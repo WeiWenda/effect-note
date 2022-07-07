@@ -2,6 +2,7 @@
 /build/
 .sass-cache
 
+/.idea
 node_modules/
 npm-debug.log
 
@@ -18,3 +19,5 @@ npm-debug.log
 *-v8.log
 
 .eslintcache
+
+out/

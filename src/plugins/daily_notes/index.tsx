@@ -1,12 +1,10 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import * as _ from 'lodash';
-import { registerPlugin, PluginApi } from '../../assets/ts/plugins';
-import { Logger } from '../../shared/utils/logger';
-import Path from '../../assets/ts/path';
-import { SerializedBlock } from '../../assets/ts/types';
-import { CachedRowInfo } from '../../assets/ts/document';
-import { matchWordRegex } from '../../assets/ts/utils/text';
+import { registerPlugin, PluginApi } from '../../ts/plugins';
+import { Path, SerializedBlock, CachedRowInfo } from '../../share';
+import { matchWordRegex } from '../../ts//text';
 import { pluginName as marksPluginName, MarksPlugin } from '../marks';
+import {Logger} from '../../ts/logger';
 
 registerPlugin<DailyNotesPlugin>(
   {
@@ -380,7 +378,7 @@ class DailyNotesPlugin {
 
   private async getDailyNotesRoot() {
     this.log('getDailyNotesRoot');
-    if (this.dailyNotesRoot && this.api.session.document.isValidPath(this.dailyNotesRoot!)) {
+    if (this.dailyNotesRoot && await this.api.session.document.isValidPath(this.dailyNotesRoot!)) {
       this.log('getDailyNotesRoot from cache');
       return this.dailyNotesRoot!;
     } else {

@@ -1,36 +1,167 @@
+@use "sass:meta"
+@import mixins
+
+html[data-theme="light"]
+    @include meta.load-css("./github.css")
+html[data-theme="dark"]
+    @include meta.load-css("./github-dark.css")
+
+.setting-table
+    border-spacing: 10px
+    border-collapse: separate
+$layout-header-height: 63px
+$layout-footer-height: 20px
+.layout-header
+    height: $layout-header-height
+    display: flex
+    flex-direction: row
+    align-items: center
+
+.drawio-viewer
+    width: 100%
+
+.horizontal-drag
+    height: 100%
+    width: 3px
+    cursor: ew-resize
+    flex-shrink: 0
+
+.layout-footer
+    height: $layout-footer-height
+    padding: 0
+
+.header-menu
+    height: $layout-header-height
+    flex-grow: 1
+
+$padding-v: 10px
+.breadcrumb
+    //padding-top: $padding-v
+    //padding-left: $padding-v
+
+.header-setting
+    height: $layout-header-height
+    padding: 0 10px
+    float: right
+    display: flex
+    align-items: center
+
+.input-hack
+    display: inline-block
+    border: none
+    caret-color: transparent
+    &:focus
+        outline: 0px solid transparent
+
+.logo
+    float: left
+    width: 30px
+    height: 30px
+    margin: 16px 16px 16px 0
+
+.header-title
+    font-family: 'Zapfino', 'Arial', 'Microsoft Yahei'
+    font-size: large
+    position: relative
+    top: 6px
+    margin-right: 16px
+    -webkit-user-select: none
+
+.node-html
+    blockquote
+        padding-top: 14px
+        padding-bottom: 14px
+        border-bottom-right-radius: 6px
+        border-top-right-radius: 6px
+        border-left: solid 3.5px
+        margin-left: 0px
+        margin-right: 2em
+    pre
+        margin-right: 2em
+    code
+        border-radius: 6px
+    table
+        border-style: solid
+        border-width: 1px
+        border-collapse: collapse
+        th
+            border-style: solid
+            border-width: 1px
+            border-collapse: collapse
+        td
+            border-style: solid
+            border-width: 1px
+            border-collapse: collapse
+            padding-left: 5px
+
 #view
     table
         border-collapse: collapse
         td, th
             padding: 5px
 
+$node-min-height: 24px
+.node
+    // min height should be at least font size
+    .node-text
+        padding-left: 510px
+        margin-left: -500px
+        display: block
+        overflow-wrap: break-word
+        white-space: pre-wrap
+
+$file-toolbar-height: 36px
+.file-toolbar
+    height: $file-toolbar-height
+    display: flex
+    align-items: center
+    justify-content: space-between
+    padding: 5px 0
+    border-bottom: 2px solid
+
+.session-content
+    @include calc(height, '100% - #{$file-toolbar-height}')
+    padding-top: 10px
+    padding-bottom: 8em
+    overflow: auto
+
 .block
+    font-size: 14px
     $indent-padding: 50px
+    $icon-padding: 15px
     padding-left: $indent-padding
 
     .bullet
         float: left
         position: relative
         display: inline-block
+        margin-left: - $icon-padding
+        z-index: 2
+        cursor: pointer
+
+        &.hover-icon
+            position: relative
+            z-index: 2
+            cursor: pointer
+        &.fold-icon
+            position: relative
+            margin-left: - $icon-padding - 15
+            z-index: 2
+            cursor: pointer
+
+.dense_block
+    $indent-padding: 20px
+    padding-left: $indent-padding
+
+    .bullet
+        float: left
+        position: relative
+        top: 3px
+        display: inline-block
         margin-left: - $indent-padding / 2 - 5
 
-        &.clone-icon
+        &.hover-icon
             margin-left: - $indent-padding - 5
-
-
-.node
-    $node-min-height: 20px
-
-    // min height should be at least font size
-    min-height: $node-min-height
-    font-size: 14px
-
-    .node-text
-        margin-left: 10px
-        display: block
-        overflow-wrap: break-word
-        white-space: pre-wrap
-        min-height: $node-min-height
 
 .searchBox
     white-space: pre-wrap

@@ -21,10 +21,9 @@ NOTES:
 import $ from 'jquery';
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 
-import { registerPlugin, PluginApi } from '../../assets/ts/plugins';
-import { Logger } from '../../shared/utils/logger';
-import Path from '../../assets/ts/path';
-import { Row } from '../../assets/ts/types';
+import { registerPlugin, PluginApi } from '../../ts/plugins';
+import { Row, Path } from '../../share';
+import {Logger} from '../../ts/logger';
 
 function pad(num: number, length: number, padChar: string = '0') {
   const val = '' + num;

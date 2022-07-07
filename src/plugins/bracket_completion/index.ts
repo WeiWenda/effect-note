@@ -1,5 +1,5 @@
-import { registerPlugin } from '../../assets/ts/plugins';
-import { Char } from '../../assets/ts/types';
+import { registerPlugin } from '../../ts/plugins';
+import { Char } from '../../share';
 
 const completions: { [key: string]: Char } = {'(': ')', '{': '}', '[': ']', '"': '"'};
 

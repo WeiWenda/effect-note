@@ -1,11 +1,9 @@
-import { Logger } from '../../shared/utils/logger';
-
-import { registerPlugin, PluginApi } from '../../assets/ts/plugins';
-import Path from '../../assets/ts/path';
-import { Row, SerializedBlock } from '../../assets/ts/types';
+import { registerPlugin, PluginApi } from '../../ts/plugins';
+import { Path, Row, SerializedBlock } from '../../share';
 
 import { pluginName as marksPluginName, MarksPlugin } from '../marks';
 import { pluginName as tagsPluginName, TagsPlugin } from '../tags';
+import {Logger} from '../../ts/logger';
 
 type Tag = string;
 

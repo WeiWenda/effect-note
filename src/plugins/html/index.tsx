@@ -1,7 +1,8 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 
-import { Token, RegexTokenizerSplitter, EmitFn, Tokenizer } from '../../assets/ts/utils/token_unfolder';
-import { registerPlugin } from '../../assets/ts/plugins';
+import { Token, RegexTokenizerSplitter, EmitFn, Tokenizer } from '../../share';
+import { registerPlugin } from '../../ts/plugins';
+import Highlight from 'react-highlight';
 
 const htmlTypes: Array<string> = [
   'div',
@@ -20,7 +21,7 @@ htmlTypes.forEach((htmltype) => {
     `<${htmltype}(.|\\n)*/>`
   );
 });
-const htmlRegex = '(' + htmlRegexParts.map((part) => '(' + part + ')').join('|') + ')';
+export const htmlRegex = '(' + htmlRegexParts.map((part) => '(' + part + ')').join('|') + ')';
 
 registerPlugin(
   {
@@ -33,21 +34,47 @@ registerPlugin(
   },
   function(api) {
     api.registerHook('session', 'renderLineTokenHook', (tokenizer, info) => {
-      if (info.has_cursor) {
-        return tokenizer;
-      }
-      if (info.has_highlight) {
-        return tokenizer;
-      }
+      // if (info.has_cursor && !info.lockEdit) {
+      //   return tokenizer;
+      // }
+      // if (info.has_highlight && !info.lockEdit) {
+      //   return tokenizer;
+      // }
       return tokenizer.then(RegexTokenizerSplitter(
         new RegExp(htmlRegex),
         (token: Token, emit: EmitFn<React.ReactNode>, wrapped: Tokenizer) => {
           try {
-            emit(<span
-              key={`html-${token.index}`}
-              dangerouslySetInnerHTML={{__html: token.text}}
-            />);
-          } catch (e) {
+            emit(
+                <div key={`html-${token.index}`} onClick={() => {
+                    if (api.session.lockEdit) {
+                        return;
+                    }
+                    const htmlContent = token.text;
+                    const path = info.path;
+                    setTimeout(() => {
+                        if (htmlContent.startsWith('<div class=\'node-html\'>')) {
+                            api.session.wangEditorHtml = htmlContent.slice('<div class=\'node-html\'>'.length, -6);
+                        } else {
+                            api.session.wangEditorHtml = htmlContent;
+                        }
+                        api.session.emit('updateAnyway');
+                    }, 100);
+                    api.session.wangEditorModalVisible = true;
+                    api.session.wangEditorOnSave = (html: any) => {
+                        let wrappedHtml = html;
+                        wrappedHtml = `<div class='node-html'>${html}</div>`;
+                        api.session.changeChars(path.row, 0, htmlContent.length, (_ ) => wrappedHtml.split('')).then(() => {
+                            api.session.emit('updateAnyway');
+                        });
+                    };
+                    api.session.emit('updateAnyway');
+                }}>
+                  <Highlight innerHTML={true}>
+                    {token.text}
+                  </Highlight>
+                </div>
+            );
+          } catch (e: any) {
             api.session.showMessage(e.message, { text_class: 'error' });
             emit(...wrapped.unfold(token));
           }

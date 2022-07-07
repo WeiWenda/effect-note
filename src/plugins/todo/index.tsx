@@ -2,11 +2,9 @@ import * as _ from 'lodash';
 
 import './index.sass';
 
-import { hideBorderAndModify, RegexTokenizerModifier } from '../../assets/ts/utils/token_unfolder';
-import { registerPlugin } from '../../assets/ts/plugins';
-import { matchWordRegex } from '../../assets/ts/utils/text';
-import { Row } from '../../assets/ts/types';
-import Session from '../../assets/ts/session';
+import { Session, Row, hideBorderAndModify, RegexTokenizerModifier } from '../../share';
+import { registerPlugin } from '../../ts/plugins';
+import { matchWordRegex } from '../../ts//text';
 
 const strikethroughClass = 'strikethrough';
 
@@ -106,7 +104,7 @@ registerPlugin(
     api.registerDefaultMappings(
       'INSERT',
       {
-        'toggle-strikethrough': [['ctrl+enter', 'meta+enter']],
+        'toggle-strikethrough': [['ctrl+enter'], ['meta+enter']],
       },
     );
 

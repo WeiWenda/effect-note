@@ -2,10 +2,11 @@ import * as http from 'http';
 
 import * as WebSocket from 'ws';
 
-import DataBackend, { InMemory } from '../src/shared/data_backend';
-import logger from '../src/shared/utils/logger';
+import { InMemory } from '../src/share';
+import logger from '../src/share/ts/utils/logger';
 
 import { SQLiteBackend } from './data_backends';
+import DataBackend from '../src/share/ts/data_backend/data_backend';
 
 type SocketServerOptions = {
   db?: string,

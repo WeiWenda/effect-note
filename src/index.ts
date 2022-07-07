@@ -1,2 +1,2 @@
-import './assets/ts/app';
+import './components';
 

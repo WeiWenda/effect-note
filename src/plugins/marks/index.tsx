@@ -1,23 +1,12 @@
 import * as _ from 'lodash';
 import * as React from 'react'; // tslint:disable-line no-unused-variable
+import { errors, PartialUnfolder, Token, EmitFn, Tokenizer,
+  Menu, Document, Session, InMemorySession, LineComponent, Mutation, Path,
+  Col, Row, SINGLE_LINE_MOTIONS, INSERT_MOTION_MAPPINGS, motionKey} from '../../share';
 
-import * as errors from '../../shared/utils/errors';
-import { Logger } from '../../shared/utils/logger';
-import { PartialUnfolder, Token, EmitFn, Tokenizer } from '../../assets/ts/utils/token_unfolder';
-
-import { registerPlugin, PluginApi } from '../../assets/ts/plugins';
-import Menu from '../../assets/ts/menu';
-import Document from '../../assets/ts/document';
-import Session, { InMemorySession } from '../../assets/ts/session';
-import LineComponent from '../../assets/ts/components/line';
-import Mutation from '../../assets/ts/mutations';
-import Path from '../../assets/ts/path';
-import { Col, Row } from '../../assets/ts/types';
-import { getStyles } from '../../assets/ts/themes';
-
-import { SINGLE_LINE_MOTIONS } from '../../assets/ts/definitions/motions';
-import { INSERT_MOTION_MAPPINGS } from '../../assets/ts/configurations/vim';
-import { motionKey } from '../../assets/ts/keyDefinitions';
+import { registerPlugin, PluginApi } from '../../ts/plugins';
+import {Logger} from '../../ts/logger';
+import { getStyles } from '../../share/ts/themes';
 
 // TODO: do this elsewhere
 declare const process: any;
@@ -83,6 +72,7 @@ export class MarksPlugin {
       }
       public async mutate(/* session */) {
         await that._setMark(this.row, this.mark);
+        that.document.emit('markChange');
         await that.api.updatedDataForRender(this.row);
       }
       public async rewind(/* session */) {
@@ -108,6 +98,7 @@ export class MarksPlugin {
         this.mark = await that.getMark(this.row);
         if (this.mark !== null) {
           await that._unsetMark(this.row, this.mark);
+          that.document.emit('markChange');
           await that.api.updatedDataForRender(this.row);
         }
       }
@@ -388,55 +379,56 @@ export class MarksPlugin {
       return obj;
     });
 
-    this.api.registerHook('session', 'renderLineOptions', (options, info) => {
-      if (info.pluginData.marks && info.pluginData.marks.marking) {
-        options.cursors = {};
-      }
-      return options;
-    });
-
-    this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
-      const { pluginData } = info;
-      if (pluginData.marks) {
-        if (pluginData.marks.marking) {
-          lineContents.unshift(
-            <span key='mark'
-              style={{
-                ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary', 'theme-trim-accent']),
-                ...markStyle
-              }}
-            >
-              <LineComponent
-                lineData={pluginData.marks.markText}
-                cursors={{
-                  [pluginData.marks.markCol]: true,
-                }}
-                cursorStyle={getStyles(this.api.session.clientStore, ['theme-cursor'])}
-                highlightStyle={getStyles(this.api.session.clientStore, ['theme-bg-highlight'])}
-                linksStyle={getStyles(this.api.session.clientStore, ['theme-link'])}
-                accentStyle={getStyles(this.api.session.clientStore, ['theme-text-accent'])}
-                cursorBetween={true}
-              />
-            </span>
-          );
-        } else {
-          const mark = pluginData.marks.mark;
-          if (mark) {
-            lineContents.unshift(
-              <span key='mark'
-                style={{
-                  ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary']),
-                  ...markStyle
-                }}
-              >
-                {mark}
-              </span>
-            );
-          }
-        }
-      }
-      return lineContents;
-    });
+    // this.api.registerHook('session', 'renderLineOptions', (options, info) => {
+    //   if (info.pluginData.marks && info.pluginData.marks.marking) {
+    //     options.cursors = {};
+    //   }
+    //   return options;
+    // });
+    //
+    // this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
+    //   const { pluginData } = info;
+    //   if (pluginData.marks) {
+    //     if (pluginData.marks.marking) {
+    //       lineContents.unshift(
+    //         <span key='mark'
+    //           style={{
+    //             ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary', 'theme-trim-accent']),
+    //             ...markStyle
+    //           }}
+    //         >
+    //           <LineComponent
+    //             lineData={pluginData.marks.markText}
+    //             cursors={{
+    //               [pluginData.marks.markCol]: true,
+    //             }}
+    //             cursorStyle={getStyles(this.api.session.clientStore, ['theme-cursor'])}
+    //             highlightStyle={getStyles(this.api.session.clientStore, ['theme-bg-highlight'])}
+    //             linksStyle={getStyles(this.api.session.clientStore, ['theme-link'])}
+    //             accentStyle={getStyles(this.api.session.clientStore, ['theme-text-accent'])}
+    //             cursorBetween={true}
+    //             session={this.session}
+    //           />
+    //         </span>
+    //       );
+    //     } else {
+    //       const mark = pluginData.marks.mark;
+    //       if (mark) {
+    //         lineContents.unshift(
+    //           <span key='mark'
+    //             style={{
+    //               ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary']),
+    //               ...markStyle
+    //             }}
+    //           >
+    //             {mark}
+    //           </span>
+    //         );
+    //       }
+    //     }
+    //   }
+    //   return lineContents;
+    // });
 
 
     this.api.registerHook('session', 'renderLineTokenHook', (tokenizer) => {
@@ -466,10 +458,10 @@ export class MarksPlugin {
         emit(...wrapped.unfold(token));
         }));
     });
-    this.api.registerListener('document', 'afterDetach', async () => {
-      this.computeMarksToPaths(); // FIRE AND FORGET
-    });
-    this.computeMarksToPaths(); // FIRE AND FORGET
+    // this.api.registerListener('document', 'afterDetach', async () => {
+    //   this.computeMarksToPaths(); // FIRE AND FORGET
+    // });
+    // this.computeMarksToPaths(); // FIRE AND FORGET
   }
 
   // maintain global marks data structures
@@ -486,6 +478,11 @@ export class MarksPlugin {
   }
   private async _setMarksToRows(mark_to_rows: MarksToRows) {
     return await this.api.setData('marks_to_ids', mark_to_rows);
+  }
+
+  public async clearMarks() {
+    await this.api.setData('marks_to_ids', {});
+    await this.api.setData('ids_to_marks', {});
   }
 
   private async _sanityCheckMarks() {

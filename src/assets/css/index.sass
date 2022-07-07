@@ -4,95 +4,131 @@ body, html
     margin: 0
     font-family: 'Monaco', monospace // Courier New?
     height: 100%
+    line-height: unset
 
-$bottom-bar-height: 25px
-#bottom-bar
-    z-index: 3
-    position: absolute
-    bottom: 0px
-    height: $bottom-bar-height
-    border-left   : 0px !important
-    border-right  : 0px !important
-    border-bottom : 0px !important
-    width: 100%
-    font-size: 12px
+a
+    color: unset
 
-    & > div, & > a
-        padding: 5px 15px
+span
+    &::selection
+        color: unset
+        background: unset
+.ant-tabs .ant-tabs-tab:hover
+    color: unset
+.ant-tabs .ant-tabs-ink-bar
+    background: unset
+.ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn
+    color: unset
+.ant-input-search >.ant-input-group >.ant-input-group-addon:last-child .ant-input-search-button:not(.ant-btn-primary)
+    &:hover
+        color: unset
+.ant-menu-light .ant-menu-submenu-selected >.ant-menu-submenu-title
+    color: unset
+.ant-menu-light .ant-menu-item-selected
+    color: unset
+.ant-layout .ant-layout-header
+    padding-inline: unset
+    padding-left: 24px
+    padding-right: 0
+.ant-tabs-tab
+    &:hover
+        color: unset
+.form_modal.ant-modal .ant-modal-content
+    padding: 20px 24px 1px 24px
 
-.btn
-    display: inline-block
-    padding: 5px
-    border-radius: 5px
-    font-size: 11px
-    cursor: pointer
-    margin: 0px 5px
-    &:focus
-        outline: 0
+.ant-menu-sub.ant-menu-inline
+    background: unset
+.ant-menu-inline .ant-menu-item::after
+    border-right: unset
+.ant-menu-inline
+    border-right: unset
+.ant-menu
+    color: unset
+    background: unset
+.ant-menu-submenu
+    color: unset
+    &:hover
+        color: unset
+        .ant-menu-submenu-title .ant-menu-submenu-arrow
+            color: unset
+.ant-menu-submenu-arrow
+    color: unset
+.ant-form
+    color: unset
+.ant-form-item
+    color: unset
+.ant-form-item-label
+    label
+        color: unset
 
-#settings
-    position: absolute
-    width: 100%
-    @include calc(height, '100% - #{$bottom-bar-height}')
-    z-index: 2
-    overflow-y: auto
+.ant-menu-light
+    .ant-menu-item:hover:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected)
+        color: unset
+.ant-menu-horizontal:not(.ant-menu-dark)
+    .ant-menu-item-selected
+        color: unset
+.ant-drawer-content
+    background: unset
+    border-left: white
+    border-left-width: 2px
+    border-left-style: solid
+.ant-drawer-body
+    padding: 0
+.ant-collapse
+    color: unset
+    background: unset
+    .ant-collapse-content
+        color: unset
+    .ant-collapse-item
+        .ant-collapse-header
+            color: unset
+.ant-collapse-content
+    color: unset
+    background: unset
+.ant-input-affix-wrapper
+    color: unset
+    background: unset
+.ant-input
+    color: unset
+    background: unset
+.ant-input-group
+    color: unset
+.ant-input-search
+    .ant-btn
+        background: unset
+.ant-input-group-addon
+    color: unset
+    background: unset
+.ant-input-search
+    .ant-input-group
+        .ant-input-group-addon:last-child .ant-input-search-button:not(.ant-btn-primary)
+            color: unset
+.ant-select-multiple .ant-select-selection-item
+    margin-top: 0
+    margin-bottom: 0
+.file-toolbar
+    .ant-btn-default
+        background: unset
+    .ant-btn
+        padding: 0px 3px
+        height: 24px
+.session-content
+    .ant-select:not(.ant-select-customize-input) .ant-select-selector
+        margin: 0
+        padding: 0
+        border-style: none
+.ant-select-multiple .ant-select-selector
+    &::after
+        margin: 0
 
-    .settings-content
-        padding: 20px 0px
-
-    .settings-header
-        $header-padding: 5px
-        @include calc(width, '100% - #{2 * $header-padding}')
-        border-radius: 2px
-        -moz-border-radius: 2px
-        padding: $header-padding
+.ant-collapse
+    .ant-collapse-item
+        max-height: 60%
+        overflow-y: auto
+        .ant-collapse-header
+            z-index: 1
+            top: 0
+            position: sticky
 
 .transition-ease-width
     @include transition(width 0.2s ease-in-out)
-
-#contents
-    display: flex
-    flex-direction: row
-    bottom: $bottom-bar-height
-    position: absolute
-    width: 100%
-    @include calc(height, '100% - #{$bottom-bar-height}')
-
-    #view, #menu
-        $content-padding: 50px
-        padding: $content-padding
-
-        @include calc(height, '100% - #{2 * $content-padding}')
-        width: 100%
-
-        overflow-y: auto
-
-.tabs
-    list-style: none
-    position: relative
-    z-index: 2
-    $tab-height: 20px
-    $tab-bar-height: 1px
-    & > li
-        display: inline-block
-        cursor: pointer
-        margin: 0 10px
-        padding: 0 10px
-        height: $tab-height
-        position: relative
-        &.active
-            height: $tab-height + $tab-bar-height
-            background-color: inherit !important
-            font-weight: bold
-            z-index: 4
-            border-bottom:  0px !important
-            border-color: inherit !important
-            margin-top: $tab-bar-height
-    &:after
-        position: absolute
-        content: ""
-        width: 100%
-        bottom: 0
-        left: 0
-        border-bottom: $tab-bar-height solid
-        z-index: 3

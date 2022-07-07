@@ -2,11 +2,11 @@
 <html>
   <head>
     <title>
-      Vimflowy
+      EffectNote
     </title>
-    <link rel="icon" href="%PUBLIC_URL%/images/vimflowy-32.png" />
+    <link rel="icon" href="%PUBLIC_URL%/images/icon.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/images/vimflowy-32.png"/>
+    <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/images/icon.png"/>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
   </head>
@@ -17,4 +17,12 @@
     </div>
 
   </body>
+  <script type="text/javascript">
+    function resizeIframe(iframe, row) {
+      iframe.height = iframe.contentWindow.document.documentElement.scrollHeight + "px";
+      iframe.contentDocument.addEventListener('click', () => {
+        window.postMessage(JSON.stringify({action: 'iframe-click', row}))
+      });
+    }
+  </script>
 </html>

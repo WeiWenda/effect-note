@@ -1,6 +1,5 @@
 import * as sqlite from 'sqlite3';
-
-import DataBackend from '../src/shared/data_backend';
+import DataBackend from '../src/share/ts/data_backend/data_backend';
 
 export class SQLiteBackend extends DataBackend {
   // init is basically like async constructor

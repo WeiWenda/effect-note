@@ -2,9 +2,9 @@ import * as React from 'react'; // tslint:disable-line no-unused-variable
 
 import './index.sass';
 
-import { hideBorderAndModify, RegexTokenizerModifier } from '../../assets/ts/utils/token_unfolder';
-import { registerPlugin } from '../../assets/ts/plugins';
-import { matchWordRegex } from '../../assets/ts/utils/text';
+import { hideBorderAndModify, RegexTokenizerModifier } from '../../share';
+import { registerPlugin } from '../../ts/plugins';
+import { matchWordRegex } from '../../ts/text';
 
 const boldClass = 'bold';
 const italicsClass = 'italic';

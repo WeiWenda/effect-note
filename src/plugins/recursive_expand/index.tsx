@@ -1,7 +1,6 @@
-import { registerPlugin } from '../../assets/ts/plugins';
-import Session from '../../assets/ts/session';
-import logger from '../../shared/utils/logger';
-import Path from '../../assets/ts/path';
+import { registerPlugin } from '../../ts/plugins';
+import { Path, Session }  from '../../share';
+import logger from '../../ts/logger';
 
 export const pluginName = 'Recursive-Expand';
 

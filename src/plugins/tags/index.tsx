@@ -1,22 +1,25 @@
 import * as _ from 'lodash';
 import * as React from 'react'; // tslint:disable-line no-unused-variable
-
-import * as errors from '../../shared/utils/errors';
-import { Logger } from '../../shared/utils/logger';
-
-import { registerPlugin, PluginApi } from '../../assets/ts/plugins';
-import Document from '../../assets/ts/document';
-import Session, { InMemorySession } from '../../assets/ts/session';
-import LineComponent from '../../assets/ts/components/line';
-import Mutation from '../../assets/ts/mutations';
-import Path from '../../assets/ts/path';
-import { Char, Row } from '../../assets/ts/types';
-import { getStyles } from '../../assets/ts/themes';
-
-import { SINGLE_LINE_MOTIONS } from '../../assets/ts/definitions/motions';
-import { INSERT_MOTION_MAPPINGS } from '../../assets/ts/configurations/vim';
-import { motionKey } from '../../assets/ts/keyDefinitions';
-import Menu from '../../assets/ts/menu';
+import {
+  Char,
+  Document,
+  errors,
+  InMemorySession,
+  INSERT_MOTION_MAPPINGS,
+  LineComponent,
+  Menu,
+  motionKey,
+  Mutation,
+  Path,
+  Row,
+  Session,
+  SINGLE_LINE_MOTIONS
+} from '../../share';
+import {PluginApi, registerPlugin} from '../../ts/plugins';
+import {Logger} from '../../ts/logger';
+import {getStyles} from '../../share/ts/themes';
+import { Select } from 'antd';
+const { Option } = Select;
 
 // TODO: do this elsewhere
 declare const process: any;
@@ -51,7 +54,8 @@ export class TagsPlugin {
   private logger: Logger;
   private session: Session;
   private document: Document;
-  private tagstate: {
+  private tags: Tag[];
+  public tagstate: {
     session: Session,
     path: Path,
   } | null = null;
@@ -64,6 +68,7 @@ export class TagsPlugin {
     this.logger = this.api.logger;
     this.session = this.api.session;
     this.document = this.session.document;
+    this.tags = [];
     // NOTE: this may not be initialized correctly at first
     // this only affects rendering @taglinks for now
   }
@@ -183,7 +188,7 @@ export class TagsPlugin {
       },
       key_transforms: [
         async (key, context) => {
-          if (key === 'space') { key = ' '};
+          if (key === 'space') { key = ' '; };
           if (key.length === 1) {
             if (this.tagstate === null) {
               throw new Error('Tag state null during key transform');
@@ -381,58 +386,89 @@ export class TagsPlugin {
       return obj;
     });
 
-    this.api.registerHook('session', 'renderLineOptions', (options, info) => {
-      if (info.pluginData.tags && info.pluginData.tags.tagging) {
-        options.cursors = {};
-      }
-      return options;
-    });
+    // this.api.registerHook('session', 'renderLineOptions', (options, info) => {
+    //   if (info.pluginData.tags && info.pluginData.tags.tagging) {
+    //     options.cursors = {};
+    //   }
+    //   return options;
+    // });
 
     this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
-      const { pluginData } = info;
-      if (pluginData.tags) {
-        const tags = pluginData.tags.tags;
-        if (tags) {
-          for (let tag of tags) {
-              const key = 'tag-' + tag;
-              lineContents.push(
-                <span key={key}
-                  style={{
-                    ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary']),
-                    ...tagStyle
+      const { path, pluginData } = info;
+      let tags: string[] = [];
+      if (pluginData.tags.tags || pluginData.tags.tagging) {
+        if (pluginData.tags.tags) {
+          tags = pluginData.tags.tags;
+        }
+        const children: React.ReactNode[] = this.tags.map(tag => {
+          return <Option key={tag}>{tag}</Option>;
+        });
+
+        const handleChange = (newTags: string[]) => {
+          this.setTags(path.row, newTags).then(() => {
+            this.document.emit('tagChange');
+          });
+        };
+        lineContents.push(
+          <Select
+                  key='tags'
+                  mode='tags'
+                  value={tags}
+                  onFocus={() => this.session.stopMonitor = true}
+                  onBlur={() => this.session.stopMonitor = false}
+                  onClick={(e) => {
+                   e.preventDefault();
+                   e.stopPropagation();
                   }}
-                >
-                  {tag}
-                </span>
-              );
-          }
-        }
-        if (pluginData.tags.tagging) {
-          lineContents.push(
-            <span key='editingTag'
-              style={{
-                ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary', 'theme-trim-accent']),
-                ...tagStyle
-              }}
-            >
-              <LineComponent
-                lineData={pluginData.tags.tagText}
-                cursors={{
-                  [pluginData.tags.tagCol]: true,
-                }}
-                cursorStyle={getStyles(this.api.session.clientStore, ['theme-cursor'])}
-                highlightStyle={getStyles(this.api.session.clientStore, ['theme-bg-highlight'])}
-                linksStyle={getStyles(this.api.session.clientStore, ['theme-link'])}
-                accentStyle={getStyles(this.api.session.clientStore, ['theme-text-accent'])}
-                cursorBetween={true}
-              />
-            </span>
-          );
-        }
+                  bordered={false} style={{ minWidth: '80px', width: 'auto' }} placeholder='添加标签' onChange={handleChange}>
+            {children}
+          </Select>
+        );
       }
       return lineContents;
     });
   }
+          // for (let tag of tags) {
+          //     const key = 'tag-' + tag;
+          //     lineContents.push(
+          //       <span key={key}
+          //         style={{
+          //           ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary']),
+          //           ...tagStyle
+          //         }}
+          //       >
+          //         {tag}
+          //       </span>
+          //     );
+          // }
+  //       }
+  //       if (pluginData.tags.tagging) {
+  //         lineContents.push(
+  //           <span key='editingTag'
+  //             style={{
+  //               ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary', 'theme-trim-accent']),
+  //               ...tagStyle
+  //             }}
+  //           >
+  //             <LineComponent
+  //               lineData={pluginData.tags.tagText}
+  //               cursors={{
+  //                 [pluginData.tags.tagCol]: true,
+  //               }}
+  //               cursorStyle={getStyles(this.api.session.clientStore, ['theme-cursor'])}
+  //               highlightStyle={getStyles(this.api.session.clientStore, ['theme-bg-highlight'])}
+  //               linksStyle={getStyles(this.api.session.clientStore, ['theme-link'])}
+  //               accentStyle={getStyles(this.api.session.clientStore, ['theme-text-accent'])}
+  //               cursorBetween={true}
+  //               session={this.session}
+  //             />
+  //           </span>
+  //         );
+  //       }
+  //     }
+  //     return lineContents;
+  //   });
+  // }
 
   // maintain global tags data structures
   //   a map: row -> tags
@@ -447,6 +483,7 @@ export class TagsPlugin {
     return await this.api.getData('tags_to_ids', {});
   }
   private async _setTagsToRows(tag_to_rows: TagsToRows) {
+    this.tags = Object.keys(tag_to_rows);
     return await this.api.setData('tags_to_ids', tag_to_rows);
   }
 
@@ -564,6 +601,11 @@ export class TagsPlugin {
     await this.session.do(new this.SetTag(row, tag));
 
     return null;
+  }
+
+  public async clearTags() {
+    await this._setTagsToRows({});
+    await this._setRowsToTags({});
   }
 
   // Delete the tag for row

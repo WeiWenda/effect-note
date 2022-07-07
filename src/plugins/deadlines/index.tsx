@@ -1,11 +1,9 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
-import { registerPlugin, PluginApi } from '../../assets/ts/plugins';
-import { Logger } from '../../shared/utils/logger';
-import Path from '../../assets/ts/path';
-import { SerializedBlock, Row } from '../../assets/ts/types';
-import { CachedRowInfo } from '../../assets/ts/document';
-import { matchWordRegex } from '../../assets/ts/utils/text';
+import { registerPlugin, PluginApi } from '../../ts/plugins';
+import { SerializedBlock, Row, Path, CachedRowInfo } from '../../share';
+import { matchWordRegex } from '../../ts/text';
 import { pluginName as marksPluginName, MarksPlugin } from '../marks';
+import {Logger} from '../../ts/logger';
 
 registerPlugin<DeadlinesPlugin>(
   {
@@ -201,7 +199,7 @@ class DeadlinesPlugin {
 
   private async getDeadlinesRoot() {
     this.log('getDeadlinesRoot');
-    if (this.deadlinesRoot && this.api.session.document.isValidPath(this.deadlinesRoot!)) {
+    if (this.deadlinesRoot && await this.api.session.document.isValidPath(this.deadlinesRoot!)) {
       this.log('getDeadlinesRoot from cache');
       return this.deadlinesRoot!;
     } else {
