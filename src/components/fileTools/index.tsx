@@ -50,11 +50,9 @@ function FileToolsComponent(props: {session: Session, curDocId: number, onEditBa
         });
         break;
       case 'export_pdf':
-        $('.session-content').css('overflow-y', 'unset');
-        $('#session-overflow').css('overflow', 'unset');
+        $('.session-content').css('overflow', 'unset');
         handlePrint();
-        $('.session-content').css('overflow-y', 'auto');
-        $('#session-overflow').css('overflow', 'hidden');
+        $('.session-content').css('overflow', 'auto');
         break;
       case 'export_text':
         props.session.getCurrentContent(Path.root(), 'text/plain').then(content => {
