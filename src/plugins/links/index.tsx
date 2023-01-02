@@ -130,6 +130,10 @@ export class LinksPlugin {
                     key: 'insert',
                     children: [
                         {
+                            label: '插入markdown（vditor）',
+                            key: 'insert_md',
+                        },
+                        {
                             label: '插入富文本（wangEditor）',
                             key: 'insert_rtf',
                         },
@@ -197,7 +201,7 @@ export class LinksPlugin {
                     return;
                 }
                 switch (key) {
-                    case 'begin_tag':
+                    case 'mark_tag':
                         that.tagsPlugin.tagstate = {
                             session: new InMemorySession(),
                             path: path
@@ -208,6 +212,20 @@ export class LinksPlugin {
                         break;
                     case 'ocr':
                         that.session.ocrModalVisible = true;
+                        that.session.emit('updateAnyway');
+                        break;
+                    case 'insert_md':
+                        that.session.md = rowInfo.pluginData.links.md || rowInfo.line.join('');
+                        that.session.mdEditorModalVisible = true;
+                        that.session.mdEditorOnSave = (markdown: string, html: string) => {
+                            that.setMarkdown(path.row, markdown).then(() => {
+                                let wrappedHtml = html;
+                                wrappedHtml = `<div class='node-html'>${html}</div>`;
+                                that.session.changeChars(path.row, 0, rowInfo.line.length, (_ ) => wrappedHtml.split('')).then(() => {
+                                    that.session.emit('updateAnyway');
+                                });
+                            });
+                        };
                         that.session.emit('updateAnyway');
                         break;
                     case 'insert_drawio':
@@ -305,7 +323,9 @@ export class LinksPlugin {
             const png = ids_to_pngs[row] || null;
             const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
             const xml = ids_to_xmls[row] || null;
-            obj.links = { link: link, png: png, xml: xml };
+            const ids_to_mds = await this.api.getData('ids_to_mds', {});
+            const md = ids_to_mds[row] || null;
+            obj.links = { link: link, png: png, xml: xml, md: md };
             return obj;
         });
         this.api.registerHook('document', 'serializeRow', async (struct, info) => {
@@ -321,6 +341,10 @@ export class LinksPlugin {
             if (ids_to_xmls[info.row] != null) {
                 struct.drawio = ids_to_xmls[info.row];
             }
+            const ids_to_mds = await this.api.getData('ids_to_mds', {});
+            if (ids_to_mds[info.row] != null) {
+                struct.md = ids_to_mds[info.row];
+            }
             return struct;
         });
         this.api.registerListener('document', 'loadRow', async (path, serialized) => {
@@ -333,6 +357,9 @@ export class LinksPlugin {
             }
             if (serialized.drawio != null) {
                 await this.setXml(path.row, serialized.drawio);
+            }
+            if (serialized.md != null) {
+                await this.setMarkdown(path.row, serialized.md);
             }
         });
         this.api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData}) => {
@@ -481,11 +508,24 @@ export class LinksPlugin {
         await this.api.setData('ids_to_links', {});
         await this.api.setData('ids_to_pngs', {});
         await this.api.setData('ids_to_xmls', {});
+        await this.api.setData('ids_to_mds', {});
     }
 
     public async getPng(row: Row): Promise<any> {
         const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
         return ids_to_pngs[row].json;
+    }
+    public async getMarkdown(row: Row): Promise<any> {
+        const ids_to_mds = await this.api.getData('ids_to_mds', {});
+        return ids_to_mds[row];
+    }
+
+    public async setMarkdown(row: Row, xml: String): Promise<String | null> {
+        const ids_to_mds = await this.api.getData('ids_to_mds', {});
+        ids_to_mds[row] = xml;
+        await this.api.setData('ids_to_mds', ids_to_mds);
+        await this.api.updatedDataForRender(row);
+        return null;
     }
     public async getXml(row: Row): Promise<any> {
         const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
@@ -537,9 +577,10 @@ export class LinksPlugin {
         window.open(url, '_blank'); // to open new page
     }
 }
+export const linksPluginName = 'Links';
 registerPlugin<LinksPlugin>(
   {
-    name: 'Links',
+    name: linksPluginName,
     author: 'WeiWenda',
     description: (
       <div>

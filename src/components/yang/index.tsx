@@ -3,6 +3,7 @@ import {Layout, Menu, Avatar, Switch, Drawer, Button, Tabs, Modal} from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
 
 import '@wangeditor/editor/dist/css/style.css';
+import 'vditor/dist/index.css';
 import {getStyles} from '../../share/ts/themes';
 import {api_utils, DocInfo, Session} from '../../share';
 import UserViewComponent from '../userView';
@@ -18,6 +19,7 @@ import { Editor, Toolbar } from '@wangeditor/editor-for-react';
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
 import {DrawioEditor} from '../drawioEditor';
 import {API_BASE_URL, getServerConfig} from '../../share/ts/utils/APIUtils';
+import Vditor from 'vditor';
 const { Header, Footer, Sider, Content } = Layout;
 
 function YangComponent(props: {session: Session, config: Config, pluginManager: PluginsManager}) {
@@ -29,6 +31,22 @@ function YangComponent(props: {session: Session, config: Config, pluginManager: 
   const [curDocInfo, setCurDocInfo] = useState({});
   const [editor, setEditor] = useState<IDomEditor | null>(null);
   const [html, setHtml] = useState('<p>');
+  const [vd, setVd] = React.useState<Vditor>();
+  useEffect(() => {
+    if (!props.session.mdEditorModalVisible) {
+      return;
+    }
+    const vditor = new Vditor('vditor', {
+      height: window.innerHeight - 400,
+      toolbar: ['quote', '|', 'bold', 'italic', 'strike', 'inline-code', '|',
+        'list', 'ordered-list', 'check' , '|', 'link', 'upload', 'table', 'code', '|', 'undo', 'redo'],
+      // theme: props.session.clientStore.getClientSetting('blackMode') ? 'dark' : 'classic',
+      after: () => {
+        vditor.setValue(props.session.md || '');
+        setVd(vditor);
+      }
+    });
+  }, [props.session.mdEditorModalVisible]);
   useEffect(() => {
     setHtml(props.session.wangEditorHtml);
   }, [props.session.wangEditorHtml]);
@@ -44,13 +62,14 @@ function YangComponent(props: {session: Session, config: Config, pluginManager: 
   useEffect(() => {
     if (baseInfoModalVisible || props.session.pngModalVisible
       || props.session.wangEditorModalVisible || props.session.ocrModalVisible
-      || props.session.drawioModalVisible) {
+      || props.session.drawioModalVisible || props.session.mdEditorModalVisible) {
       props.session.stopMonitor = true;
     } else {
       props.session.stopMonitor = false;
     }
   }, [baseInfoModalVisible, props.session.pngModalVisible,
-    props.session.wangEditorModalVisible, props.session.ocrModalVisible, props.session.drawioModalVisible]);
+    props.session.wangEditorModalVisible, props.session.ocrModalVisible,
+    props.session.mdEditorModalVisible, props.session.drawioModalVisible]);
   const toolbarConfig: Partial<IToolbarConfig> = {
     excludeKeys: ['group-video', 'divider', 'fullScreen', 'emotion', 'group-justify', 'group-indent']
   };
@@ -122,6 +141,23 @@ function YangComponent(props: {session: Session, config: Config, pluginManager: 
           mode='default'
           style={{ height: window.innerHeight - 400, overflowY: 'hidden' }}
         />
+      </Modal>
+      <Modal
+          width={window.innerWidth - 250}
+          open={props.session.mdEditorModalVisible}
+          onCancel={() => {
+              props.session.mdEditorModalVisible = false;
+              props.session.emit('updateAnyway');
+          }}
+          title='编辑markdown'
+          cancelText={'取消'}
+          okText={'确认'}
+          onOk={() => {
+              props.session.mdEditorModalVisible = false;
+              props.session.mdEditorOnSave(vd?.getValue(), vd?.getHTML().replace(/<p>|<\/p>|\n/g, ''));
+          }}
+      >
+        <div id='vditor' className='vditor' />
       </Modal>
       <Modal width={window.innerWidth - 10}
              style={{top: 20}}

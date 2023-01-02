@@ -3,6 +3,7 @@ import * as React from 'react'; // tslint:disable-line no-unused-variable
 import { Token, RegexTokenizerSplitter, EmitFn, Tokenizer } from '../../share';
 import { registerPlugin } from '../../ts/plugins';
 import Highlight from 'react-highlight';
+import {LinksPlugin, linksPluginName} from '../links';
 
 const htmlTypes: Array<string> = [
   'div',
@@ -31,8 +32,10 @@ registerPlugin(
       Lets you inline the following html tags:
         ${ htmlTypes.map((htmltype) => '<' + htmltype + '>').join(' ') }
     `,
+    dependencies: [linksPluginName],
   },
   function(api) {
+    const linksPlugin = api.getPlugin(linksPluginName) as LinksPlugin;
     api.registerHook('session', 'renderLineTokenHook', (tokenizer, info) => {
       // if (info.has_cursor && !info.lockEdit) {
       //   return tokenizer;
@@ -49,24 +52,39 @@ registerPlugin(
                     if (api.session.lockEdit) {
                         return;
                     }
-                    const htmlContent = token.text;
                     const path = info.path;
-                    setTimeout(() => {
-                        if (htmlContent.startsWith('<div class=\'node-html\'>')) {
-                            api.session.wangEditorHtml = htmlContent.slice('<div class=\'node-html\'>'.length, -6);
-                        } else {
-                            api.session.wangEditorHtml = htmlContent;
-                        }
-                        api.session.emit('updateAnyway');
-                    }, 100);
-                    api.session.wangEditorModalVisible = true;
-                    api.session.wangEditorOnSave = (html: any) => {
-                        let wrappedHtml = html;
-                        wrappedHtml = `<div class='node-html'>${html}</div>`;
-                        api.session.changeChars(path.row, 0, htmlContent.length, (_ ) => wrappedHtml.split('')).then(() => {
+                    if (info.pluginData.links.md) {
+                      const md = info.pluginData.links.md;
+                      api.session.md = md;
+                      api.session.mdEditorModalVisible = true;
+                      api.session.mdEditorOnSave = (markdown: string, html: string) => {
+                        linksPlugin.setMarkdown(path.row, markdown).then(() => {
+                          let wrappedHtml = html;
+                          wrappedHtml = `<div class='node-html'>${html}</div>`;
+                          api.session.changeChars(path.row, 0, info.line.length, (_ ) => wrappedHtml.split('')).then(() => {
                             api.session.emit('updateAnyway');
+                          });
                         });
-                    };
+                      };
+                    } else {
+                      const htmlContent = token.text;
+                      setTimeout(() => {
+                          if (htmlContent.startsWith('<div class=\'node-html\'>')) {
+                              api.session.wangEditorHtml = htmlContent.slice('<div class=\'node-html\'>'.length, -6);
+                          } else {
+                              api.session.wangEditorHtml = htmlContent;
+                          }
+                          api.session.emit('updateAnyway');
+                      }, 100);
+                      api.session.wangEditorModalVisible = true;
+                      api.session.wangEditorOnSave = (html: any) => {
+                          let wrappedHtml = html;
+                          wrappedHtml = `<div class='node-html'>${html}</div>`;
+                          api.session.changeChars(path.row, 0, htmlContent.length, (_ ) => wrappedHtml.split('')).then(() => {
+                              api.session.emit('updateAnyway');
+                          });
+                      };
+                    }
                     api.session.emit('updateAnyway');
                 }}>
                   <Highlight innerHTML={true}>

@@ -99,7 +99,8 @@ class RowComponent extends React.Component<RowProps, {}> {
 
     const hooksInfo = {
       path, pluginData: this.props.cached.pluginData,
-      has_cursor, has_highlight, lockEdit: this.props.session.lockEdit
+      has_cursor, has_highlight, lockEdit: this.props.session.lockEdit,
+      line: this.props.cached.line
     };
 
     lineoptions.lineHook = PartialUnfolder.trivial<Token, React.ReactNode>();

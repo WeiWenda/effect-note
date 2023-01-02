@@ -103,12 +103,15 @@ export default class Session extends EventEmitter {
   public pngModalVisible: boolean = false;
   public drawioModalVisible: boolean = false;
   public drawioXml: string | undefined = undefined;
+  public md: string | undefined = undefined;
   public ocrModalVisible: boolean = false;
   public wangEditorModalVisible: boolean = false;
+  public mdEditorModalVisible: boolean = false;
   public wangEditorHtml: string = '<p>';
   public pngOnSave: (img_src: any, json: any) => void;
   public drawioOnSave: (xml: any) => void;
   public wangEditorOnSave: (html: any) => void;
+  public mdEditorOnSave: (markdown: any, html: any) => void;
   public hoverOpen: boolean = false;
   // 记录上次选中内容的path，3种情况下不为空：
   // 1. onCharMouseUp
@@ -148,6 +151,7 @@ export default class Session extends EventEmitter {
     this.showPreview = clientStore.getClientSetting('defaultLayout').includes('right');
     this.showHeader = clientStore.getClientSetting('defaultLayout').includes('top');
     this.pngOnSave = () => {};
+    this.mdEditorOnSave = () => {};
     this.wangEditorOnSave = () => {};
     this.formSubmitAction = () => {};
     this.drawioOnSave = () => {};
