@@ -1,16 +1,17 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Session, Document, Row, Mutation, api_utils, InMemorySession} from '../../share';
-import {Dropdown, Image, Menu, MenuProps, message, Modal, Tag, Tooltip} from 'antd';
+import {DatePicker, Dropdown, Image, Menu, MenuProps, message, Modal, Tag, Tooltip} from 'antd';
 import {ExclamationCircleOutlined, LinkOutlined, PictureOutlined, CloudSyncOutlined} from '@ant-design/icons';
 import {Logger} from '../../ts/logger';
 import { getStyles } from '../../share/ts/themes';
 import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
 import {DrawioViewer} from '../../components/drawioViewer';
+import {HoverIconDropDownComponent} from './dropdownMenu';
 
 type RowsToLinks = {[key: number]: String};
 export class LinksPlugin {
-    private api: PluginApi;
+    public api: PluginApi;
     private logger: Logger;
     private session: Session;
     private document: Document;
@@ -97,226 +98,11 @@ export class LinksPlugin {
             };
         };
         this.api.registerHook('session', 'renderHoverBullet', function(bullet, {path, rowInfo}) {
-            const pluginData = rowInfo.pluginData;
-            const items = [
-                {
-                    label: '展开',
-                    key: 'unfold',
-                    children: [
-                        {
-                            label: '展开全部子节点',
-                            key: 'unfold_100',
-                        },
-                        {
-                            label: '展开至一级子节点',
-                            key: 'unfold_1',
-                        },
-                        {
-                            label: '展开至二级子节点',
-                            key: 'unfold_2',
-                        },
-                        {
-                            label: '展开至三级子节点',
-                            key: 'unfold_3',
-                        },
-                        {
-                            label: '折叠全部子节点',
-                            key: 'fold_100',
-                        }
-                    ],
-                },
-                {
-                    label: '插入',
-                    key: 'insert',
-                    children: [
-                        {
-                            label: '插入markdown（vditor）',
-                            key: 'insert_md',
-                        },
-                        {
-                            label: '插入富文本（wangEditor）',
-                            key: 'insert_rtf',
-                        },
-                        {
-                            label: '插入流程图（Drawio）',
-                            key: 'insert_drawio',
-                        },
-                        {
-                            label: '插入文本识别',
-                            key: 'ocr',
-                        }
-                    ]
-                },
-                {
-                    label: '标记',
-                    key: 'mark',
-                    children: [
-                        {
-                            label: '收藏',
-                            key: 'mark_mark',
-                        },
-                        {
-                            label: '标签',
-                            key: 'mark_tag',
-                        },
-                        {
-                            label: '标记任务开始',
-                            key: 'mark_start',
-                        },
-                        {
-                            label: '标记任务结束',
-                            key: 'mark_end',
-                        }
-                    ]
-                },
-                {
-                    label: '导出',
-                    key: 'export',
-                    children: [
-                        {
-                            label: '导出为json',
-                            key: 'export_json',
-                        },
-                        {
-                            label: '导出为text（兼容WorkFlowy）',
-                            key: 'export_text',
-                        }
-                    ],
-                }
-            ];
-            const onClick: MenuProps['onClick'] = ({ key }) => {
-                that.session.hoverOpen = false;
-                if (key.startsWith('fold')) {
-                    const foldLevel = Number(key.split('_').pop());
-                    that.session.foldBlock(path, foldLevel, true).then(() => {
-                        that.session.emit('updateInner');
-                    });
-                    return;
-                }
-                if (key.startsWith('unfold')) {
-                    const unfoldLevel = Number(key.split('_').pop());
-                    that.session.foldBlock(path, unfoldLevel, false).then(() => {
-                        that.session.emit('updateInner');
-                    });
-                    return;
-                }
-                switch (key) {
-                    case 'mark_tag':
-                        that.tagsPlugin.tagstate = {
-                            session: new InMemorySession(),
-                            path: path
-                        };
-                        that.api.updatedDataForRender(path.row).then(() => {
-                            that.session.emit('updateInner');
-                        });
-                        break;
-                    case 'ocr':
-                        that.session.ocrModalVisible = true;
-                        that.session.emit('updateAnyway');
-                        break;
-                    case 'insert_md':
-                        that.session.md = rowInfo.pluginData.links.md || rowInfo.line.join('');
-                        that.session.mdEditorModalVisible = true;
-                        that.session.mdEditorOnSave = (markdown: string, html: string) => {
-                            that.setMarkdown(path.row, markdown).then(() => {
-                                let wrappedHtml = html;
-                                wrappedHtml = `<div class='node-html'>${html}</div>`;
-                                that.session.changeChars(path.row, 0, rowInfo.line.length, (_ ) => wrappedHtml.split('')).then(() => {
-                                    that.session.emit('updateAnyway');
-                                });
-                            });
-                        };
-                        that.session.emit('updateAnyway');
-                        break;
-                    case 'insert_drawio':
-                        onInsertDrawio(path.row);
-                        break;
-                    case 'insert_rtf':
-                        setTimeout(() => {
-                            if (rowInfo.line.join('').startsWith('<div class=\'node-html\'>')) {
-                                that.session.wangEditorHtml = rowInfo.line.join('').slice('<div class=\'node-html\'>'.length, -6);
-                            } else {
-                                that.session.wangEditorHtml = rowInfo.line.join('');
-                            }
-                            that.session.emit('updateAnyway');
-                        }, 100);
-                        that.session.wangEditorModalVisible = true;
-                        that.session.wangEditorOnSave = (html: any) => {
-                            let wrappedHtml = html;
-                            wrappedHtml = `<div class='node-html'>${html}</div>`;
-                            that.session.changeChars(path.row, 0, rowInfo.line.length, (_ ) => wrappedHtml.split('')).then(() => {
-                                that.session.emit('updateAnyway');
-                            });
-                        };
-                        that.session.emit('updateAnyway');
-                        break;
-                    case 'add_png':
-                        that.session.pngModalVisible = true;
-                        that.session.pngOnSave = (img_src: any, json: any) => {
-                            that.setPng(path.row, img_src, json).then(() => {
-                                that.session.emit('updateAnyway');
-                            });
-                        };
-                        setTimeout(() => {
-                            that.session.getKityMinderNode(path).then(kmnode => {
-                                that.session.mindMapRef.current.setContent(kmnode);
-                            });
-                        }, 1000);
-                        that.session.emit('updateAnyway');
-                        break;
-                    case 'add_link':
-                        that.session.formSubmitAction = (value) => {
-                          that.setLink(path.row, value).then(() => {
-                              that.session.emit('updateAnyway');
-                          });
-                        };
-                        that.session.emit('updateAnyway');
-                        break;
-                    case 'export_json':
-                        that.session.getCurrentContent(path, 'application/json').then(content => {
-                            let tab = window.open('about:blank', '_blank');
-                            tab?.document.write('<html><body>' +
-                              '<pre style="word-wrap: break-word; white-space: pre-wrap;">' + content + '</pre></body></html>');
-                            tab?.document.close();
-                        });
-                        break;
-                    case 'export_text':
-                        that.session.getCurrentContent(path, 'text/plain').then(content => {
-                            let tab = window.open('about:blank', '_blank');
-                            tab?.document.write('<html><body>' +
-                              '<pre style="word-wrap: break-word; white-space: pre-wrap;">' + content + '</pre></body></html>');
-                            tab?.document.close();
-                        });
-                        break;
-                    default:
-                        message.info(`Click on item ${key}`);
-                }
-            };
-            if (pluginData.links?.png === null) {
-                items.filter(item => item.key === 'insert')[0].children!.splice(0, 0, {
-                      label: '插入思维导图（百度脑图）',
-                      key: 'add_png',
-                  });
-            }
-            // if (pluginData.links?.link === null) {
-            //     dynamicOperations.push({
-            //         label: '新增扩展阅读',
-            //         key: 'add_link',
-            //     });
-            // }
-            bullet =
-              <Dropdown
-                  onOpenChange={(open) => {
-                      that.session.hoverOpen = open;
-                  }}
-                  overlay={<Menu
-                onClick={onClick}
-                items={items}
-              />} trigger={['click']} >
-                {bullet}
-              </Dropdown>;
-            return bullet;
-        });
+              return (
+                <HoverIconDropDownComponent session={that.session} bullet={bullet} path={path} rowInfo={rowInfo}
+                    tagsPlugin={that.tagsPlugin} linksPlugin={that} onInsertDrawio={onInsertDrawio} />
+              );
+          });
         this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
             const link = await this.getLink(row);
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
