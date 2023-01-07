@@ -110,7 +110,7 @@ export default class KeyEmitter extends EventEmitter {
 
   public listen() {
 
-    return $(document).keydown(e => {
+    return document.addEventListener('keydown', (e) => {
       // IME input keycode is 229
       if (e.keyCode === 229) {
         return false;
@@ -121,6 +121,9 @@ export default class KeyEmitter extends EventEmitter {
       let key;
       if (e.keyCode in keyCodeMap) {
         key = keyCodeMap[e.keyCode];
+        if (e.getModifierState('CapsLock')) {
+          key = key.toUpperCase();
+        }
       } else {
         // this is necessary for typing stuff..
         key = String.fromCharCode(e.keyCode);

@@ -1,13 +1,15 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {PluginApi, registerPlugin} from '../../ts/plugins';
-import {Session, Document, Row, Mutation, api_utils, InMemorySession} from '../../share';
-import {DatePicker, Dropdown, Image, Menu, MenuProps, message, Modal, Tag, Tooltip} from 'antd';
-import {ExclamationCircleOutlined, LinkOutlined, PictureOutlined, CloudSyncOutlined} from '@ant-design/icons';
+import {Document, Mutation, Row, Session} from '../../share';
+import {Dropdown, Image, Menu, MenuProps, message, Modal, Tag, Space} from 'antd';
+import {ExclamationCircleOutlined, LinkOutlined, PictureOutlined, EditOutlined, ZoomInOutlined, ZoomOutOutlined} from '@ant-design/icons';
 import {Logger} from '../../ts/logger';
-import { getStyles } from '../../share/ts/themes';
+import {getStyles} from '../../share/ts/themes';
 import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
 import {DrawioViewer} from '../../components/drawioViewer';
 import {HoverIconDropDownComponent} from './dropdownMenu';
+import {MarksPlugin, pluginName} from '../marks';
+import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
 
 type RowsToLinks = {[key: number]: String};
 export class LinksPlugin {
@@ -16,6 +18,7 @@ export class LinksPlugin {
     private session: Session;
     private document: Document;
     private tagsPlugin: TagsPlugin;
+    private markPlugin: MarksPlugin;
     public SetLink!: new(row: Row, mark: String) => Mutation;
     public UnsetLink!: new(row: Row) => Mutation;
     constructor(api: PluginApi) {
@@ -24,6 +27,7 @@ export class LinksPlugin {
         this.session = this.api.session;
         this.document = this.session.document;
         this.tagsPlugin = this.api.getPlugin(tagsPluginName) as TagsPlugin;
+        this.markPlugin = this.api.getPlugin(pluginName) as MarksPlugin;
     }
     public async enable() {
         const that = this;
@@ -82,9 +86,6 @@ export class LinksPlugin {
         }
         this.UnsetLink = UnsetLink;
         const onInsertDrawio = (row: Row) => {
-            if (that.session.lockEdit) {
-                return;
-            }
             that.getXml(row).then(xml => {
                 that.session.drawioModalVisible = true;
                 that.session.drawioXml = xml;
@@ -100,7 +101,7 @@ export class LinksPlugin {
         this.api.registerHook('session', 'renderHoverBullet', function(bullet, {path, rowInfo}) {
               return (
                 <HoverIconDropDownComponent session={that.session} bullet={bullet} path={path} rowInfo={rowInfo}
-                    tagsPlugin={that.tagsPlugin} linksPlugin={that} onInsertDrawio={onInsertDrawio} />
+                    tagsPlugin={that.tagsPlugin} markPlugin={that.markPlugin} linksPlugin={that} onInsertDrawio={onInsertDrawio} />
               );
           });
         this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
@@ -134,25 +135,36 @@ export class LinksPlugin {
             return struct;
         });
         this.api.registerListener('document', 'loadRow', async (path, serialized) => {
-            if (serialized.link != null) {
+            if (serialized.link !== null) {
                 const err = await this.setLink(path.row, serialized.link);
                 if (err) { return this.session.showMessage(err, {text_class: 'error'}); }
             }
-            if (serialized.png != null) {
+            if (serialized.png?.src && serialized.png?.json) {
                 await this.setPng(path.row, serialized.png.src, serialized.png.json);
             }
-            if (serialized.drawio != null) {
+            if (serialized.drawio !== null) {
                 await this.setXml(path.row, serialized.drawio);
             }
-            if (serialized.md != null) {
+            if (serialized.md !== null) {
                 await this.setMarkdown(path.row, serialized.md);
             }
         });
         this.api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData}) => {
             if (pluginData.links?.xml != null) {
+                const ref: any = React.createRef();
                 elements.push(
-                    <DrawioViewer key={'drawio'} session={that.session} row={path.row} content={pluginData.links.xml}
-                       onClickFunc={onInsertDrawio}/>
+                  <SpecialBlock key={'special-block'} blockType={'Drawio'} session={that.session} tools={
+                      <Space>
+                          <ZoomInOutlined onClick={() => {ref.current!.zoomIn(); }}/>
+                          <ZoomOutOutlined onClick={() => {ref.current!.zoomOut(); }}/>
+                          <EditOutlined onClick={() => {
+                              onInsertDrawio(path.row);
+                          }}/>
+                      </Space>
+                  }>
+                      <DrawioViewer ref={ref} key={'drawio'} session={that.session} row={path.row} content={pluginData.links.xml}
+                                    onClickFunc={onInsertDrawio}/>
+                  </SpecialBlock>
                 );
             }
             if (pluginData.links?.png != null) {
@@ -373,7 +385,7 @@ registerPlugin<LinksPlugin>(
        允许每个节点增加一个http外链，用于提供pdf、ppt、wiki。
       </div>
     ),
-    dependencies: [tagsPluginName],
+    dependencies: [tagsPluginName, pluginName],
   },
     async function(api) {
       const linksPlugin = new LinksPlugin(api);

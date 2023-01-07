@@ -11,6 +11,25 @@ export function encodeHtml(content: string) {
     return content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 };
 
+export const htmlTypes: Array<string> = [
+    'div',
+    'span',
+    'img',
+    'table'
+];
+
+const htmlRegexParts: Array<string> = [];
+htmlTypes.forEach((htmltype) => {
+    htmlRegexParts.push(
+      `<${htmltype}(.|\\n)*>(.|\\n)*</${htmltype}>`
+    );
+    // self-closing
+    htmlRegexParts.push(
+      `<${htmltype}(.|\\n)*/>`
+    );
+});
+export const htmlRegex = '(' + htmlRegexParts.map((part) => '(' + part + ')').join('|') + ')';
+
 export async function exportFile(session: Session, type = 'json') {
     const filename = session.document.name === '' ?
         `vimflowy.${type}` :
@@ -28,6 +47,7 @@ export function mimetypeLookup(filename: string): string | undefined {
     const parts = filename.split('.');
     const extension = parts.length > 1 ? parts[parts.length - 1] : '';
     const extensionLookup: {[key: string]: string} = {
+        'md': 'text/markdown',
         'opml': 'text/x-opml',
         'json': 'application/json',
         'txt': 'text/plain',

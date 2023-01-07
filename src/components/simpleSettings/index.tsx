@@ -154,7 +154,7 @@ function SimpleSettingsComponent(props: { session: Session, config: Config, refr
                         },
                         {
                             label: (
-                                <span style={{fontFamily: 'PingFang SC'}}>苹文-简（Mac系统字体）</span>
+                                <span style={{fontFamily: 'PingFang SC'}}>苹方-简（Mac系统字体）</span>
                             ),
                             value: 'PingFang SC'
                         },

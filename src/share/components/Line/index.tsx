@@ -10,6 +10,7 @@ import {
 import Session from '../../ts/session';
 import Path from '../../ts/path';
 import ContentEditable from 'react-contenteditable';
+import $ from 'jquery';
 
 export type LineProps = {
   lineData: Line;
@@ -92,6 +93,11 @@ export default class LineComponent extends React.Component<LineProps, {input: st
         }
         if (char_info.cursor) {
           if (cursorBetween) {
+            setTimeout(() => {
+              if (!session.stopMonitor) {
+                $('#input-hack').focus();
+              }
+            }, 100);
             emit(<ContentEditable id='input-hack'
                       className='input-hack'
                       key='input-hack'

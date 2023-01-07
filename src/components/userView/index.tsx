@@ -133,10 +133,10 @@ async function toggleRecursiveCollapse(document: Document, path: Path, collapse:
 function UserViewComponent(props: {session: Session,
   pluginManager: PluginsManager, curDocId: number, onEditBaseInfo: (docInfo: DocInfo) => void}) {
   const forceUpdate = useForceUpdate();
-  const [curMenu, setCurMenu] = useState('');
+  const [curMenu, setCurMenu] = useState(props.session.clientStore.getClientSetting('openFile'));
   const [fileListWidth, setFileListWidth] = useState(250);
   const [previewWidth, setPreviewWidth] = useState(300);
-  const [openKeys, setOpenKeys] = useState(['0']);
+  const [openKeys, setOpenKeys] = useState<string[]>(JSON.parse(props.session.clientStore.getClientSetting('openMenus')));
   const [filter, setFilter] = useState('');
   const [filterInner, setFilterInner] = useState('');
   const docs = props.session.userDocs;
@@ -201,9 +201,6 @@ function UserViewComponent(props: {session: Session,
       const items = getItems(tagMap, menuID2DocID);
       setMenuItems(items);
       setMenuItem2DocId(menuID2DocID);
-      if (menuID2DocID.indexOf(curDocId).toString() !== curMenu) {
-        setCurMenu(menuID2DocID.indexOf(curDocId).toString());
-      }
     };
     if (filter) {
       props.session.showMessage('检索中...');
@@ -404,9 +401,6 @@ function UserViewComponent(props: {session: Session,
   useEffect(() => {
     console.log(`当前文档id: ${props.curDocId}`);
     setCurDocId(props.curDocId);
-    if (menuItem2DocId.length > 0 && menuItem2DocId.indexOf(props.curDocId).toString() !== curMenu) {
-      setCurMenu(menuItem2DocId.indexOf(props.curDocId).toString());
-    }
     // 父页面新建笔记时
     if (props.session.userDocs.find(doc => doc.id === props.curDocId) || props.curDocId === -1) {
       loadDoc(props.curDocId);
@@ -430,6 +424,7 @@ function UserViewComponent(props: {session: Session,
   const onClick: MenuProps['onClick'] = e => {
     if (!loading) {
       setCurMenu(e.key);
+      props.session.clientStore.setClientSetting('openFile', e.key);
       const remoteDocId = menuItem2DocId[Number(e.key)];
       setCurDocId(remoteDocId);
       loadDoc(remoteDocId);
@@ -438,7 +433,9 @@ function UserViewComponent(props: {session: Session,
     }
   };
   const onOpenChange: MenuProps['onOpenChange'] = keys => {
-    setOpenKeys(keys.filter(key => menuItem2DocId.length > Number(key) && menuItem2DocId[Number(key)] === -2));
+    const filteredKeys = keys.filter(key => menuItem2DocId.length > Number(key) && menuItem2DocId[Number(key)] === -2);
+    props.session.clientStore.setClientSetting('openMenus', JSON.stringify(filteredKeys));
+    setOpenKeys(filteredKeys);
   };
   const onSearchFileList = (e: string) => {
     setFilter(e);
@@ -459,7 +456,7 @@ function UserViewComponent(props: {session: Session,
     <div style={{height: '100%', flexDirection: 'row', display: 'flex', width: '100%'}}>
       {
         props.session.showFilelist &&
-          <div style={{width: `${fileListWidth}px`, flexShrink: 0}}>
+          <div style={{width: `${fileListWidth}px`, overflow: 'auto', flexShrink: 0}}>
               <Search
                   placeholder='搜索笔记名称或内容'
                   allowClear
@@ -573,7 +570,7 @@ function UserViewComponent(props: {session: Session,
                     curDocId !== -1 &&
                     // process.env.REACT_APP_BUILD_PROFILE === 'local' &&
                       <Popover placement='bottom' content={
-                        <div style={{maxHeight: '100px', overflowY: 'auto'}}>
+                        <div style={{width: '200px', maxHeight: '100px', overflowY: 'auto'}}>
                           <Radio.Group onChange={(v) => {
                             setCurrentVersion(v.target.value);
                             getDocContent(Number(curDocId), v.target.value).then((res) => {

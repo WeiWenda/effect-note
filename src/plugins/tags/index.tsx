@@ -433,7 +433,7 @@ export class TagsPlugin {
         if (status) {
           lineContents.push(
             <Popover key={'status'} content={(
-              <ul>
+              <ul style={{paddingInlineStart: '1em'}}>
                 {[startTag, endTag, dueTag].filter(t => t).map((t, index) => (
                   <li key={index} >{t}</li>
                 ))}

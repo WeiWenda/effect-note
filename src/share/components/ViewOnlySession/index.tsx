@@ -4,7 +4,7 @@ import {promiseDebounce} from '../../ts/utils/functional';
 import logger from '../../ts/utils/logger';
 
 import * as Modes from '../../ts/modes';
-import BlockComponent from '../Session/block';
+import BlockComponent from '../Block/block';
 import Spinner from '../Spinner';
 import Session from '../../ts/session';
 import Path from '../../ts/path';

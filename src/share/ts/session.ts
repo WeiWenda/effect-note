@@ -107,7 +107,10 @@ export default class Session extends EventEmitter {
   public ocrModalVisible: boolean = false;
   public wangEditorModalVisible: boolean = false;
   public mdEditorModalVisible: boolean = false;
+  public exportModalVisible: boolean = false;
   public wangEditorHtml: string = '<p>';
+  public exportModalContent: string = '';
+  public exportFileFunc: () => void;
   public pngOnSave: (img_src: any, json: any) => void;
   public drawioOnSave: (xml: any) => void;
   public wangEditorOnSave: (html: any) => void;
@@ -155,6 +158,7 @@ export default class Session extends EventEmitter {
     this.wangEditorOnSave = () => {};
     this.formSubmitAction = () => {};
     this.drawioOnSave = () => {};
+    this.exportFileFunc = () => {};
 
     this.register = new Register(this);
 
@@ -237,6 +241,83 @@ export default class Session extends EventEmitter {
     return root;
   }
 
+  private async parseMarkDown(content: string) {
+    // Step 1: parse into (int, string) pairs of indentation amounts.
+    let lines: Array<{
+      indent: number,
+      line: string,
+      isOutline: boolean,
+    }> = [];
+    const headNumber = /^#+/;
+    const content_lines = content.split('\n');
+    let currentIndent = 0;
+    let inCodeBlock = false;
+    content_lines.forEach((line) => {
+      if (line.startsWith('```')) {
+        inCodeBlock = !inCodeBlock;
+      }
+      const matches = line.match(headNumber);
+      let indent = currentIndent;
+      let isOutline = false;
+      if (matches && !inCodeBlock) {
+        indent = matches[0].length;
+        isOutline = true;
+        currentIndent = indent + 1;
+      }
+      if (line.length > 0) {
+        lines.push({
+          isOutline,
+          indent,
+          line: line.replace(/^#*\s/, ''),
+        });
+      }
+    });
+    while (lines[lines.length - 1].line === '') { // Strip trailing blank line(s)
+      lines = lines.splice(0, lines.length - 1);
+    }
+
+    // Step 2: convert a list of (int, string, annotation?) into a forest format
+    const parseAllChildren = async function(parentIndentation: number, lineNumber: number) {
+      const children: Array<any> = [];
+      while (lineNumber < lines.length && lines[lineNumber].indent > parentIndentation) {
+        let endLineNumber = lineNumber + 1;
+        while (endLineNumber < lines.length
+          && !lines[endLineNumber].isOutline
+          && lines[endLineNumber].indent === lines[lineNumber].indent) {
+          endLineNumber = endLineNumber + 1;
+        }
+        const mdContent = lines.slice(lineNumber, endLineNumber).map(line => line.line);
+        let child: any = {};
+        if (mdContent.length === 1 && new RegExp('[\u4E00-\u9FA5a-zA-Z]').test(mdContent[0][0])) {
+          child = {text: mdContent[0]};
+        } else {
+          child = {
+            text: '',
+            plugins: {
+              md: mdContent.join('\n')
+            }
+          };
+        }
+        const result = await parseAllChildren(lines[lineNumber].indent, endLineNumber);
+        ({ lineNumber } = result);
+        if (result.children !== null) {
+          child.children = result.children;
+          child.collapsed = result.children.length > 0;
+        }
+        children.push(child);
+      }
+      return { children, lineNumber };
+    };
+    const forest = (await parseAllChildren(-1, 0)).children;
+    const root = {
+      text: '',
+      children: forest,
+      collapsed: forest.length > 0,
+    };
+    console.log(JSON.stringify(root));
+    return root;
+  }
+
   private parsePlaintext(content: string) {
     // Step 1: parse into (int, string) pairs of indentation amounts.
     let lines: Array<{
@@ -299,8 +380,11 @@ export default class Session extends EventEmitter {
     return root;
   }
 
-  private parseContent(content: string, mimetype: string) {
-    if (mimetype === 'text/x-opml') {
+  private async parseContent(content: string, mimetype: string) {
+    if (mimetype === 'text/markdown') {
+      const parseResult = await this.parseMarkDown(content);
+      return parseResult;
+    } else if (mimetype === 'text/x-opml') {
       return this.parseOpml(content);
     } else if (mimetype === 'application/json') {
       return this.parseJson(content);
@@ -316,7 +400,7 @@ export default class Session extends EventEmitter {
       await this.document.reload(content);
     } else {
       content = content.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
-      const root = this.parseContent(content, 'application/json');
+      const root = await this.parseContent(content, 'application/json');
       if (root.text === '' && root.children) { // Complete export, not one node
         await this.document.reload(root.children);
       } else {
@@ -329,7 +413,7 @@ export default class Session extends EventEmitter {
   // TODO: make this use replace_empty = true?
   public async importContent(content: string, mimetype: string) {
     content = content.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
-    const root = this.parseContent(content, mimetype);
+    const root = await this.parseContent(content, mimetype);
     if (!root) { return false; }
     const { path } = this.cursor;
     const parent = path.isRoot() ? path : path.parent!;
@@ -385,6 +469,31 @@ export default class Session extends EventEmitter {
     const jsonContent = await this.document.serialize(this.cursor.row);
     if (mimetype === 'application/json') {
       return JSON.stringify(jsonContent, undefined, 2);
+    } else if (mimetype === 'text/markdown') {
+      const exportLines = function(node: any, curDepth: number) {
+        if (typeof(node) === 'string') {
+          return [`${node}`];
+        }
+        const lines: Array<string> = [];
+        const children = node.children || [];
+        if (node.plugins?.md) {
+          lines.push(node.plugins.md);
+        } else if (children.length > 0 && curDepth <= 6) {
+          lines.push(`${'#'.repeat(curDepth)} ${node.text}`);
+        } else {
+          lines.push(`${node.text}`);
+        }
+        children.forEach((child: any) => {
+          if (child.clone) { return; }
+          exportLines(child, curDepth + 1).forEach((line: string) => lines.push(line));
+        });
+        return lines;
+      };
+      let curDepth = 1;
+      if (typeof(jsonContent) !== 'string' && (jsonContent as any).text === '') {
+        curDepth = 0;
+      }
+      return exportLines(jsonContent, curDepth).join('\n');
     } else if (mimetype === 'text/plain') {
       // Workflowy compatible plaintext export
       //   Ignores 'collapsed' and viewRoot

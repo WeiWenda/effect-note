@@ -33,6 +33,8 @@ export type ClientSettings = Theme & {
   defaultLayout: string;
   fontFamily: string;
   fontFamilyZh: string;
+  openMenus: string;
+  openFile: string;
 };
 
 type ClientSetting = keyof ClientSettings;
@@ -50,6 +52,8 @@ const default_client_settings: ClientSettings =
     defaultLayout: 'top_left',
     fontFamily: 'Arial',
     fontFamilyZh: 'PingFang SC',
+    openMenus: '[\"0\"]',
+    openFile: '0',
   });
 
 export type LocalDocSettings = {
@@ -182,7 +186,7 @@ type DocSetting = keyof DocSettings;
 
 const default_doc_settings: DocSettings = {
   // TODO import these names from the plugins
-  enabledPlugins: ['Marks', 'LaTeX', 'Todo', 'Tags', 'Links', 'HTML'],
+  enabledPlugins: ['Marks', 'LaTeX', 'Tags', 'Links', 'HTML', 'Todo', 'Markdown', 'Text Formatting'],
 };
 
 const timeout = (ns: number) => {

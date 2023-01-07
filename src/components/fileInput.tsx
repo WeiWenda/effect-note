@@ -6,7 +6,7 @@ type Props = {
   onLoad?: (filename: string, contents: string) => void;
   onError?: (error: string) => void;
   style?: React.CSSProperties;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 export const load_file = function(file: File): Promise<{name: string, contents: string}> {
@@ -60,7 +60,7 @@ export default class FileInput extends React.Component<Props, {}> {
       <div
         style={this.props.style || {position: 'relative'}}
       >
-        <input type='file' id={this.id}
+        <input type='file' id='file-uploader'
           style={{
             position: 'absolute',
             opacity: 0,
@@ -70,8 +70,6 @@ export default class FileInput extends React.Component<Props, {}> {
           }}
           onChange={(e) => this.handleChange(e)}
         />
-
-        {this.props.children}
       </div>
     );
   }

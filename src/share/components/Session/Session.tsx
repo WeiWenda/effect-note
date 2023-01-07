@@ -4,7 +4,7 @@ import { promiseDebounce } from '../../ts/utils/functional';
 import logger from '../../ts/utils/logger';
 
 import * as Modes from '../../ts/modes';
-import BlockComponent from './block';
+import BlockComponent from '../Block/block';
 import Spinner from '../Spinner';
 import Session from '../../ts/session';
 import { Col } from '../../ts/types';
@@ -110,6 +110,7 @@ export default class SessionComponent extends React.Component<Props, State> {
       const session = this.props.session;
 
       await session.toggleBlockCollapsed(path.row);
+      session.cursor.reset();
       session.save();
       this.update();
     };
@@ -214,9 +215,6 @@ export default class SessionComponent extends React.Component<Props, State> {
         cursorsTree,
         loaded: true,
       });
-      if (!session.stopMonitor) {
-        $('#input-hack').focus();
-      }
       finishProfiling();
     });
   }

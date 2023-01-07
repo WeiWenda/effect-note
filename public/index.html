@@ -20,9 +20,9 @@
   <script type="text/javascript">
     function resizeIframe(iframe, row) {
       iframe.height = iframe.contentWindow.document.documentElement.scrollHeight + "px";
-      iframe.contentDocument.addEventListener('click', () => {
-        window.postMessage(JSON.stringify({action: 'iframe-click', row}))
-      });
+      // iframe.contentDocument.addEventListener('click', () => {
+      //   window.postMessage(JSON.stringify({action: 'iframe-click', row}))
+      // });
     }
   </script>
 </html>

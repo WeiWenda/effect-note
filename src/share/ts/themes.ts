@@ -179,6 +179,7 @@ export function appendStyleScript(clientStore: ClientStore) {
                     .ant-input:hover{border-color:${theme['theme-text-link']}}
                     .ant-btn-default:not(:disabled):hover{border-color:${theme['theme-text-link']};color:${theme['theme-text-link']}}
                     .file-toolbar .ant-btn{color: ${theme['theme-text-primary']}}
+                    .node-html a{color: ${theme['theme-text-link']}}
                     .ant-input-group .ant-input-group-addon{color: ${theme['theme-text-primary']}}
                     .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover{border-color:${theme['theme-text-link']}}
                     .ant-input-affix-wrapper-focused{border-color:${theme['theme-text-link']}}

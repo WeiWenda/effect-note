@@ -5,11 +5,13 @@ import { useReactToPrint } from 'react-to-print';
 import {ExclamationCircleOutlined, MoreOutlined} from '@ant-design/icons';
 import {api_utils, DocInfo, Path, Session} from '../../share';
 import {encodeHtml} from '../../ts/util';
+import {exportAction} from '../../plugins/links/dropdownMenu';
 
 function FileToolsComponent(props: {session: Session, curDocId: number, onEditBaseInfo: () => void, reloadFunc: (type: string) => void}) {
   const handlePrint = useReactToPrint({
     content: () => props.session.sessionRef.current,
   });
+  const docName = props.session.userDocs.find(doc => doc.id === props.curDocId)?.name;
   const operationClick: MenuProps['onClick'] = ({ key }) => {
     switch (key) {
       case 'remove':
@@ -41,26 +43,19 @@ function FileToolsComponent(props: {session: Session, curDocId: number, onEditBa
           }
         });
         break;
+      case 'export_md':
+        exportAction(props.session, Path.root(), 'text/markdown', docName);
+        break;
       case 'export_json':
-        props.session.getCurrentContent(Path.root(), 'application/json').then(content => {
-          let tab = window.open('about:blank', '_blank');
-          tab?.document.write('<html><body>' +
-            '<pre style="word-wrap: break-word; white-space: pre-wrap;">' + encodeHtml(content) + '</pre></body></html>');
-          tab?.document.close();
-        });
+        exportAction(props.session, Path.root(), 'application/json', docName);
+        break;
+      case 'export_text':
+        exportAction(props.session, Path.root(), 'text/plain', docName);
         break;
       case 'export_pdf':
         $('.session-content').css('overflow', 'unset');
         handlePrint();
         $('.session-content').css('overflow', 'auto');
-        break;
-      case 'export_text':
-        props.session.getCurrentContent(Path.root(), 'text/plain').then(content => {
-          let tab = window.open('about:blank', '_blank');
-          tab?.document.write('<html><body>' +
-            '<pre style="word-wrap: break-word; white-space: pre-wrap;">' + encodeHtml(content) + '</pre></body></html>');
-          tab?.document.close();
-        });
         break;
       default:
         message.info(`Click on item ${key}`);
@@ -89,6 +84,10 @@ function FileToolsComponent(props: {session: Session, curDocId: number, onEditBa
             {
               label: '导出为pdf',
               key: 'export_pdf',
+            },
+            {
+              label: '导出为markdown',
+              key: 'export_md',
             },
             {
               label: '导出为json（无损导出）',

@@ -10,6 +10,7 @@ import { CursorsInfoTree } from '../../ts/cursor';
 import { Col } from '../../ts/types';
 import { PartialUnfolder, Token } from '../../ts/utils/token_unfolder';
 import { getStyles } from '../../ts/themes';
+import {htmlRegex} from '../../../ts/util';
 
 type RowProps = {
   session: Session;
@@ -36,6 +37,15 @@ class RowComponent extends React.Component<RowProps, {}> {
       this.onClick = () => {
         if (!props.onClick) {
           throw new Error('onClick disappeared');
+        }
+        if (props.session.lockEdit) {
+          return;
+        }
+        if (props.cached.pluginData.links.md || props.cached.pluginData.links.xml) {
+          return;
+        }
+        if (new RegExp(htmlRegex).test(props.cached.line.join(''))) {
+          return;
         }
         props.onClick(props.path);
       };

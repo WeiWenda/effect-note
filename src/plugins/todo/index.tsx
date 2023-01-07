@@ -5,6 +5,8 @@ import './index.sass';
 import { Session, Row, hideBorderAndModify, RegexTokenizerModifier } from '../../share';
 import { registerPlugin } from '../../ts/plugins';
 import { matchWordRegex } from '../../ts//text';
+import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
+import Moment from 'moment';
 
 const strikethroughClass = 'strikethrough';
 
@@ -15,15 +17,10 @@ registerPlugin(
     name: pluginName,
     author: 'Jeff Wu',
     description: `Lets you strike out bullets (by default with ctrl+enter)`,
+    dependencies: [tagsPluginName],
   },
   function(api) {
-    api.registerHook('session', 'renderLineTokenHook', (tokenizer, hooksInfo) => {
-      if (hooksInfo.has_cursor) {
-        return tokenizer;
-      }
-      if (hooksInfo.has_highlight) {
-        return tokenizer;
-      }
+    api.registerHook('session', 'renderLineTokenHook', (tokenizer, _hooksInfo) => {
       return tokenizer.then(RegexTokenizerModifier(
         matchWordRegex('\\~\\~(\\n|.)+?\\~\\~'),
         hideBorderAndModify(2, 2, (char_info) => { char_info.renderOptions.classes[strikethroughClass] = true; })
@@ -53,9 +50,14 @@ registerPlugin(
       'toggle-strikethrough',
       'Toggle strikethrough for a row',
       async function({ session }) {
+        const tagsPlugin = api.getPlugin(tagsPluginName) as TagsPlugin;
+        const existTags = await tagsPlugin.getTags(session.cursor.row);
+        const filteredTags = existTags?.filter(t => !t.startsWith('end: ')) || [];
         if (await isStruckThrough(session, session.cursor.row)) {
+          await tagsPlugin.setTags(session.cursor.row, filteredTags);
           await removeStrikeThrough(session, session.cursor.row);
         } else {
+          await tagsPlugin.setTags(session.cursor.row, ['end: ' + Moment().format('yyyy-MM-DD HH:mm:ss'), ...filteredTags]);
           await addStrikeThrough(session, session.cursor.row);
         }
       },

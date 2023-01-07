@@ -28,7 +28,7 @@ import {
 import { SERVER_CONFIG } from '../ts/constants';
 // load all plugins
 import '../plugins';
-import YangComponent from './yang';
+import YinComponent from './yin';
 import {
   BrowserRouter as Router,
   Routes,
@@ -292,7 +292,7 @@ $(document).ready(async () => {
 
   function renderMain() {
     root.render(
-      <YangComponent session={session} config={config} pluginManager={pluginManager}/>
+      <YinComponent session={session} config={config} pluginManager={pluginManager}/>
       // <Router>
       //   <Routes>
       //     <Route path='/yin' element={
@@ -456,7 +456,7 @@ $(document).ready(async () => {
   // });
 });
 
-function copyToClipboard(text: string, richText?: string) {
+export function copyToClipboard(text: string, richText?: string) {
   // https://stackoverflow.com/a/33928558/5937230
 
   // https://stackoverflow.com/questions/23934656/javascript-copy-rich-text-contents-to-clipboard

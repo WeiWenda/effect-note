@@ -5,10 +5,27 @@ import {useState} from 'react';
 import {TagsPlugin} from '../tags';
 import {LinksPlugin} from './index';
 import dayjs from 'dayjs';
+import {MarksPlugin} from '../marks';
+import $ from 'jquery';
+import {downloadFile} from '../../ts/util';
+
+export function exportAction(session: Session, path: Path, mimeType: string, filename?: string) {
+  session.getCurrentContent(path, mimeType).then(content => {
+    session.exportModalContent = content;
+    session.exportModalVisible = true;
+    session.document.getText(path.row).then(blockContent => {
+      session.exportFileFunc = () => {
+        downloadFile(`${blockContent ? blockContent : (filename ? filename : 'effect-note-export')}`, content, mimeType);
+      };
+      session.emit('updateAnyway');
+    });
+  });
+}
 
 export function HoverIconDropDownComponent(props: {session: Session, bullet: any,
   path: Path, rowInfo: CachedRowInfo
   tagsPlugin: TagsPlugin,
+  markPlugin: MarksPlugin,
   linksPlugin: LinksPlugin,
   onInsertDrawio: (row: Row) => void,
 }) {
@@ -136,9 +153,27 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       ]
     },
     {
+      label: '导入',
+      key: 'load',
+      children: [
+        {
+          label: '导入markdown',
+          key: 'load_md',
+        },
+        {
+          label: '导入opml',
+          key: 'load_opml',
+        }
+      ]
+    },
+    {
       label: '导出',
       key: 'export',
       children: [
+        {
+          label: '导出为markdown',
+          key: 'export_md',
+        },
         {
           label: '导出为json',
           key: 'export_json',
@@ -171,6 +206,14 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       return;
     }
     switch (key) {
+      case 'load_md':
+        $('#file-uploader').trigger('click');
+        break;
+      case 'mark_mark':
+        props.markPlugin.setMark(props.path.row, props.rowInfo.line.join('')).then(() => {
+          props.session.emit('updateInner');
+        });
+        break;
       case 'mark_tag':
         props.tagsPlugin.tagstate = {
           session: new InMemorySession(),
@@ -187,13 +230,13 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       case 'insert_md':
         props.session.md = props.rowInfo.pluginData.links.md || props.rowInfo.line.join('');
         props.session.mdEditorModalVisible = true;
-        props.session.mdEditorOnSave = (markdown: string, html: string) => {
+        props.session.mdEditorOnSave = (markdown: string, _html: string) => {
           props.linksPlugin.setMarkdown(props.path.row, markdown).then(() => {
-            let wrappedHtml = html;
-            wrappedHtml = `<div class='node-html'>${html}</div>`;
-            props.session.changeChars(props.path.row, 0, props.rowInfo.line.length, (_ ) => wrappedHtml.split('')).then(() => {
-              props.session.emit('updateAnyway');
-            });
+            props.session.emit('updateAnyway');
+            // let wrappedHtml = html;
+            // wrappedHtml = `<div class='node-html'>${html}</div>`;
+            // props.session.changeChars(props.path.row, 0, props.rowInfo.line.length, (_ ) => wrappedHtml.split('')).then(() => {
+            // });
           });
         };
         props.session.emit('updateAnyway');
@@ -242,21 +285,14 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         };
         props.session.emit('updateAnyway');
         break;
+      case 'export_md':
+        exportAction(props.session, props.path, 'text/markdown');
+        break;
       case 'export_json':
-        props.session.getCurrentContent(props.path, 'application/json').then(content => {
-          let tab = window.open('about:blank', '_blank');
-          tab?.document.write('<html><body>' +
-            '<pre style="word-wrap: break-word; white-space: pre-wrap;">' + content + '</pre></body></html>');
-          tab?.document.close();
-        });
+        exportAction(props.session, props.path, 'application/json');
         break;
       case 'export_text':
-        props.session.getCurrentContent(props.path, 'text/plain').then(content => {
-          let tab = window.open('about:blank', '_blank');
-          tab?.document.write('<html><body>' +
-            '<pre style="word-wrap: break-word; white-space: pre-wrap;">' + content + '</pre></body></html>');
-          tab?.document.close();
-        });
+        exportAction(props.session, props.path, 'text/plain');
         break;
       default:
         message.info(`Click on item ${key}`);
@@ -284,6 +320,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       open={dropDownOpen}
       onOpenChange={(open) => {
         setDropDownOpen(open);
+        props.session.cursor.reset();
         props.session.hoverOpen = open;
       }}
       menu={menusProps} trigger={['click']} >

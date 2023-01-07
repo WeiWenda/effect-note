@@ -20,9 +20,13 @@ import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
 import {DrawioEditor} from '../drawioEditor';
 import {API_BASE_URL, getServerConfig} from '../../share/ts/utils/APIUtils';
 import Vditor from 'vditor';
+import {mimetypeLookup} from '../../ts/util';
+import logger from '../../ts/logger';
+import FileInput from '../fileInput';
+import { ExportComponent } from '../export';
 const { Header, Footer, Sider, Content } = Layout;
 
-function YangComponent(props: {session: Session, config: Config, pluginManager: PluginsManager}) {
+function YinComponent(props: {session: Session, config: Config, pluginManager: PluginsManager}) {
   const [settingOpen, setSettingOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [curDocId, setCurDocId] = useState(localStorage.getItem('currentDocId') ? Number(localStorage.getItem('currentDocId')) : -1);
@@ -62,14 +66,15 @@ function YangComponent(props: {session: Session, config: Config, pluginManager: 
   useEffect(() => {
     if (baseInfoModalVisible || props.session.pngModalVisible
       || props.session.wangEditorModalVisible || props.session.ocrModalVisible
-      || props.session.drawioModalVisible || props.session.mdEditorModalVisible) {
+      || props.session.drawioModalVisible || props.session.mdEditorModalVisible
+      || props.session.exportModalVisible) {
       props.session.stopMonitor = true;
     } else {
       props.session.stopMonitor = false;
     }
   }, [baseInfoModalVisible, props.session.pngModalVisible,
     props.session.wangEditorModalVisible, props.session.ocrModalVisible,
-    props.session.mdEditorModalVisible, props.session.drawioModalVisible]);
+    props.session.mdEditorModalVisible, props.session.drawioModalVisible, props.session.exportModalVisible]);
   const toolbarConfig: Partial<IToolbarConfig> = {
     excludeKeys: ['group-video', 'divider', 'fullScreen', 'emotion', 'group-justify', 'group-indent']
   };
@@ -92,6 +97,36 @@ function YangComponent(props: {session: Session, config: Config, pluginManager: 
   }, [editor]);
   return (
     <Layout style={{height: '100%', width: '100%'}}>
+      <FileInput
+        onLoad={async (filename, contents) => {
+          const mimetype = mimetypeLookup(filename);
+          if (!mimetype) {
+            props.session.showMessage('Invalid filetype!', { time: 0 });
+            return;
+          }
+          if (await props.session.importContent(contents, mimetype)) {
+            props.session.showMessage('导入成功', {text_class: 'success'});
+          } else {
+            props.session.showMessage('Import failed due to parsing issue', {text_class: 'error'});
+          }
+        }}
+        onError={(error) => {
+          logger.error('Data file input error', error);
+          props.session.showMessage(`Error reading data: ${error}`, {text_class: 'error'});
+        }}
+      />
+      <Modal
+        style={{width: '500px'}}
+        title='导出'
+        open={props.session.exportModalVisible}
+        footer={null}
+        onCancel={() => {
+          props.session.exportModalVisible = false;
+          props.session.emit('updateAnyway');
+        }}
+      >
+        <ExportComponent session={props.session} />
+      </Modal>
       <Modal
         className={'form_modal'}
         open={baseInfoModalVisible}
@@ -285,5 +320,5 @@ function YangComponent(props: {session: Session, config: Config, pluginManager: 
     </Layout >);
 };
 
-export default YangComponent;
+export default YinComponent;
 

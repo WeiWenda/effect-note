@@ -17,6 +17,10 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     },
   });
+  win.webContents.on('new-window', function(e, url) {
+    e.preventDefault();
+    require('electron').shell.openExternal(url);
+  });
   // and load the index.html of the app.
   // win.loadFile("index.html");
   win.loadURL(`http://localhost:${port}/index.html`);
