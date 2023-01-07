@@ -910,7 +910,7 @@ export default class Document extends EventEmitter {
     const id_mapping = {};
     for (let i = 0; i < serialized_rows.length; i++) {
       const serialized_row = serialized_rows[i];
-      await this.loadTo(serialized_row, this.root, -1, id_mapping, true);
+      await this.loadTo(serialized_row, this.root, -1, id_mapping, false);
     }
   }
 

@@ -65,6 +65,12 @@ export type DocInfo = {
     loaded?: boolean;
 };
 
+export type SubscriptionInfo = {
+  name?: string;
+  gitRemote?: string;
+  rootDir?: string;
+};
+
 export type DocVersion = {
   time: number,
   commitId: string

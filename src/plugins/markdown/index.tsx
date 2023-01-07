@@ -31,7 +31,7 @@ registerPlugin(
               api.session.emit('updateAnyway');
             }}/>
           } session={api.session}>
-            <div id={id} style={{display: 'flex', flexDirection: 'column'}} key={id}/>
+            <div id={id} className={'node-markdown'} key={id}/>
           </SpecialBlock>
         );
         setTimeout(() => {

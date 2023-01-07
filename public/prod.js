@@ -7,6 +7,10 @@ const Moment = require('moment');
 const multer = require('multer')
 const cors = require('cors');
 const { createWorker } = require('tesseract.js');
+const lunr = require("lunr")
+require("lunr-languages/lunr.stemmer.support")(lunr)
+require('lunr-languages/lunr.multi')(lunr)
+require("lunr-languages/lunr.zh")(lunr)
 
 const express = require('express');
 const git = require('isomorphic-git');
@@ -41,7 +45,6 @@ async function startExpress(args) {
   }
 
   const buildDir = path.resolve(__dirname + '/../build');
-
   let port = args.port || 3000;
   let host = args.host || 'localhost';
   let gitRemote = args.store.get('gitRemote', 'https://gitee.com/xxx/xxx')
@@ -49,7 +52,11 @@ async function startExpress(args) {
   let gitUsername = args.store.get('gitUsername', '未配置')
   let gitPassword = args.store.get('gitPassword', '未配置')
   let gitDepth = args.store.get('gitDepth', 100)
-
+  let subscriptionIndex = lunr(function() {
+    this.ref("path")
+    this.field("title")
+    this.field("content")
+  })
   const app = express();
   const worker = await createWorker({
     cachePath: path.join(__dirname, 'lang-data'),
@@ -112,6 +119,37 @@ async function startExpress(args) {
       })
     });
   });
+  app.post('/api/subscription', async (req, res) => {
+    const dirname = req.body.name;
+    const gitRemote = req.body.gitRemote;
+    const rootDir = req.body.rootDir;
+    const localDir = path.join(path.dirname(gitHome), 'effectnote', dirname + '_whole')
+    const existList = JSON.parse(args.store.get('subscription_list', '{}'))
+    if (existList.hasOwnProperty(dirname)) {
+      res.status(500).send({message: '名称重复'})
+    } else {
+      existList[dirname] = req.body;
+      args.store.set('subscription_list', JSON.stringify(existList))
+      await git.clone({
+        fs,
+        http: isoHttp,
+        dir: path.join(path.dirname(gitHome), 'effectnote', dirname + '_whole'),
+        url: gitRemote,
+        singleBranch: true,
+        depth: 1,
+      })
+      fs.symlinkSync(path.join(localDir, rootDir), path.join(path.dirname(gitHome), 'effectnote', dirname))
+      refreshIndex()
+      res.send({message: 'subscription success'})
+    }
+  })
+  app.get('/api/refresh_subscription', async (req, res) => {
+    await refreshIndex()
+    res.send({message: '索引构建成功'})
+  })
+  app.get('/api/search_subscription', (req, res) => {
+    res.send(subscriptionIndex.search(req.query.search))
+  })
   app.get('/api/docs/:docId/versions', async (req, res) => {
     const docId = Number(req.params.docId);
     const files = await listFiles();
@@ -243,6 +281,39 @@ async function startExpress(args) {
   server.listen(port, host, (err) => {
     const address_info = server.address();
   });
+
+  async function refreshIndex() {
+    const existList = JSON.parse(args.store.get('subscription_list', '{}'))
+    subscriptionIndex = lunr(function() {
+      this.use(lunr.multiLanguage('en', 'zh'))
+      this.ref("path")
+      this.field("title")
+      this.field("content")
+      Object.keys(existList).forEach(async (sub) => {
+        const dir = path.join(path.dirname(gitHome), 'effectnote', sub)
+        await addDocToIndex(dir, this)
+      })
+    })
+  }
+
+  async function addDocToIndex(dir, lunrIdx) {
+    fs.readdirSync(dir, {withFileTypes: true})
+      .forEach(async (item) => {
+        if (item.isDirectory()) {
+          await addDocToIndex(path.join(dir, item.name), lunrIdx)
+        } else {
+          console.log(item.name)
+          if (item.name.endsWith('.md') || item.name.endsWith('.effect.json')) {
+            const content = fs.readFileSync(path.join(dir, item.name), {encoding: 'utf-8'});
+            lunrIdx.add({
+              'path': path.join(dir, item.name),
+              'title': item.name,
+              'content': content,
+            })
+          }
+        }
+      })
+  }
 
   function constructDocInfo(content, filepath, id) {
     const paths = filepath.split('/');

@@ -1,4 +1,4 @@
-import {DocInfo} from '../types';
+import {DocInfo, SubscriptionInfo} from '../types';
 import {ServerConfig} from '../../../ts/server_config';
 
 export const API_BASE_URL = 'http://localhost:51223/api';
@@ -139,6 +139,14 @@ export function updateDoc(docId: number, docInfo: DocInfo) {
     });
 }
 
+export function addSubscription(info: SubscriptionInfo) {
+    return request({
+        url: API_BASE_URL + '/subscription',
+        method: 'POST',
+        body: JSON.stringify(info)
+    });
+}
+
 export function uploadDoc(docInfo: DocInfo) {
     // if (!localStorage.getItem(ACCESS_TOKEN) && process.env.REACT_APP_BUILD_PROFILE === 'cloud') {
     //     return Promise.reject('No access token set.');
@@ -189,7 +197,6 @@ export function deleteDocContent(docId: number) {
         method: 'DELETE'
     });
 }
-
 
 export function getCurrentUserDocs() {
     // if (!localStorage.getItem(ACCESS_TOKEN) && process.env.REACT_APP_BUILD_PROFILE === 'cloud') {

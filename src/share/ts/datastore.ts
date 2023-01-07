@@ -35,6 +35,7 @@ export type ClientSettings = Theme & {
   fontFamilyZh: string;
   openMenus: string;
   openFile: string;
+  curView: string;
 };
 
 type ClientSetting = keyof ClientSettings;
@@ -54,6 +55,7 @@ const default_client_settings: ClientSettings =
     fontFamilyZh: 'PingFang SC',
     openMenus: '[\"0\"]',
     openFile: '0',
+    curView: 'user_view',
   });
 
 export type LocalDocSettings = {

@@ -6,11 +6,14 @@
   "author": "weiwenda",
   "description": "My Description",
   "dependencies": {
+    "@node-rs/jieba": "^1.6.1",
     "cors": "^2.8.5",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0",
     "express": "^4.16.4",
     "isomorphic-git": "^1.21.0",
+    "lunr": "^2.3.9",
+    "lunr-languages": "^1.10.0",
     "moment": "^2.29.4",
     "multer": "^1.4.5-lts.1",
     "tesseract.js": "^4.0.2"
@@ -21,7 +24,7 @@
     "typecheck": "tsc -p . --noEmit",
     "verify": "npm run lint && npm run typecheck && npm test",
     "electron": "electron public/electron.js",
-    "start": "export REACT_APP_BUILD_PROFILE=local && npm run build && electron-forge start",
+    "start": "electron-forge start",
     "startdev": "export REACT_APP_BUILD_PROFILE=cloud && react-scripts start",
     "build": "react-scripts build",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --opts test/mocha.opts",

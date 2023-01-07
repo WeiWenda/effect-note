@@ -38,6 +38,7 @@ import {
 import {PluginsManager} from '../ts/plugins';
 import logger from '../ts/logger';
 import {appendStyleScript} from '../share/ts/themes';
+import LayoutComponent from './layout';
 
 declare const window: any; // because we attach globals for debugging
 
@@ -292,7 +293,7 @@ $(document).ready(async () => {
 
   function renderMain() {
     root.render(
-      <YinComponent session={session} config={config} pluginManager={pluginManager}/>
+      <LayoutComponent session={session} config={config} pluginManager={pluginManager}/>
       // <Router>
       //   <Routes>
       //     <Route path='/yin' element={
