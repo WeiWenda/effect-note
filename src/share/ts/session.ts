@@ -302,7 +302,7 @@ export default class Session extends EventEmitter {
         ({ lineNumber } = result);
         if (result.children !== null) {
           child.children = result.children;
-          child.collapsed = result.children.length > 0;
+          child.collapsed = false;
         }
         children.push(child);
       }
@@ -312,9 +312,8 @@ export default class Session extends EventEmitter {
     const root = {
       text: '',
       children: forest,
-      collapsed: forest.length > 0,
+      collapsed: false,
     };
-    console.log(JSON.stringify(root));
     return root;
   }
 
@@ -395,12 +394,12 @@ export default class Session extends EventEmitter {
     }
   }
 
-  public async reloadContent(content: any) {
+  public async reloadContent(content: any, mimetype?: string) {
     if (Array.isArray(content)) {
       await this.document.reload(content);
     } else {
       content = content.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
-      const root = await this.parseContent(content, 'application/json');
+      const root = await this.parseContent(content, mimetype || 'application/json');
       if (root.text === '' && root.children) { // Complete export, not one node
         await this.document.reload(root.children);
       } else {

@@ -77,6 +77,13 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   }, [baseInfoModalVisible, props.session.pngModalVisible,
     props.session.wangEditorModalVisible, props.session.ocrModalVisible,
     props.session.mdEditorModalVisible, props.session.drawioModalVisible, props.session.exportModalVisible]);
+  useEffect(() => {
+    if (curPage === 'user_view') {
+      props.session.stopMonitor = false;
+    } else {
+      props.session.stopMonitor = true;
+    }
+  }, [curPage]);
   const toolbarConfig: Partial<IToolbarConfig> = {
     excludeKeys: ['group-video', 'divider', 'fullScreen', 'emotion', 'group-justify', 'group-indent']
   };

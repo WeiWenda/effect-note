@@ -1,138 +1,119 @@
-import {Session} from '../../share';
+import {DocInfo, IndexedDBBackend, InMemory, Path, Session, SubscriptionSearchResult} from '../../share';
 import Config from '../../share/ts/config';
-import {Space, Tree, Input, Avatar, List} from 'antd';
-import type { DataNode, TreeProps } from 'antd/es/tree';
+import {Input, List, Tree} from 'antd';
+import type {DataNode} from 'antd/es/tree';
 import * as React from 'react';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {getStyles} from '../../share/ts/themes';
 import {DraggableCore} from 'react-draggable';
-import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
+import {getSubscriptionFileContent, getSubscriptionFiles, getSubscriptions, searchSubscription} from '../../share/ts/utils/APIUtils';
+import {SessionWithToolbarComponent} from '../session';
+import {mimetypeLookup} from '../../ts/util';
+
 const {Search} = Input;
 
 export function YangComponent(props: {session: Session, config: Config}) {
   const [fileListWidth, setFileListWidth] = useState(250);
-  const treeData: DataNode[] = [
-    {
-      title: 'parent 1',
-      key: '0-0',
-      children: [
-        {
-          title: 'parent 1-0',
-          key: '0-0-0',
-          disabled: true,
-          children: [
-            {
-              title: 'leaf',
-              key: '0-0-0-0',
-              disableCheckbox: true,
-            },
-            {
-              title: 'leaf',
-              key: '0-0-0-1',
-            },
-          ],
-        },
-        {
-          title: 'parent 1-1',
-          key: '0-0-1',
-          children: [{ title: <span style={{ color: '#1890ff' }}>sss</span>, key: '0-0-1-0' }],
-        },
-      ],
-    },
-  ];
-  const onSelect: TreeProps['onSelect'] = (selectedKeys, info) => {
-    console.log('selected', selectedKeys, info);
+  const [treeData, setTreeData] = useState<DataNode[]>([]);
+  const [filter, setFilter] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<string | undefined>(undefined);
+  const [searchResult, setSearchResult] = useState<SubscriptionSearchResult[]>([]);
+  useEffect(() => {
+    getSubscriptions().then((res) => {
+      setTreeData(res.data.map((sub: string) => {
+        return {title: sub, key: sub};
+      }));
+    });
+  }, []);
+  const updateTreeData = (list: DataNode[], key: React.Key, children: DataNode[]): DataNode[] =>
+    list.map((node) => {
+      if (node.key === key) {
+        return {
+          ...node,
+          children,
+        };
+      }
+      if (node.children) {
+        return {
+          ...node,
+          children: updateTreeData(node.children, key, children),
+        };
+      }
+      return node;
+    });
+  const onLoadData = async ({ key, children }: any) => {
+    if (children) {
+      return;
+    }
+    const sub_files = await getSubscriptionFiles(key);
+    setTreeData((origin: DataNode[]) => {
+      return updateTreeData(origin, key,  sub_files.data);
+    });
   };
-
-  const onCheck: TreeProps['onCheck'] = (checkedKeys, info) => {
-    console.log('onCheck', checkedKeys, info);
+  const onSearch = (value: string) => {
+    setFilter(value);
+    if (value) {
+      searchSubscription(value).then(res => {
+        props.session.showMessage(`共找到${res.length}条记录`);
+        setSearchResult(res);
+      });
+    }
   };
-  const onSearch = (value: string) => console.log(value);
-  const data = Array.from({ length: 23 }).map((_, i) => ({
-    href: 'https://ant.design',
-    title: `ant design part ${i}`,
-    avatar: 'https://joeschmoe.io/api/v1/random',
-    description:
-      'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-    content:
-      'We supply a series of design principles, practical patterns and high quality design resources ' +
-      '(Sketch and Axure), to help people create their product prototypes beautifully and efficiently.',
-  }));
-  const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
-    <Space>
-      {React.createElement(icon)}
-      {text}
-    </Space>
-  );
+  const loadDoc = async (res: DocInfo) => {
+    props.session.document.store.setBackend(new InMemory(), res.id!.toString());
+    props.session.document.root = Path.root();
+    props.session.cursor.reset();
+    props.session.document.cache.clear();
+    props.session.stopAnchor();
+    props.session.search = null;
+    props.session.document.removeAllListeners('lineSaved');
+    props.session.document.removeAllListeners('beforeMove');
+    props.session.document.removeAllListeners('beforeAttach');
+    props.session.document.removeAllListeners('beforeDetach');
+    await props.session.reloadContent(res.content, mimetypeLookup(res.name!));
+    props.session.reset_history();
+    props.session.reset_jump_history();
+  };
+  const onSelect = (_selectedKeysValue: React.Key[], info: any) => {
+    const filepath = info.node.key;
+    getSubscriptionFileContent(filepath).then(res => {
+      setLoading(true);
+      loadDoc(res).then(() => {
+        setLoading(false);
+        setSelectedResult(filepath);
+      });
+    });
+  };
   return (
     <div style={{height: '100%', flexDirection: 'row', display: 'flex', width: '100%'}}>
-      <div style={{width: `${fileListWidth}px`, overflow: 'auto', flexShrink: 0}}>
-        <Tree
-          checkable
-          defaultExpandedKeys={['0-0-0', '0-0-1']}
-          defaultSelectedKeys={['0-0-0', '0-0-1']}
-          defaultCheckedKeys={['0-0-0', '0-0-1']}
-          onSelect={onSelect}
-          onCheck={onCheck}
-          treeData={treeData}
-        />
+      <div style={{width: `${fileListWidth}px`, overflow: 'auto', flexShrink: 0, flexGrow: selectedResult ? 0 : 1}}>
+        <div className={selectedResult ? '' : filter ? 'sub-after-search' : 'sub-before-search'}>
+          <Search
+            placeholder='搜索关键字，前缀：title: 只搜文件名，空格（或） +（必须出现） -（不出现）'
+            allowClear
+            enterButton='Search'
+            size='middle'
+            onSearch={onSearch}
+          />
+        </div>
+        <Tree loadData={onLoadData} treeData={treeData} onSelect={onSelect}/>
       </div>
-      <DraggableCore key='filelist_drag' onDrag={(_, ui) => {
-        setFileListWidth(Math.min(Math.max(fileListWidth + ui.deltaX, 72), 700));
-      }}>
-        <div className='horizontal-drag' style={{
-          ...getStyles(props.session.clientStore, ['theme-bg-secondary'])
-        }}></div>
-      </DraggableCore>
-      <div style={{overflow: 'auto'}}>
-        <Search
-          placeholder='搜索关键字，可以使用&（且） 、（或）'
-          allowClear
-          enterButton='Search'
-          size='large'
-          onSearch={onSearch}
-        />
-        <List
-          itemLayout='vertical'
-          size='large'
-          pagination={{
-            onChange: (page) => {
-              console.log(page);
-            },
-            pageSize: 3,
-          }}
-          dataSource={data}
-          footer={
-            <div>
-              <b>ant design</b> footer part
-            </div>
-          }
-          renderItem={(item) => (
-            <List.Item
-              key={item.title}
-              actions={[
-                <IconText icon={StarOutlined} text='156' key='list-vertical-star-o' />,
-                <IconText icon={LikeOutlined} text='156' key='list-vertical-like-o' />,
-                <IconText icon={MessageOutlined} text='2' key='list-vertical-message' />,
-              ]}
-              extra={
-                <img
-                  width={272}
-                  alt='logo'
-                  src='https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png'
-                />
-              }
-            >
-              <List.Item.Meta
-                avatar={<Avatar src={item.avatar} />}
-                title={<a href={item.href}>{item.title}</a>}
-                description={item.description}
-              />
-              {item.content}
-            </List.Item>
-          )}
-        />
-      </div>
+      {
+        selectedResult &&
+        <DraggableCore key='filelist_drag' onDrag={(_, ui) => {
+          setFileListWidth(Math.min(Math.max(fileListWidth + ui.deltaX, 72), 700));
+        }}>
+          <div className='horizontal-drag' style={{
+            ...getStyles(props.session.clientStore, ['theme-bg-secondary'])
+          }}></div>
+        </DraggableCore>
+      }
+      {
+        selectedResult &&
+        <SessionWithToolbarComponent loading={loading} session={props.session} filterOuter={filter}
+                                     showLayoutIcon={false} showLockIcon={false}/>
+      }
     </div>
   );
 }

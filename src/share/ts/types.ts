@@ -71,6 +71,17 @@ export type SubscriptionInfo = {
   rootDir?: string;
 };
 
+export type SubscriptionSearchResult = {
+  ref: string;
+  matchData: {
+    metadata: {
+      [key: string]: {
+        content: {}
+      }
+    }
+  }
+};
+
 export type DocVersion = {
   time: number,
   commitId: string

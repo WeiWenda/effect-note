@@ -184,6 +184,7 @@ export function appendStyleScript(clientStore: ClientStore) {
                     .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover{border-color:${theme['theme-text-link']}}
                     .ant-input-affix-wrapper-focused{border-color:${theme['theme-text-link']}}
                     .ant-input-search .ant-input:hover{border-color:${theme['theme-text-link']}}
+                    .ant-input-search .ant-input-search-button:hover{color:${theme['theme-text-link']};border-color:${theme['theme-text-link']}}
                     .ant-input-search .ant-input:focus{border-color:${theme['theme-text-link']}}
                     .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover::after{border-bottom: 2px solid ${theme['theme-text-link']};}
                     .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected::after{border-bottom: 2px solid ${theme['theme-text-link']};}

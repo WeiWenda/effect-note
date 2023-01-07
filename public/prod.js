@@ -52,11 +52,8 @@ async function startExpress(args) {
   let gitUsername = args.store.get('gitUsername', '未配置')
   let gitPassword = args.store.get('gitPassword', '未配置')
   let gitDepth = args.store.get('gitDepth', 100)
-  let subscriptionIndex = lunr(function() {
-    this.ref("path")
-    this.field("title")
-    this.field("content")
-  })
+  let subscriptionIndex = null;
+  refreshIndex();
   const app = express();
   const worker = await createWorker({
     cachePath: path.join(__dirname, 'lang-data'),
@@ -119,11 +116,32 @@ async function startExpress(args) {
       })
     });
   });
+  app.get('/api/subscription', async (req, res) => {
+    const existList = JSON.parse(args.store.get('subscription_list', '{}'))
+    res.send({data: Object.keys(existList)})
+  })
+  app.get('/api/subscription/file_tree', (req, res) => {
+    const dir = req.query.dir;
+    const data = fs.readdirSync(path.join(getSearchDir(), dir), {withFileTypes: true}).map(file => {
+      return {
+        title: file.name,
+        key: path.join(dir, file.name),
+        isLeaf: !file.isDirectory()
+      }
+    });
+    res.send({data})
+  })
+  app.get('/api/subscription/file_content', (req, res) => {
+    const filepath = req.query.filepath;
+    const name = filepath.split('/').pop()
+    const content = fs.readFileSync(path.join(getSearchDir(), filepath), {encoding: 'utf-8'});
+    res.send({name, tag: JSON.stringify([]), content, id: -2});
+  })
   app.post('/api/subscription', async (req, res) => {
     const dirname = req.body.name;
     const gitRemote = req.body.gitRemote;
     const rootDir = req.body.rootDir;
-    const localDir = path.join(path.dirname(gitHome), 'effectnote', dirname + '_whole')
+    const localDir = path.join(getSearchDir(), dirname + '_whole')
     const existList = JSON.parse(args.store.get('subscription_list', '{}'))
     if (existList.hasOwnProperty(dirname)) {
       res.status(500).send({message: '名称重复'})
@@ -133,12 +151,12 @@ async function startExpress(args) {
       await git.clone({
         fs,
         http: isoHttp,
-        dir: path.join(path.dirname(gitHome), 'effectnote', dirname + '_whole'),
+        dir: path.join(getSearchDir(), dirname + '_whole'),
         url: gitRemote,
         singleBranch: true,
         depth: 1,
       })
-      fs.symlinkSync(path.join(localDir, rootDir), path.join(path.dirname(gitHome), 'effectnote', dirname))
+      fs.symlinkSync(path.join(localDir, rootDir), path.join(getSearchDir(), dirname))
       refreshIndex()
       res.send({message: 'subscription success'})
     }
@@ -282,6 +300,10 @@ async function startExpress(args) {
     const address_info = server.address();
   });
 
+  function getSearchDir() {
+    return path.join(path.dirname(gitHome), 'effectnote')
+  }
+
   async function refreshIndex() {
     const existList = JSON.parse(args.store.get('subscription_list', '{}'))
     subscriptionIndex = lunr(function() {
@@ -290,21 +312,20 @@ async function startExpress(args) {
       this.field("title")
       this.field("content")
       Object.keys(existList).forEach(async (sub) => {
-        const dir = path.join(path.dirname(gitHome), 'effectnote', sub)
-        await addDocToIndex(dir, this)
+        await addDocToIndex(sub, this)
       })
     })
   }
 
   async function addDocToIndex(dir, lunrIdx) {
-    fs.readdirSync(dir, {withFileTypes: true})
+    fs.readdirSync(path.join(getSearchDir(), dir), {withFileTypes: true})
       .forEach(async (item) => {
         if (item.isDirectory()) {
           await addDocToIndex(path.join(dir, item.name), lunrIdx)
         } else {
           console.log(item.name)
           if (item.name.endsWith('.md') || item.name.endsWith('.effect.json')) {
-            const content = fs.readFileSync(path.join(dir, item.name), {encoding: 'utf-8'});
+            const content = fs.readFileSync(path.join(getSearchDir(), dir, item.name), {encoding: 'utf-8'});
             lunrIdx.add({
               'path': path.join(dir, item.name),
               'title': item.name,

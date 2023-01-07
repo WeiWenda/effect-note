@@ -147,6 +147,34 @@ export function addSubscription(info: SubscriptionInfo) {
     });
 }
 
+export function getSubscriptions() {
+    return request({
+        url: API_BASE_URL + '/subscription',
+        method: 'GET'
+    });
+}
+
+export function getSubscriptionFiles(dir: string) {
+    return request({
+        url: API_BASE_URL + `/subscription/file_tree?dir=${dir}`,
+        method: 'GET',
+    });
+}
+
+export function searchSubscription(query: string) {
+    return request({
+       url: API_BASE_URL + `/search_subscription?search=${query}`,
+       method: 'GET',
+    });
+}
+
+export function getSubscriptionFileContent(filepath: string) {
+    return request({
+       url: API_BASE_URL + `/subscription/file_content?filepath=${filepath}`,
+       method: 'GET',
+    });
+}
+
 export function uploadDoc(docInfo: DocInfo) {
     // if (!localStorage.getItem(ACCESS_TOKEN) && process.env.REACT_APP_BUILD_PROFILE === 'cloud') {
     //     return Promise.reject('No access token set.');

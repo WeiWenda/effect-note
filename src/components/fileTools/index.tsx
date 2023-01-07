@@ -7,7 +7,7 @@ import {api_utils, DocInfo, Path, Session} from '../../share';
 import {encodeHtml} from '../../ts/util';
 import {exportAction} from '../../plugins/links/dropdownMenu';
 
-function FileToolsComponent(props: {session: Session, curDocId: number, onEditBaseInfo: () => void, reloadFunc: (type: string) => void}) {
+function FileToolsComponent(props: {session: Session, curDocId: number | undefined, onEditBaseInfo: () => void, reloadFunc: (type: string) => void}) {
   const handlePrint = useReactToPrint({
     content: () => props.session.sessionRef.current,
   });
@@ -21,7 +21,7 @@ function FileToolsComponent(props: {session: Session, curDocId: number, onEditBa
           okText: '确认',
           cancelText: '取消',
           onOk: () => {
-            api_utils.deleteDocContent(props.curDocId).then(() => {
+            api_utils.deleteDocContent(props.curDocId!).then(() => {
               localStorage.removeItem('currentDocId');
               api_utils.getCurrentUserDocs().then(res => {
                 props.session.userDocs = res.content;
@@ -35,7 +35,7 @@ function FileToolsComponent(props: {session: Session, curDocId: number, onEditBa
         props.onEditBaseInfo();
         break;
       case 'save':
-        props.session.reUploadFile(Path.root(), props.curDocId).then((docId) => {
+        props.session.reUploadFile(Path.root(), props.curDocId!).then((docId) => {
           if (docId !== undefined) {
             props.session.emit('save-cloud', {docId: docId});
           } else {
@@ -61,45 +61,48 @@ function FileToolsComponent(props: {session: Session, curDocId: number, onEditBa
         message.info(`Click on item ${key}`);
     }
   };
+  const items: any[] = [
+    {
+      label: '导出',
+      key: 'export',
+      children: [
+        {
+          label: '导出为pdf',
+          key: 'export_pdf',
+        },
+        {
+          label: '导出为markdown',
+          key: 'export_md',
+        },
+        {
+          label: '导出为json（无损导出）',
+          key: 'export_json',
+        },
+        {
+          label: '导出为text（兼容WorkFlowy）',
+          key: 'export_text',
+        }
+      ],
+    }
+  ];
+  if (props.curDocId) {
+    items.unshift({
+        key: 'edit-base-info',
+        label: '重命名',
+      },
+      {
+        key: 'remove',
+        label: '删除',
+      },
+      {
+        key: 'save',
+        label: '保存(Ctrl+s)',
+      });
+  }
   const menu = (
     <Menu
       onClick={operationClick}
-      items={[
-        {
-          key: 'edit-base-info',
-          label: '重命名',
-        },
-        {
-          key: 'remove',
-          label: '删除',
-        },
-        {
-          key: 'save',
-          label: '保存(Ctrl+s)',
-        },
-        {
-          label: '导出',
-          key: 'export',
-          children: [
-            {
-              label: '导出为pdf',
-              key: 'export_pdf',
-            },
-            {
-              label: '导出为markdown',
-              key: 'export_md',
-            },
-            {
-              label: '导出为json（无损导出）',
-              key: 'export_json',
-            },
-            {
-              label: '导出为text（兼容WorkFlowy）',
-              key: 'export_text',
-            }
-          ],
-        }
-      ]}
+      items={items}
     />
   );
   return (
