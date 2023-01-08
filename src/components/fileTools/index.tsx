@@ -27,6 +27,8 @@ function FileToolsComponent(props: {session: Session, curDocId: number | undefin
                 props.session.userDocs = res.content;
                 props.reloadFunc(key);
               });
+            }).catch(e => {
+              props.session.showMessage(e, {warning: true});
             });
           }
         });

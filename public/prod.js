@@ -92,7 +92,7 @@ async function startExpress(args) {
 
   app.get('/api/docs', (_, res) => {
       listFiles().then(files => {
-        const result = [{name: '欢迎使用Effect笔记', tag: JSON.stringify([]), id: -1}].concat(
+        const result = [{name: '欢迎使用Effect笔记', filename: 'help.effect.json', tag: JSON.stringify([]), id: -1}].concat(
           files.map((file, index) => {
             return constructDocInfo(undefined, file, index);
           })

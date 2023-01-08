@@ -1,18 +1,18 @@
 import {DocInfo, SubscriptionInfo} from '../types';
 import {ServerConfig} from '../../../ts/server_config';
+import config from '../vim';
 
 export const API_BASE_URL = 'http://localhost:51223/api';
-export let API_BASE_URL2 = '/api';
 export const ACCESS_TOKEN = 'accessToken';
-
-if (process.env.REACT_APP_BUILD_PROFILE === 'cloud') {
-    API_BASE_URL2 = API_BASE_URL;
-}
 
 const request = (options: any) => {
     const headers = new Headers({
         'Content-Type': 'application/json',
     });
+
+    if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
+        return Promise.reject('Demo部署环境下，该功能不可用');
+    }
 
     if (localStorage.getItem(ACCESS_TOKEN)) {
         headers.append('Authorization', 'Bearer ' + localStorage.getItem(ACCESS_TOKEN));
@@ -107,14 +107,14 @@ export function checkUsernameAvailability(username: string) {
 
 export function getServerConfig() {
     return request({
-       url: API_BASE_URL2 + '/config',
+       url: API_BASE_URL + '/config',
        method: 'GET'
     });
 }
 
 export function setServerConfig(serverConfig: ServerConfig) {
     return request({
-        url: API_BASE_URL2 + '/config',
+        url: API_BASE_URL + '/config',
         method: 'POST',
         body: JSON.stringify(serverConfig)
     });
@@ -122,7 +122,7 @@ export function setServerConfig(serverConfig: ServerConfig) {
 
 export function applyGitConfig() {
     return request({
-        url: API_BASE_URL2 + '/config/git_refresh',
+        url: API_BASE_URL + '/config/git_refresh',
         method: 'GET'
     });
 }
@@ -133,7 +133,7 @@ export function updateDoc(docId: number, docInfo: DocInfo) {
     // }
 
     return request({
-        url: API_BASE_URL2 + '/docs/' + docId,
+        url: API_BASE_URL + '/docs/' + docId,
         method: 'PUT',
         body: JSON.stringify(docInfo)
     });
@@ -181,7 +181,7 @@ export function uploadDoc(docInfo: DocInfo) {
     // }
 
     return request({
-        url: API_BASE_URL2 + '/docs/',
+        url: API_BASE_URL + '/docs/',
         method: 'POST',
         body: JSON.stringify(docInfo)
     });
@@ -189,7 +189,7 @@ export function uploadDoc(docInfo: DocInfo) {
 
 export function getDocVersions(docId: number) {
     return request({
-        url: API_BASE_URL2 + '/docs/' + docId + '/versions',
+        url: API_BASE_URL + '/docs/' + docId + '/versions',
         method: 'GET',
     });
 }
@@ -209,9 +209,11 @@ export function getDocContent(docId: number, version: string = 'HEAD') {
     // if (!localStorage.getItem(ACCESS_TOKEN) && process.env.REACT_APP_BUILD_PROFILE === 'cloud') {
     //     return Promise.reject('No access token set.');
     // }
-
+    if (docId === -1) {
+        return Promise.resolve({content: config.getDefaultData()});
+    }
     return request({
-        url: `${API_BASE_URL2}/docs/${docId}?version=${version}`,
+        url: `${API_BASE_URL}/docs/${docId}?version=${version}`,
         method: 'GET',
     });
 }
@@ -230,9 +232,11 @@ export function getCurrentUserDocs() {
     // if (!localStorage.getItem(ACCESS_TOKEN) && process.env.REACT_APP_BUILD_PROFILE === 'cloud') {
     //     return Promise.reject('No access token set.');
     // }
-
+    if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
+        return Promise.resolve({content: [{name: '欢迎使用Effect笔记', filename: 'help.effect.json', tag: JSON.stringify([]), id: -1}]});
+    }
     return request({
-        url: API_BASE_URL2 + '/docs',
+        url: API_BASE_URL + '/docs',
         method: 'GET'
     });
 }

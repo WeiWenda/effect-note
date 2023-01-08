@@ -28,6 +28,8 @@ export function YangComponent(props: {session: Session, config: Config}) {
       setTreeData(res.data.map((sub: string) => {
         return {title: sub, key: sub};
       }));
+    }).catch(e => {
+      props.session.showMessage(e, {warning: true});
     });
   }, []);
   const updateTreeData = (list: DataNode[], key: React.Key, children: DataNode[]): DataNode[] =>
@@ -61,6 +63,8 @@ export function YangComponent(props: {session: Session, config: Config}) {
       searchSubscription(value).then(res => {
         props.session.showMessage(`共找到${res.length}条记录`);
         setSearchResult(res);
+      }).catch(e => {
+        props.session.showMessage(e, {warning: true});
       });
     } else {
       setSearchResult([]);

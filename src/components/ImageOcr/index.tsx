@@ -43,7 +43,9 @@ export const ImageOcr = (props: {session: Session}) => {
       item.uploadFile = {...file, status: 'uploading'};
       valueChange(listTmp);
       // message.loading({content: '文字识别中...', duration: 0, key: loadingKey});
-      const res = await ocrFile(file?.originFileObj!);
+      const res = await ocrFile(file?.originFileObj!).catch(e => {
+        props.session.showMessage(e, {warning: true});
+      });
       form.setFields([
         {name: 'text', value: form.getFieldValue('text').value ?? '' + res.content.replace(/[ \t\r\f\v]/g, '')}
       ]);

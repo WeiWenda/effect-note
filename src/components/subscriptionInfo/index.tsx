@@ -17,7 +17,7 @@ export function SubscriptionInfoComponent(props: {session: Session, onFinish: ()
         addSubscription({name: values.name, gitRemote, rootDir}).then(() => {
           props.onFinish();
         }).catch(res => {
-          props.session.showMessage(res.message);
+          props.session.showMessage(res.message || res, {warning: true});
         });
       }}
     >

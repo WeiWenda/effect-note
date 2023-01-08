@@ -278,6 +278,9 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                       setCurDocInfo({});
                       setBaseInfoModalVisible(true);
                     }
+                }).catch(() => {
+                  setCurDocInfo({});
+                  setBaseInfoModalVisible(true);
                 });
             }}>新建笔记</Button>
           }

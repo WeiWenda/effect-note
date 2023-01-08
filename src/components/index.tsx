@@ -239,8 +239,12 @@ $(document).ready(async () => {
     viewRoot: viewRoot,
     cursorPath: cursorPath,
     showMessage: (() => {
-      return (messageContent: string, options: {time?: number, text_class?: string} = {}) => {
-        message.success(messageContent, options.time || 1);
+      return (messageContent: string, options: {warning?: boolean, time?: number, text_class?: string} = {}) => {
+        if (options.warning) {
+          message.warning(messageContent, options.time || 1);
+        } else {
+          message.success(messageContent, options.time || 1);
+        }
       };
     })(),
     toggleBindingsDiv: () => {

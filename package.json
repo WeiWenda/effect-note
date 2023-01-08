@@ -26,6 +26,7 @@
     "electron": "electron public/electron.js",
     "start": "export REACT_APP_BUILD_PROFILE=local && npm run build && electron-forge start",
     "startdev": "export REACT_APP_BUILD_PROFILE=cloud && react-scripts start",
+    "startdemo": "export REACT_APP_BUILD_PROFILE=demo && react-scripts start",
     "build": "react-scripts build",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --opts test/mocha.opts",
     "test-windows": "SET TS_NODE_COMPILER_OPTIONS={\"module\":\"commonjs\"}&& mocha --opts test/mocha.opts",
