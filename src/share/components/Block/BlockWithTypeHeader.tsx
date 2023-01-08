@@ -21,13 +21,11 @@ export function SpecialBlock(props: React.PropsWithChildren<{blockType: string, 
       <div className={`effect-block-header ${headerVision ? '' : 'effect-block-header-hidden'}`} style={{
         height: `${props.session.clientStore.getClientSetting('lineHeight')}px`
       }}>
-        <span style={{opacity: 1}}>
+        <Space style={{opacity: 1}}>
           {
             // !props.session.lockEdit &&
             props.blockType
           }
-        </span>
-        <Space style={{opacity: 1}}>
           {
             fold &&
             <FolderOutlined onClick={() => {

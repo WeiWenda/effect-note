@@ -24,7 +24,7 @@
     "typecheck": "tsc -p . --noEmit",
     "verify": "npm run lint && npm run typecheck && npm test",
     "electron": "electron public/electron.js",
-    "start": "electron-forge start",
+    "start": "export REACT_APP_BUILD_PROFILE=local && npm run build && electron-forge start",
     "startdev": "export REACT_APP_BUILD_PROFILE=cloud && react-scripts start",
     "build": "react-scripts build",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --opts test/mocha.opts",
