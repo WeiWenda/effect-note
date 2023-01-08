@@ -59,6 +59,7 @@ export type UserInfo = {
 export type DocInfo = {
     id?: number;
     name?: string;
+    filename?: string;
     tag?: string;
     content?: string;
     dirtyUpdate?: boolean;

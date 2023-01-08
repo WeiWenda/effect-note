@@ -30,9 +30,6 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
     const initialCrumbContents: {[row: number]: string} = {};
     return initialCrumbContents;
   });
-  const onSearchContent = (searchContent: string) => {
-    setFilterInner(searchContent);
-  };
   const onCrumbClick = async (path: Path) => {
     const session = props.session;
     await session.zoomInto(path);
@@ -47,8 +44,8 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
     return () => setValue(value + 1); // update state to force render
   }
   const forceUpdate = useForceUpdate();
-  const applyFilterInner = () => {
-    if (filterInner) {
+  const applyFilterInner = (filterContent: string) => {
+    if (filterContent) {
       if (!props.session.search) {
         props.session.search = new FileSearch(async (query) => {
           const results = await props.session.document.search(props.session.viewRoot, query);
@@ -61,14 +58,19 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
           };
         }, props.session);
       }
-      props.session.search?.update(filterInner);
+      props.session.search?.update(filterContent);
     } else {
       props.session.search = null;
     }
   };
+  const onSearchContent = (searchContent: string) => {
+    setFilterInner(searchContent);
+    applyFilterInner(searchContent);
+  };
   useEffect(() => {
-    applyFilterInner();
-  }, [filterInner, props.filterOuter]);
+    setFilterInner(props.filterOuter);
+    applyFilterInner(props.filterOuter);
+  }, [props.filterOuter]);
   useEffect(() => {
     props.session.on('changeViewRoot', async (path: Path) => {
       setIsRoot(path.isRoot());

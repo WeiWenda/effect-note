@@ -314,7 +314,7 @@ function YinComponent(props: {session: Session,
       await markPlugin.clearMarks();
       await tagPlugin.clearTags();
       await linkPlugin.clearLinks();
-      await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo.name!)).then(() => {
+      await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo.filename!)).then(() => {
         props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'], () => markDirty(docID));
         return afterLoadDoc();
       });

@@ -344,7 +344,9 @@ async function startExpress(args) {
     const otherTags = nameSplits.filter(split => {
       return split && split !== 'json' && split !== 'effect'
     })
-    return {name, tag: tag ? JSON.stringify([tag].concat(otherTags)) : JSON.stringify([]), content, id}
+    return {name,
+      filename: filepath.split('/').pop(),
+      tag: tag ? JSON.stringify([tag].concat(otherTags)) : JSON.stringify([]), content, id}
   }
 
   /**

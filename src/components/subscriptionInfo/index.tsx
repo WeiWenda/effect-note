@@ -11,9 +11,9 @@ export function SubscriptionInfoComponent(props: {session: Session, onFinish: ()
       form={form}
       initialValues={{name: '开发快速参考', path: 'https://github.com/jaywcjlove/reference/tree/main/docs'}}
       onFinish={(values) => {
-        const path = values.path;
-        const gitRemote = path.split('/tree/main/')[0] + '.git';
-        const rootDir = path.split('/tree/main/')[1];
+        const paths = values.path.split('/');
+        const gitRemote = paths.slice(0, 5).join('/') + '.git';
+        const rootDir = paths.length > 7 ? paths.slice(7, paths.length).join('/') : '';
         addSubscription({name: values.name, gitRemote, rootDir}).then(() => {
           props.onFinish();
         }).catch(res => {

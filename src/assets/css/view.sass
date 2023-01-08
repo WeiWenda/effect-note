@@ -82,18 +82,48 @@ $padding-v: 10px
         display: flex
         flex-direction: column
 
+$sub-before-search-height: 272px
 .sub-before-search
+    height: $sub-before-search-height
     margin-left: 23em
     margin-right: 23em
-    margin-top: 8em
-    margin-bottom: 7em
+    padding-top: 128px
+    padding-bottom: 112px
 
+.sub-board-row
+    @include calc(height, '100% - #{$sub-before-search-height}')
+    display: flex
+    flex-direction: row
+    .sub-board-filelist
+        width: 300px
+        padding-right: 5em
+        overflow: auto
+
+$sub-after-search-height: 45px
 .sub-after-search
-    margin-left: 1em
-    margin-right: 45em
-    margin-top: 1em
-    margin-bottom: 1em
+    height: $sub-after-search-height
+    padding-left: 1em
+    padding-right: 45em
+    padding-top: 13px
 
+.sub-board-column
+    @include calc(height, '100% - #{$sub-after-search-height}')
+    display: flex
+    flex-direction: column
+    overflow: auto
+    .sub-board-filelist
+        width: 100%
+
+.sub-search-result-wrapper
+    @include calc(height, '100% - #{$sub-after-search-height}')
+    display: flex
+    flex-direction: row
+    justify-content: space-between
+    .sub_filelist_after_search
+        width: 400px
+        padding-right: 10em
+        padding-bottom: 8em
+        overflow: auto
 
 .node-html
     blockquote

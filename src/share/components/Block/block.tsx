@@ -292,7 +292,9 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
     } else if (children.length && ((!collapsed) || this.props.topLevel)) {
       let childrenLoaded = true;
       let childrenDivs = cached.children.filter(cachedChild => {
-        return !this.props.filteredRows || this.props.filteredRows.has(cachedChild?.row!);
+        return !this.props.filteredRows ||
+          this.props.session.search?.results.accentMap.has(parent.row) ||
+          this.props.filteredRows.has(cachedChild?.row!);
       }).map((cachedChild) => {
         if (cachedChild === null) {
           childrenLoaded = false;
