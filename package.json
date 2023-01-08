@@ -28,6 +28,7 @@
     "startdev": "export REACT_APP_BUILD_PROFILE=cloud && react-scripts start",
     "startdemo": "export REACT_APP_BUILD_PROFILE=demo && react-scripts start",
     "build": "react-scripts build",
+    "builddemo": "export REACT_APP_BUILD_PROFILE=demo && react-scripts build",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --opts test/mocha.opts",
     "test-windows": "SET TS_NODE_COMPILER_OPTIONS={\"module\":\"commonjs\"}&& mocha --opts test/mocha.opts",
     "watchtest": "npm test -- --reporter dot --watch",

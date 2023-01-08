@@ -36,7 +36,7 @@
           "collapsed": true,
           "children": [
             {
-              "text": "Github"
+              "text": "<div class='node-html'><p><a href=\"https://github.com/WeiWenda/effect-note\" target=\"_blank\">Github</a></p></div>"
             },
             {
               "text": "Gitee"
@@ -102,7 +102,7 @@
           "collapsed": true,
           "children": [
             {
-              "text": "<div class='node-html'><h4>Step1：<img src=\"http://localhost:51223/images/hello/image-1qw.png\" alt=\"image-1qw.png\" data-href=\"http://localhost:51223/images/hello/image-1qw.png\" style=\"width: 100%;\"/>Step2:</h4><h4><img src=\"http://localhost:51223/images/hello/image-016.png\" alt=\"image-016.png\" data-href=\"http://localhost:51223/images/hello/image-016.png\" style=\"width: 80%;\"/></h4></div>"
+              "text": "<div class='node-html'><h4>Step1：<img src=\"./images/image-1qw.png\" alt=\"image-1qw.png\" data-href=\"./images/image-1qw.png\" style=\"width: 100%;\"/>Step2:</h4><h4><img src=\"./images/image-016.png\" alt=\"image-016.png\" data-href=\"./images/image-016.png\" style=\"width: 80%;\"/></h4></div>"
             }
           ]
         },
@@ -117,7 +117,7 @@
           "collapsed": true,
           "children": [
             {
-              "text": "<div class='node-html'><p><img src=\"http://localhost:51223/images/hello/image-nf8.png\" alt=\"image-nf8.png\" data-href=\"http://localhost:51223/images/hello/image-nf8.png\" style=\"width: 100%;\"/></p></div>"
+              "text": "<div class='node-html'><p><img src=\"./images/image-nf8.png\" alt=\"image-nf8.png\" data-href=\"./images/image-nf8.png\" style=\"width: 100%;\"/></p></div>"
             }
           ]
         },
@@ -129,7 +129,7 @@
               "text": "先进入锁定模式"
             },
             {
-              "text": "<div class='node-html'><p>再选择页面布局</p><p><img src=\"http://localhost:51223/images/hello/image-l4t.png\" alt=\"image-l4t.png\" data-href=\"http://localhost:51223/images/hello/image-l4t.png\" style=\"width: 50px;\"/></p></div>"
+              "text": "<div class='node-html'><p>再选择页面布局</p><p><img src=\"./images/image-l4t.png\" alt=\"image-l4t.png\" data-href=\"./images/image-l4t.png\" style=\"width: 50px;\"/></p></div>"
             }
           ]
         },
@@ -241,7 +241,7 @@
               "collapsed": true,
               "children": [
                 {
-                  "text": "<div class='node-html'><p><span style=\"color: rgb(225, 60, 57);\">红色内容</span></p><p><span style=\"background-color: rgb(255, 236, 61);\">高亮</span>内容</p><pre><code class=\"language-javascript\">//javascript代码\nasync function deleteFile(file) {\n  return fs.promises.unlink(file)\n}</code></pre><blockquote> 引用内容</blockquote><div data-w-e-type=\"todo\"><input type=\"checkbox\" disabled >checklist</div><div data-w-e-type=\"todo\"><input type=\"checkbox\" disabled >todo1</div><div data-w-e-type=\"todo\"><input type=\"checkbox\" disabled checked>todo2</div></div>"
+                  "text": "<div class='node-html'><p><span style=\"color: rgb(225, 60, 57);\">红色内容</span></p><p><span style=\"background-color: rgb(255, 236, 61);\">高亮</span>内容</p><p> <a href=\"https://github.com/WeiWenda/effect-note\" target=\"_blank\">GitHub地址</a> </p><pre><code class=\"language-javascript\">//javascript代码\nasync function deleteFile(file) {\n  return fs.promises.unlink(file)\n}</code></pre><blockquote> 引用内容</blockquote><div data-w-e-type=\"todo\"><input type=\"checkbox\" disabled >checklist</div><div data-w-e-type=\"todo\"><input type=\"checkbox\" disabled >todo1</div><div data-w-e-type=\"todo\"><input type=\"checkbox\" disabled checked>todo2</div></div>"
                 }
               ]
             },
@@ -284,7 +284,7 @@
           "collapsed": true,
           "children": [
             {
-              "text": "<div class='node-html'><h4>Step1：</h4><h4><img src=\"http://localhost:51223/images/hello/image-mq6.png\" alt=\"image-mq6.png\" data-href=\"http://localhost:51223/images/hello/image-mq6.png\" style=\"width: 100%;\"/></h4><h4>Step2：</h4><p><img src=\"http://localhost:51223/images/hello/image-nog.png\" alt=\"image-nog.png\" data-href=\"http://localhost:51223/images/hello/image-nog.png\" style=\"width: 100%;\"/></p></div>"
+              "text": "<div class='node-html'><h4>Step1：</h4><h4><img src=\"./images/image-mq6.png\" alt=\"image-mq6.png\" data-href=\"./images/image-mq6.png\" style=\"width: 100%;\"/></h4><h4>Step2：</h4><p><img src=\"./images/image-nog.png\" alt=\"image-nog.png\" data-href=\"./images/image-nog.png\" style=\"width: 100%;\"/></p></div>"
             }
           ]
         },
@@ -293,7 +293,7 @@
           "collapsed": true,
           "children": [
             {
-              "text": "<div class='node-html'><h4>Step1：</h4><h4><img src=\"http://localhost:51223/images/hello/image-74j.png\" alt=\"image-74j.png\" data-href=\"http://localhost:51223/images/hello/image-74j.png\" style=\"width: 100%;\"/>Step2：</h4><p><img src=\"http://localhost:51223/images/hello/image-sye.png\" alt=\"image-sye.png\" data-href=\"http://localhost:51223/images/hello/image-sye.png\" style=\"width: 100%;\"/></p></div>"
+              "text": "<div class='node-html'><h4>Step1：</h4><h4><img src=\"./images/image-74j.png\" alt=\"image-74j.png\" data-href=\"./images/image-74j.png\" style=\"width: 100%;\"/>Step2：</h4><p><img src=\"./images/image-sye.png\" alt=\"image-sye.png\" data-href=\"./images/image-sye.png\" style=\"width: 100%;\"/></p></div>"
             }
           ]
         }
@@ -310,7 +310,7 @@
           "text": "点击折叠按钮，收起或展开内容"
         },
         {
-          "text": "<div class='node-html'><table style=\"width: auto;\"><tbody><tr><th colSpan=\"1\" rowSpan=\"1\" width=\"153\">操作</th><th colSpan=\"1\" rowSpan=\"1\" width=\"161.1\">window快捷键</th><th colSpan=\"1\" rowSpan=\"1\" width=\"165.65\">mac快捷键</th></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">撤销</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+z</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+z</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">重做</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+shift+z</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+shift+z</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">复制</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+c</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+c</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">粘贴</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+v</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+v</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">剪切</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+x</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+x</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">删除</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">delete</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">delete</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记完成</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+enter</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+enter</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">保存</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+s</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+s</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">缩进>></td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">tab</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">tab</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">缩进<<</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+tab</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+tab</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">光标至行首</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">home</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">home</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">光标至行尾</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">end</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">end</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">键盘选中内容</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+上下左右</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+上下左右</td></tr></tbody></table><p><br></p></div>"
+          "text": "<div class='node-html'><table style=\"width: auto;\"><tbody><tr><th colSpan=\"1\" rowSpan=\"1\" width=\"153\">操作</th><th colSpan=\"1\" rowSpan=\"1\" width=\"161.1\">window快捷键</th><th colSpan=\"1\" rowSpan=\"1\" width=\"165.65\">mac快捷键</th></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">撤销</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+z</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+z</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">重做</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+shift+z</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+shift+z</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">复制</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+c</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+c</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">粘贴</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+v</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+v</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">剪切</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+x</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+x</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">删除</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">delete</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">delete</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记完成</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+enter</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+enter</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">保存</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+s</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+s</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">缩进&gt;&gt;</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">tab</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">tab</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">缩进&lt;&lt;</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+tab</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+tab</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">光标至行首</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">home</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">home</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">光标至行尾</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">end</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">end</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">键盘选中内容</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+上下左右</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+上下左右</td></tr></tbody></table><p><br></p></div>"
         }
       ]
     },
@@ -320,9 +320,52 @@
       "children": [
         {
           "text": "v0.1.0",
+          "plugins": {
+            "tags": [
+              "end: 2023-01-02 15:25:09"
+            ]
+          },
           "children": [
             {
               "text": "第一个版本"
+            }
+          ]
+        },
+        {
+          "text": "v0.2.0",
+          "plugins": {
+            "tags": [
+              "end: 2023-01-08 15:25:23"
+            ]
+          },
+          "children": [
+            {
+              "text": "New Features",
+              "children": [
+                {
+                  "text": "增加markdown特殊块"
+                },
+                {
+                  "text": "增加markdown导入导出"
+                },
+                {
+                  "text": "增加节点标记（收藏、标签、完成）"
+                },
+                {
+                  "text": "增加Discovery版块"
+                }
+              ]
+            },
+            {
+              "text": "Fix",
+              "children": [
+                {
+                  "text": "导出pdf内容不全"
+                },
+                {
+                  "text": "滚动条抖动"
+                }
+              ]
             }
           ]
         }
@@ -411,6 +454,19 @@
           ]
         },
         {
+          "text": "vditor",
+          "plugins": {
+            "tags": [
+              " MIT LICENSED"
+            ]
+          },
+          "children": [
+            {
+              "text": "https://github.com/Vanessa219/vditor"
+            }
+          ]
+        },
+        {
           "text": "tesseract.js",
           "plugins": {
             "tags": [
@@ -446,6 +502,19 @@
           "children": [
             {
               "text": "https://github.com/nhn/tui.image-editor"
+            }
+          ]
+        },
+        {
+          "text": "lunr.js",
+          "plugins": {
+            "tags": [
+              " MIT LICENSED"
+            ]
+          },
+          "children": [
+            {
+              "text": "https://github.com/olivernn/lunr.js"
             }
           ]
         }
