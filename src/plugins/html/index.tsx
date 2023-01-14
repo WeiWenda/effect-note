@@ -6,6 +6,7 @@ import Highlight from 'react-highlight';
 import {EditOutlined} from '@ant-design/icons';
 import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
 import {htmlRegex, htmlTypes} from '../../ts/util';
+import {FontStyleToolComponent} from '../../share/components/Line/fontStyleTool';
 
 registerPlugin(
   {
@@ -28,35 +29,57 @@ registerPlugin(
         new RegExp(htmlRegex),
         (token: Token, emit: EmitFn<React.ReactNode>, wrapped: Tokenizer) => {
           try {
-            emit(
-              <SpecialBlock key={`html-${token.index}`} blockType={'RTF'} session={api.session} tools={
-                <EditOutlined onClick={() => {
-                  const path = info.path;
-                  const htmlContent = token.text;
-                  setTimeout(() => {
-                    if (htmlContent.startsWith('<div class=\'node-html\'>')) {
+            const htmlContent = token.text;
+            if (htmlContent.startsWith('<div class=\'node-html\'>')) {
+              emit(
+                <SpecialBlock key={`html-${token.index}`}
+                              path={info.path}
+                              blockType={'RTF'} session={api.session} tools={
+                  <EditOutlined onClick={() => {
+                    const path = info.path;
+                    setTimeout(() => {
                       api.session.wangEditorHtml = htmlContent.slice('<div class=\'node-html\'>'.length, -6);
-                    } else {
-                      api.session.wangEditorHtml = htmlContent;
-                    }
-                    api.session.emit('updateAnyway');
-                  }, 100);
-                  api.session.wangEditorModalVisible = true;
-                  api.session.wangEditorOnSave = (html: any) => {
-                    let wrappedHtml = html;
-                    wrappedHtml = `<div class='node-html'>${html}</div>`;
-                    api.session.changeChars(path.row, 0, htmlContent.length, (_ ) => wrappedHtml.split('')).then(() => {
                       api.session.emit('updateAnyway');
-                    });
-                  };
-                  api.session.emit('updateAnyway');
-                }}/>
-              }>
-                <Highlight innerHTML={true}>
-                  {token.text}
-                </Highlight>
-              </SpecialBlock>
-            );
+                    }, 100);
+                    api.session.wangEditorModalVisible = true;
+                    api.session.wangEditorOnSave = (html: any) => {
+                      let wrappedHtml = html;
+                      wrappedHtml = `<div class='node-html'>${html}</div>`;
+                      api.session.changeChars(path.row, 0, htmlContent.length, (_ ) => wrappedHtml.split('')).then(() => {
+                        api.session.emit('updateAnyway');
+                      });
+                    };
+                    api.session.emit('updateAnyway');
+                  }}/>
+                }>
+                  <Highlight innerHTML={true}>
+                    {token.text}
+                  </Highlight>
+                </SpecialBlock>
+              );
+            } else {
+              const textContent = new RegExp(htmlRegex).exec(token.text);
+              if (textContent && textContent.length > 4 && textContent[4] && !api.session.lockEdit) {
+                emit(
+                  <FontStyleToolComponent key={`html-${token.index}`}
+                                          session={api.session} path={info.path}
+                                          textContent={textContent[4]}
+                                          showDelete={true}
+                                          startCol={token.index} endCol={token.index + token.length}>
+                    <span
+                      className={'node-html'}
+                      dangerouslySetInnerHTML={{__html: token.text}}
+                    />
+                  </FontStyleToolComponent>
+                );
+              } else {
+                emit(<span
+                  key={`html-${token.index}`}
+                  className={'node-html'}
+                  dangerouslySetInnerHTML={{__html: token.text}}
+                />);
+              }
+            }
           } catch (e: any) {
             api.session.showMessage(e.message, { text_class: 'error' });
             emit(...wrapped.unfold(token));

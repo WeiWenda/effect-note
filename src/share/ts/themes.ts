@@ -160,6 +160,7 @@ export function appendStyleScript(clientStore: ClientStore) {
                     .node .node-text{min-height: ${clientStore.getClientSetting('lineHeight')}px}
                     .block{padding-left: ${clientStore.getClientSetting('blockPaddingLeft')}px}
                     .node{font-family: "${clientStore.getClientSetting('fontFamily')}","${clientStore.getClientSetting('fontFamilyZh')}",system-ui;min-height: ${clientStore.getClientSetting('lineHeight')}px;font-size: ${clientStore.getClientSetting('fontSize')}px}
+                    .rtf-toolbox{background-color: ${theme['theme-bg-primary']};color: ${theme['theme-text-primary']}}
                     </style>
                   `);
   $('.span-selection-background').remove();
@@ -170,6 +171,7 @@ export function appendStyleScript(clientStore: ClientStore) {
                     .bullet-fa-circle:hover {background-color: ${theme['theme-bg-highlight']}}
                     .ant-collapse-header {background-color: ${theme['theme-bg-primary']}}
                     .node-html table th{background-color: ${theme['theme-bg-secondary']}}
+                    .node-html code{background-color: ${theme['theme-bg-tertiary']}}
                     .node-html blockquote{border-left-color: ${theme['theme-bg-cursor']};background-color: ${theme['theme-bg-secondary']}}
                     .node-html table tr:hover{background-color: ${theme['theme-bg-secondary']}}
                     span::selection{background:${theme['theme-bg-highlight']}}</style>`);

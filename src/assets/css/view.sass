@@ -17,6 +17,9 @@ $layout-footer-height: 20px
     flex-direction: row
     align-items: center
 
+.rtf-toolbox
+    font-size: 20px
+
 .drawio-viewer
     width: 100%
 
@@ -126,6 +129,50 @@ $sub-after-search-height: 45px
         overflow: auto
 
 .node-html
+    .bold
+        font-weight: bold
+    .italic
+        font-style: italic
+    .red-color
+        color: rgba(212, 76, 71, 1)
+    .yellow-color
+        color: rgba(217, 115, 13, 1)
+    .green-color
+        color: rgba(68, 131, 97, 1)
+    .blue-color
+        color: rgba(51, 126, 169, 1)
+    .purple-color
+        color: rgba(144, 101, 176, 1)
+    .grey-color
+        color: rgba(120, 119, 116, 1)
+    .red-background
+        border-radius: 6px
+        padding: 0.2em 0.4em
+        background-color: #FFBDAD
+    .yellow-background
+        border-radius: 6px
+        padding: 0.2em 0.4em
+        background-color: #FFF0B3
+    .green-background
+        border-radius: 6px
+        padding: 0.2em 0.4em
+        background-color: #ABF5D1
+    .cyan-background
+        border-radius: 6px
+        padding: 0.2em 0.4em
+        background-color: #B3F5FF
+    .blue-background
+        border-radius: 6px
+        padding: 0.2em 0.4em
+        background-color: #B3D4FF
+    .purple-background
+        border-radius: 6px
+        padding: 0.2em 0.4em
+        background-color: #C0B6F2
+    code
+        border-radius: 3px
+        padding: 0.2em 0.4em
+        font-size: 85%
     blockquote
         padding-left: 1em
         padding-top: 14px
@@ -137,8 +184,6 @@ $sub-after-search-height: 45px
         margin-right: 2em
     pre
         margin-right: 2em
-    code
-        border-radius: 6px
     table
         border-style: solid
         border-width: 1px
@@ -220,17 +265,14 @@ $file-toolbar-height: 36px
         position: relative
         display: inline-block
         margin-left: - $icon-padding
-        z-index: 2
         cursor: pointer
 
         &.hover-icon
             position: relative
-            z-index: 2
             cursor: pointer
         &.fold-icon
             position: relative
             margin-left: - $icon-padding - 15
-            z-index: 2
             cursor: pointer
 
 .dense_block

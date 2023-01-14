@@ -420,6 +420,11 @@ $(document).ready(async () => {
     renderMain(); // fire and forget
   });
 
+  window.addEventListener('blur', () => {
+    session.cursor.reset();
+    session.emit('updateInner');
+  });
+
   // needed for safari
   // const $pasteHack = $('#paste-hack');
   // $pasteHack.focus();

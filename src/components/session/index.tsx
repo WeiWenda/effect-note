@@ -1,6 +1,15 @@
 import {DocInfo, DocVersion, Modes, Path, Session, SessionComponent, SpinnerComponent} from '../../share';
-import {Popover, Radio, Space, Input} from 'antd';
-import {HistoryOutlined, LeftOutlined, LockOutlined, RightOutlined, StarFilled, StarOutlined, UnlockOutlined} from '@ant-design/icons';
+import {Popover, Radio, Space, Input, Button, Dropdown, MenuProps} from 'antd';
+import {
+  MenuUnfoldOutlined,
+  HistoryOutlined,
+  LeftOutlined,
+  LockOutlined,
+  RightOutlined,
+  StarFilled,
+  StarOutlined,
+  UnlockOutlined
+} from '@ant-design/icons';
 import BreadcrumbsComponent from '../breadcrumbs';
 import LayoutToolsComponent from '../layoutTools';
 import {getDocContent, getDocVersions} from '../../share/ts/utils/APIUtils';
@@ -22,6 +31,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   markPlugin?: MarksPlugin,
   onEditBaseInfo?: (info: DocInfo) => void}) {
   const [isMarked, setMarked] = useState(false);
+  const [unfoldLevel, setUnfoldLevel] = useState(100);
   const [isRoot, setIsRoot] = useState(props.session.viewRoot.isRoot());
   const [filterInner, setFilterInner] = useState('');
   const [versions, setVersions] = useState(new Array<DocVersion>());
@@ -67,6 +77,20 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
     setFilterInner(searchContent);
     applyFilterInner(searchContent);
   };
+  const unfoldMenus: MenuProps['items'] = [
+    {
+      key: 'h1',
+      label: 'H1',
+    }, {
+      key: 'h2',
+      label: 'H2',
+    }, {
+      key: 'h3',
+      label: 'H3',
+    }, {
+      key: 'h100',
+      label: 'ALL',
+    }];
   useEffect(() => {
     setFilterInner(props.filterOuter);
     applyFilterInner(props.filterOuter);
@@ -95,8 +119,9 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
         if (doc.id === info.docId) {
           doc.dirtyUpdate = false;
         }
-        return {...doc};
+        return doc;
       });
+      props.session.emit('updateAnyway');
     });
   }, []);
   return (
@@ -151,6 +176,21 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
               props.showLayoutIcon &&
               <LayoutToolsComponent session={props.session} />
             }
+            <Dropdown menu={{
+              items: unfoldMenus,
+              onClick: ({ key }) => {
+                const expandLevel = Number(key.substring(1));
+                setUnfoldLevel(expandLevel);
+                props.session.foldBlock(props.session.viewRoot, expandLevel, false).then(() => {
+                  props.session.emit('updateInner');
+                });
+              },
+            }}>
+                <Button>
+                    <MenuUnfoldOutlined />
+                    { unfoldLevel !== 100 && 'H' + unfoldLevel }
+                </Button>
+            </Dropdown>
             {
               props.session.lockEdit && props.showLayoutIcon &&
               <LockOutlined onClick={() => {

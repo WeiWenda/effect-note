@@ -11,6 +11,7 @@ import { Col } from '../../ts/types';
 import { PartialUnfolder, Token } from '../../ts/utils/token_unfolder';
 import { getStyles } from '../../ts/themes';
 import {htmlRegex} from '../../../ts/util';
+import Draggable, {DraggableCore} from 'react-draggable';
 
 type RowProps = {
   session: Session;
@@ -23,12 +24,15 @@ type RowProps = {
   cursorBetween: boolean;
   viewOnly?: boolean;
 };
-class RowComponent extends React.Component<RowProps, {}> {
+class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
   private onClick: (() => void) | undefined = undefined;
   private onCharClick: ((column: Col, e: MouseEvent) => void) | undefined = undefined;
 
   constructor(props: RowProps) {
     super(props);
+    this.state = {
+      showDragHint: false
+    };
     this.init(props);
   }
 
@@ -38,13 +42,10 @@ class RowComponent extends React.Component<RowProps, {}> {
         if (!props.onClick) {
           throw new Error('onClick disappeared');
         }
-        if (props.session.lockEdit) {
-          return;
-        }
         if (props.cached.pluginData.links.md || props.cached.pluginData.links.xml) {
           return;
         }
-        if (new RegExp(htmlRegex).test(props.cached.line.join(''))) {
+        if (props.cached.line.join('').startsWith('<div class=\'node-html\'>')) {
           return;
         }
         props.onClick(props.path);
@@ -143,7 +144,15 @@ class RowComponent extends React.Component<RowProps, {}> {
     return (
       <div key='text' className='node-text'
            onClick={this.onClick}
-           onMouseEnter={() => {this.props.session.setHoverRow(path); }}
+           onMouseEnter={() => {
+             this.props.session.setHoverRow(path);
+             if (this.props.session.dragging) {
+               this.setState({showDragHint: true});
+             }
+           }}
+           onMouseLeave={() => {
+             this.setState({showDragHint: false});
+           }}
         onMouseDown={(e) => {
           if (e.detail === 1) {
             console.log('onLineMouseDown');
@@ -166,6 +175,10 @@ class RowComponent extends React.Component<RowProps, {}> {
       >
         {results}
         {infoChildren}
+        {
+          this.state.showDragHint &&
+          <div style={{height: '2px', width: '500px', ...getStyles(this.props.session.clientStore, ['theme-bg-tertiary'])}}/>
+        }
       </div>
     );
   }
@@ -346,7 +359,12 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                   (cachedChild.collapsed ? this.props.iconDirFold : this.props.iconDirUnFold)
                   : this.props.iconNoTopLevel);
 
-        const onBulletClick = () => this.props.onBulletClick?.(path);
+        const onBulletClick = () => {
+          console.log('onBulletClick');
+          if (!this.props.session.dragging) {
+            this.props.onBulletClick?.(path);
+          }
+        };
         if (finalIcon === 'fa-circle-o') {
           style.transform = 'scale(0.4)';
         }
@@ -372,6 +390,41 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
             </a>
           );
         }
+        bullet = (
+            <DraggableCore
+              onDrag={(_ , ui) => {
+                if (Math.abs(ui.deltaX) + Math.abs(ui.deltaY) > 0 && !session.dragging) {
+                  session.selecting = true;
+                  session.dragging = true;
+                  session.setAnchor(path, 0);
+                  session.cursor.setPosition(path, 0).then(() => {
+                    session.emit('updateAnyway');
+                  });
+                }
+              }}
+              onStop={() => {
+                if (session.dragging) {
+                  if (session.hoverRow) {
+                    const target = session.hoverRow;
+                    session.yankDelete().then(() => {
+                      session.cursor.setPosition(target, 0).then(() => {
+                        session.pasteAfter().then(() => {
+                          session.emit('updateAnyway');
+                        });
+                      });
+                    });
+                  }
+                  setTimeout(() => {
+                    session.selecting = false;
+                    session.stopAnchor();
+                    session.dragging = false;
+                  }, 100);
+                }
+              }}
+            >
+              {bullet}
+            </DraggableCore>
+          );
         bullet = session.applyHook('renderBullet', bullet, { path, rowInfo });
         return (
           <div key={path.row}>

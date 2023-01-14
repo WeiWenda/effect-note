@@ -1,16 +1,24 @@
 import * as React from 'react';
+import {ReactNode} from 'react';
 import * as _ from 'lodash';
 
 import * as text_utils from '../../ts/utils/text';
-import { Col, Line } from '../../ts/types';
+import {Col, Line} from '../../ts/types';
 import {
-  EmitFn, Token, Tokenizer, PartialTokenizer,
-  RegexTokenizerSplitter, CharInfo, Unfolder, PartialUnfolder
+  CharInfo,
+  EmitFn,
+  PartialTokenizer,
+  PartialUnfolder,
+  RegexTokenizerSplitter,
+  Token,
+  Tokenizer,
+  Unfolder
 } from '../../ts/utils/token_unfolder';
 import Session from '../../ts/session';
 import Path from '../../ts/path';
 import ContentEditable from 'react-contenteditable';
 import $ from 'jquery';
+import {FontStyleToolComponent} from './fontStyleTool';
 
 export type LineProps = {
   lineData: Line;
@@ -80,6 +88,8 @@ export default class LineComponent extends React.Component<LineProps, {input: st
     const DefaultTokenizer: Tokenizer = new Unfolder<Token, React.ReactNode>((
       token: Token, emit: EmitFn<React.ReactNode>
     ) => {
+      const firstIndexOfHighlight = token.info.findIndex(i => i.highlight);
+      const highlightNumber = token.info.filter(i => i.highlight).length;
       for (let i = 0; i < token.text.length; i++) {
         const char_info = token.info[i];
         const classes = Object.keys(char_info.renderOptions.classes);
@@ -106,8 +116,9 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                         const newVal = e.target.value.replace(/&lt;/g, '<')
                           .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
                         this.setState({input: newVal});
-                        if (newVal.length === 1 &&
-                            ! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal)) {
+                        if ( (newVal === '——') ||
+                               (newVal.length === 1 &&
+                                  ! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal))) {
                           this.props.session.addCharsAtCursor(newVal.split('')).then(() => {
                             this.props.session.emit('updateAnyway');
                             this.setState({input: ''});
@@ -148,9 +159,31 @@ export default class LineComponent extends React.Component<LineProps, {input: st
             onClick = this.props.onCharClick.bind(this, column);
           }
         }
-        const divType = char_info.renderOptions.divType || 'span';
-        emit(
-          React.createElement(
+        let divType = char_info.renderOptions.divType || 'span';
+        if (i === firstIndexOfHighlight && !this.props.session.lockEdit) {
+          const element = React.createElement(
+            divType,
+            {
+              style: style,
+              key: `default-${column}`,
+              className: classes.join(' '),
+              href: href,
+              target: target
+            } as React.DOMAttributes<any>,
+            token.text.slice(i, i + highlightNumber) as React.ReactNode
+          );
+          emit(
+            <FontStyleToolComponent key={'font-style-tool'} session={this.props.session} path={this.props.path!}
+                                    startCol={token.index + firstIndexOfHighlight}
+                                    endCol={token.index + firstIndexOfHighlight + highlightNumber}
+                                    showDelete={false}
+                                    textContent={token.text.slice(firstIndexOfHighlight, firstIndexOfHighlight + highlightNumber)} >
+              {element}
+            </FontStyleToolComponent>
+          );
+          i = i + highlightNumber - 1;
+        } else {
+          emit(React.createElement(
             divType,
             {
               style: style,
@@ -193,8 +226,8 @@ export default class LineComponent extends React.Component<LineProps, {input: st
               target: target
             } as React.DOMAttributes<any>,
             token.text[i] as React.ReactNode
-          )
-        );
+          ));
+        }
       }
 
     });
@@ -282,7 +315,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
 
     let tokenizer = lineHook
       .then(LineTokenizer)
-      .then(WordTokenizer)
+      // .then(WordTokenizer)
       .finish(DefaultTokenizer);
 
     // NOTE: this doesn't seem to work for the breadcrumbs, e.g. try visual selecting word at end

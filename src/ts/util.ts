@@ -13,15 +13,20 @@ export function encodeHtml(content: string) {
 
 export const htmlTypes: Array<string> = [
     'div',
-    'span',
     'img',
     'table'
 ];
 
 const htmlRegexParts: Array<string> = [];
+htmlRegexParts.push(
+  `<span(.|\\n)*?>([^<]*?)</span>`
+);
+htmlRegexParts.push(
+  `<span(.|\\n)*/>`
+);
 htmlTypes.forEach((htmltype) => {
     htmlRegexParts.push(
-      `<${htmltype}(.|\\n)*>(.|\\n)*</${htmltype}>`
+      `<${htmltype}(.|\\n)*>(.*?)</${htmltype}>`
     );
     // self-closing
     htmlRegexParts.push(

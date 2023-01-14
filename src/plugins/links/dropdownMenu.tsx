@@ -153,6 +153,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       ]
     },
     {
+      label: '清空',
+      key: 'delete'
+    },
+    {
       label: '导入',
       key: 'load',
       children: [
@@ -185,6 +189,18 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       ],
     }
   ];
+  const replaceEmptyBlock = async () => {
+    const parent = props.path.parent!;
+    const index = await props.session.document.indexInParent(props.path);
+    const newRow = await props.session.addBlocks(parent, index + 1, [''], {});
+    const childrens = await props.session.document._getChildren(props.path.row);
+    if (childrens.length > 0) {
+      await props.session.attachBlocks(newRow[0], childrens);
+    }
+    await props.session.delBlocks(parent.row, index, 1);
+    props.session.cursor.setPosition(newRow[0], 0);
+    props.session.emit('updateInner');
+  };
   const onClick: MenuProps['onClick'] = ({ key }) => {
     if (key.startsWith('mark_task')) {
       return;
@@ -293,6 +309,9 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         break;
       case 'export_text':
         exportAction(props.session, props.path, 'text/plain');
+        break;
+      case 'delete':
+        replaceEmptyBlock();
         break;
       default:
         message.info(`Click on item ${key}`);

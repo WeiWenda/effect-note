@@ -153,7 +153,9 @@ export class LinksPlugin {
             if (pluginData.links?.xml != null) {
                 const ref: any = React.createRef();
                 elements.push(
-                  <SpecialBlock key={'special-block'} blockType={'Drawio'} session={that.session} tools={
+                  <SpecialBlock key={'special-block'}
+                                path={path}
+                                blockType={'Drawio'} session={that.session} tools={
                       <Space>
                           <ZoomInOutlined onClick={() => {ref.current!.zoomIn(); }}/>
                           <ZoomOutOutlined onClick={() => {ref.current!.zoomOut(); }}/>

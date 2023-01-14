@@ -3,6 +3,7 @@ import * as React from 'react';
 import Path from '../share/ts/path';
 import Session from '../share/ts/session';
 import { getStyles } from '../share/ts/themes';
+import Spinner from '../share/components/Spinner';
 
 type CrumbProps = {
   onClick: ((...args: any[]) => void) | undefined,
@@ -62,7 +63,7 @@ export default class BreadcrumbsComponent extends React.Component<BreadcrumbsPro
       while (path.parent != null) {
         const cachedRow = session.document.cache.get(path.row);
         if (!cachedRow) {
-          throw new Error('Row wasnt cached despite being in crumbs');
+          return (<Spinner/>);
         }
         const hooksInfo = {
           path,

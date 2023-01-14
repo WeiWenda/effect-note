@@ -19,7 +19,9 @@ registerPlugin(
       if (pluginData.links?.md) {
         const id = `vditor-${path.row}`;
         const vditorDiv = (
-          <SpecialBlock key={'special-block'} blockType={'Markdown'} tools={
+          <SpecialBlock key={'special-block'}
+                        path={path}
+                        blockType={'Markdown'} tools={
             <EditOutlined onClick={() => {
               api.session.md = pluginData.links.md;
               api.session.mdEditorModalVisible = true;
