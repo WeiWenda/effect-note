@@ -177,7 +177,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
         {infoChildren}
         {
           this.state.showDragHint &&
-          <div style={{height: '2px', width: '500px', ...getStyles(this.props.session.clientStore, ['theme-bg-tertiary'])}}/>
+          <div className={'drag-hint'} style={{...getStyles(this.props.session.clientStore, ['theme-bg-tertiary'])}}/>
         }
       </div>
     );
@@ -391,14 +391,16 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
           );
         }
         bullet = (
-            <DraggableCore
+            <Draggable
+              position={{x: 0, y: 0}}
+              positionOffset={session.dragging && session.cursor.path.is(path) ? {x: 0, y: 20} : {x: 0, y: 0}}
               onDrag={(_ , ui) => {
                 if (Math.abs(ui.deltaX) + Math.abs(ui.deltaY) > 0 && !session.dragging) {
                   session.selecting = true;
                   session.dragging = true;
                   session.setAnchor(path, 0);
                   session.cursor.setPosition(path, 0).then(() => {
-                    session.emit('updateAnyway');
+                    session.emit('updateInner');
                   });
                 }
               }}
@@ -409,7 +411,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                     session.yankDelete().then(() => {
                       session.cursor.setPosition(target, 0).then(() => {
                         session.pasteAfter().then(() => {
-                          session.emit('updateAnyway');
+                          session.emit('updateInner');
                         });
                       });
                     });
@@ -418,12 +420,13 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                     session.selecting = false;
                     session.stopAnchor();
                     session.dragging = false;
-                  }, 100);
+                    session.emit('updateInner');
+                  }, 10);
                 }
               }}
             >
               {bullet}
-            </DraggableCore>
+            </Draggable>
           );
         bullet = session.applyHook('renderBullet', bullet, { path, rowInfo });
         return (
