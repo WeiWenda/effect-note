@@ -4,10 +4,13 @@ import $ from 'jquery';
 import { useReactToPrint } from 'react-to-print';
 import {ExclamationCircleOutlined, MoreOutlined} from '@ant-design/icons';
 import {api_utils, DocInfo, Path, Session} from '../../share';
-import {encodeHtml} from '../../ts/util';
+import {downloadFile, encodeHtml} from '../../ts/util';
 import {exportAction} from '../../plugins/links/dropdownMenu';
+import {TagsPlugin} from '../../plugins/tags';
 
-function FileToolsComponent(props: {session: Session, curDocId: number | undefined, onEditBaseInfo: () => void, reloadFunc: (type: string) => void}) {
+function FileToolsComponent(props: {
+  session: Session, curDocId: number | undefined, onEditBaseInfo: () => void, reloadFunc: (type: string) => void,
+  tagPlugin?: TagsPlugin}) {
   const handlePrint = useReactToPrint({
     content: () => props.session.sessionRef.current,
   });
@@ -22,7 +25,7 @@ function FileToolsComponent(props: {session: Session, curDocId: number | undefin
           cancelText: '取消',
           onOk: () => {
             api_utils.deleteDocContent(props.curDocId!).then(() => {
-              localStorage.removeItem('currentDocId');
+              props.session.clientStore.setClientSetting('curDocId', -1);
               api_utils.getCurrentUserDocs().then(res => {
                 props.session.userDocs = res.content;
                 props.reloadFunc(key);
@@ -54,6 +57,16 @@ function FileToolsComponent(props: {session: Session, curDocId: number | undefin
       case 'export_text':
         exportAction(props.session, Path.root(), 'text/plain', docName);
         break;
+      case 'export_ics':
+        props.tagPlugin?.listEvents().then(content => {
+          props.session.exportModalContent = content;
+          props.session.exportModalVisible = true;
+          props.session.exportFileFunc = () => {
+            downloadFile(docName!, content, 'text/calendar');
+          };
+          props.session.emit('updateAnyway');
+        });
+        break;
       case 'export_pdf':
         $('.session-content').css('overflow', 'unset');
         handlePrint();
@@ -77,13 +90,17 @@ function FileToolsComponent(props: {session: Session, curDocId: number | undefin
           key: 'export_md',
         },
         {
-          label: '导出为json（无损导出）',
+          label: '导出为json（用于EffectNote导入）',
           key: 'export_json',
         },
         {
-          label: '导出为text（兼容WorkFlowy）',
+          label: '导出为text（用于WorkFlowy导入）',
           key: 'export_text',
-        }
+        },
+        {
+          label: '导出为ics（用于日历导入）',
+          key: 'export_ics',
+        },
       ],
     }
   ];

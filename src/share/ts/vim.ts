@@ -186,6 +186,7 @@ export const INSERT_MODE_MAPPINGS: HotkeyMapping = Object.assign({
   'zoom-out': [['ctrl+left']],
   'zoom-cursor': [['ctrl+shift+right']],
   'zoom-root': [['ctrl+shift+left']],
+  'refresh': [['ctrl+r'], ['meta+r']],
   'save-cloud': [['ctrl+s'], ['meta+s']],
 }, INSERT_MOTION_MAPPINGS);
 

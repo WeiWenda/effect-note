@@ -34,7 +34,7 @@ export const HeaderItems = [
 function LayoutComponent(props: {session: Session, config: Config, pluginManager: PluginsManager}) {
   const [settingOpen, setSettingOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [curDocId, setCurDocId] = useState(localStorage.getItem('currentDocId') ? Number(localStorage.getItem('currentDocId')) : -1);
+  const [curDocId, setCurDocId] = useState(props.session.clientStore.getClientSetting('curDocId'));
   const [baseInfoModalVisible, setBaseInfoModalVisible] = useState(false);
   const [subscriptionModalVisible, setSubscriptionModalVisible] = useState(false);
   const [curPage, setCurPage] = useState(props.session.clientStore.getClientSetting('curView'));
@@ -47,10 +47,34 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       return;
     }
     const vditor = new Vditor('vditor', {
-      height: window.innerHeight - 400,
+      upload: {
+        url: API_BASE_URL +  '/upload_image',
+        fieldName: 'wangeditor-uploaded-image',
+        accept: 'image/*',
+        format: (_files, responseText) => {
+          const succMap: any = {};
+          JSON.parse(responseText).data.forEach((file: any) => {
+            succMap[file.alt] = file.href;
+          });
+          const res = JSON.stringify({
+            'msg': '',
+            'code': 0,
+            'data': {
+              succMap
+            }
+          });
+          return res;
+        }
+      },
+      preview: {
+        theme : {
+          current: props.session.clientStore.getClientSetting('blackMode') ? 'dark' : 'light',
+          path: 'content-theme'
+      }},
+      theme: props.session.clientStore.getClientSetting('blackMode') ? 'dark' : 'classic',
+      height: window.innerHeight - 360,
       toolbar: ['quote', '|', 'headings', 'bold', 'italic', 'strike', 'inline-code', '|',
-        'list', 'ordered-list', 'check' , '|', 'link', 'upload', 'table', 'code', '|', 'undo', 'redo'],
-      // theme: props.session.clientStore.getClientSetting('blackMode') ? 'dark' : 'classic',
+        'list', 'ordered-list', 'check' , '|', 'link', 'upload', 'table', 'code', '|', 'insert-before', 'insert-after', 'undo', 'redo'],
       after: () => {
         vditor.setValue(props.session.md || '');
         setVd(vditor);

@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import * as React from 'react'; // tslint:disable-line no-unused-variable
+import ical from 'ical-generator';
 import {
   Char,
   Document,
@@ -403,21 +404,21 @@ export class TagsPlugin {
         const dueTag = tags.find(t => t.startsWith('due:'));
         let status: string | undefined = undefined;
         if (endTag) {
-          const endTime = Moment(endTag.split(':')[1]);
-          if (dueTag && endTime.isAfter(Moment(endTag.split(':')[1]))) {
+          const endTime = Moment(endTag.split('end:')[1]);
+          if (dueTag && endTime.isAfter(Moment(dueTag.split('due:')[1]))) {
             status = 'Delay';
           } else {
             status = 'Done';
           }
         } else if (startTag) {
-          const startTime = Moment(startTag.split(':')[1]);
-          if (dueTag && startTime.isAfter(Moment(dueTag.split(':')[1]))) {
+          const startTime = Moment(startTag.split('start:')[1]);
+          if (dueTag && startTime.isAfter(Moment(dueTag.split('due:')[1]))) {
             status = 'Delay';
           } else {
             status = 'Doing';
           }
         } else if (dueTag) {
-          const dueTime = Moment(dueTag.split(':')[1]);
+          const dueTime = Moment(dueTag.split('due:')[1]);
           if (Moment().isAfter(dueTime)) {
             status = 'Delay';
           } else {
@@ -604,6 +605,29 @@ export class TagsPlugin {
     await this._sanityCheckTags();
   }
 
+  public async listEvents(): Promise<string> {
+    const cal = ical();
+    const rowsToTags = await this._getRowsToTags();
+    await Promise.all(Object.keys(rowsToTags).map(async (row) => {
+      const tags = rowsToTags[Number(row)];
+      if (tags.some(tag => tag.startsWith('end:'))) {
+        let content = (await this.session.document.getLine(Number(row))).join('');
+        if (content.startsWith('~~')) {
+          content = content.slice(2, -2);
+        }
+        const startTime = tags.find(t => t.startsWith('start:'))?.split('start:').pop();
+        const endTime = tags.find(t => t.startsWith('end:'))!.split('end:').pop();
+        cal.createEvent({
+          id: endTime,
+          start: startTime ? Moment(startTime) : Moment(endTime).subtract('hour', 1),
+          end: Moment(endTime),
+          summary: content
+        });
+      }
+      return Promise.resolve();
+    }));
+    return cal.toString();
+  }
 
   public async listTags(): Promise<{[tag: string]: Path[]}> {
     await this._sanityCheckTags();

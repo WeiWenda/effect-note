@@ -20,6 +20,7 @@ import {useEffect, useState} from 'react';
 import {MarksPlugin} from '../../plugins/marks';
 import {default as FileSearch} from '../../share/ts/search';
 import {mimetypeLookup} from '../../ts/util';
+import {TagsPlugin} from '../../plugins/tags';
 const {Search} = Input;
 
 export function SessionWithToolbarComponent(props: {session: Session, loading: boolean, filterOuter: string,
@@ -29,6 +30,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   afterLoadDoc?: () => Promise<void>
   curDocInfo?: DocInfo,
   markPlugin?: MarksPlugin,
+  tagPlugin?: TagsPlugin,
   onEditBaseInfo?: (info: DocInfo) => void}) {
   const [isMarked, setMarked] = useState(false);
   const [unfoldLevel, setUnfoldLevel] = useState(100);
@@ -36,10 +38,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const [filterInner, setFilterInner] = useState('');
   const [versions, setVersions] = useState(new Array<DocVersion>());
   const [currentVersion, setCurrentVersion] = useState('');
-  const [crumbContents, setCrumbContents] = useState(() => {
-    const initialCrumbContents: {[row: number]: string} = {};
-    return initialCrumbContents;
-  });
+  const [crumbContents, setCrumbContents] = useState<{[row: number]: string}>( {});
   const onCrumbClick = async (path: Path) => {
     const session = props.session;
     await session.zoomInto(path);
@@ -92,10 +91,22 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
       label: 'ALL',
     }];
   useEffect(() => {
-    setFilterInner(props.filterOuter);
-    applyFilterInner(props.filterOuter);
-  }, [props.filterOuter]);
+    if (!props.loading) {
+      setFilterInner(props.filterOuter);
+      applyFilterInner(props.filterOuter);
+    }
+  }, [props.filterOuter, props.loading]);
+  const updateCrumbContent = async () => {
+    let path = props.session.viewRoot;
+    const newCrumbContents: {[row: number]: string} = {};
+    while (path.parent != null) {
+      path = path.parent;
+      newCrumbContents[path.row] = await props.session.document.getText(path.row);
+    }
+    setCrumbContents(newCrumbContents);
+  };
   useEffect(() => {
+    updateCrumbContent();
     props.session.on('changeViewRoot', async (path: Path) => {
       setIsRoot(path.isRoot());
       if (props.markPlugin) {
@@ -106,12 +117,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
           setMarked(false);
         }
       }
-      const newCrumbContents: {[row: number]: string} = {};
-      while (path.parent != null) {
-        path = path.parent;
-        newCrumbContents[path.row] = await props.session.document.getText(path.row);
-      }
-      setCrumbContents(newCrumbContents);
+      updateCrumbContent();
     });
     props.session.replaceListener('save-cloud', (info) => {
       props.session.showMessage('保存成功');
@@ -234,7 +240,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                       getDocContent(props.curDocInfo!.id!, v.target.value).then((res) => {
                         props.session.showMessage('版本回溯中...');
                         props.beforeLoadDoc!().then(() => {
-                          props.session.reloadContent(res.content, mimetypeLookup(props.curDocInfo!.name!)).then(() => {
+                          props.session.reloadContent(res.content).then(() => {
                             props.afterLoadDoc!().then(() => {
                               props.session.showMessage('版本回溯完成');
                             });
@@ -266,6 +272,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                 </Popover>
             }
             <FileToolsComponent session={props.session} curDocId={props.curDocInfo?.id}
+                                tagPlugin={props.tagPlugin}
                                 onEditBaseInfo={() => {
                                   if (props.onEditBaseInfo && props.curDocInfo) {
                                     props.onEditBaseInfo(props.curDocInfo);

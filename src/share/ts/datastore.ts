@@ -36,6 +36,7 @@ export type ClientSettings = Theme & {
   openMenus: string;
   openFile: string;
   curView: string;
+  curDocId: number;
 };
 
 type ClientSetting = keyof ClientSettings;
@@ -56,6 +57,7 @@ const default_client_settings: ClientSettings =
     openMenus: '[\"0\"]',
     openFile: '0',
     curView: 'user_view',
+    curDocId: -1,
   });
 
 export type LocalDocSettings = {
@@ -89,10 +91,16 @@ export class ClientStore {
   private cache: {[key: string]: any} = {};
   private use_cache: boolean = true;
 
-  constructor(backend: SynchronousDataBackend, docname = '') {
+  constructor(backend: SynchronousDataBackend) {
     this.backend = backend;
+    const docname = this.getClientSetting('curDocId').toString();
     this.docname = docname;
     this.prefix = `${docname}save`;
+  }
+
+  public setDocname(docId: number) {
+    this.docname = docId.toString();
+    this.prefix = `${docId.toString()}save`;
   }
 
   private _get<T>(key: string, default_value: T): T {
@@ -121,7 +129,7 @@ export class ClientStore {
     if (this.use_cache) {
       this.cache[key] = value;
     }
-    logger.debug('setting to storage', key, value);
+    logger.info('setting to storage', key, value);
     this.backend.set(key, JSON.stringify(value));
   }
 
@@ -231,7 +239,7 @@ export class DocumentStore {
   private cache: {[key: string]: any} = {};
   private use_cache: boolean = true;
   public events: EventEmitter = new EventEmitter();
-  private backend: DataBackend;
+  public backend: DataBackend;
 
   constructor(backend: DataBackend, docname = '') {
     this.backend = backend;

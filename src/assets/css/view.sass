@@ -3,8 +3,20 @@
 
 html[data-theme="light"]
     @include meta.load-css("./github.css")
+    --w-e-textarea-bg-color: #FFFFFF
+    --w-e-toolbar-bg-color: #f6f8fa
+    --w-e-toolbar-color: #586069
+    --w-e-textarea-color: #24292e
 html[data-theme="dark"]
     @include meta.load-css("./github-dark.css")
+    --w-e-textarea-slight-bg-color: #0d1117
+    --w-e-textarea-bg-color: #24292e
+    --w-e-toolbar-bg-color: #1d2125
+    --w-e-toolbar-active-bg-color: #454a50
+    --w-e-toolbar-color: #b9b9b9
+    --w-e-toolbar-active-color: #b9b9b9
+    --w-e-toolbar-disabled-color: #3f454b
+    --w-e-textarea-color: #d1d5da
 
 .setting-table
     border-spacing: 10px
@@ -183,7 +195,7 @@ $sub-after-search-height: 45px
         margin-left: 0px
         margin-right: 2em
     pre
-        margin-right: 2em
+        //margin-right: 2em
     table
         border-style: solid
         border-width: 1px
@@ -241,7 +253,9 @@ $file-toolbar-height: 36px
     .effect-block-header
         background-color: rgb(240, 240, 240, 0.5)
         position: absolute
-        width: 100%
+        top: 0
+        right: 0
+        width: auto
         padding-left: 1em
         padding-right: 1em
         display: flex

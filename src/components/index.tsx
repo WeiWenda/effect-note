@@ -16,25 +16,35 @@ import 'font-awesome/css/font-awesome.min.css';
 import '../assets/css/utils.sass';
 import '../assets/css/index.sass';
 import '../assets/css/view.sass';
-import { message } from 'antd';
+import {message} from 'antd';
 
 import {
-  browser_utils, errors, SerializedBlock, Modes, RegisterTypes,
-  KeyEmitter, KeyHandler, KeyMappings, KeyBindings, ClientStore, DocumentStore,
-  SynchronousInMemory, InMemory, BackendType, SynchronousLocalStorageBackend,
-  ClientSocketBackend, IndexedDBBackend, Document, Path, Session,
-  config, keyDefinitions, api_utils
+  api_utils,
+  BackendType,
+  browser_utils,
+  ClientStore,
+  config,
+  Document,
+  DocumentStore,
+  errors,
+  IndexedDBBackend,
+  InMemory,
+  KeyBindings,
+  keyDefinitions,
+  KeyEmitter,
+  KeyHandler,
+  KeyMappings,
+  Modes,
+  Path,
+  RegisterTypes,
+  SerializedBlock,
+  Session,
+  SynchronousInMemory,
+  SynchronousLocalStorageBackend
 } from '../share';
-import { SERVER_CONFIG } from '../ts/constants';
+import {SERVER_CONFIG} from '../ts/constants';
 // load all plugins
 import '../plugins';
-import YinComponent from './yin';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link
-} from 'react-router-dom';
 import {PluginsManager} from '../ts/plugins';
 import logger from '../ts/logger';
 import {appendStyleScript} from '../share/ts/themes';
@@ -67,7 +77,6 @@ root.render(
 );
 
 $(document).ready(async () => {
-  let docname = localStorage.getItem('currentDocId') || '';
   // random global state.  these things should be managed by redux maybe
   let caughtErr: null | Error = null;
 
@@ -98,7 +107,7 @@ $(document).ready(async () => {
     clientStore = new ClientStore(new SynchronousInMemory());
     backend_type = 'inmemory';
   } else {
-    clientStore = new ClientStore(new SynchronousLocalStorageBackend(), docname);
+    clientStore = new ClientStore(new SynchronousLocalStorageBackend());
     if (SERVER_CONFIG.socketserver) {
       backend_type = 'socketserver';
     } else {
@@ -106,73 +115,14 @@ $(document).ready(async () => {
     }
   }
 
+  const docname = clientStore.getClientSetting('curDocId').toString();
+
   function getLocalStore(): DocumentStore {
      return new DocumentStore(new IndexedDBBackend(docname), docname);
   }
 
-  async function getSocketServerStore(): Promise<DocumentStore> {
-    let socketServerHost;
-    let socketServerDocument;
-    let socketServerPassword;
-    if (SERVER_CONFIG.socketserver) { // server is fixed!
-      socketServerHost = window.location.origin.replace(/^http/, 'ws');
-      socketServerDocument = docname;
-      socketServerPassword = clientStore.getDocSetting('socketServerPassword');
-    } else {
-      socketServerHost = clientStore.getDocSetting('socketServerHost');
-      socketServerDocument = clientStore.getDocSetting('socketServerDocument');
-      socketServerPassword = clientStore.getDocSetting('socketServerPassword');
-    }
-
-    if (!socketServerHost) {
-      throw new Error('No socket server host found');
-    }
-    const socket_backend = new ClientSocketBackend();
-    // NOTE: we don't pass docname to DocumentStore since we want keys
-    // to not have prefixes
-    const dStore = new DocumentStore(socket_backend);
-    while (true) {
-      try {
-        await socket_backend.init(
-          socketServerHost, socketServerPassword || '', socketServerDocument || '');
-        break;
-      } catch (e) {
-        if (e === 'Wrong password!') {
-          socketServerPassword = prompt(
-            socketServerPassword ?
-              'Password incorrect!  Please try again: ' :
-              'Please enter the password',
-            '');
-        } else {
-          throw e;
-        }
-      }
-    }
-    clientStore.setDocSetting('socketServerPassword', socketServerPassword);
-    logger.info(`Successfully initialized socked connection: ${socketServerHost}`);
-    return dStore;
-  }
-
   if (backend_type === 'inmemory') {
     docStore = new DocumentStore(new InMemory());
-  } else if (backend_type === 'socketserver') {
-    try {
-      docStore = await getSocketServerStore();
-    } catch (e: any) {
-      alert(`
-        Error loading socket server datastore:
-
-        ${e.message}
-
-        ${e.stack}
-
-        Falling back to localStorage default.
-      `);
-
-      clientStore.setDocSetting('socketServerPassword', '');
-      docStore = getLocalStore();
-      backend_type = 'local';
-    }
   } else {
     docStore = getLocalStore();
     backend_type = 'local';
@@ -422,6 +372,7 @@ $(document).ready(async () => {
 
   window.addEventListener('blur', () => {
     session.cursor.reset();
+    session.register.saveNone();
     session.emit('updateInner');
   });
 

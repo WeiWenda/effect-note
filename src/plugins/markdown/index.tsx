@@ -38,8 +38,12 @@ registerPlugin(
         );
         setTimeout(() => {
           const divs = $(`#${id}`).get();
+          const mode = api.session.clientStore.getClientSetting('blackMode') ? 'dark' : 'light';
           if (divs.length > 0) {
-            Vditor.preview(divs[0] as HTMLDivElement, pluginData.links.md);
+            Vditor.preview(divs[0] as HTMLDivElement, pluginData.links.md, {mode, theme : {
+                current: mode,
+                path: 'content-theme'
+              }});
           }
         }, 100);
         elements.push(vditorDiv);

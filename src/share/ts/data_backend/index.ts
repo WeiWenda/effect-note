@@ -89,9 +89,8 @@ export class IndexedDBBackend extends DataBackend {
   }
 
   public async get(key: string): Promise<string | null> {
-    console.time('EE' + key);
     const res = await localForage.getItem(key);
-    console.timeEnd('EE' + key);
+    logger.debug('IndexDB get:', key, res);
     return res as string;
   }
 
@@ -102,6 +101,7 @@ export class IndexedDBBackend extends DataBackend {
     this.lastSave = Date.now();
     await localForage.setItem(this._lastSaveKey_(), this.lastSave + '');
     await localForage.setItem(key, value);
+    logger.debug('IndexDB set:', key, value);
     return Promise.resolve();
   }
 

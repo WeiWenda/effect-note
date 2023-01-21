@@ -165,6 +165,8 @@ export function appendStyleScript(clientStore: ClientStore) {
                   `);
   $('.span-selection-background').remove();
   $('#app').append(`<style class='span-selection-background'>
+                    .ant-modal .ant-modal-content{background-color: ${theme['theme-bg-secondary']}}
+                    .ant-modal .ant-modal-header{background-color: ${theme['theme-bg-secondary']}}
                     .ant-collapse-borderless > .ant-collapse-item{border-bottom: 2px solid ${theme['theme-bg-secondary']};}
                     .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {background-color:${theme['theme-bg-secondary']}}
                     .bullet-folded {background-color:${theme['theme-bg-tertiary']}}
@@ -177,6 +179,8 @@ export function appendStyleScript(clientStore: ClientStore) {
                     span::selection{background:${theme['theme-bg-highlight']}}</style>`);
   $('.span-hover-color').remove();
   $('#app').append(`<style class='span-hover-color'>
+                    .ant-modal .ant-modal-close{color: ${theme['theme-text-primary']}}
+                    .ant-modal .ant-modal-title{color: ${theme['theme-text-primary']}}
                     .ant-select:not(.ant-select-disabled):not(.ant-select-customize-input):not(.ant-pagination-size-changer):hover .ant-select-selector{border-color:${theme['theme-text-link']}}
                     .ant-input:hover{border-color:${theme['theme-text-link']}}
                     .ant-btn-default:not(:disabled):hover{border-color:${theme['theme-text-link']};color:${theme['theme-text-link']}}

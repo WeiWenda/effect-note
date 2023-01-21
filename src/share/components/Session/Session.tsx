@@ -10,7 +10,6 @@ import Session from '../../ts/session';
 import { Col } from '../../ts/types';
 import Path from '../../ts/path';
 import { CursorsInfoTree } from '../../ts/cursor';
-import $ from 'jquery';
 
 // TODO: move mode-specific logic into mode render functions
 
@@ -22,7 +21,6 @@ type State = {
   loaded: boolean;
   // set after data is loaded
   cursorsTree?: CursorsInfoTree;
-  crumbContents?: {[row: number]: string };
 };
 
 type Profiler = (profilerMessage: string) => () => void;
@@ -203,15 +201,7 @@ export default class SessionComponent extends React.Component<Props, State> {
         }
       }
 
-      const crumbContents: {[row: number]: string} = {};
-      let path = session.viewRoot;
-      while (path.parent != null) {
-        path = path.parent;
-        crumbContents[path.row] = await session.document.getText(path.row);
-      }
-
       this.setState({
-        crumbContents,
         cursorsTree,
         loaded: true,
       });
@@ -246,11 +236,6 @@ export default class SessionComponent extends React.Component<Props, State> {
   public render() {
     const session = this.props.session;
     if (!this.state.loaded) { return <Spinner/>; }
-
-    const crumbContents = this.state.crumbContents;
-    if (crumbContents == null) {
-      throw new Error('crumbContents should have been loaded');
-    }
 
     const cursorsTree = this.state.cursorsTree;
     if (cursorsTree == null) {

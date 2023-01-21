@@ -1,4 +1,13 @@
-import {api_utils, DocInfo, Document, IndexedDBBackend, Path, Session, ViewOnlySessionComponent} from '../../share';
+import {
+  api_utils,
+  DocInfo,
+  Document,
+  IndexedDBBackend,
+  Path,
+  Session,
+  SubscriptionSearchResult,
+  ViewOnlySessionComponent
+} from '../../share';
 
 import * as React from 'react';
 import {useEffect, useState} from 'react';
@@ -10,7 +19,7 @@ import {MarksPlugin} from '../../plugins/marks';
 import {TagsPlugin} from '../../plugins/tags';
 import config from '../../share/ts/vim';
 import {getStyles} from '../../share/ts/themes';
-import {getDocContent} from '../../share/ts/utils/APIUtils';
+import {getDocContent, searchDoc} from '../../share/ts/utils/APIUtils';
 import {DraggableCore} from 'react-draggable';
 import {LinksPlugin} from '../../plugins/links';
 import {SessionWithToolbarComponent} from '../session';
@@ -124,6 +133,7 @@ function YinComponent(props: {session: Session,
   const [previewWidth, setPreviewWidth] = useState(300);
   const [openKeys, setOpenKeys] = useState<string[]>(JSON.parse(props.session.clientStore.getClientSetting('openMenus')));
   const [filter, setFilter] = useState('');
+  const [filteredDocIds, setFilteredDocIds] = useState<number[]>([]);
   const docs = props.session.userDocs;
   const [menuItems, setMenuItems] = useState(new Array<MenuItem>());
   const [menuItem2DocId, setMenuItem2DocId] = useState(new Array<number>());
@@ -139,13 +149,6 @@ function YinComponent(props: {session: Session,
   // 1. 父页面新建笔记时
   // 2. 修改过滤时
   useEffect(() => {
-    const getDocContents = async () => {
-      const docContents: DocInfo[] = await Promise.all(props.session.userDocs.filter(x => x.id !== undefined && x.id >= 0)
-          .map(async (x) => {
-        return await getDocContent(x.id!);
-      }));
-      return docContents;
-    };
     const updateMenu = (filteredDocs: DocInfo[]) => {
       const menuID2DocID: Array<number> = [];
       const tagMap = getTagMap(filteredDocs);
@@ -154,20 +157,15 @@ function YinComponent(props: {session: Session,
       setMenuItem2DocId(menuID2DocID);
     };
     if (filter) {
-      props.session.showMessage('检索中...');
-      getDocContents().then(docContents => {
-        const filteredDocs = docContents.filter(x => {
-          const docName = x.name!;
-          const docContent = x.content!;
-          return docName.includes(filter) || docContent.includes(filter);
-        });
-        if (filteredDocs.length > 0) {
-          updateMenu(filteredDocs);
-          props.session.showMessage('检索完成');
-        } else {
-          props.session.showMessage('未找到匹配内容');
-        }
+      const filteredDocs = props.session.userDocs.filter(x => {
+        return filteredDocIds.includes(x.id!);
       });
+      if (filteredDocs.length > 0) {
+        updateMenu(filteredDocs);
+        props.session.showMessage(`共找到${filteredDocs.length}条记录`);
+      } else {
+        props.session.showMessage('未找到匹配内容');
+      }
     } else {
       updateMenu(props.session.userDocs);
     }
@@ -227,7 +225,6 @@ function YinComponent(props: {session: Session,
       const tagDocument = new Document(docStore, '');
       const newTagSession = new Session(props.session.clientStore, tagDocument, {});
       tagPlugin.listTags().then(tags => {
-        console.log('tags', tags);
         const childRows: number[] = [];
         const loadTagPromises = Object.entries(tags).reduce((p: Promise<void>, tag) =>
           p.then(() =>
@@ -280,8 +277,12 @@ function YinComponent(props: {session: Session,
     props.session.document.cache.clear();
     props.session.stopAnchor();
     props.session.search = null;
+    props.session.document.removeAllListeners('lineSaved');
+    props.session.document.removeAllListeners('beforeMove');
+    props.session.document.removeAllListeners('beforeAttach');
+    props.session.document.removeAllListeners('beforeDetach');
   };
-  const loadDoc = async (docID: number) => {
+  const loadDoc = async (docID: number, firstOpen: boolean = false) => {
     setLoading(true);
     const curDocInfo = docs.find(doc => doc.id === docID)!;
     let initialLoad = false;
@@ -289,28 +290,26 @@ function YinComponent(props: {session: Session,
       initialLoad = true;
       // props.session.showMessage('初始加载中...');
       curDocInfo.loaded = true;
-    } else {
-      // props.session.showMessage('加载中...');
     }
-    let docContent: any;
-    if (docID === -1) {
-      docContent = config.getDefaultData();
-    } else {
-      const docRes = await api_utils.getDocContent(docID);
-      docContent = docRes.content;
+    if (firstOpen && !props.session.viewRoot.isRoot()) {
+      initialLoad = false;
+      curDocInfo.loaded = true;
     }
     const newDocName = docID.toString();
-    localStorage.setItem('currentDocId', newDocName);
+    props.session.clientStore.setClientSetting('curDocId', docID);
+    props.session.clientStore.setDocname(docID);
     document.title = curDocInfo.name!;
-    // const docStore = new DocumentStore(new InMemory());
     props.session.document.store.setBackend(new IndexedDBBackend(newDocName), newDocName);
     await beforeLoadDoc();
-    props.session.document.removeAllListeners('lineSaved');
-    props.session.document.removeAllListeners('beforeMove');
-    props.session.document.removeAllListeners('beforeAttach');
-    props.session.document.removeAllListeners('beforeDetach');
-
     if (initialLoad) {
+      let docContent: any;
+      if (docID === -1) {
+        docContent = config.getDefaultData();
+      } else {
+        const docRes = await api_utils.getDocContent(docID);
+        docContent = docRes.content;
+      }
+      await props.session.changeViewRoot(Path.root());
       await markPlugin.clearMarks();
       await tagPlugin.clearTags();
       await linkPlugin.clearLinks();
@@ -326,11 +325,10 @@ function YinComponent(props: {session: Session,
     }
   };
   useEffect(() => {
-    console.log(`当前文档id: ${props.curDocId}`);
     setCurDocId(props.curDocId);
     // 父页面新建笔记时
     if (props.session.userDocs.find(doc => doc.id === props.curDocId) || props.curDocId === -1) {
-      loadDoc(props.curDocId);
+      loadDoc(props.curDocId, true);
     }
   }, [props.curDocId]);
   const onClick: MenuProps['onClick'] = e => {
@@ -350,7 +348,10 @@ function YinComponent(props: {session: Session,
     setOpenKeys(filteredKeys);
   };
   const onSearchFileList = (e: string) => {
-    setFilter(e);
+    searchDoc(e).then((res: SubscriptionSearchResult[]) => {
+      setFilteredDocIds(res.map(r => Number(r.ref)));
+      setFilter(e);
+    });
   };
   return (
     <div style={{height: '100%', flexDirection: 'row', display: 'flex', width: '100%'}}>
@@ -391,6 +392,7 @@ function YinComponent(props: {session: Session,
                                    filterOuter={filter}
                                    showLayoutIcon={true}
                                    showLockIcon={true}
+                                   tagPlugin={tagPlugin}
                                    onEditBaseInfo={props.onEditBaseInfo}
       />
       {

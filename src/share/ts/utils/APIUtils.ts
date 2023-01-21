@@ -163,8 +163,15 @@ export function getSubscriptionFiles(dir: string) {
 
 export function searchSubscription(query: string) {
     return request({
-       url: API_BASE_URL + `/search_subscription?search=${query}`,
+       url: API_BASE_URL + `/subscription/search?search=${query}`,
        method: 'GET',
+    });
+}
+
+export function searchDoc(query: string) {
+    return request({
+        url: API_BASE_URL + `/docs/search?search=${query}`,
+        method: 'GET',
     });
 }
 
