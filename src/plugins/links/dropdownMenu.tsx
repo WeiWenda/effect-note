@@ -223,6 +223,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
     }
     switch (key) {
       case 'load_md':
+        props.session.fileInputRef.current.setPath(props.path);
         $('#file-uploader').trigger('click');
         break;
       case 'mark_mark':

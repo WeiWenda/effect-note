@@ -131,13 +131,14 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   return (
     <Layout style={{height: '100%', width: '100%'}}>
       <FileInput
-        onLoad={async (filename, contents) => {
+        ref={props.session.fileInputRef}
+        onLoad={async (path, filename, contents) => {
           const mimetype = mimetypeLookup(filename);
           if (!mimetype) {
             props.session.showMessage('Invalid filetype!', { time: 0 });
             return;
           }
-          if (await props.session.importContent(contents, mimetype)) {
+          if (await props.session.importContent(contents, mimetype, path)) {
             props.session.showMessage('导入成功', {text_class: 'success'});
           } else {
             props.session.showMessage('Import failed due to parsing issue', {text_class: 'error'});

@@ -533,14 +533,14 @@ export default class SettingsComponent extends React.Component<Props, State> {
                 onSelect={(filename) => {
                   session.showMessage(`Reading in file ${filename}...`);
                 }}
-                onLoad={async (filename, contents) => {
+                onLoad={async (_path: Path, filename, contents) => {
                   const mimetype = mimetypeLookup(filename);
                   if (!mimetype) {
                     session.showMessage('Invalid filetype!', { time: 0 });
                     return;
                   }
                   session.showMessage('Importing contents...', { time: 0 });
-                  if (await session.importContent(contents, mimetype)) {
+                  if (await session.importContent(contents, mimetype, Path.root())) {
                     session.showMessage('Imported!', {text_class: 'success'});
                     await session.setMode('NORMAL');
                   } else {

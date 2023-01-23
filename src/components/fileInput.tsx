@@ -1,9 +1,10 @@
 import * as React from 'react';
 import $ from 'jquery';
+import {Path} from '../share';
 
 type Props = {
   onSelect?: (filename: string) => void;
-  onLoad?: (filename: string, contents: string) => void;
+  onLoad?: (path: Path, filename: string, contents: string) => void;
   onError?: (error: string) => void;
   style?: React.CSSProperties;
   children?: React.ReactNode;
@@ -26,12 +27,19 @@ export const load_file = function(file: File): Promise<{name: string, contents: 
   });
 };
 
-export default class FileInput extends React.Component<Props, {}> {
+export default class FileInput extends React.Component<Props, {path: Path}> {
   private id: string;
 
   constructor(props: Props) {
     super(props);
     this.id = `fileinput.${Math.random()}`;
+    this.state = {
+      path: Path.root()
+    };
+  }
+
+  private setPath(path: Path) {
+    this.setState({path});
   }
 
   private handleChange(e: React.FormEvent<HTMLInputElement>) {
@@ -44,7 +52,7 @@ export default class FileInput extends React.Component<Props, {}> {
     }
     load_file(file).then(({ name, contents }) => {
       if (this.props.onLoad) {
-        this.props.onLoad(name, contents);
+        this.props.onLoad(this.state.path, name, contents);
       }
       $(`#${this.id}`).val('');
     }).catch((err: string) => {

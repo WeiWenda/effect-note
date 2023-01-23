@@ -96,6 +96,7 @@ export default class Session extends EventEmitter {
   public showMessage: (message: string, options?: any) => void;
   public toggleBindingsDiv: () => void;
   public mindMapRef: any;
+  public fileInputRef: any;
   public drawioRef: any;
   public cloudFileListRef: any;
   public sessionRef: any;
@@ -151,6 +152,7 @@ export default class Session extends EventEmitter {
     this.mindMapRef = React.createRef();
     this.drawioRef = React.createRef();
     this.sessionRef = React.createRef();
+    this.fileInputRef = React.createRef();
     this.showFilelist = clientStore.getClientSetting('defaultLayout').includes('left');
     this.showPreview = clientStore.getClientSetting('defaultLayout').includes('right');
     this.showHeader = clientStore.getClientSetting('defaultLayout').includes('top');
@@ -289,7 +291,7 @@ export default class Session extends EventEmitter {
         }
         const mdContent = lines.slice(lineNumber, endLineNumber).map(line => line.line);
         let child: any = {};
-        if (mdContent.length === 1 && new RegExp('[\u4E00-\u9FA5a-zA-Z]').test(mdContent[0][0])) {
+        if (mdContent.length === 1 && new RegExp('[\u4E00-\u9FA5a-zA-Z0-9]').test(mdContent[0][0])) {
           child = {text: mdContent[0]};
         } else {
           child = {
@@ -411,11 +413,10 @@ export default class Session extends EventEmitter {
   }
 
   // TODO: make this use replace_empty = true?
-  public async importContent(content: string, mimetype: string) {
+  public async importContent(content: string, mimetype: string, path: Path) {
     content = content.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
     const root = await this.parseContent(content, mimetype);
     if (!root) { return false; }
-    const { path } = this.cursor;
     const parent = path.isRoot() ? path : path.parent!;
     const index = path.isRoot() ? 0 : await this.document.indexInParent(path);
     if (root.text === '' && root.children) { // Complete export, not one node

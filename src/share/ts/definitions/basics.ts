@@ -637,7 +637,7 @@ keyDefinitions.registerAction(new Action(
         await session.pasteText(text);
       } else {
         session.showMessage(`识别到${mimetype}格式，导入中...`);
-        await session.importContent(text, mimetype);
+        await session.importContent(text, mimetype, session.cursor.path);
       }
     } else {
       await session.pasteBefore();
