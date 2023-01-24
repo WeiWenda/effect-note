@@ -26,6 +26,7 @@ type RowProps = {
 };
 class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
   private onClick: (() => void) | undefined = undefined;
+  private isNormalRow: boolean = true;
   private onCharClick: ((column: Col, e: MouseEvent) => void) | undefined = undefined;
 
   constructor(props: RowProps) {
@@ -33,6 +34,10 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
     this.state = {
       showDragHint: false
     };
+    if (props.cached.pluginData.links.md || props.cached.pluginData.links.xml ||
+      props.cached.line.join('').startsWith('<div class=\'node-html\'>')) {
+      this.isNormalRow = false;
+    }
     this.init(props);
   }
 
@@ -42,13 +47,11 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
         if (!props.onClick) {
           throw new Error('onClick disappeared');
         }
-        if (props.cached.pluginData.links.md || props.cached.pluginData.links.xml) {
+        if (!this.isNormalRow) {
           return;
+        } else {
+          props.onClick(props.path);
         }
-        if (props.cached.line.join('').startsWith('<div class=\'node-html\'>')) {
-          return;
-        }
-        props.onClick(props.path);
       };
     }
 
@@ -154,7 +157,10 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
              this.setState({showDragHint: false});
            }}
         onMouseDown={(e) => {
-          if (e.detail === 1) {
+          if (!this.isNormalRow) {
+            session.cursor.reset();
+            session.emit('updateInner');
+          } else if (e.detail === 1) {
             console.log('onLineMouseDown');
             session.selecting = false;
             session.setAnchor(path, -1);
