@@ -294,14 +294,6 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         }, 1000);
         props.session.emit('updateAnyway');
         break;
-      case 'add_link':
-        props.session.formSubmitAction = (value) => {
-          props.linksPlugin.setLink(props.path.row, value).then(() => {
-            props.session.emit('updateAnyway');
-          });
-        };
-        props.session.emit('updateAnyway');
-        break;
       case 'export_md':
         exportAction(props.session, props.path, 'text/markdown');
         break;

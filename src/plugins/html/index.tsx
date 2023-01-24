@@ -7,6 +7,7 @@ import {EditOutlined} from '@ant-design/icons';
 import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
 import {htmlRegex, htmlTypes} from '../../ts/util';
 import {FontStyleToolComponent} from '../../share/components/Line/fontStyleTool';
+import {LinksPlugin, linksPluginName} from '../links';
 
 registerPlugin(
   {
@@ -16,8 +17,10 @@ registerPlugin(
       Lets you inline the following html tags:
         ${ htmlTypes.map((htmltype) => '<' + htmltype + '>').join(' ') }
     `,
+    dependencies: [linksPluginName],
   },
   function(api) {
+    const linksPlugin = api.getPlugin(linksPluginName) as LinksPlugin;
     api.registerHook('session', 'renderLineTokenHook', (tokenizer, info) => {
       // if (info.has_cursor && !info.lockEdit) {
       //   return tokenizer;
@@ -34,6 +37,8 @@ registerPlugin(
               emit(
                 <SpecialBlock key={`html-${token.index}`}
                               path={info.path}
+                              collapse={info.pluginData.links?.collapse || false}
+                              setCollapseCallback={(collapse) => linksPlugin.setBlockCollapse(info.path.row, collapse)}
                               blockType={'RTF'} session={api.session} tools={
                   <EditOutlined onClick={() => {
                     const path = info.path;

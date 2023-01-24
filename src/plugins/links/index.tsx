@@ -1,8 +1,8 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Document, Mutation, Row, Session} from '../../share';
-import {Dropdown, Image, Menu, MenuProps, message, Modal, Tag, Space} from 'antd';
-import {ExclamationCircleOutlined, LinkOutlined, PictureOutlined, EditOutlined, ZoomInOutlined, ZoomOutOutlined} from '@ant-design/icons';
+import {Dropdown, Image, Menu, MenuProps, message, Modal, Space, Tag} from 'antd';
+import {EditOutlined, ExclamationCircleOutlined, PictureOutlined, ZoomInOutlined, ZoomOutOutlined} from '@ant-design/icons';
 import {Logger} from '../../ts/logger';
 import {getStyles} from '../../share/ts/themes';
 import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
@@ -11,7 +11,6 @@ import {HoverIconDropDownComponent} from './dropdownMenu';
 import {MarksPlugin, pluginName} from '../marks';
 import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
 
-type RowsToLinks = {[key: number]: String};
 export class LinksPlugin {
     public api: PluginApi;
     private logger: Logger;
@@ -19,8 +18,7 @@ export class LinksPlugin {
     private document: Document;
     private tagsPlugin: TagsPlugin;
     private markPlugin: MarksPlugin;
-    public SetLink!: new(row: Row, mark: String) => Mutation;
-    public UnsetLink!: new(row: Row) => Mutation;
+    public SetCollapse!: new(row: Row, collpase: boolean) => Mutation;
     constructor(api: PluginApi) {
         this.api = api;
         this.logger = this.api.logger;
@@ -31,60 +29,29 @@ export class LinksPlugin {
     }
     public async enable() {
         const that = this;
-        class SetLink extends Mutation {
+        class SetCollapse extends Mutation {
             private row: Row;
-            private mark: String;
+            private collapse: boolean;
 
-            constructor(row: Row, mark: String) {
+            constructor(row: Row, collapse: boolean) {
                 super();
                 this.row = row;
-                this.mark = mark;
+                this.collapse = collapse;
             }
             public str() {
-                return `row ${this.row}, mark ${this.mark}`;
+                return `row ${this.row}, collapse ${this.collapse}`;
             }
             public async mutate(/* session */) {
-                await that._setLink(this.row, this.mark);
+                await that._setCollapse(this.row, this.collapse);
                 await that.api.updatedDataForRender(this.row);
             }
             public async rewind(/* session */) {
                 return [
-                    new UnsetLink(this.row),
+                    new SetCollapse(this.row, !this.collapse),
                 ];
             }
         }
-        this.SetLink = SetLink;
-        class UnsetLink extends Mutation {
-            private row: Row;
-            private link: String | null | undefined = undefined;
-
-            constructor(row: Row) {
-                super();
-                this.row = row;
-            }
-            public str() {
-                return `row ${this.row}`;
-            }
-            public async mutate(/* session */) {
-                this.link = await that.getLink(this.row);
-                if (this.link !== null) {
-                    await that._unsetLink(this.row);
-                    await that.api.updatedDataForRender(this.row);
-                }
-            }
-            public async rewind(/* session */) {
-                if (this.link === undefined) {
-                    throw new Error('Rewinding before mutating: UnsetMark');
-                }
-                if (this.link === null) {
-                    return [];
-                }
-                return [
-                    new SetLink(this.row, this.link),
-                ];
-            }
-        }
-        this.UnsetLink = UnsetLink;
+        this.SetCollapse = SetCollapse;
         const onInsertDrawio = (row: Row) => {
             that.getXml(row).then(xml => {
                 that.session.drawioModalVisible = true;
@@ -105,20 +72,20 @@ export class LinksPlugin {
               );
           });
         this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
-            const link = await this.getLink(row);
+            const collapse = await this.getCollapse(row);
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
             const png = ids_to_pngs[row] || null;
             const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
             const xml = ids_to_xmls[row] || null;
             const ids_to_mds = await this.api.getData('ids_to_mds', {});
             const md = ids_to_mds[row] || null;
-            obj.links = { link: link, png: png, xml: xml, md: md };
+            obj.links = { collapse: collapse, png: png, xml: xml, md: md };
             return obj;
         });
         this.api.registerHook('document', 'serializeRow', async (struct, info) => {
-            const link = await this.getLink(info.row);
-            if (link) {
-                struct.link = link;
+            const collapse = await this.getCollapse(info.row);
+            if (collapse !== null) {
+                struct.collapse = collapse;
             }
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
             if (ids_to_pngs[info.row] != null) {
@@ -135,9 +102,8 @@ export class LinksPlugin {
             return struct;
         });
         this.api.registerListener('document', 'loadRow', async (path, serialized) => {
-            if (serialized.link !== null) {
-                const err = await this.setLink(path.row, serialized.link);
-                if (err) { return this.session.showMessage(err, {text_class: 'error'}); }
+            if (serialized.collapse) {
+                await this.setBlockCollapse(path.row, true);
             }
             if (serialized.png?.src && serialized.png?.json) {
                 await this.setPng(path.row, serialized.png.src, serialized.png.json);
@@ -155,6 +121,8 @@ export class LinksPlugin {
                 elements.push(
                   <SpecialBlock key={'special-block'}
                                 path={path}
+                                collapse={pluginData.links.collapse || false}
+                                setCollapseCallback={(collapse) => this.setBlockCollapse(path.row, collapse)}
                                 blockType={'Drawio'} session={that.session} tools={
                       <Space>
                           <ZoomInOutlined onClick={() => {ref.current!.zoomIn(); }}/>
@@ -240,67 +208,12 @@ export class LinksPlugin {
                     />
                 );
             }
-            if (pluginData.links?.link != null) {
-                const linkOnClick: MenuProps['onClick'] = ({ key }) => {
-                    switch (key) {
-                        case 'del_link':
-                            Modal.confirm({
-                                title: '确认删除当前扩展阅读链接？',
-                                icon: <ExclamationCircleOutlined />,
-                                okText: '确认',
-                                cancelText: '取消',
-                                onOk: () => {
-                                    that.setLink(path.row, null).then(() => {
-                                        that.session.emit('updateAnyway');
-                                    });
-                                }
-                            });
-                            break;
-                        case 'edit_link':
-                            that.session.formSubmitAction = (value) => {
-                                that.setLink(path.row, value).then(() => {
-                                    that.session.emit('updateAnyway');
-                                });
-                            };
-                            that.session.emit('updateAnyway');
-                            break;
-                        default:
-                            message.info(`Click on item ${key}`);
-                    }
-                };
-                const linkMenu = <Menu
-                  onClick={linkOnClick}
-                  items={[{
-                          key: 'edit_link',
-                          label: '修改链接',
-                      },
-                      {
-                          key: 'del_link',
-                          label: '取消链接',
-                      }]}
-                ></Menu>;
-                elements.push(
-                  <Dropdown overlay={linkMenu} trigger={['contextMenu']} >
-                      <Tag key='link'
-                           icon={<LinkOutlined />}
-                           onClick={() => that.onClicked(pluginData.links.link)}
-                           style={{
-                               ...getStyles(this.session.clientStore, ['theme-bg-secondary', 'theme-trim', 'theme-text-primary'])
-                           }} >
-                          扩展阅读
-                      </Tag>
-                  </Dropdown>
-                );
-            }
             return elements;
         });
     }
-    public async setLink(row: Row, mark: String | null) {
-        if (mark) {
-            await this.session.do(new this.SetLink(row, mark));
-        } else {
-            await this.session.do(new this.UnsetLink(row));
-        }
+
+    public async setBlockCollapse(row: Row, collapse: boolean) {
+        await this.session.do(new this.SetCollapse(row, collapse));
         return null;
     }
 
@@ -355,26 +268,14 @@ export class LinksPlugin {
         await this.api.updatedDataForRender(row);
     }
 
-    public async getLink(row: Row): Promise<String | null> {
-        const marks = await this._getRowsToLinks();
-        return marks[row] || null;
+    public async getCollapse(row: Row): Promise<boolean | null> {
+        const ids_to_collapses = await this.api.getData('ids_to_collapses', {});
+        return ids_to_collapses[row] || null;
     }
-    private async _getRowsToLinks(): Promise<RowsToLinks> {
-        return await this.api.getData('ids_to_links', {});
-    }
-    private async _setLink(row: Row, mark: String) {
-        const rows_to_marks = await this._getRowsToLinks();
-        rows_to_marks[row] = mark;
-        await this.api.setData('ids_to_links', rows_to_marks);
-    }
-    private async _unsetLink(row: Row) {
-        const rows_to_marks = await this._getRowsToLinks();
-        delete rows_to_marks[row];
-        await this.api.setData('ids_to_links', rows_to_marks);
-    }
-    private onClicked(url: string) {
-        // route to new page by changing window.location
-        window.open(url, '_blank'); // to open new page
+    private async _setCollapse(row: Row, mark: boolean) {
+        const ids_to_collapses = await this.api.getData('ids_to_collapses', {});
+        ids_to_collapses[row] = mark;
+        await this.api.setData('ids_to_collapses', ids_to_collapses);
     }
 }
 export const linksPluginName = 'Links';

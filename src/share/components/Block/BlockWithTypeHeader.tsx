@@ -5,8 +5,11 @@ import {Space} from 'antd';
 import {useState} from 'react';
 import {FolderOutlined, FolderOpenOutlined, EnterOutlined, CopyOutlined} from '@ant-design/icons';
 
-export function SpecialBlock(props: React.PropsWithChildren<{blockType: string, session: Session, tools: any, path: Path}>) {
-  const [fold, setFold] = useState(false);
+export function SpecialBlock(props: React.PropsWithChildren<{
+  blockType: string, session: Session,
+  tools: any, path: Path, collapse: boolean,
+  setCollapseCallback: (collapse: boolean) => void}>) {
+  const [fold, setFold] = useState(props.collapse);
   const [headerVision, setHeaderVision] = useState(false);
   return (
     <div className={'effect-block-wrapper'} onMouseEnter={() => {
@@ -30,12 +33,14 @@ export function SpecialBlock(props: React.PropsWithChildren<{blockType: string, 
             fold &&
             <FolderOutlined onClick={() => {
               setFold(false);
+              props.setCollapseCallback(false);
             }} />
           }
           {
             !fold &&
             <FolderOpenOutlined onClick={() => {
               setFold(true);
+              props.setCollapseCallback(true);
             }} />
           }
           {

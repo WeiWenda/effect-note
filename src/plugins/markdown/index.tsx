@@ -21,6 +21,8 @@ registerPlugin(
         const vditorDiv = (
           <SpecialBlock key={'special-block'}
                         path={path}
+                        collapse={pluginData.links.collapse || false}
+                        setCollapseCallback={(collapse) => linksPlugin.setBlockCollapse(path.row, collapse)}
                         blockType={'Markdown'} tools={
             <EditOutlined onClick={() => {
               api.session.md = pluginData.links.md;
