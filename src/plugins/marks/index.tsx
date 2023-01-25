@@ -435,26 +435,35 @@ export class MarksPlugin {
       return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
         token: Token, emit: EmitFn<React.ReactNode>, wrapped: Tokenizer
       ) => {
-        if (this.session.mode === 'NORMAL') {
-          const matches = this.getMarkMatches(token.text);
-          matches.map(pos => {
-            let start = pos[0];
-            let end = pos[1];
-            const mark = this.parseMarkMatch(token.text.slice(start, end));
-            const path = this.marks_to_paths[mark];
-            if (path) {
-              token.info.slice(start, end).forEach((char_info) => {
-                char_info.renderOptions.divType = 'a';
-                char_info.renderOptions.style = char_info.renderOptions.style || {};
-                Object.assign(char_info.renderOptions.style, getStyles(this.session.clientStore, ['theme-link']));
-                char_info.renderOptions.onClick = async () => {
-                  await this.session.zoomInto(path);
-                  this.session.save();
-                };
+        if (this.session.mode === 'SEARCH') {
+          token.info.forEach(info => {
+            if (info.cursor) {
+              info.selectPrompt = [];
+              Object.keys(this.marks_to_paths).forEach(label => {
+                const path =  this.marks_to_paths[label];
+                info.selectPrompt!.push({label, value: path.row.toString()});
               });
             }
           });
         }
+        const matches = this.getMarkMatches(token.text);
+        matches.map(pos => {
+          let start = pos[0];
+          let end = pos[1];
+          const mark = this.parseMarkMatch(token.text.slice(start, end));
+          const path = this.marks_to_paths[mark];
+          if (path) {
+            token.info.slice(start, end).forEach((char_info) => {
+              char_info.renderOptions.divType = 'a';
+              char_info.renderOptions.style = char_info.renderOptions.style || {};
+              Object.assign(char_info.renderOptions.style, getStyles(this.session.clientStore, ['theme-link']));
+              char_info.renderOptions.onClick = async () => {
+                await this.session.zoomInto(path);
+                this.session.save();
+              };
+            });
+          }
+        });
         emit(...wrapped.unfold(token));
         }));
     });

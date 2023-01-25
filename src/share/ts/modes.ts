@@ -186,7 +186,7 @@ registerMode({
     }
   },
   async exit(session: Session) {
-    await session.cursor.left();
+    // await session.cursor.left();
     // unlike other modes, esc in insert mode keeps changes
     session.save();
   },
@@ -246,33 +246,33 @@ registerMode({
 registerMode({
   name: 'SEARCH',
   cursorBetween: true,
-  within_row: true,
-  async every(_actionName: ActionName, { session, keyStream }) {
-    if (session.menu == null) {
-      throw new Error('No menu in session');
-    }
-    await session.menu.update();
-    keyStream.drop();
-  },
-  async exit(session) {
-    session.menu = null;
-    // NOTE: should keyStream.drop() here?
-  },
-  key_transforms: [
-    async function(key, context) {
-      if (context.session.menu == null) {
-        throw new Error('No menu in session');
-      }
-      key = transform_insert_key(key);
-      if (key.length === 1) {
-        await context.session.menu.session.addCharsAtCursor([key]);
-        await context.session.menu.update();
-        context.keyStream.drop();
-        return [null, context];
-      }
-      return [key, context];
-    },
-  ],
+  // within_row: true,
+  // async every(_actionName: ActionName, { session, keyStream }) {
+  //   if (session.menu == null) {
+  //     throw new Error('No menu in session');
+  //   }
+  //   await session.menu.update();
+  //   keyStream.drop();
+  // },
+  // async exit(session) {
+  //   session.menu = null;
+  //   // NOTE: should keyStream.drop() here?
+  // },
+  // key_transforms: [
+  //   async function(key, context) {
+  //     if (context.session.menu == null) {
+  //       throw new Error('No menu in session');
+  //     }
+  //     key = transform_insert_key(key);
+  //     if (key.length === 1) {
+  //       await context.session.menu.session.addCharsAtCursor([key]);
+  //       await context.session.menu.update();
+  //       context.keyStream.drop();
+  //       return [null, context];
+  //     }
+  //     return [key, context];
+  //   },
+  // ],
 });
 
 const getMode: (mode: ModeId) => Mode = (mode: ModeId) => MODES[mode];

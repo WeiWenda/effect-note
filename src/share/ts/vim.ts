@@ -191,14 +191,14 @@ export const INSERT_MODE_MAPPINGS: HotkeyMapping = Object.assign({
 }, INSERT_MOTION_MAPPINGS);
 
 export const SEARCH_MODE_MAPPINGS: HotkeyMapping = Object.assign({
-  'move-cursor-search': [[motionKey]],
-  'toggle-help': [['ctrl+?']],
+  // 'move-cursor-search': [[motionKey]],
+  // 'toggle-help': [['ctrl+?']],
   'exit-mode': [['esc'], ['ctrl+c'], ['ctrl+[']],
-  'search-delete-char-after': [['delete']],
-  'search-delete-char-before': [['backspace'], ['shift+backspace']],
-  'search-select': [['enter']],
-  'search-up': [['ctrl+k'], ['up'], ['shift+tab']],
-  'search-down': [['ctrl+j'], ['down'], ['tab']],
+  // 'search-delete-char-after': [['delete']],
+  // 'search-delete-char-before': [['backspace'], ['shift+backspace']],
+  // 'search-select': [['enter']],
+  // 'search-up': [['ctrl+k'], ['up'], ['shift+tab']],
+  // 'search-down': [['ctrl+j'], ['down'], ['tab']],
 }, _.pick(INSERT_MOTION_MAPPINGS, SINGLE_LINE_MOTIONS));
 
 export const SETTINGS_MODE_MAPPINGS: HotkeyMapping = {

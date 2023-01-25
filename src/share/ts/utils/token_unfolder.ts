@@ -4,11 +4,13 @@
 // This file contains the definitions and some useful combinators for these unfolders.
 
 import * as React from 'react';
+import Path from '../path';
 
 export type CharInfo = {
   highlight: boolean,
   cursor: boolean,
   accent: boolean,
+  selectPrompt?: {label: string, value: string}[],
   renderOptions: {
     divType?: string,
     style?: React.CSSProperties,

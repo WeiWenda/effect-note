@@ -34,7 +34,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
     this.state = {
       showDragHint: false
     };
-    if (props.cached.pluginData.links.md || props.cached.pluginData.links.xml ||
+    if (props.cached.pluginData.links?.md || props.cached.pluginData.links?.xml ||
       props.cached.line.join('').startsWith('<div class=\'node-html\'>')) {
       this.isNormalRow = false;
     }
@@ -396,44 +396,46 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
             </a>
           );
         }
-        bullet = (
-            <Draggable
-              position={{x: 0, y: 0}}
-              positionOffset={session.dragging && session.cursor.path.is(path) ? {x: 0, y: 20} : {x: 0, y: 0}}
-              onDrag={(_ , ui) => {
-                if (Math.abs(ui.deltaX) + Math.abs(ui.deltaY) > 0 && !session.dragging) {
-                  session.selecting = true;
-                  session.dragging = true;
-                  session.setAnchor(path, 0);
-                  session.cursor.setPosition(path, 0).then(() => {
-                    session.emit('updateInner');
-                  });
-                }
-              }}
-              onStop={() => {
-                if (session.dragging) {
-                  if (session.hoverRow) {
-                    const target = session.hoverRow;
-                    session.yankDelete().then(() => {
-                      session.cursor.setPosition(target, 0).then(() => {
-                        session.pasteAfter().then(() => {
-                          session.emit('updateInner');
-                        });
-                      });
+        if (!this.props.viewOnly) {
+          bullet = (
+              <Draggable
+                position={{x: 0, y: 0}}
+                positionOffset={session.dragging && session.cursor.path.is(path) ? {x: 0, y: 20} : {x: 0, y: 0}}
+                onDrag={(_ , ui) => {
+                  if (Math.abs(ui.deltaX) + Math.abs(ui.deltaY) > 0 && !session.dragging) {
+                    session.selecting = true;
+                    session.dragging = true;
+                    session.setAnchor(path, 0);
+                    session.cursor.setPosition(path, 0).then(() => {
+                      session.emit('updateInner');
                     });
                   }
-                  setTimeout(() => {
-                    session.selecting = false;
-                    session.stopAnchor();
-                    session.dragging = false;
-                    session.emit('updateInner');
-                  }, 10);
-                }
-              }}
-            >
-              {bullet}
-            </Draggable>
-          );
+                }}
+                onStop={() => {
+                  if (session.dragging) {
+                    if (session.hoverRow) {
+                      const target = session.hoverRow;
+                      session.yankDelete().then(() => {
+                        session.cursor.setPosition(target, 0).then(() => {
+                          session.pasteAfter().then(() => {
+                            session.emit('updateInner');
+                          });
+                        });
+                      });
+                    }
+                    setTimeout(() => {
+                      session.selecting = false;
+                      session.stopAnchor();
+                      session.dragging = false;
+                      session.emit('updateInner');
+                    }, 10);
+                  }
+                }}
+              >
+                {bullet}
+              </Draggable>
+            );
+        }
         bullet = session.applyHook('renderBullet', bullet, { path, rowInfo });
         return (
           <div key={path.row}>

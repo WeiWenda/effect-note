@@ -684,7 +684,7 @@ keyDefinitions.registerAction(new Action(
   'exit-mode',
   'Exit back to normal mode',
   async function({ session }) {
-    await session.setMode('NORMAL');
+    await session.setMode('INSERT');
   },
   // generally dont repeat actions not in normal mode
   { sequence: SequenceAction.DROP },
