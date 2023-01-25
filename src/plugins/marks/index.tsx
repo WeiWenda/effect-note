@@ -435,7 +435,7 @@ export class MarksPlugin {
       return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
         token: Token, emit: EmitFn<React.ReactNode>, wrapped: Tokenizer
       ) => {
-        if (this.session.mode === 'NORMAL') {
+        if (this.session.mode === 'INSERT') {
           const matches = this.getMarkMatches(token.text);
           matches.map(pos => {
             let start = pos[0];

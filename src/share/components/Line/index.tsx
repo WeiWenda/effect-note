@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {ReactNode} from 'react';
+import {Select} from 'antd';
 import * as _ from 'lodash';
 
 import * as text_utils from '../../ts/utils/text';
@@ -103,40 +104,84 @@ export default class LineComponent extends React.Component<LineProps, {input: st
         }
         if (char_info.cursor) {
           if (cursorBetween) {
-            setTimeout(() => {
-              if (!session.stopMonitor) {
-                $('#input-hack').focus();
-              }
-            }, 100);
-            emit(<ContentEditable id='input-hack'
-                      className='input-hack'
-                      key='input-hack'
-                      html={this.state.input}
-                      onChange={(e) => {
-                        const newVal = e.target.value.replace(/&lt;/g, '<')
-                          .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-                        this.setState({input: newVal});
-                        if ( (newVal === '——') ||
-                               (newVal.length === 1 &&
-                                  ! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal))) {
+            if (session.mode === 'SEARCH') {
+              emit(<Select
+                showSearch
+                style={{ width: 200 }}
+                placeholder='Search to Select'
+                optionFilterProp='children'
+                filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                filterSort={(optionA, optionB) =>
+                  (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                }
+                options={[
+                  {
+                    value: '1',
+                    label: 'Not Identified',
+                  },
+                  {
+                    value: '2',
+                    label: 'Closed',
+                  },
+                  {
+                    value: '3',
+                    label: 'Communicated',
+                  },
+                  {
+                    value: '4',
+                    label: 'Identified',
+                  },
+                  {
+                    value: '5',
+                    label: 'Resolved',
+                  },
+                  {
+                    value: '6',
+                    label: 'Cancelled',
+                  },
+                ]}
+              />);
+            } else {
+              setTimeout(() => {
+                if (!session.stopMonitor) {
+                  $('#input-hack').focus();
+                }
+              }, 100);
+              emit(<ContentEditable id='input-hack'
+                        className='input-hack'
+                        key='input-hack'
+                        html={this.state.input}
+                        onChange={(e) => {
+                          const newVal = e.target.value.replace(/&lt;/g, '<')
+                            .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+                          this.setState({input: newVal});
+                          if ( (newVal === '——') ||
+                                 (newVal.length === 1 &&
+                                    ! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal))) {
+                            if (newVal === '@') {
+                              this.setState({input: ''});
+                              this.props.session.setMode('SEARCH');
+                            } else {
+                              this.props.session.addCharsAtCursor(newVal.split('')).then(() => {
+                                this.props.session.emit('updateAnyway');
+                                this.setState({input: ''});
+                              });
+                            }
+                          }
+                        }}
+                        onCompositionEnd={(e) => {
+                          const newVal = e.data.replace(/&lt;/g, '<')
+                            .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+                          e.preventDefault();
+                          e.stopPropagation();
+                          // simply insert the key
                           this.props.session.addCharsAtCursor(newVal.split('')).then(() => {
                             this.props.session.emit('updateAnyway');
                             this.setState({input: ''});
                           });
-                        }
-                      }}
-                      onCompositionEnd={(e) => {
-                        const newVal = e.data.replace(/&lt;/g, '<')
-                          .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // simply insert the key
-                        this.props.session.addCharsAtCursor(newVal.split('')).then(() => {
-                          this.props.session.emit('updateAnyway');
-                          this.setState({input: ''});
-                        });
-                      }}></ContentEditable>);
-            emit(cursorBetweenDiv(token.index + i));
+                        }}></ContentEditable>);
+              emit(cursorBetweenDiv(token.index + i));
+            }
           } else {
             classes.push('cursor');
             Object.assign(style, this.props.cursorStyle);
@@ -321,9 +366,9 @@ export default class LineComponent extends React.Component<LineProps, {input: st
     // NOTE: this doesn't seem to work for the breadcrumbs, e.g. try visual selecting word at end
 
     // - start with a plain text string
-    // - allow custom "sentence" tokenization first
+    // - allow custom 'sentence' tokenization first
     // - then tokenize into words
-    // - allow more custom "word" tokenization
+    // - allow more custom 'word' tokenization
     const info: Array<CharInfo> = [];
     for (let i = 0; i < lineData.length; i++) {
       const char_info: CharInfo = {
