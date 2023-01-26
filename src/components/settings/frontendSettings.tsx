@@ -9,7 +9,7 @@ import {ServerConfig} from '../../ts/server_config';
 import {SERVER_CONFIG} from '../../ts/constants';
 import {applyGitConfig, getServerConfig, setServerConfig as saveServerConfig} from '../../share/ts/utils/APIUtils';
 
-function SimpleSettingsComponent(props: { session: Session, config: Config, refreshFunc: () => void }) {
+function FrontendSettingsComponent(props: { session: Session, config: Config, refreshFunc: () => void }) {
   // const navigate = useNavigate();
   const applyTheme = (theme: Theme) => {
     Object.keys(theme).forEach((theme_prop: string) => {
@@ -18,16 +18,6 @@ function SimpleSettingsComponent(props: { session: Session, config: Config, refr
     appendStyleScript(props.session.clientStore);
     props.refreshFunc();
   };
-  const [serverConfig, setServerConfig] = useState(SERVER_CONFIG);
-  useEffect(() => {
-    getServerConfig().then((res: ServerConfig) => {
-      setServerConfig(res);
-    });
-  }, []);
-  const [gitRemoteEditing, setGitRemoteEditing] = useState(false);
-  const [gitUsernameEditing, setGitUsernameEditing] = useState(false);
-  const [gitDepthEditing, setGitDepthEditing] = useState(false);
-  const [gitPasswordditing, setGitPasswordEditing] = useState(false);
   return (
     <div>
       <table className='setting-table'>
@@ -247,141 +237,6 @@ function SimpleSettingsComponent(props: { session: Session, config: Config, refr
         {/*</tr>*/}
         </tbody>
       </table>
-      {
-        process.env.REACT_APP_BUILD_PROFILE === 'local' &&
-        <table className='setting-table'>
-          <tbody>
-          <tr>
-            <td style={{
-              ...getStyles(props.session.clientStore, ['theme-text-primary'])
-            }}>
-              Git仓库
-            </td>
-            <td>
-              <Input value={serverConfig.gitRemote}
-                     style={{width: 600}}
-                     disabled={!gitRemoteEditing}
-                     bordered={false}
-                     onChange={(newValue) => {
-                       serverConfig.gitRemote = newValue.target.value;
-                       setServerConfig({...serverConfig});
-                     }}
-                     onBlur={() => {
-                       saveServerConfig(serverConfig);
-                     }}
-                     addonAfter={<EditOutlined onClick={() => {
-                       setGitRemoteEditing(!gitRemoteEditing);
-                     }}/>}/>
-            </td>
-          </tr>
-          <tr>
-            <td style={{
-              ...getStyles(props.session.clientStore, ['theme-text-primary'])
-            }}>
-              Git登录帐号
-            </td>
-            <td>
-              <Input value={serverConfig.gitUsername}
-                     disabled={!gitUsernameEditing}
-                     bordered={false}
-                     onChange={(newValue) => {
-                       serverConfig.gitUsername = newValue.target.value;
-                       setServerConfig({...serverConfig});
-                     }}
-                     onBlur={() => {
-                       saveServerConfig(serverConfig);
-                     }}
-                     addonAfter={<EditOutlined onClick={() => {
-                       setGitUsernameEditing(!gitUsernameEditing);
-                     }}/>}/>
-            </td>
-          </tr>
-          <tr>
-            <td style={{
-              ...getStyles(props.session.clientStore, ['theme-text-primary'])
-            }}>
-              Git登录密码
-            </td>
-            <td>
-              <Input.Password value={serverConfig.gitPassword}
-                              disabled={!gitPasswordditing}
-                              onChange={(newValue) => {
-                                serverConfig.gitPassword = newValue.target.value;
-                                setServerConfig({...serverConfig});
-                              }}
-                              onBlur={() => {
-                                saveServerConfig(serverConfig);
-                              }}
-                              bordered={false} addonAfter={<EditOutlined onClick={() => {
-                setGitPasswordEditing(!gitPasswordditing);
-              }}/>}/>
-            </td>
-          </tr>
-          <tr>
-            <td style={{
-              ...getStyles(props.session.clientStore, ['theme-text-primary'])
-            }}>
-              Git本地目录
-            </td>
-            <td>
-              <Input value={serverConfig.gitLocalDir}
-                     disabled={true}
-                     bordered={false}
-                     addonAfter={<EditOutlined onClick={() => {
-                       window.electronAPI.openDirectory().then((files) => {
-                         if (!files.cancelled) {
-                           serverConfig.gitLocalDir = files.filePaths.pop();
-                           setServerConfig({...serverConfig});
-                           saveServerConfig(serverConfig);
-                         }
-                       });
-                     }}/>}/>
-            </td>
-          </tr>
-          <tr>
-              <td style={{
-                ...getStyles(props.session.clientStore, ['theme-text-primary'])
-              }}>
-                  保留近多少次修改
-              </td>
-              <td>
-                  <Input value={serverConfig.gitDepth}
-                         disabled={!gitDepthEditing}
-                         bordered={false}
-                         onChange={(newValue) => {
-                           serverConfig.gitDepth = Number(newValue.target.value);
-                           setServerConfig({...serverConfig});
-                         }}
-                         onBlur={() => {
-                           saveServerConfig(serverConfig);
-                         }}
-                         addonAfter={<EditOutlined onClick={() => {
-                           setGitDepthEditing(!gitDepthEditing);
-                         }}/>}/>
-              </td>
-          </tr>
-          <tr>
-              <td>
-                  <Button onClick={() => {
-                      Modal.confirm({
-                        title: `${serverConfig.gitLocalDir} 将被重建，请确认！`,
-                        icon: <ExclamationCircleOutlined />,
-                        okText: '确认',
-                        cancelText: '取消',
-                        onOk: () => {
-                          applyGitConfig().then(() => {
-                            props.session.showMessage('应用成功');
-                          });
-                        }
-                      });
-                  }}>应用Git配置</Button>
-              </td>
-              <td>
-              </td>
-          </tr>
-          </tbody>
-        </table>
-      }
       {/*<div>*/}
       {/*  <Button danger onClick={() => {*/}
       {/*    localStorage.removeItem(api_utils.ACCESS_TOKEN);*/}
@@ -394,4 +249,4 @@ function SimpleSettingsComponent(props: { session: Session, config: Config, refr
   );
 }
 
-export default SimpleSettingsComponent;
+export default FrontendSettingsComponent;

@@ -9,7 +9,6 @@ import {api_utils, DocInfo, Session} from '../../share';
 import {useEffect, useState} from 'react';
 import {ImageOcr} from '../ImageOcr';
 import Config from '../../share/ts/config';
-import SimpleSettingsComponent from '../simpleSettings';
 import FileBaseInfoComponent from '../fileBaseInfo';
 import {PluginsManager} from '../../ts/plugins';
 import {Mindmap} from '../mindmap';
@@ -25,6 +24,8 @@ import { ExportComponent } from '../export';
 import YinComponent from '../yin';
 import {YangComponent} from '../yang';
 import {SubscriptionInfoComponent} from '../subscriptionInfo';
+import BackendSettingsComponent from '../settings/backendSettings';
+import FrontendSettingsComponent from '../settings/frontendSettings';
 const { Header, Footer, Sider, Content } = Layout;
 
 export const HeaderItems = [
@@ -349,29 +350,22 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         <Tabs style={{
           ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
         }} defaultActiveKey='1'>
-          <Tabs.TabPane tab='基本配置' key='1'>
-            <SimpleSettingsComponent session={props.session} config={props.config} refreshFunc={() => {
+          <Tabs.TabPane tab='页面配置' key='1'>
+            <FrontendSettingsComponent session={props.session} config={props.config} refreshFunc={() => {
               setRefreshing(true);
               setTimeout(() => {
                 setRefreshing(false);
               }, 100);
             }}/>
           </Tabs.TabPane>
-          {/*<Tabs.TabPane tab='高级配置' key='2'>*/}
-          {/*  <div style={{width: '1100px'}}>*/}
-          {/*    <SettingsComponent*/}
-          {/*      session={props.session}*/}
-          {/*      config={props.config}*/}
-          {/*      rerenderAll={() => {*/}
-          {/*        setRefreshing(true);*/}
-          {/*        setTimeout(() => {*/}
-          {/*          setRefreshing(false);*/}
-          {/*        }, 100);*/}
-          {/*      }}*/}
-          {/*      onExport={() => {}}*/}
-          {/*    />*/}
-          {/*  </div>*/}
-          {/*</Tabs.TabPane>*/}
+          <Tabs.TabPane tab='服务端配置' key='2'>
+            <BackendSettingsComponent session={props.session} config={props.config} refreshFunc={() => {
+              setRefreshing(true);
+              setTimeout(() => {
+                setRefreshing(false);
+              }, 100);
+            }}/>
+          </Tabs.TabPane>
         </Tabs>
       </Drawer>
       {/*<Footer className='layout-footer' style={{*/}
