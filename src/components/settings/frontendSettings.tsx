@@ -1,13 +1,8 @@
-import {Button, Input, Modal, Switch, Slider, InputNumber, Select} from 'antd';
+import {InputNumber, Select, Switch} from 'antd';
 import * as React from 'react';
-import {api_utils, ModeId, Session} from '../../share';
-import {EditOutlined, ExclamationCircleOutlined} from '@ant-design/icons';
+import {Session} from '../../share';
 import {appendStyleScript, getStyles, Theme, themes} from '../../share/ts/themes';
 import Config from '../../share/ts/config';
-import {useEffect, useState} from 'react';
-import {ServerConfig} from '../../ts/server_config';
-import {SERVER_CONFIG} from '../../ts/constants';
-import {applyGitConfig, getServerConfig, setServerConfig as saveServerConfig} from '../../share/ts/utils/APIUtils';
 
 function FrontendSettingsComponent(props: { session: Session, config: Config, refreshFunc: () => void }) {
   // const navigate = useNavigate();

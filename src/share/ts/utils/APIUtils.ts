@@ -120,7 +120,7 @@ export function setServerConfig(serverConfig: ServerConfig) {
     });
 }
 
-export function applyGitConfig() {
+export function workspaceRebuild() {
     return request({
         url: API_BASE_URL + '/config/git_refresh',
         method: 'GET'

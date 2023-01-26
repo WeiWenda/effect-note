@@ -309,8 +309,8 @@ function YinComponent(props: {session: Session,
         const docRes = await api_utils.getDocContent(docID);
         docContent = docRes.content;
       }
-      await props.session.changeViewRoot(Path.root());
       await markPlugin.clearMarks();
+      await props.session.changeViewRoot(Path.root());
       await tagPlugin.clearTags();
       await linkPlugin.clearLinks();
       await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo.filename!)).then(() => {

@@ -1,25 +1,23 @@
-import {Button, Input, Modal, Row, Col, Menu, MenuProps} from 'antd';
+import {Button, Col, Form, Input, Menu, MenuProps, Row, Select, Divider, Dropdown, Modal} from 'antd';
+import {EditOutlined, ExclamationCircleOutlined, PlusSquareOutlined} from '@ant-design/icons';
 import * as React from 'react';
-import {api_utils, ModeId, Session} from '../../share';
-import {EditOutlined, ExclamationCircleOutlined} from '@ant-design/icons';
-import {appendStyleScript, getStyles, Theme, themes} from '../../share/ts/themes';
-import Config from '../../share/ts/config';
 import {useEffect, useState} from 'react';
-import {ServerConfig} from '../../ts/server_config';
+import {Session} from '../../share';
+import {EMPTY_WORKSPACE_INFO, ServerConfig, WorkSpaceInfo} from '../../ts/server_config';
 import {SERVER_CONFIG} from '../../ts/constants';
-import {applyGitConfig, getServerConfig, setServerConfig as saveServerConfig} from '../../share/ts/utils/APIUtils';
+import { getServerConfig, setServerConfig as saveServerConfig, workspaceRebuild} from '../../share/ts/utils/APIUtils';
 
-function BackendSettingsComponent(props: { session: Session, config: Config, refreshFunc: () => void }) {
+function BackendSettingsComponent(props: { session: Session}) {
   const [serverConfig, setServerConfig] = useState(SERVER_CONFIG);
+  const [form] = Form.useForm();
+  const [curWorkSpace, setCurWorkSpace] = useState<WorkSpaceInfo | undefined>(undefined);
   useEffect(() => {
     getServerConfig().then((res: ServerConfig) => {
       setServerConfig(res);
+      setCurWorkSpace(res.workspaces?.find(i => i.active));
+      form.setFieldsValue(res.workspaces?.find(i => i.active));
     });
   }, []);
-  const [gitRemoteEditing, setGitRemoteEditing] = useState(false);
-  const [gitUsernameEditing, setGitUsernameEditing] = useState(false);
-  const [gitDepthEditing, setGitDepthEditing] = useState(false);
-  const [gitPasswordditing, setGitPasswordEditing] = useState(false);
   const [curMenu, setCurMenu] = useState('workspace');
   const menuItems = [{
     label: '工作空间',
@@ -31,9 +29,17 @@ function BackendSettingsComponent(props: { session: Session, config: Config, ref
   const onClick: MenuProps['onClick'] = e => {
     setCurMenu(e.key);
   };
+  const onSelect = (value: String) => {
+    const workspace = serverConfig.workspaces?.find(i => i.gitLocalDir === value);
+    setCurWorkSpace(workspace);
+    form.setFieldsValue(workspace);
+    serverConfig.workspaces = [{ active: true, ...workspace} , ...serverConfig.workspaces!
+      .filter(i => i.gitLocalDir !== workspace?.gitLocalDir).map(i => {return {active: false, ...i}; })];
+    saveServerConfig(serverConfig);
+  };
   return (
     <Row>
-      <Col>
+      <Col span={4}>
         <Menu
           selectedKeys={[curMenu]}
           onClick={onClick}
@@ -41,141 +47,145 @@ function BackendSettingsComponent(props: { session: Session, config: Config, ref
           items={menuItems}
         />
       </Col>
-      <Col>
+      <Col span={20}>
         {
           curMenu === 'workspace' &&
-          <table className='setting-table'>
-            <tbody>
-            <tr>
-              <td style={{
-                ...getStyles(props.session.clientStore, ['theme-text-primary'])
-              }}>
-                Git仓库
-              </td>
-              <td>
-                <Input value={serverConfig.gitRemote}
-                       style={{width: 600}}
-                       disabled={!gitRemoteEditing}
-                       bordered={false}
-                       onChange={(newValue) => {
-                         serverConfig.gitRemote = newValue.target.value;
-                         setServerConfig({...serverConfig});
-                       }}
-                       onBlur={() => {
-                         saveServerConfig(serverConfig);
-                       }}
-                       addonAfter={<EditOutlined onClick={() => {
-                         setGitRemoteEditing(!gitRemoteEditing);
-                       }}/>}/>
-              </td>
-            </tr>
-            <tr>
-              <td style={{
-                ...getStyles(props.session.clientStore, ['theme-text-primary'])
-              }}>
-                Git登录帐号
-              </td>
-              <td>
-                <Input value={serverConfig.gitUsername}
-                       disabled={!gitUsernameEditing}
-                       bordered={false}
-                       onChange={(newValue) => {
-                         serverConfig.gitUsername = newValue.target.value;
-                         setServerConfig({...serverConfig});
-                       }}
-                       onBlur={() => {
-                         saveServerConfig(serverConfig);
-                       }}
-                       addonAfter={<EditOutlined onClick={() => {
-                         setGitUsernameEditing(!gitUsernameEditing);
-                       }}/>}/>
-              </td>
-            </tr>
-            <tr>
-              <td style={{
-                ...getStyles(props.session.clientStore, ['theme-text-primary'])
-              }}>
-                Git登录密码
-              </td>
-              <td>
-                <Input.Password value={serverConfig.gitPassword}
-                                disabled={!gitPasswordditing}
-                                onChange={(newValue) => {
-                                  serverConfig.gitPassword = newValue.target.value;
-                                  setServerConfig({...serverConfig});
-                                }}
-                                onBlur={() => {
-                                  saveServerConfig(serverConfig);
-                                }}
-                                bordered={false} addonAfter={<EditOutlined onClick={() => {
-                  setGitPasswordEditing(!gitPasswordditing);
-                }}/>}/>
-              </td>
-            </tr>
-            <tr>
-              <td style={{
-                ...getStyles(props.session.clientStore, ['theme-text-primary'])
-              }}>
-                Git本地目录
-              </td>
-              <td>
-                <Input value={serverConfig.gitLocalDir}
-                       disabled={true}
-                       bordered={false}
-                       addonAfter={<EditOutlined onClick={() => {
-                         window.electronAPI.openDirectory().then((files) => {
-                           if (!files.cancelled) {
-                             serverConfig.gitLocalDir = files.filePaths.pop();
-                             setServerConfig({...serverConfig});
-                             saveServerConfig(serverConfig);
-                           }
-                         });
-                       }}/>}/>
-              </td>
-            </tr>
-            <tr>
-                <td style={{
-                  ...getStyles(props.session.clientStore, ['theme-text-primary'])
-                }}>
-                    保留近多少次修改
-                </td>
-                <td>
-                    <Input value={serverConfig.gitDepth}
-                           disabled={!gitDepthEditing}
-                           bordered={false}
-                           onChange={(newValue) => {
-                             serverConfig.gitDepth = Number(newValue.target.value);
-                             setServerConfig({...serverConfig});
-                           }}
-                           onBlur={() => {
-                             saveServerConfig(serverConfig);
-                           }}
-                           addonAfter={<EditOutlined onClick={() => {
-                             setGitDepthEditing(!gitDepthEditing);
-                           }}/>}/>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <Button onClick={() => {
+          <div>
+            <div style={{paddingBottom: '1em'}}>当前工作空间：</div>
+            <Row style={{alignItems: 'center'}}>
+              <Col>
+                <Select
+                  value={curWorkSpace?.gitLocalDir}
+                  style={{ maxWidth: 600 }}
+                  onChange={onSelect}
+                  options={
+                    serverConfig.workspaces?.map(info => {
+                      return {
+                        value: info.gitLocalDir,
+                        label: info.gitLocalDir
+                      };
+                    })}
+                />
+              </Col>
+              <Col>
+                <Dropdown.Button
+                  menu={{ items: [{
+                    key: 'rebuild',
+                    label: '重建',
+                  }, {
+                    key: 'delete',
+                    label: '删除',
+                  }, {
+                    key: 'duplicate',
+                    label: '复制'
+                  }], onClick: (e) => {
+                    switch (e.key) {
+                      case 'rebuild':
                         Modal.confirm({
-                          title: `${serverConfig.gitLocalDir} 将被重建，请确认！`,
-                          icon: <ExclamationCircleOutlined />,
-                          okText: '确认',
-                          cancelText: '取消',
-                          onOk: () => {
-                            applyGitConfig().then(() => {
-                              props.session.showMessage('应用成功');
-                            });
-                          }
-                        });
-                    }}>应用Git配置</Button>
-                </td>
-                <td>
-                </td>
-            </tr>
-            </tbody>
-          </table>
+                            title: `${curWorkSpace?.gitLocalDir} 将被重建，请确认！`,
+                            icon: <ExclamationCircleOutlined />,
+                            okText: '确认',
+                            cancelText: '取消',
+                            onOk: () => {
+                              workspaceRebuild().then(() => {
+                                props.session.showMessage('重建成功');
+                              });
+                            }
+                          });
+                        break;
+                      case 'delete':
+                        if (serverConfig.workspaces?.length && serverConfig.workspaces.length > 1) {
+                          serverConfig.workspaces = [...serverConfig.workspaces!
+                            .filter(i => i.gitLocalDir !== curWorkSpace?.gitLocalDir).map(i => {return {active: false, ...i}; })];
+                          serverConfig.workspaces[0].active = true;
+                          saveServerConfig(serverConfig);
+                        }
+                        break;
+                      case 'duplicate':
+                        const workspace = {...curWorkSpace, gitLocalDir: curWorkSpace?.gitLocalDir + '(copy)'};
+                        serverConfig.workspaces?.push(workspace);
+                        setServerConfig(serverConfig);
+                        setCurWorkSpace(workspace);
+                        form.setFieldsValue(workspace);
+                        break;
+                      default:
+                        // do nothing
+                    }
+                  }
+                }}><PlusSquareOutlined onClick={() => {
+                  serverConfig.workspaces?.push(EMPTY_WORKSPACE_INFO);
+                  setServerConfig(serverConfig);
+                  setCurWorkSpace(EMPTY_WORKSPACE_INFO);
+                  form.setFieldsValue(EMPTY_WORKSPACE_INFO);
+                }} /></Dropdown.Button>
+              </Col>
+            </Row>
+            <Divider />
+            {
+              curWorkSpace &&
+              <Form
+                form={form}
+                name='basic'
+                labelCol={{ span: 6 }}
+                wrapperCol={{ span: 18 }}
+                style={{ maxWidth: 600 }}
+                onFinish={(values) => {
+                  serverConfig.workspaces = [{ active: true, ...values} , ...serverConfig.workspaces!
+                    .filter(i => i.gitLocalDir !== curWorkSpace.gitLocalDir).map(i => {return {active: false, ...i}; })];
+                  saveServerConfig(serverConfig);
+                }}
+                autoComplete='off'
+              >
+                <Form.Item
+                  label='本地目录'
+                  name='gitLocalDir'
+                >
+                  <Input
+                    disabled={true}
+                    addonAfter={<EditOutlined onClick={() => {
+                      window.electronAPI.openDirectory().then((files) => {
+                        if (!files.cancelled) {
+                          form.setFieldValue('gitLocalDir', files.filePaths.pop());
+                        }
+                      });
+                    }}/>}/>
+                </Form.Item>
+                <Form.Item
+                  label='Git仓库'
+                  name='gitRemote'
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  label='Git登录帐号'
+                  name='gitUsername'
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  label='Git登录密码'
+                  name='gitPassword'
+                >
+                  <Input.Password />
+                </Form.Item>
+
+                <Form.Item
+                  label='保留近多少次修改'
+                  name='gitDepth'
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item wrapperCol={{ offset: 21 }}>
+                  <Button type='primary' htmlType='submit'>
+                    应用
+                  </Button>
+                </Form.Item>
+              </Form>
+            }
+          </div>
         }
         {
           curMenu === 'subscription' &&

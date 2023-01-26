@@ -8,7 +8,7 @@ const cors = require('cors');
 const { createWorker } = require('tesseract.js');
 const express = require('express');
 const git = require('isomorphic-git');
-const {getGitConfig} = require("./isomorphicGit");
+const {store, getGitConfig} = require("./isomorphicGit");
 const isWindows = os.type().toLowerCase().indexOf('windows') >= 0
 const IMAGES_FOLDER = 'images'
 
@@ -75,11 +75,16 @@ async function startExpress(args) {
 
   app.get('/api/config', (_, res) => {
     const {gitRemote, gitHome, gitUsername, gitPassword, gitDepth} = getGitConfig();
-    res.send({ gitRemote: gitRemote,
-      gitLocalDir: gitHome,
-      gitUsername,
-      gitPassword,
-      gitDepth});
+    const serverConfig = store.get('serverConfig', JSON.stringify({
+      workspaces: [{
+        active: true,
+        gitRemote: gitRemote,
+        gitLocalDir: gitHome,
+        gitUsername,
+        gitPassword,
+        gitDepth}]
+    }));
+    res.send(serverConfig);
   });
   app.get('/api/config/git_refresh', async (_, res) => {
     const {gitRemote, gitHome, gitUsername, gitPassword, gitDepth} = getGitConfig();
@@ -98,11 +103,15 @@ async function startExpress(args) {
     res.send({message: 'apply success'});
   })
   app.post('/api/config', async (req, res) => {
-    args.store.set('gitRemote', req.body.gitRemote);
-    args.store.set('gitHome', req.body.gitLocalDir);
-    args.store.set('gitUsername', req.body.gitUsername);
-    args.store.set('gitPassword', req.body.gitPassword);
-    args.store.set('gitDepth', req.body.gitDepth);
+    const activeWorkSpace = req.body.workspaces.find(i => i.active)
+    if (activeWorkSpace) {
+      store.set('gitRemote', activeWorkSpace.gitRemote);
+      store.set('gitHome', activeWorkSpace.gitLocalDir);
+      store.set('gitUsername', activeWorkSpace.gitUsername);
+      store.set('gitPassword', activeWorkSpace.gitPassword);
+      store.set('gitDepth', activeWorkSpace.gitDepth);
+    }
+    store.set('serverConfig', JSON.stringify(req.body))
     res.send({message: 'save success'});
   });
 

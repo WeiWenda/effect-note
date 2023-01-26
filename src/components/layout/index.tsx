@@ -343,7 +343,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       </Content>
       <Drawer drawerStyle={{
         ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
-        }} width='unset' placement='right' open={settingOpen} closable={false} onClose={() => {
+        }} width='50%' placement='right' open={settingOpen} closable={false} onClose={() => {
         setSettingOpen(false);
         props.session.stopMonitor = false;
       }} >
@@ -359,12 +359,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
             }}/>
           </Tabs.TabPane>
           <Tabs.TabPane tab='服务端配置' key='2'>
-            <BackendSettingsComponent session={props.session} config={props.config} refreshFunc={() => {
-              setRefreshing(true);
-              setTimeout(() => {
-                setRefreshing(false);
-              }, 100);
-            }}/>
+            <BackendSettingsComponent session={props.session}/>
           </Tabs.TabPane>
         </Tabs>
       </Drawer>
