@@ -301,6 +301,7 @@ function YinComponent(props: {session: Session,
     document.title = curDocInfo.name!;
     props.session.document.store.setBackend(new IndexedDBBackend(newDocName), newDocName);
     await beforeLoadDoc();
+    console.time('loading: ' + curDocInfo.name);
     if (initialLoad) {
       let docContent: any;
       if (docID === -1) {
@@ -323,6 +324,7 @@ function YinComponent(props: {session: Session,
       await afterLoadDoc();
       setLoading(false);
     }
+    console.timeEnd('loading: ' + curDocInfo.name);
   };
   useEffect(() => {
     setCurDocId(props.curDocId);

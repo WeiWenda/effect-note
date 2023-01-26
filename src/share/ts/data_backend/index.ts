@@ -90,7 +90,6 @@ export class IndexedDBBackend extends DataBackend {
 
   public async get(key: string): Promise<string | null> {
     const res = await localForage.getItem(key);
-    logger.debug('IndexDB get:', key, res);
     return res as string;
   }
 

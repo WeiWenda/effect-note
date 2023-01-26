@@ -129,7 +129,7 @@ export class ClientStore {
     if (this.use_cache) {
       this.cache[key] = value;
     }
-    logger.info('setting to storage', key, value);
+    logger.debug('setting to storage', key, value);
     this.backend.set(key, JSON.stringify(value));
   }
 

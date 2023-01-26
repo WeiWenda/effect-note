@@ -95,38 +95,39 @@ $(document).ready(async () => {
   };
 
   const noLocalStorage = (typeof localStorage === 'undefined' || localStorage === null);
-  let clientStore: ClientStore;
-  let docStore: DocumentStore;
-  let backend_type: BackendType;
+  let clientStore: ClientStore = new ClientStore(new SynchronousLocalStorageBackend());;
+  let backend_type: BackendType = 'local';
+  const docname = clientStore.getClientSetting('curDocId').toString();
+  let docStore: DocumentStore = new DocumentStore(new IndexedDBBackend(docname), docname);
   let doc;
 
   // TODO: consider using modernizr for feature detection
   // probably also want to check flexbox support
-  if (noLocalStorage) {
-    alert('You need local storage support for data to be persisted!');
-    clientStore = new ClientStore(new SynchronousInMemory());
-    backend_type = 'inmemory';
-  } else {
-    clientStore = new ClientStore(new SynchronousLocalStorageBackend());
-    if (SERVER_CONFIG.socketserver) {
-      backend_type = 'socketserver';
-    } else {
-      backend_type = clientStore.getDocSetting('dataSource');
-    }
-  }
-
-  const docname = clientStore.getClientSetting('curDocId').toString();
-
-  function getLocalStore(): DocumentStore {
-     return new DocumentStore(new IndexedDBBackend(docname), docname);
-  }
-
-  if (backend_type === 'inmemory') {
-    docStore = new DocumentStore(new InMemory());
-  } else {
-    docStore = getLocalStore();
-    backend_type = 'local';
-  }
+  // if (noLocalStorage) {
+  //   alert('You need local storage support for data to be persisted!');
+  //   clientStore = new ClientStore(new SynchronousInMemory());
+  //   backend_type = 'inmemory';
+  // } else {
+  //   clientStore = new ClientStore(new SynchronousLocalStorageBackend());
+  //   if (SERVER_CONFIG.socketserver) {
+  //     backend_type = 'socketserver';
+  //   } else {
+  //     backend_type = clientStore.getDocSetting('dataSource');
+  //   }
+  // }
+  //
+  // const docname = clientStore.getClientSetting('curDocId').toString();
+  //
+  // function getLocalStore(): DocumentStore {
+  //    return new DocumentStore(new IndexedDBBackend(docname), docname);
+  // }
+  //
+  // if (backend_type === 'inmemory') {
+  //   docStore = new DocumentStore(new InMemory());
+  // } else {
+  //   docStore = getLocalStore();
+  //   backend_type = 'local';
+  // }
 
   doc = new Document(docStore, docname);
 
@@ -135,7 +136,7 @@ $(document).ready(async () => {
   //   to_load = config.getDefaultData();
   // }
 
-  let showingKeyBindings = clientStore.getClientSetting('showKeyBindings');
+  // let showingKeyBindings = clientStore.getClientSetting('showKeyBindings');
 
   doc.store.events.on('saved', () => {
     renderMain(); // fire and forget
@@ -145,8 +146,9 @@ $(document).ready(async () => {
   });
 
   // hotkeys and key bindings
-  const saved_mappings = clientStore.getClientSetting('hotkeys');
-  const mappings = KeyMappings.merge(config.defaultMappings, new KeyMappings(saved_mappings));
+  // const saved_mappings = clientStore.getClientSetting('hotkeys');
+  // const mappings = KeyMappings.merge(config.defaultMappings, new KeyMappings(saved_mappings));
+  const mappings = config.defaultMappings;
   const keyBindings = new KeyBindings(keyDefinitions, mappings);
 
   // session
@@ -197,11 +199,11 @@ $(document).ready(async () => {
         }
       };
     })(),
-    toggleBindingsDiv: () => {
-      showingKeyBindings = !showingKeyBindings;
-      clientStore.setClientSetting('showKeyBindings', showingKeyBindings);
-      renderMain(); // fire and forget
-    },
+    // toggleBindingsDiv: () => {
+    //   showingKeyBindings = !showingKeyBindings;
+    //   clientStore.setClientSetting('showKeyBindings', showingKeyBindings);
+    //   renderMain(); // fire and forget
+    // },
     getLinesPerPage: () => {
       const line_height = getLineHeight();
       const page_height = $(document).height() as number;

@@ -77,8 +77,7 @@ export class LinksPlugin {
             const png = ids_to_pngs[row] || null;
             const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
             const xml = ids_to_xmls[row] || null;
-            const ids_to_mds = await this.api.getData('ids_to_mds', {});
-            const md = ids_to_mds[row] || null;
+            const md = await this.getMarkdown(row);
             obj.links = { collapse: collapse, png: png, xml: xml, md: md };
             return obj;
         });
@@ -95,25 +94,26 @@ export class LinksPlugin {
             if (ids_to_xmls[info.row] != null) {
                 struct.drawio = ids_to_xmls[info.row];
             }
-            const ids_to_mds = await this.api.getData('ids_to_mds', {});
-            if (ids_to_mds[info.row] != null) {
-                struct.md = ids_to_mds[info.row];
+            const md = await this.getMarkdown(info.row);
+            if (md != null) {
+                struct.md = md;
             }
             return struct;
         });
         this.api.registerListener('document', 'loadRow', async (path, serialized) => {
             if (serialized.collapse) {
-                await this.setBlockCollapse(path.row, true);
+                await this._setCollapse(path.row, true);
             }
             if (serialized.png?.src && serialized.png?.json) {
-                await this.setPng(path.row, serialized.png.src, serialized.png.json);
+                await this._setPng(path.row, serialized.png.src, serialized.png.json);
             }
-            if (serialized.drawio !== null) {
-                await this.setXml(path.row, serialized.drawio);
+            if (serialized.drawio) {
+                await this._setXml(path.row, serialized.drawio);
             }
-            if (serialized.md !== null) {
-                await this.setMarkdown(path.row, serialized.md);
+            if (serialized.md) {
+                await this._setMarkdown(path.row, serialized.md);
             }
+            await this.api.updatedDataForRender(path.row);
         });
         this.api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData}) => {
             if (pluginData.links?.xml != null) {
@@ -222,6 +222,7 @@ export class LinksPlugin {
         await this.api.setData('ids_to_pngs', {});
         await this.api.setData('ids_to_xmls', {});
         await this.api.setData('ids_to_mds', {});
+        await this.api.setData('ids_to_collapses', {});
     }
 
     public async getPng(row: Row): Promise<any> {
@@ -230,35 +231,52 @@ export class LinksPlugin {
     }
     public async getMarkdown(row: Row): Promise<any> {
         const ids_to_mds = await this.api.getData('ids_to_mds', {});
-        return ids_to_mds[row];
+        if (ids_to_mds[row]) {
+            const markdown = await this.api.getData(row + ':md', '');
+            return markdown || null;
+        } else {
+            return null;
+        }
     }
 
-    public async setMarkdown(row: Row, xml: String): Promise<String | null> {
-        const ids_to_mds = await this.api.getData('ids_to_mds', {});
-        ids_to_mds[row] = xml;
-        await this.api.setData('ids_to_mds', ids_to_mds);
+    public async setMarkdown(row: Row, md: String): Promise<void> {
+        await this._setMarkdown(row, md);
         await this.api.updatedDataForRender(row);
-        return null;
     }
+
+    private async _setMarkdown(row: Row, md: String): Promise<void> {
+        await this.api.setData(row + ':md', md);
+        // 不存在的key查询效率较差
+        const ids_to_mds = await this.api.getData('ids_to_mds', {});
+        ids_to_mds[row] = 1;
+        await this.api.setData('ids_to_mds', ids_to_mds);
+    }
+
     public async getXml(row: Row): Promise<any> {
         const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
         return ids_to_xmls[row];
     }
 
-    public async setXml(row: Row, xml: String): Promise<String | null> {
+    public async setXml(row: Row, xml: String): Promise<void> {
+        await this._setXml(row, xml);
+        await this.api.updatedDataForRender(row);
+    }
+
+    private async _setXml(row: Row, xml: String): Promise<void> {
         const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
         ids_to_xmls[row] = xml;
         await this.api.setData('ids_to_xmls', ids_to_xmls);
-        await this.api.updatedDataForRender(row);
-        return null;
     }
 
-    public async setPng(row: Row, src: String, json: any): Promise<String | null> {
+    public async setPng(row: Row, src: String, json: any): Promise<void> {
+        await this._setPng(row, src, json);
+        await this.api.updatedDataForRender(row);
+    }
+
+    private async _setPng(row: Row, src: String, json: any): Promise<void> {
         const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
         ids_to_pngs[row] = {src: src, json: json};
         await this.api.setData('ids_to_pngs', ids_to_pngs);
-        await this.api.updatedDataForRender(row);
-        return null;
     }
 
     public async unsetPng(row: Row) {
