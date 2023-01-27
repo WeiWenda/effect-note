@@ -67,7 +67,9 @@ export type DocInfo = {
 };
 
 export type SubscriptionInfo = {
-  name?: string;
+  name: string;
+  order?: number;
+  disabled?: boolean;
   gitRemote?: string;
   rootDir?: string;
 };

@@ -154,6 +154,14 @@ export function getSubscriptions() {
     });
 }
 
+export function updateSubscriptions(body: any) {
+    return request({
+        url: API_BASE_URL + '/subscription',
+        method: 'PUT',
+        body: JSON.stringify(body)
+    });
+}
+
 export function getSubscriptionFiles(dir: string) {
     return request({
         url: API_BASE_URL + `/subscription/file_tree?dir=${dir}`,

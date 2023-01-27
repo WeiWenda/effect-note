@@ -1,4 +1,4 @@
-import {DocInfo, IndexedDBBackend, InMemory, Path, Session, SubscriptionSearchResult} from '../../share';
+import {DocInfo, IndexedDBBackend, InMemory, Path, Session, SubscriptionInfo, SubscriptionSearchResult} from '../../share';
 import Config from '../../share/ts/config';
 import {Input, List, Tree} from 'antd';
 import type {DataNode} from 'antd/es/tree';
@@ -25,9 +25,12 @@ export function YangComponent(props: {session: Session, config: Config}) {
   const [searchResult, setSearchResult] = useState<SubscriptionSearchResult[]>([]);
   useEffect(() => {
     getSubscriptions().then((res) => {
-      setTreeData(res.data.map((sub: string) => {
-        return {title: sub, key: sub};
-      }));
+      const subscriptions = (Object.values(res.data) as SubscriptionInfo[]).filter(sub => {
+        return !sub.disabled;
+      }).sort((a, b) => {
+        return (a.order || 0) - (b.order || 0);
+      }).map(sub => { return {title: sub.name, key: sub.name}; });
+      setTreeData(subscriptions);
     }).catch(e => {
       props.session.showMessage(e, {warning: true});
     });

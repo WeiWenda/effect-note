@@ -44,7 +44,7 @@ async function addDocToIndex(dir, lunrIdx) {
 }
 router.get('/', async (req, res) => {
     const existList = JSON.parse(store.get('subscription_list', '{}'))
-    res.send({data: Object.keys(existList)})
+    res.send({data: existList})
 })
 router.get('/file_tree', (req, res) => {
     const dir = req.query.dir;
@@ -62,6 +62,11 @@ router.get('/file_content', (req, res) => {
     const name = filepath.split('/').pop()
     const content = fs.readFileSync(path.join(getSearchDir(), filepath), {encoding: 'utf-8'});
     res.send({name, tag: JSON.stringify([]), content, id: -2});
+})
+router.put('/', (req, res) => {
+    store.set('subscription_list', JSON.stringify(req.body))
+    refreshIndex()
+    res.send({message: 'update subscription success'})
 })
 router.post('/', async (req, res) => {
     const dirname = req.body.name;
