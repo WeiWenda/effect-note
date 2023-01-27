@@ -1,7 +1,10 @@
+import { Theme } from '../share/ts/themes';
+
 // server-side configuration of client code
 export type ServerConfig = {
   socketserver?: boolean,
-  workspaces?: WorkSpaceInfo[]
+  workspaces?: WorkSpaceInfo[],
+  themes?: {[key: string]: Theme},
 };
 export type WorkSpaceInfo = {
   active?: boolean,

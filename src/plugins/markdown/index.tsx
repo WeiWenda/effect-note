@@ -40,7 +40,7 @@ registerPlugin(
         );
         setTimeout(() => {
           const divs = $(`#${id}`).get();
-          const mode = api.session.clientStore.getClientSetting('blackMode') ? 'dark' : 'light';
+          const mode = api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light';
           if (divs.length > 0) {
             Vditor.preview(divs[0] as HTMLDivElement, pluginData.links.md, {mode, theme : {
                 current: mode,

@@ -69,10 +69,10 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       },
       preview: {
         theme : {
-          current: props.session.clientStore.getClientSetting('blackMode') ? 'dark' : 'light',
+          current: props.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light',
           path: 'content-theme'
       }},
-      theme: props.session.clientStore.getClientSetting('blackMode') ? 'dark' : 'classic',
+      theme: props.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'classic',
       height: window.innerHeight - 360,
       toolbar: ['quote', '|', 'headings', 'bold', 'italic', 'strike', 'inline-code', '|',
         'list', 'ordered-list', 'check' , '|', 'link', 'upload', 'table', 'code', '|', 'insert-before', 'insert-after', 'undo', 'redo'],

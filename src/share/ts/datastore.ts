@@ -26,17 +26,12 @@ export type ClientSettings = Theme & {
   hotkeys: any; // TODO
   copyToClipboard: boolean;
   formattedCopy: boolean;
-  blackMode: boolean;
-  fontSize: number;
-  blockPaddingLeft: number;
-  lineHeight: number;
   defaultLayout: string;
-  fontFamily: string;
-  fontFamilyZh: string;
   openMenus: string;
   openFile: string;
   curView: string;
   curDocId: number;
+  curTheme: string;
 };
 
 type ClientSetting = keyof ClientSettings;
@@ -47,13 +42,8 @@ const default_client_settings: ClientSettings =
     hotkeys: {},
     copyToClipboard: true,
     formattedCopy: false,
-    blackMode: false,
-    fontSize: 15,
-    blockPaddingLeft: 36,
-    lineHeight: 27,
+    curTheme: 'Default',
     defaultLayout: 'top_left',
-    fontFamily: 'Arial',
-    fontFamilyZh: 'PingFang SC',
     openMenus: '[\"0\"]',
     openFile: '0',
     curView: 'user_view',

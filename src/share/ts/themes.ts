@@ -18,6 +18,11 @@ export type Theme = {
 
   'theme-text-cursor': string,
   'theme-bg-cursor': string,
+  'lineHeight': number,
+  'fontSize': number,
+  'fontFamily': string,
+  'fontFamilyZh': string,
+  'blockPaddingLeft': number,
 };
 
 export type StyleProperty =
@@ -97,6 +102,11 @@ export const themes: {[key: string]: Theme} = {
 
     'theme-text-cursor': colors.white,
     'theme-bg-cursor': '#666',
+    fontSize: 15,
+    lineHeight: 27,
+    blockPaddingLeft: 36,
+    fontFamily: 'Arial',
+    fontFamilyZh: 'PingFang SC',
   },
   'Dark': {
     'theme-bg-primary': '#000000',
@@ -113,6 +123,11 @@ export const themes: {[key: string]: Theme} = {
 
     'theme-text-cursor': colors.black,
     'theme-bg-cursor': '#ccc',
+    fontSize: 15,
+    lineHeight: 27,
+    blockPaddingLeft: 36,
+    fontFamily: 'Arial',
+    fontFamilyZh: 'PingFang SC',
   },
   'Solarized Light': {
     'theme-bg-primary': colors.solarized.base3,
@@ -129,6 +144,11 @@ export const themes: {[key: string]: Theme} = {
 
     'theme-text-cursor': colors.solarized.base3,
     'theme-bg-cursor': colors.solarized.cyan,
+    fontSize: 15,
+    lineHeight: 27,
+    blockPaddingLeft: 36,
+    fontFamily: 'Arial',
+    fontFamilyZh: 'PingFang SC',
   },
   'Solarized Dark': {
     'theme-bg-primary': colors.solarized.base02,
@@ -145,15 +165,22 @@ export const themes: {[key: string]: Theme} = {
 
     'theme-text-cursor': colors.solarized.base02,
     'theme-bg-cursor': colors.solarized.base1,
+    fontSize: 15,
+    lineHeight: 27,
+    blockPaddingLeft: 36,
+    fontFamily: 'Arial',
+    fontFamilyZh: 'PingFang SC',
   },
 };
 
 export function appendStyleScript(clientStore: ClientStore) {
   const theme: Theme = {} as Theme;
   Object.keys(themes.Default).forEach((theme_property: string) => {
+    // @ts-ignore
     theme[theme_property as keyof Theme] = clientStore.getClientSetting(theme_property as keyof Theme);
   });
-  document.documentElement.setAttribute('data-theme', clientStore.getClientSetting('blackMode') ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme',
+    clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light');
   $('.node-dynamic-style').remove();
   $('#app').append(`<style class='node-dynamic-style'>
                     .session-content{padding-left: ${50 - clientStore.getClientSetting('blockPaddingLeft')}px}
