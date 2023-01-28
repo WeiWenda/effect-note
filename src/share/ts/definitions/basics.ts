@@ -629,18 +629,20 @@ keyDefinitions.registerAction(new Action(
   'paste-before',
   'Paste before cursor',
   async function({ session }) {
-    if (session.register.serialize().type === RegisterTypes.NONE) {
-      let text: string = await navigator.clipboard.readText();
-      text = text.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
-      const mimetype = mimetypeLookupByContent(text);
-      if (!mimetype) {
-        await session.pasteText(text);
+    if (!session.stopMonitor) {
+      if (session.register.serialize().type === RegisterTypes.NONE) {
+        let text: string = await navigator.clipboard.readText();
+        text = text.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
+        const mimetype = mimetypeLookupByContent(text);
+        if (!mimetype) {
+          await session.pasteText(text);
+        } else {
+          session.showMessage(`识别到${mimetype}格式，导入中...`);
+          await session.importContent(text, mimetype, session.cursor.path);
+        }
       } else {
-        session.showMessage(`识别到${mimetype}格式，导入中...`);
-        await session.importContent(text, mimetype, session.cursor.path);
+        await session.pasteBefore();
       }
-    } else {
-      await session.pasteBefore();
     }
   },
 ));

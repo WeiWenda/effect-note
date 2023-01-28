@@ -24,6 +24,9 @@ htmlRegexParts.push(
 htmlRegexParts.push(
   `<span(.|\\n)*/>`
 );
+htmlRegexParts.push(
+  `<a(.|\\n)*?href="(.*?)">([^<]*?)</a>`
+);
 htmlTypes.forEach((htmltype) => {
     htmlRegexParts.push(
       `<${htmltype}(.|\\n)*>(.*?)</${htmltype}>`

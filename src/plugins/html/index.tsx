@@ -64,7 +64,7 @@ registerPlugin(
               );
             } else {
               const textContent = new RegExp(htmlRegex).exec(token.text);
-              if (textContent && textContent.length > 4 && textContent[4] && !api.session.lockEdit) {
+              if (textContent && textContent[4] && !api.session.lockEdit) {
                 emit(
                   <FontStyleToolComponent key={`html-${token.index}`}
                                           session={api.session} path={info.path}
@@ -72,7 +72,19 @@ registerPlugin(
                                           showDelete={true}
                                           startCol={token.index} endCol={token.index + token.length}>
                     <span
-                      className={'node-html'}
+                      dangerouslySetInnerHTML={{__html: token.text}}
+                    />
+                  </FontStyleToolComponent>
+                );
+              } else if (textContent && textContent[9] && !api.session.lockEdit) {
+                emit(
+                  <FontStyleToolComponent key={`html-${token.index}`}
+                                          session={api.session} path={info.path}
+                                          textContent={textContent[10]}
+                                          link={textContent[9]}
+                                          showDelete={true}
+                                          startCol={token.index} endCol={token.index + token.length}>
+                    <span
                       dangerouslySetInnerHTML={{__html: token.text}}
                     />
                   </FontStyleToolComponent>

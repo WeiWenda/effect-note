@@ -373,7 +373,11 @@ $(document).ready(async () => {
   });
 
   window.addEventListener('blur', () => {
-    session.cursor.reset();
+    // 从其他应用复制链接的情况
+    if (!session.selectPopoverOpen) {
+      session.cursor.reset();
+      session.selecting = false;
+    }
     session.register.saveNone();
     session.emit('updateInner');
   });

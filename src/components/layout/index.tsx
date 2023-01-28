@@ -94,7 +94,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
     if (baseInfoModalVisible || props.session.pngModalVisible
       || props.session.wangEditorModalVisible || props.session.ocrModalVisible
       || props.session.drawioModalVisible || props.session.mdEditorModalVisible
-      || props.session.exportModalVisible) {
+      || props.session.exportModalVisible || props.session.selectPopoverOpen) {
       props.session.stopMonitor = true;
     } else {
       props.session.stopMonitor = false;
@@ -102,7 +102,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   }, [baseInfoModalVisible, props.session.pngModalVisible,
     props.session.wangEditorModalVisible, props.session.ocrModalVisible,
     props.session.mdEditorModalVisible, props.session.drawioModalVisible,
-    props.session.exportModalVisible]);
+    props.session.exportModalVisible,  props.session.selectPopoverOpen]);
   useEffect(() => {
     if (curPage === 'user_view') {
       props.session.stopMonitor = false;

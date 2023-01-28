@@ -157,13 +157,15 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
              this.setState({showDragHint: false});
            }}
         onMouseDown={(e) => {
-          if (!this.isNormalRow) {
-            session.cursor.reset();
-            session.emit('updateInner');
-          } else if (e.detail === 1) {
-            console.log('onLineMouseDown');
-            session.selecting = false;
-            session.setAnchor(path, -1);
+          if (!this.props.session.selectPopoverOpen) {
+            if (!this.isNormalRow) {
+              session.cursor.reset();
+              session.emit('updateInner');
+            } else if (e.detail === 1) {
+              console.log('onLineMouseDown');
+              session.selecting = false;
+              session.setAnchor(path, -1);
+            }
           }
         }}
         onMouseUp={(e) => {
