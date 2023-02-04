@@ -30,7 +30,7 @@ export interface UploadImageInfo {
   blobURL?: string;
 }
 
-export const ImageOcr = (props: {session: Session}) => {
+export const ImageOcr = (props: {session: Session, onFinish: () => void}) => {
 
   const [values, valueChange] = useState<UploadImageInfo[]>([]);
   const [form] = Form.useForm();
@@ -206,7 +206,7 @@ export const ImageOcr = (props: {session: Session}) => {
       onFinish={(formValues) => {
         props.session.pasteText(formValues.text).then(() => {
           props.session.showMessage('插入成功');
-          props.session.ocrModalVisible = false;
+          props.onFinish();
           props.session.emit('updateAnyway');
         });
       }}

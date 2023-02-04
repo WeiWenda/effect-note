@@ -42,11 +42,6 @@ registerPlugin(
                               blockType={'RTF'} session={api.session} tools={
                   <EditOutlined onClick={() => {
                     const path = info.path;
-                    setTimeout(() => {
-                      api.session.wangEditorHtml = htmlContent.slice('<div class=\'node-html\'>'.length, -6);
-                      api.session.emit('updateAnyway');
-                    }, 100);
-                    api.session.wangEditorModalVisible = true;
                     api.session.wangEditorOnSave = (html: any) => {
                       let wrappedHtml = html;
                       wrappedHtml = `<div class='node-html'>${html}</div>`;
@@ -54,7 +49,7 @@ registerPlugin(
                         api.session.emit('updateAnyway');
                       });
                     };
-                    api.session.emit('updateAnyway');
+                    api.session.emit('openModal', 'rtf', {html: htmlContent.slice('<div class=\'node-html\'>'.length, -6)});
                   }}/>
                 }>
                   <Highlight innerHTML={true}>

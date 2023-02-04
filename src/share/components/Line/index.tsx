@@ -194,6 +194,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
               style: style,
               key: `default-${column}`,
               className: classes.join(' '),
+              onClick: onClick,
               href: href,
               target: target
             } as React.DOMAttributes<any>,

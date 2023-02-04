@@ -13,12 +13,12 @@ span
     &::selection
         color: unset
         background: unset
-.ant-tabs .ant-tabs-tab:hover
-    color: unset
 .ant-tabs .ant-tabs-ink-bar
     background: unset
-.ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn
-    color: unset
+.ant-form-item
+    .ant-form-item-label
+        label
+            color: unset
 .ant-input-search >.ant-input-group >.ant-input-group-addon:last-child .ant-input-search-button:not(.ant-btn-primary)
     &:hover
         color: unset
@@ -30,9 +30,6 @@ span
     padding-inline: unset
     padding-left: 24px
     padding-right: 0
-.ant-tabs-tab
-    &:hover
-        color: unset
 .form_modal.ant-modal .ant-modal-content
     padding: 20px 24px 1px 24px
 
@@ -57,9 +54,6 @@ span
     color: unset
 .ant-form-item
     color: unset
-.ant-form-item-label
-    label
-        color: unset
 
 .ant-menu-light
     .ant-menu-item:hover:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected)
@@ -69,11 +63,9 @@ span
         color: unset
 .ant-drawer-content
     background: unset
-    border-left: white
-    border-left-width: 2px
-    border-left-style: solid
-.ant-drawer-body
-    padding: 0
+.ant-drawer
+    .ant-drawer-body
+        padding: 0
 .ant-collapse
     color: unset
     background: unset
@@ -134,6 +126,30 @@ span
             z-index: 1
             top: 0
             position: sticky
+.ant-list
+    color: unset
+    .ant-list-item
+        color: unset
+        .ant-list-item-action
+            li
+                color: unset
+.ant-pagination
+    color: unset
+    .ant-pagination-item-active
+        color: unset
+        background-color: unset
+
+    .ant-pagination-item
+        a
+            color: unset
+    .ant-pagination-prev
+        color: unset
+        button
+            color: unset
+    .ant-pagination-next
+        color: unset
+        button
+            color: unset
 
 .transition-ease-width
     @include transition(width 0.2s ease-in-out)

@@ -1,14 +1,13 @@
 import {api_utils, DocInfo, Path, Session} from '../../share';
 import { Button, Form, Input, Select } from 'antd';
 import React, {useEffect, useState} from 'react';
+import {onlyUnique} from '../../ts/util';
+import {getStyles} from '../../share/ts/themes';
 
 const { Option } = Select;
 
 function FileBaseInfoComponent(props: {session: Session, tags: string[], docInfo: DocInfo, onFinish: (docId: number) => void}) {
   const [form] = Form.useForm();
-  function onlyUnique(value: string, index: number, self: string[]) {
-    return self.indexOf(value) === index;
-  }
   const children: React.ReactNode[] = props.tags.filter( onlyUnique ).map(tag => {
     return <Option key={tag}>{tag}</Option>;
   });
@@ -26,6 +25,9 @@ function FileBaseInfoComponent(props: {session: Session, tags: string[], docInfo
   return (
     <Form
       layout='vertical'
+      style={{
+        ...getStyles(props.session.clientStore, ['theme-text-primary'])
+      }}
       form={form}
       initialValues={{name: defaultName, tag: defaultTags}}
       onFinish={(values) => {
@@ -35,20 +37,22 @@ function FileBaseInfoComponent(props: {session: Session, tags: string[], docInfo
             tag: JSON.stringify(values.tags),
             name: values.name
           }).then((doc_id) => {
+            props.session.showMessage('修改成功');
             props.onFinish(doc_id);
           });
         } else {
           props.session.newFile(values.name || defaultName, values.tags || []).then((doc_id) => {
+            props.session.showMessage('创建成功');
             props.onFinish(doc_id);
           });
         }
       }}
     >
-      <Form.Item name='name' label='文档名称'>
+      <Form.Item name='name' label='笔记名称'>
         <Input />
       </Form.Item>
-      <Form.Item name='tags' label='文档类别'>
-        <Select mode='tags' placeholder='一级目录/二级目录/../N级目录'>
+      <Form.Item name='tags' label='分类标签'>
+        <Select mode='tags' placeholder='标签可分层，如：目录/子目录'>
           {children}
         </Select>
       </Form.Item>

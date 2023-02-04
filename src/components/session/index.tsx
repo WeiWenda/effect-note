@@ -1,10 +1,11 @@
-import {DocInfo, DocVersion, Modes, Path, Session, SessionComponent, SpinnerComponent} from '../../share';
-import {Popover, Radio, Space, Input, Button, Dropdown, MenuProps} from 'antd';
+import {DocVersion, Modes, Path, Session, SessionComponent, SpinnerComponent} from '../../share';
+import {Button, Dropdown, Input, MenuProps, Popover, Radio, Space} from 'antd';
 import {
-  MenuUnfoldOutlined,
   HistoryOutlined,
   LeftOutlined,
   LockOutlined,
+  MenuUnfoldOutlined,
+  MoreOutlined,
   RightOutlined,
   StarFilled,
   StarOutlined,
@@ -19,8 +20,9 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {MarksPlugin} from '../../plugins/marks';
 import {default as FileSearch} from '../../share/ts/search';
-import {mimetypeLookup} from '../../ts/util';
 import {TagsPlugin} from '../../plugins/tags';
+import { useForceUpdate } from '../layout';
+
 const {Search} = Input;
 
 export function SessionWithToolbarComponent(props: {session: Session, loading: boolean, filterOuter: string,
@@ -28,10 +30,9 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   showLockIcon: boolean,
   beforeLoadDoc?: () => Promise<void>,
   afterLoadDoc?: () => Promise<void>
-  curDocInfo?: DocInfo,
+  curDocId: number,
   markPlugin?: MarksPlugin,
-  tagPlugin?: TagsPlugin,
-  onEditBaseInfo?: (info: DocInfo) => void}) {
+  tagPlugin?: TagsPlugin}) {
   const [isMarked, setMarked] = useState(false);
   const [unfoldLevel, setUnfoldLevel] = useState(100);
   const [isRoot, setIsRoot] = useState(props.session.viewRoot.isRoot());
@@ -48,10 +49,6 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const textColor = props.session.clientStore.getClientSetting('theme-text-primary');
   const selectStyle = `opacity(100%) drop-shadow(0 0 0 ${textColor}) brightness(10)`;
   const unselectStyle = `opacity(10%) drop-shadow(0 0 0 ${textColor})`;
-  function useForceUpdate() {
-    const [value, setValue] = useState(0); // integer state
-    return () => setValue(value + 1); // update state to force render
-  }
   const forceUpdate = useForceUpdate();
   const applyFilterInner = (filterContent: string) => {
     if (filterContent) {
@@ -118,16 +115,6 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
         }
       }
       updateCrumbContent();
-    });
-    props.session.replaceListener('save-cloud', (info) => {
-      props.session.showMessage('保存成功');
-      props.session.userDocs = props.session.userDocs.map(doc => {
-        if (doc.id === info.docId) {
-          doc.dirtyUpdate = false;
-        }
-        return doc;
-      });
-      props.session.emit('updateAnyway');
     });
   }, []);
   return (
@@ -232,12 +219,12 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
               }}/>
             }
             {
-              props.curDocInfo && props.beforeLoadDoc && props.afterLoadDoc &&
+              props.curDocId !== -1 && props.beforeLoadDoc && props.afterLoadDoc &&
                 <Popover placement='bottom' content={
                   <div style={{width: '200px', maxHeight: '100px', overflowY: 'auto'}}>
                     <Radio.Group onChange={(v) => {
                       setCurrentVersion(v.target.value);
-                      getDocContent(props.curDocInfo!.id!, v.target.value).then((res) => {
+                      getDocContent(props.curDocId, v.target.value).then((res) => {
                         props.session.showMessage('版本回溯中...');
                         props.beforeLoadDoc!().then(() => {
                           props.session.reloadContent(res.content).then(() => {
@@ -265,24 +252,16 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                          trigger='click'
                          onOpenChange={(open) => {
                            if (open) {
-                             getDocVersions(props.curDocInfo!.id!).then(res => setVersions(res));
+                             getDocVersions(props.curDocId).then(res => setVersions(res));
                            }
                          }}>
                   <HistoryOutlined />
                 </Popover>
             }
-            <FileToolsComponent session={props.session} curDocId={props.curDocInfo?.id}
-                                tagPlugin={props.tagPlugin}
-                                onEditBaseInfo={() => {
-                                  if (props.onEditBaseInfo && props.curDocInfo) {
-                                    props.onEditBaseInfo(props.curDocInfo);
-                                  }
-                                }}
-                                reloadFunc={(operationType: string) => {
-                                  if (operationType === 'remove') {
-                                    forceUpdate();
-                                  }
-                                }}/>
+            <FileToolsComponent session={props.session} curDocId={props.curDocId}
+                                tagPlugin={props.tagPlugin}>
+                <MoreOutlined style={{float: 'right', paddingRight: '10px'}} onClick={e => e.preventDefault()}/>
+            </FileToolsComponent>
           </Space>
         </div>
       }

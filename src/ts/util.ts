@@ -51,6 +51,10 @@ export async function exportFile(session: Session, type = 'json') {
     downloadFile(filename, content, mimetype);
 }
 
+export function onlyUnique(value: string, index: number, self: string[]) {
+    return self.indexOf(value) === index;
+}
+
 export function mimetypeLookup(filename: string): string | undefined {
     const parts = filename.split('.');
     const extension = parts.length > 1 ? parts[parts.length - 1] : '';

@@ -16,6 +16,12 @@ import 'font-awesome/css/font-awesome.min.css';
 import '../assets/css/utils.sass';
 import '../assets/css/index.sass';
 import '../assets/css/view.sass';
+import {
+  createBrowserRouter,
+  Link,
+  Route,
+  RouterProvider,
+} from 'react-router-dom';
 import {message} from 'antd';
 
 import {
@@ -48,7 +54,9 @@ import '../plugins';
 import {PluginsManager} from '../ts/plugins';
 import logger from '../ts/logger';
 import {appendStyleScript} from '../share/ts/themes';
-import LayoutComponent from './layout';
+import LayoutComponent, {noteLoader} from './layout';
+import YinComponent from './yin';
+import {YangComponent} from './yang';
 
 declare const window: any; // because we attach globals for debugging
 
@@ -78,24 +86,24 @@ root.render(
 
 $(document).ready(async () => {
   // random global state.  these things should be managed by redux maybe
-  let caughtErr: null | Error = null;
-
-  window.onerror = function(msg: string, url: string, line: number, _col: number, err: Error) {
-    logger.error(`Caught error: '${msg}' from  ${url}:${line}`);
-    if (msg === 'ResizeObserver loop limit exceeded') {
-      // caughtErr = new ExpectedError(msg);
-    } else if (err) {
-      logger.error('Error: ', msg, err, err.stack, JSON.stringify(err));
-      caughtErr = err;
-    } else {
-      logger.error('Error: ', msg, JSON.stringify(msg));
-      caughtErr = new Error(msg);
-    }
-    renderMain(); // fire and forget
-  };
+  // let caughtErr: null | Error = null;
+  //
+  // window.onerror = function(msg: string, url: string, line: number, _col: number, err: Error) {
+  //   logger.error(`Caught error: '${msg}' from  ${url}:${line}`);
+  //   if (msg === 'ResizeObserver loop limit exceeded') {
+  //     // caughtErr = new ExpectedError(msg);
+  //   } else if (err) {
+  //     logger.error('Error: ', msg, err, err.stack, JSON.stringify(err));
+  //     caughtErr = err;
+  //   } else {
+  //     logger.error('Error: ', msg, JSON.stringify(msg));
+  //     caughtErr = new Error(msg);
+  //   }
+  //   renderMain(); // fire and forget
+  // };
 
   const noLocalStorage = (typeof localStorage === 'undefined' || localStorage === null);
-  let clientStore: ClientStore = new ClientStore(new SynchronousLocalStorageBackend());;
+  let clientStore: ClientStore = new ClientStore(new SynchronousLocalStorageBackend());
   let backend_type: BackendType = 'local';
   const docname = clientStore.getClientSetting('curDocId').toString();
   let docStore: DocumentStore = new DocumentStore(new IndexedDBBackend(docname), docname);
@@ -131,54 +139,20 @@ $(document).ready(async () => {
 
   doc = new Document(docStore, docname);
 
-  let to_load: any = null;
-  // if ((await docStore.getChildren(Path.rootRow())).length === 0 && docname === '') {
-  //   to_load = config.getDefaultData();
-  // }
-
   // let showingKeyBindings = clientStore.getClientSetting('showKeyBindings');
 
-  doc.store.events.on('saved', () => {
-    renderMain(); // fire and forget
-  });
-  doc.store.events.on('unsaved', () => {
-    renderMain(); // fire and forget
-  });
+  // doc.store.events.on('saved', () => {
+  //   renderMain(); // fire and forget
+  // });
+  // doc.store.events.on('unsaved', () => {
+  //   renderMain(); // fire and forget
+  // });
 
   // hotkeys and key bindings
   // const saved_mappings = clientStore.getClientSetting('hotkeys');
   // const mappings = KeyMappings.merge(config.defaultMappings, new KeyMappings(saved_mappings));
   const mappings = config.defaultMappings;
   const keyBindings = new KeyBindings(keyDefinitions, mappings);
-
-  // session
-  // if (!await doc.hasChildren(doc.root.row)) {
-  //   // HACKY: should load the actual data now, but since plugins aren't enabled...
-  //   await doc.loadEmpty();
-  // }
-
-  let viewRoot;
-  if (window.location.hash.length > 1) {
-    try {
-      const row = parseInt(window.location.hash.slice(1), 10);
-      if (await doc.isAttached(row)) {
-        viewRoot = await doc.canonicalPath(row);
-      }
-    } catch (e) {
-      logger.error(`Invalid hash: ${window.location.hash}`);
-    }
-  }
-  if (!viewRoot) {
-    viewRoot = Path.loadFromAncestry(await clientStore.getLastViewRoot());
-  }
-  let cursorPath = viewRoot;
-  // if (viewRoot.isRoot() || !await doc.isValidPath(viewRoot)) {
-  //   viewRoot = Path.root();
-  //   cursorPath = (await doc.getChildren(viewRoot))[0];
-  //   window.location.hash = '';
-  // } else {
-  //   cursorPath = viewRoot;
-  // }
 
   function getLineHeight() {
     const line_height = $('.node-text').height() || 21;
@@ -188,8 +162,6 @@ $(document).ready(async () => {
 
   const session = new Session(clientStore, doc, {
     initialMode: config.defaultMode,
-    viewRoot: viewRoot,
-    cursorPath: cursorPath,
     showMessage: (() => {
       return (messageContent: string, options: {warning?: boolean, time?: number, text_class?: string} = {}) => {
         if (options.warning) {
@@ -225,16 +197,16 @@ $(document).ready(async () => {
   }
 
   // load data
-  if (to_load !== null) {
-    await doc.load(to_load);
-    // a bit hacky.  without this, you can undo initial marks, for example
-    session.cursor.setPosition(
-      (await doc.getChildren(viewRoot))[0], 0
-    );
-    session.reset_history();
-    session.reset_jump_history();
-    await renderMain();
-  }
+  // if (to_load !== null) {
+  //   await doc.load(to_load);
+  //   // a bit hacky.  without this, you can undo initial marks, for example
+  //   session.cursor.setPosition(
+  //     (await doc.getChildren(viewRoot))[0], 0
+  //   );
+  //   session.reset_history();
+  //   session.reset_jump_history();
+  //   await renderMain();
+  // }
 
   const keyHandler = new KeyHandler(session, keyBindings);
   const keyEmitter = new KeyEmitter();
@@ -247,47 +219,43 @@ $(document).ready(async () => {
   window.keyEmitter = keyEmitter;
   window.keyBindings = keyBindings;
 
-  function renderMain() {
-    root.render(
-      <LayoutComponent session={session} config={config} pluginManager={pluginManager}/>
-      // <Router>
-      //   <Routes>
-      //     <Route path='/yin' element={
-      //       <AppComponent
-      //         error={caughtErr}
-      //         message={userMessage}
-      //         saveMessage={saveMessage}
-      //         config={config}
-      //         session={session}
-      //         pluginManager={pluginManager}
-      //         showFileList={true}
-      //         showingKeyBindings={showingKeyBindings}
-      //         keyBindings={keyBindings}
-      //         initialBackendType={backend_type}
-      //       />
-      //     }/>
-      //     <Route path='/' element={
-      //
-      //     }/>
-      //   </Routes>
-      // </Router>
-    );
-    const cursorDiv = $('#view .cursor')[0];
-    if (cursorDiv) {
-      browser_utils.scrollIntoView(cursorDiv, $('#view'), 50);
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <LayoutComponent session={session} config={config} pluginManager={pluginManager}/>,
+      children: [
+        {
+          path: 'note/:curDocId',
+          element: <YinComponent session={session} pluginManager={pluginManager}/>,
+          loader: noteLoader,
+        },
+        {
+          path: 'discovery',
+          element: <YangComponent session={session} config={config}/>
+        }
+      ]
     }
+  ]);
+  root.render(
+    <RouterProvider router={router} />
+  );
+  const cursorDiv = $('#view .cursor')[0];
+  if (cursorDiv) {
+    browser_utils.scrollIntoView(cursorDiv, $('#view'), 50);
   }
-  window.renderMain = renderMain;
-
-  await api_utils.getCurrentUserDocs().then(res => {
-    session.userDocs = res.content;
-  });
-  await renderMain();
+  // function renderMain() {
+  //   console.log('renderMain');
+  // }
+  // window.renderMain = renderMain;
   appendStyleScript(clientStore);
 
   session.on('scroll', (numlines) => {
     const line_height = getLineHeight();
     browser_utils.scrollDiv($('#view'), line_height * numlines);
+  });
+
+  session.on('changeViewRoot', async (path: Path) => {
+    await clientStore.setLastViewRoot(path.getAncestry());
   });
 
   session.on('yank', (info) => {
@@ -334,13 +302,6 @@ $(document).ready(async () => {
     }
   });
 
-  session.on('importFinished', renderMain); // fire and forget
-
-  session.on('changeViewRoot', async (path: Path) => {
-    await clientStore.setLastViewRoot(path.getAncestry());
-    window.location.hash = `#${path.row}`;
-  });
-
   keyEmitter.listen();
   keyEmitter.on('keydown', (key) => {
     if (!session.stopMonitor) {
@@ -354,22 +315,8 @@ $(document).ready(async () => {
     }
   });
 
-  keyHandler.on('handledKey', renderMain); // fire and forget
-
-  session.on('modeChange', renderMain); // fire and forget
-
-  session.on('updateAnyway', renderMain);
-
-  keyBindings.on('applied_hotkey_settings', (hotkey_settings) => {
-    clientStore.setClientSetting('hotkeys', hotkey_settings);
-    renderMain(); // fire and forget
-  });
-
-  pluginManager.on('status', renderMain); // fire and forget
-
-  pluginManager.on('enabledPluginsChange', function(enabled) {
-    docStore.setSetting('enabledPlugins', enabled);
-    renderMain(); // fire and forget
+  keyHandler.on('handledKey', () => {
+    session.emit('updateAnyway');
   });
 
   window.addEventListener('blur', () => {
@@ -385,31 +332,27 @@ $(document).ready(async () => {
   // needed for safari
   // const $pasteHack = $('#paste-hack');
   // $pasteHack.focus();
-  $(document).on('click', function(e) {
-    if (e.detail === 2 && session.mode === 'NORMAL') {
-      session.setMode('INSERT');
-    }
-    // if settings menu is up, we don't want to blur (the dropdowns need focus)
-    if (session.mode === 'SETTINGS') { return; }
-    // if user is trying to copy, we don't want to blur
-    if (window.getSelection().toString()) { return; }
-    // $pasteHack.focus();
-  });
-
+  // $(document).on('click', function(e) {
+  //   if (e.detail === 2 && session.mode === 'NORMAL') {
+  //     session.setMode('INSERT');
+  //   }
+  //   // if settings menu is up, we don't want to blur (the dropdowns need focus)
+  //   if (session.mode === 'SETTINGS') { return; }
+  //   // if user is trying to copy, we don't want to blur
+  //   if (window.getSelection().toString()) { return; }
+  //   // $pasteHack.focus();
+  // });
   $(document).on('paste', async (e) => {
-    if (session.mode === 'SETTINGS') { return; }
-
     if (session.stopMonitor) { return; }
-
     e.preventDefault();
     let text: string = ((e.originalEvent || e) as any).clipboardData.getData('text/plain');
     text = text.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
     await keyHandler.queue(async () => {
       // TODO: deal with this better when there are multiple lines
       // maybe put in insert mode?
-      session.pasteText(text);
+      await session.pasteText(text);
     });
-    renderMain(); // fire and forget
+    session.emit('updateAnyway');
   });
 
   $(window).on('unload', () => {

@@ -44,7 +44,7 @@ export class DrawioViewer extends Component {
     const iframeContent =
         `<body>
           ${div.outerHTML.replaceAll(/"/g, '\'')}
-          <script type='text/javascript' src='drawio/js/viewer-static.min.js'></script>
+          <script type='text/javascript' src='/drawio/js/viewer-static.min.js'></script>
         </body>`
     const iframe = '<iframe id="drawioViewIfr" onload="resizeIframe(this,' + this.props.row + ')" class="drawio-viewer" srcDoc="' + iframeContent + '"'
       + ' frameborder="0" ></iframe>';

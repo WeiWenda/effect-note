@@ -2,6 +2,7 @@ import {DocInfo, Session} from '../../share';
 import {Button, Form, Input, Select} from 'antd';
 import React from 'react';
 import {addSubscription} from '../../share/ts/utils/APIUtils';
+import {getStyles} from '../../share/ts/themes';
 
 export function SubscriptionInfoComponent(props: {session: Session, onFinish: () => void}) {
   const [form] = Form.useForm();
@@ -9,6 +10,9 @@ export function SubscriptionInfoComponent(props: {session: Session, onFinish: ()
     <Form
       layout='vertical'
       form={form}
+      style={{
+        ...getStyles(props.session.clientStore, ['theme-text-primary'])
+      }}
       initialValues={{name: '开发快速参考', path: 'https://github.com/jaywcjlove/reference/tree/main/docs'}}
       onFinish={(values) => {
         const paths = values.path.split('/');

@@ -119,6 +119,9 @@ export function YangComponent(props: {session: Session, config: Config}) {
               treeData.map((subscription, i) => {
                 return (
                   <Tree key={i} className={'sub-board-filelist'}
+                        style={{
+                          ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
+                        }}
                         loadData={onLoadData}
                         treeData={[subscription]}
                         onSelect={onSelect}
@@ -176,6 +179,9 @@ export function YangComponent(props: {session: Session, config: Config}) {
             {
               !selectedResult &&
               <Tree className={'sub_filelist_after_search'}
+                    style={{
+                      ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
+                    }}
                     expandedKeys={expandedTreeNode}
                     selectedKeys={selectedTreeNode}
                     loadData={onLoadData} treeData={treeData}
@@ -198,7 +204,7 @@ export function YangComponent(props: {session: Session, config: Config}) {
       }
       {
         selectedResult &&
-        <SessionWithToolbarComponent loading={loading} session={props.session} filterOuter={filterOuter}
+        <SessionWithToolbarComponent curDocId={-1} loading={loading} session={props.session} filterOuter={filterOuter}
                                      showLayoutIcon={false} showLockIcon={false}/>
       }
     </div>

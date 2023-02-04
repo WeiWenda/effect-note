@@ -203,9 +203,20 @@ export function appendStyleScript(clientStore: ClientStore) {
                     .node-html code{background-color: ${theme['theme-bg-tertiary']}}
                     .node-html blockquote{border-left-color: ${theme['theme-bg-cursor']};background-color: ${theme['theme-bg-secondary']}}
                     .node-html table tr:hover{background-color: ${theme['theme-bg-secondary']}}
+                    .ant-tabs-card >.ant-tabs-nav .ant-tabs-tab-active{background-color: ${theme['theme-bg-primary']}}
+                    .ant-tabs-card.ant-tabs-top >.ant-tabs-nav .ant-tabs-tab-active{border-bottom-color: ${theme['theme-bg-primary']}}
+                    .ant-tabs-card >.ant-tabs-nav .ant-tabs-tab{border: 1px solid ${theme['theme-bg-tertiary']};}
+                    .ant-list-split .ant-list-header{border-block-end: 1px solid ${theme['theme-bg-secondary']};}
+                    .ant-list-split .ant-list-item{border-block-end: 1px solid ${theme['theme-bg-secondary']};}
+                    .ant-list-split.ant-list-something-after-last-item .ant-spin-container>.ant-list-items>.ant-list-item:last-child{border-block-end: 1px solid ${theme['theme-bg-secondary']};}
                     span::selection{background:${theme['theme-bg-highlight']}}</style>`);
   $('.span-hover-color').remove();
   $('#app').append(`<style class='span-hover-color'>
+                    .ant-pagination .ant-pagination-item-active{border-color: ${theme['theme-text-link']}}
+                    .ant-pagination .ant-pagination-item-active:hover a{color: ${theme['theme-text-link']}}
+                    .ant-pagination .ant-pagination-item-active:hover{border-color: ${theme['theme-text-link']}}
+                    .ant-tabs .ant-tabs-tab:hover{color: ${theme['theme-text-link']}}
+                    .ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn{color: ${theme['theme-text-link']}}
                     .ant-modal .ant-modal-close{color: ${theme['theme-text-primary']}}
                     .ant-modal .ant-modal-title{color: ${theme['theme-text-primary']}}
                     .ant-select:not(.ant-select-disabled):not(.ant-select-customize-input):not(.ant-pagination-size-changer):hover .ant-select-selector{border-color:${theme['theme-text-link']}}

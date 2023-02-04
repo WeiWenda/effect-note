@@ -46,7 +46,7 @@ const default_client_settings: ClientSettings =
     defaultLayout: 'top_left',
     openMenus: '[\"0\"]',
     openFile: '0',
-    curView: 'user_view',
+    curView: 'note',
     curDocId: -1,
   });
 

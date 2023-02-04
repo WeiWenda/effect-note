@@ -39,7 +39,7 @@ async function deleteFile(file) {
 async function commit() {
     const gitConfig = getGitConfig()
     const status = await git.statusMatrix({fs, dir: gitConfig.gitHome});
-    if (status.every(([filepath, c1, c2, c3]) => c1 === 1 && c2 === 1 && c3 === 1)) {
+    if (status.every(([filepath, c1, c2, c3]) => (filepath.split('/').pop().startsWith('.') || (c1 === 1 && c2 === 1 && c3 === 1)))) {
         console.log('nothing changed!')
         return;
     }

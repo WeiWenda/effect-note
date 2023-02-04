@@ -25,14 +25,12 @@ registerPlugin(
                         setCollapseCallback={(collapse) => linksPlugin.setBlockCollapse(path.row, collapse)}
                         blockType={'Markdown'} tools={
             <EditOutlined onClick={() => {
-              api.session.md = pluginData.links.md;
-              api.session.mdEditorModalVisible = true;
               api.session.mdEditorOnSave = (markdown: string, _html: string) => {
                 linksPlugin.setMarkdown(path.row, markdown).then(() => {
                   api.session.emit('updateAnyway');
                 });
               };
-              api.session.emit('updateAnyway');
+              api.session.emit('openModal', 'md', {'md': pluginData.links.md});
             }}/>
           } session={api.session}>
             <div id={id} className={'node-markdown'} key={id}/>
@@ -42,7 +40,11 @@ registerPlugin(
           const divs = $(`#${id}`).get();
           const mode = api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light';
           if (divs.length > 0) {
-            Vditor.preview(divs[0] as HTMLDivElement, pluginData.links.md, {mode, theme : {
+            Vditor.preview(divs[0] as HTMLDivElement, pluginData.links.md, {mode,
+              transform: (html: string) => {
+                return html.replace('<a ', '<a target="_blank" ');
+              },
+              theme : {
                 current: mode,
                 path: 'content-theme'
               }});

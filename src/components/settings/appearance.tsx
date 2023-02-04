@@ -1,4 +1,4 @@
-import {Col, Dropdown, InputNumber, Row, Select, Input, Space, Popover, Button} from 'antd';
+import {Col, Dropdown, InputNumber, Row, Select, Input, Space, Popover, Button, Divider} from 'antd';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {Session} from '../../share';
@@ -11,7 +11,7 @@ import {getServerConfig, setServerConfig as saveServerConfig} from '../../share/
 import {ServerConfig} from '../../ts/server_config';
 import $ from 'jquery';
 
-function FrontendSettingsComponent(props: { session: Session, config: Config, refreshFunc: () => void }) {
+function AppearanceSettingsComponent(props: { session: Session, config: Config, refreshFunc: () => void }) {
   const [serverConfig, setServerConfig] = useState(SERVER_CONFIG);
   const [editing, setEditing] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<string>(props.session.clientStore.getClientSetting('curTheme'));
@@ -81,10 +81,8 @@ function FrontendSettingsComponent(props: { session: Session, config: Config, re
   };
   return (
     <div>
+      <div style={{paddingBottom: '1em'}}>当前主题：</div>
       <Row>
-        <Col span={4}>
-          当前主题：
-        </Col>
         <Col style={{display: 'flex', flexDirection: 'column'}}>
           <Space>
             {
@@ -149,6 +147,7 @@ function FrontendSettingsComponent(props: { session: Session, config: Config, re
           </Space>
         </Col>
       </Row>
+      <Divider />
       <table className='setting-table'>
         <tbody style={{
           ...getStyles(props.session.clientStore, ['theme-text-primary'])
@@ -365,4 +364,4 @@ function FrontendSettingsComponent(props: { session: Session, config: Config, re
   );
 }
 
-export default FrontendSettingsComponent;
+export default AppearanceSettingsComponent;

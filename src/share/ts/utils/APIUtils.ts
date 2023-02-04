@@ -75,6 +75,14 @@ export function ocrFile(file: File) {
     });
 };
 
+export function downloadImage(url: string) {
+    return request({
+        url: API_BASE_URL + '/download_image',
+        method: 'POST',
+        body: JSON.stringify({url})
+    });
+}
+
 export function setCategory(key: string, value: string) {
     return requestText({
         url: API_BASE_URL + `/categories/set`,

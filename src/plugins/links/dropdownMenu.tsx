@@ -8,11 +8,12 @@ import dayjs from 'dayjs';
 import {MarksPlugin} from '../marks';
 import $ from 'jquery';
 import {downloadFile} from '../../ts/util';
+import Moment from 'moment/moment';
 
 export function exportAction(session: Session, path: Path, mimeType: string, filename?: string) {
   session.getCurrentContent(path, mimeType).then(content => {
     session.exportModalContent = content;
-    session.exportModalVisible = true;
+    session.emit('openModal', 'export');
     session.document.getText(path.row).then(blockContent => {
       session.exportFileFunc = () => {
         downloadFile(`${blockContent ? blockContent : (filename ? filename : 'effect-note-export')}`, content, mimeType);
@@ -21,6 +22,38 @@ export function exportAction(session: Session, path: Path, mimeType: string, fil
     });
   });
 }
+
+export const getTaskStatus = (tags: string[]) => {
+  let status: string | undefined = undefined;
+  if (tags.some((t: string) => new RegExp('(start|end|due):.*').test(t))) {
+    const startTag = tags.find(t => t.startsWith('start:'));
+    const endTag = tags.find(t => t.startsWith('end:'));
+    const dueTag = tags.find(t => t.startsWith('due:'));
+    if (endTag) {
+      const endTime = Moment(endTag.split('end:')[1]);
+      if (dueTag && endTime.isAfter(Moment(dueTag.split('due:')[1]))) {
+        status = 'Delay';
+      } else {
+        status = 'Done';
+      }
+    } else if (startTag) {
+      const startTime = Moment(startTag.split('start:')[1]);
+      if (dueTag && startTime.isAfter(Moment(dueTag.split('due:')[1]))) {
+        status = 'Delay';
+      } else {
+        status = 'Doing';
+      }
+    } else if (dueTag) {
+      const dueTime = Moment(dueTag.split('due:')[1]);
+      if (Moment().isAfter(dueTime)) {
+        status = 'Delay';
+      } else {
+        status = 'Todo';
+      }
+    }
+  }
+  return status;
+};
 
 export function HoverIconDropDownComponent(props: {session: Session, bullet: any,
   path: Path, rowInfo: CachedRowInfo
@@ -33,8 +66,11 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const setTags = (prefix: string, dateString: string) => {
     props.tagsPlugin.getTags(props.path.row).then(tags => {
-      const filteredTags = tags?.filter(t => !t.startsWith(prefix)) || [];
-      props.tagsPlugin.setTags(props.path.row, [prefix + dateString, ...filteredTags]).then(() => {
+      let filteredTags = tags?.filter(t => !t.startsWith(prefix))
+        .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t)) || [];
+      filteredTags = [prefix + dateString,  ...filteredTags];
+      filteredTags = [getTaskStatus(filteredTags)!, ...filteredTags];
+      props.tagsPlugin.setTags(props.path.row, filteredTags).then(() => {
         props.session.emit('updateAnyway');
       });
     });
@@ -241,12 +277,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         });
         break;
       case 'ocr':
-        props.session.ocrModalVisible = true;
-        props.session.emit('updateAnyway');
+        props.session.emit('openModal', 'ocr');
         break;
       case 'insert_md':
-        props.session.md = props.rowInfo.pluginData.links.md || props.rowInfo.line.join('');
-        props.session.mdEditorModalVisible = true;
+        props.session.emit('openModal', 'md', {'md': props.rowInfo.pluginData.links.md || props.rowInfo.line.join('')});
         props.session.mdEditorOnSave = (markdown: string, _html: string) => {
           props.linksPlugin.setMarkdown(props.path.row, markdown).then(() => {
             props.session.emit('updateAnyway');
@@ -256,32 +290,25 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
             // });
           });
         };
-        props.session.emit('updateAnyway');
         break;
       case 'insert_drawio':
         props.onInsertDrawio(props.path.row);
         break;
       case 'insert_rtf':
-        setTimeout(() => {
-          if (props.rowInfo.line.join('').startsWith('<div class=\'node-html\'>')) {
-            props.session.wangEditorHtml = props.rowInfo.line.join('').slice('<div class=\'node-html\'>'.length, -6);
-          } else {
-            props.session.wangEditorHtml = props.rowInfo.line.join('');
-          }
-          props.session.emit('updateAnyway');
-        }, 100);
-        props.session.wangEditorModalVisible = true;
-        props.session.wangEditorOnSave = (html: any) => {
-          let wrappedHtml = html;
-          wrappedHtml = `<div class='node-html'>${html}</div>`;
+        let html: string = props.rowInfo.line.join('');
+        if (props.rowInfo.line.join('').startsWith('<div class=\'node-html\'>')) {
+          html = props.rowInfo.line.join('').slice('<div class=\'node-html\'>'.length, -6);
+        }
+        props.session.emit('openModal', 'rtf', {html});
+        props.session.wangEditorOnSave = (content: any) => {
+          let wrappedHtml = `<div class='node-html'>${content}</div>`;
           props.session.changeChars(props.path.row, 0, props.rowInfo.line.length, (_ ) => wrappedHtml.split('')).then(() => {
             props.session.emit('updateAnyway');
           });
         };
-        props.session.emit('updateAnyway');
         break;
       case 'add_png':
-        props.session.pngModalVisible = true;
+        props.session.emit('openModal', 'png');
         props.session.pngOnSave = (img_src: any, json: any) => {
           props.linksPlugin.setPng(props.path.row, img_src, json).then(() => {
             props.session.emit('updateAnyway');
@@ -292,7 +319,6 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
             props.session.mindMapRef.current.setContent(kmnode);
           });
         }, 1000);
-        props.session.emit('updateAnyway');
         break;
       case 'export_md':
         exportAction(props.session, props.path, 'text/markdown');

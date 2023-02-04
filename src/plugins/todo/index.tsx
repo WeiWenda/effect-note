@@ -7,6 +7,7 @@ import { registerPlugin } from '../../ts/plugins';
 import { matchWordRegex } from '../../ts//text';
 import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
 import Moment from 'moment';
+import {getTaskStatus} from '../links/dropdownMenu';
 
 const strikethroughClass = 'strikethrough';
 
@@ -52,12 +53,19 @@ registerPlugin(
       async function({ session }) {
         const tagsPlugin = api.getPlugin(tagsPluginName) as TagsPlugin;
         const existTags = await tagsPlugin.getTags(session.cursor.row);
-        const filteredTags = existTags?.filter(t => !t.startsWith('end: ')) || [];
+        let filteredTags = existTags?.filter(t => !t.startsWith('end: '))
+          .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t)) || [];
         if (await isStruckThrough(session, session.cursor.row)) {
+          const taskStatus = getTaskStatus(filteredTags);
+          if (taskStatus) {
+            filteredTags = [taskStatus, ...filteredTags];
+          }
           await tagsPlugin.setTags(session.cursor.row, filteredTags);
           await removeStrikeThrough(session, session.cursor.row);
         } else {
-          await tagsPlugin.setTags(session.cursor.row, ['end: ' + Moment().format('yyyy-MM-DD HH:mm:ss'), ...filteredTags]);
+          filteredTags = ['end: ' + Moment().format('yyyy-MM-DD HH:mm:ss'),  ...filteredTags];
+          filteredTags = [getTaskStatus(filteredTags)!, ...filteredTags];
+          await tagsPlugin.setTags(session.cursor.row, filteredTags);
           await addStrikeThrough(session, session.cursor.row);
         }
       },

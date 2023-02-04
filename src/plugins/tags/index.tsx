@@ -20,7 +20,9 @@ import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Logger} from '../../ts/logger';
 import {getStyles} from '../../share/ts/themes';
 import {Popover, Select, Tag} from 'antd';
+import type { CustomTagProps } from 'rc-select/lib/BaseSelect';
 import Moment from 'moment';
+import {onlyUnique} from '../../ts/util';
 const { Option } = Select;
 
 // TODO: do this elsewhere
@@ -32,14 +34,28 @@ type Rows = Row[];
 type TagsToRows = {[key: string]: Rows};
 type RowsToTags = {[key: number]: Tags};
 
-const tagStyle = {
-  padding: '0px 8px',
-  marginLeft: 8,
-};
-
 const tagSearchStyle = {
   padding: '0px 8px',
   marginRight: 8,
+};
+const colorMap: Record<string, string> = {
+  'Delay': 'error',
+  'Done': 'success',
+  'Todo': 'warning',
+  'Doing': 'processing',
+  '关键': 'error',
+  '重要': 'warning',
+  '注意': 'processing'
+};
+const tagRender = (props: CustomTagProps) => {
+  const { label, value, closable, onClose } = props;
+  return (
+    <Tag
+      color={colorMap[label as string] || 'default'}
+    >
+      {label}
+    </Tag>
+  );
 };
 
 /*
@@ -398,56 +414,32 @@ export class TagsPlugin {
     this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
       const { path, pluginData } = info;
       let tags: string[] = pluginData.tags.tags || [];
-      if (tags.some((t: string) => new RegExp('(start|end|due):.*').test(t))) {
+      const taskStatus = tags.find(t => ['Delay', 'Done', 'Todo', 'Doing'].includes(t));
+      if (taskStatus) {
         const startTag = tags.find(t => t.startsWith('start:'));
         const endTag = tags.find(t => t.startsWith('end:'));
         const dueTag = tags.find(t => t.startsWith('due:'));
-        let status: string | undefined = undefined;
-        if (endTag) {
-          const endTime = Moment(endTag.split('end:')[1]);
-          if (dueTag && endTime.isAfter(Moment(dueTag.split('due:')[1]))) {
-            status = 'Delay';
-          } else {
-            status = 'Done';
-          }
-        } else if (startTag) {
-          const startTime = Moment(startTag.split('start:')[1]);
-          if (dueTag && startTime.isAfter(Moment(dueTag.split('due:')[1]))) {
-            status = 'Delay';
-          } else {
-            status = 'Doing';
-          }
-        } else if (dueTag) {
-          const dueTime = Moment(dueTag.split('due:')[1]);
-          if (Moment().isAfter(dueTime)) {
-            status = 'Delay';
-          } else {
-            status = 'Todo';
-          }
-        }
-        const colorMap: Record<string, string> = {
-          'Delay': 'error',
-          'Done': 'success',
-          'Todo': 'warning',
-          'Doing': 'processing'
-        };
-        if (status) {
-          lineContents.push(
-            <Popover key={'status'} content={(
-              <ul style={{paddingInlineStart: '1em'}}>
-                {[startTag, endTag, dueTag].filter(t => t).map((t, index) => (
-                  <li key={index} >{t}</li>
-                ))}
-              </ul>
-            )}>
-              <Tag style={{marginLeft: '10px'}} color={colorMap[status]}>{status}</Tag>
-            </Popover>
-          );
-        }
+        lineContents.push(
+          <Popover key={'status'} content={(
+            <ul style={{paddingInlineStart: '1em'}}>
+              {[startTag, endTag, dueTag].filter(t => t).map((t, index) => (
+                <li key={index} >{t}</li>
+              ))}
+            </ul>
+          )}>
+            <Tag style={{marginLeft: '10px'}} color={colorMap[taskStatus]}>{taskStatus}</Tag>
+          </Popover>
+        );
       }
-      tags = tags.filter((t: string) => !new RegExp('(start|end|due):.*').test(t));
+      tags = tags
+        .filter((t: string) => !new RegExp('((start|end|due):.*)').test(t))
+        .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t));
       if (tags.length > 0 || pluginData.tags.tagging) {
-        const options: any[] = this.tags.map(tag => { return {label: tag, value: tag}; });
+        const options: any[] = this.tags
+          .filter((t: string) => !new RegExp('(start|end|due):.*').test(t))
+          .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t))
+          .concat(['重要', '关键', '注意']).filter( onlyUnique )
+          .map(tag => { return {label: tag, value: tag}; });
         const handleChange = (newTags: string[]) => {
           this.setTags(path.row, newTags);
         };
@@ -456,6 +448,7 @@ export class TagsPlugin {
                   key='tags'
                   mode='tags'
                   value={tags}
+                  tagRender={tagRender}
                   options={options}
                   onFocus={() => this.session.stopMonitor = true}
                   onBlur={() => this.session.stopMonitor = false}
@@ -463,7 +456,8 @@ export class TagsPlugin {
                    e.preventDefault();
                    e.stopPropagation();
                   }}
-                  bordered={false} style={{ minWidth: '80px', width: 'auto' }} placeholder='添加标签' onChange={handleChange}>
+                  bordered={false} style={{
+                    marginLeft: '5px', minWidth: '80px', width: 'auto' }} placeholder='添加标签' onChange={handleChange}>
           </Select>
         );
       }

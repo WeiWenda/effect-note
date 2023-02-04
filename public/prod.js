@@ -1,4 +1,5 @@
 const http = require('http');
+const client = require('https');
 const fs = require('fs');
 const os = require('os')
 const path = require('path');
@@ -66,6 +67,17 @@ async function startExpress(args) {
     const data = await saveFiles(req.files, storePath)
     res.send(data)
   })
+  app.post('/api/download_image', async function (req, res) {
+    const picUrl = req.body.url
+    const {gitHome} = getGitConfig();
+    const filename = picUrl.split('/').pop().replace(/[^\w]/g, '')
+    const distinctFileName = genRandomFileName(filename)
+    downloadImage(picUrl, path.join(gitHome, IMAGES_FOLDER, distinctFileName)).then(() => {
+      res.send({data: {originalURL: picUrl, url: `http://localhost:${port}/api/${IMAGES_FOLDER}/${distinctFileName}`}})
+    }).catch(() => {
+      res.send({data: {originalURL: picUrl, url: picUrl}})
+    })
+  })
   app.post('/api/ocr_image', multer().single('file'), async function(req, res) {
     const { data: { text } } = await worker.recognize(req.file.buffer);
     console.log(text);
@@ -121,6 +133,9 @@ async function startExpress(args) {
     res.sendFile(pictureName, {root: gitHome + '/' + IMAGES_FOLDER})
   })
   app.use(express.static(buildDir));
+  app.get('*', (req, res) => {
+    res.sendFile(buildDir + '/index.html');
+  })
   const server = http.createServer(app);
   server.listen(port, host, (err) => {
     const address_info = server.address();
@@ -149,6 +164,22 @@ async function startExpress(args) {
     const fileNameWithOutExt = fileName.slice(0, pointLastIndexOf) // "a.123"
     const ext = fileName.slice(pointLastIndexOf + 1, length) // "png"
     return `${fileNameWithOutExt}-${r}.${ext}`
+  }
+
+  function downloadImage(url, filepath) {
+    return new Promise((resolve, reject) => {
+      client.get(url, (res) => {
+        if (res.statusCode === 200) {
+          res.pipe(fs.createWriteStream(filepath))
+              .on('error', reject)
+              .once('close', () => resolve(filepath));
+        } else {
+          // Consume response data to free up memory
+          res.resume();
+          reject(new Error(`Request Failed With a Status Code: ${res.statusCode}`));
+        }
+      });
+    });
   }
 
   /**

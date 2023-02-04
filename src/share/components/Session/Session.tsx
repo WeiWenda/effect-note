@@ -46,6 +46,7 @@ export default class SessionComponent extends React.Component<Props, State> {
     });
 
     this.props.session.on('updateInner',  () => {
+      logger.debug('updateInner');
       this.update();
     });
 

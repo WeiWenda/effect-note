@@ -7,16 +7,24 @@ import {api_utils, DocInfo, Path, Session} from '../../share';
 import {downloadFile, encodeHtml} from '../../ts/util';
 import {exportAction} from '../../plugins/links/dropdownMenu';
 import {TagsPlugin} from '../../plugins/tags';
+import {useNavigate} from 'react-router-dom';
 
-function FileToolsComponent(props: {
-  session: Session, curDocId: number | undefined, onEditBaseInfo: () => void, reloadFunc: (type: string) => void,
-  tagPlugin?: TagsPlugin}) {
+function FileToolsComponent(props:  React.PropsWithChildren<{
+  session: Session, curDocId: number,
+  trigger?: ('click' | 'hover' | 'contextMenu')[],
+  tagPlugin?: TagsPlugin}>) {
+  const navigate = useNavigate();
   const handlePrint = useReactToPrint({
     content: () => props.session.sessionRef.current,
   });
   const docName = props.session.userDocs.find(doc => doc.id === props.curDocId)?.name;
-  const operationClick: MenuProps['onClick'] = ({ key }) => {
+  const operationClick: MenuProps['onClick'] = ({ key, domEvent }) => {
+    domEvent.preventDefault();
+    domEvent.stopPropagation();
     switch (key) {
+      case 'open-in-browser':
+        window.open(`/note/${props.curDocId}`, '_blank');
+        break;
       case 'remove':
         Modal.confirm({
           title: '确认删除当前文档？',
@@ -24,12 +32,9 @@ function FileToolsComponent(props: {
           okText: '确认',
           cancelText: '取消',
           onOk: () => {
-            api_utils.deleteDocContent(props.curDocId!).then(() => {
+            api_utils.deleteDocContent(props.curDocId).then(() => {
               props.session.clientStore.setClientSetting('curDocId', -1);
-              api_utils.getCurrentUserDocs().then(res => {
-                props.session.userDocs = res.content;
-                props.reloadFunc(key);
-              });
+              navigate(`/note/-1`);
             }).catch(e => {
               props.session.showMessage(e, {warning: true});
             });
@@ -37,10 +42,13 @@ function FileToolsComponent(props: {
         });
         break;
       case 'edit-base-info':
-        props.onEditBaseInfo();
+        const docInfo = props.session.userDocs.find(d => d.id === props.curDocId);
+        if (docInfo && props.curDocId !== -1) {
+          props.session.emit('openModal', 'noteInfo', {docInfo: docInfo});
+        }
         break;
       case 'save':
-        props.session.reUploadFile(Path.root(), props.curDocId!).then((docId) => {
+        props.session.reUploadFile(Path.root(), props.curDocId).then((docId) => {
           if (docId !== undefined) {
             props.session.emit('save-cloud', {docId: docId});
           } else {
@@ -60,7 +68,7 @@ function FileToolsComponent(props: {
       case 'export_ics':
         props.tagPlugin?.listEvents().then(content => {
           props.session.exportModalContent = content;
-          props.session.exportModalVisible = true;
+          props.session.emit('openModal', 'export');
           props.session.exportFileFunc = () => {
             downloadFile(docName!, content, 'text/calendar');
           };
@@ -76,8 +84,26 @@ function FileToolsComponent(props: {
         message.info(`Click on item ${key}`);
     }
   };
-  const items: any[] = [
-    {
+  const items: MenuProps['items'] = [{
+    key: 'open-in-browser',
+    label: '在新页面打开',
+  }];
+  if (props.curDocId !== -1) {
+    items.push({
+        key: 'edit-base-info',
+        label: '重命名',
+      },
+      {
+        key: 'remove',
+        label: '删除',
+      });
+  }
+  if (!props.trigger) {
+    items.push({
+        key: 'save',
+        label: '保存',
+      },
+      {
       label: '导出',
       key: 'export',
       children: [
@@ -102,31 +128,15 @@ function FileToolsComponent(props: {
           key: 'export_ics',
         },
       ],
-    }
-  ];
-  if (props.curDocId) {
-    items.unshift({
-        key: 'edit-base-info',
-        label: '重命名',
-      },
-      {
-        key: 'remove',
-        label: '删除',
-      },
-      {
-        key: 'save',
-        label: '保存(Ctrl+s)',
-      });
+    });
   }
-  const menu = (
-    <Menu
-      onClick={operationClick}
-      items={items}
-    />
-  );
   return (
-    <Dropdown overlayStyle={{width: '120px'}} overlay={menu}>
-      <MoreOutlined style={{float: 'right', paddingRight: '10px'}} onClick={e => e.preventDefault()}/>
+    <Dropdown overlayStyle={{width: '120px'}} trigger={props.trigger || ['hover']}
+      menu={{
+        items,
+        onClick: operationClick
+      }}>
+      {props.children}
     </Dropdown>
   );
 }

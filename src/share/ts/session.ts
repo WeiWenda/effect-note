@@ -15,7 +15,7 @@ import { XMLParser, XMLBuilder, XMLValidator } from 'fast-xml-parser';
 import * as Modes from './modes';
 
 import {ModeId, CursorOptions, Row, Col, Chars, SerializedBlock, UserInfo, KityMinderNode, DocInfo} from './types';
-import {updateDoc, uploadDoc} from './utils/APIUtils';
+import {downloadImage, updateDoc, uploadDoc} from './utils/APIUtils';
 import React from 'react';
 import Search from './search';
 
@@ -83,9 +83,6 @@ export default class Session extends EventEmitter {
   public currentUser: UserInfo | null = null;
   public showBreadCrumbsRootView: boolean = false;
   public vimMode: boolean = false;
-  public showPreview: boolean = true;
-  public showHeader: boolean = true;
-  public showFilelist: boolean = true;
   public lockEdit: boolean = false;
   public userDocs: DocInfo[] = [];
   public hoverRow: Path | null = null;
@@ -98,18 +95,8 @@ export default class Session extends EventEmitter {
   public mindMapRef: any;
   public fileInputRef: any;
   public drawioRef: any;
-  public cloudFileListRef: any;
   public sessionRef: any;
   private saving: boolean = false;
-  public pngModalVisible: boolean = false;
-  public drawioModalVisible: boolean = false;
-  public drawioXml: string | undefined = undefined;
-  public md: string | undefined = undefined;
-  public ocrModalVisible: boolean = false;
-  public wangEditorModalVisible: boolean = false;
-  public mdEditorModalVisible: boolean = false;
-  public exportModalVisible: boolean = false;
-  public wangEditorHtml: string = '<p>';
   public exportModalContent: string = '';
   public exportFileFunc: () => void;
   public pngOnSave: (img_src: any, json: any) => void;
@@ -148,15 +135,13 @@ export default class Session extends EventEmitter {
     this.showMessage = options.showMessage || ((message) => {
       logger.info(`Showing message: ${message}`);
     });
+    this.stopMonitor = clientStore.getClientSetting('curView') !== 'note';
     this.toggleBindingsDiv = options.toggleBindingsDiv || (() => null);
     this.getLinesPerPage = options.getLinesPerPage || (() => 10);
     this.mindMapRef = React.createRef();
     this.drawioRef = React.createRef();
     this.sessionRef = React.createRef();
     this.fileInputRef = React.createRef();
-    this.showFilelist = clientStore.getClientSetting('defaultLayout').includes('left');
-    this.showPreview = clientStore.getClientSetting('defaultLayout').includes('right');
-    this.showHeader = clientStore.getClientSetting('defaultLayout').includes('top');
     this.pngOnSave = () => {};
     this.mdEditorOnSave = () => {};
     this.wangEditorOnSave = () => {};
@@ -253,29 +238,47 @@ export default class Session extends EventEmitter {
       isOutline: boolean,
     }> = [];
     const headNumber = /^#+/;
+    const pictureUrl = /!\[\]\((.*?)\)/;
     const content_lines = content.split('\n');
     let currentIndent = 0;
     let inCodeBlock = false;
-    content_lines.forEach((line) => {
-      if (line.startsWith('```')) {
-        inCodeBlock = !inCodeBlock;
-      }
-      const matches = line.match(headNumber);
-      let indent = currentIndent;
-      let isOutline = false;
-      if (matches && !inCodeBlock) {
-        indent = matches[0].length;
-        isOutline = true;
-        currentIndent = indent + 1;
-      }
-      if (line.length > 0) {
-        lines.push({
-          isOutline,
-          indent,
-          line: line.replace(/^#*\s/, ''),
-        });
-      }
-    });
+    await content_lines.reduce((p: Promise<void>, line) =>
+      p.then(() => {
+        if (line.startsWith('```')) {
+          inCodeBlock = !inCodeBlock;
+        }
+        const matches = line.match(headNumber);
+        let indent = currentIndent;
+        let isOutline = false;
+        if (matches && !inCodeBlock) {
+          indent = matches[0].length;
+          isOutline = true;
+          currentIndent = indent + 1;
+        }
+        if (line.length > 0) {
+          let trimedLine = line.replace(/^#*\s/, '');
+          const urlMatches = pictureUrl.exec(trimedLine);
+          if (urlMatches) {
+            return downloadImage(urlMatches[1]).then((res) => {
+              const originalUrl = res.data.originalURL;
+              const localUrl = res.data.url;
+              lines.push({
+                isOutline,
+                indent,
+                line: trimedLine.replace(originalUrl, localUrl),
+              });
+              return Promise.resolve();
+            });
+          } else {
+            lines.push({
+              isOutline,
+              indent,
+              line: trimedLine,
+            });
+          }
+        }
+        return Promise.resolve();
+      }), Promise.resolve());
     while (lines[lines.length - 1].line === '') { // Strip trailing blank line(s)
       lines = lines.splice(0, lines.length - 1);
     }
@@ -1766,6 +1769,7 @@ export default class Session extends EventEmitter {
         this.stopAnchor();
       } else {
         // 单行选中
+        this.selectPopoverOpen = false;
         const options = {includeEnd: false, yank: false};
         await this.deleteBetween(cursor, anchor, options);
         this.stopAnchor();

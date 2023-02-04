@@ -54,13 +54,10 @@ export class LinksPlugin {
         this.SetCollapse = SetCollapse;
         const onInsertDrawio = (row: Row) => {
             that.getXml(row).then(xml => {
-                that.session.drawioModalVisible = true;
-                that.session.drawioXml = xml;
-                that.session.emit('updateAnyway');
+                that.session.emit('openModal', 'drawio', {xml: xml});
             });
             that.session.drawioOnSave = (xml: string) => {
                 that.setXml(row, xml).then(() => {
-                    that.session.drawioXml = undefined;
                     that.session.emit('updateAnyway');
                 });
             };
@@ -154,7 +151,7 @@ export class LinksPlugin {
                             });
                             break;
                         case 'edit_png':
-                            that.session.pngModalVisible = true;
+                            that.session.emit('openModal', 'png');
                             that.session.pngOnSave = (img_src: any, json: any) => {
                                 that.setPng(path.row, img_src, json).then(() => {
                                     that.session.emit('updateAnyway');
@@ -165,7 +162,6 @@ export class LinksPlugin {
                                     that.session.mindMapRef.current.setContent(kmnode);
                                 });
                             }, 1000);
-                            that.session.emit('updateAnyway');
                             break;
                         default:
                             message.info(`Click on item ${key}`);
@@ -187,7 +183,7 @@ export class LinksPlugin {
                         <Tag icon={<PictureOutlined />}
                           onClick={() => pluginData.links.png.visible = true}
                           style={{
-                              marginLeft: '10px',
+                              marginLeft: '5px',
                               ...getStyles(this.session.clientStore, ['theme-bg-secondary', 'theme-trim', 'theme-text-primary'])
                           }} >
                          脑图

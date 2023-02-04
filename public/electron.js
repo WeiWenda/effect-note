@@ -23,7 +23,7 @@ function createWindow() {
   });
   // and load the index.html of the app.
   // win.loadFile("index.html");
-  win.loadURL(`http://localhost:${port}/index.html`);
+  win.loadURL(`http://localhost:${port}/note/-1`);
 }
 
 const gotTheLock = app.requestSingleInstanceLock()

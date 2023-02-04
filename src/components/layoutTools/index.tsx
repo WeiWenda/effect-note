@@ -9,12 +9,9 @@ function LayoutToolsComponent(props: {session: Session}) {
   const selectStyle = `opacity(100%) drop-shadow(0 0 0 ${textColor}) brightness(40)`;
   const [layout, setLayout] = useState(props.session.clientStore.getClientSetting('defaultLayout'));
   const operationClick: MenuProps['onClick'] = ({ key }) => {
-    props.session.showFilelist = key.includes('left');
-    props.session.showPreview = key.includes('right');
-    props.session.showHeader = key.includes('top');
+    props.session.emit('changeLayout', key);
     props.session.clientStore.setClientSetting('defaultLayout', key);
     setLayout(key);
-    props.session.emit('updateAnyway');
   };
   const items: MenuProps['items'] = [
     {

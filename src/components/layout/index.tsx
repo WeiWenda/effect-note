@@ -5,7 +5,7 @@ import { SettingOutlined } from '@ant-design/icons';
 import '@wangeditor/editor/dist/css/style.css';
 import 'vditor/dist/index.css';
 import {getStyles} from '../../share/ts/themes';
-import {api_utils, DocInfo, Session} from '../../share';
+import {api_utils, DocInfo, KeyHandler, Path, Session} from '../../share';
 import {useEffect, useState} from 'react';
 import {ImageOcr} from '../ImageOcr';
 import Config from '../../share/ts/config';
@@ -21,95 +21,121 @@ import {mimetypeLookup} from '../../ts/util';
 import logger from '../../ts/logger';
 import FileInput from '../fileInput';
 import { ExportComponent } from '../export';
-import YinComponent from '../yin';
-import {YangComponent} from '../yang';
 import {SubscriptionInfoComponent} from '../subscriptionInfo';
-import BackendSettingsComponent from '../settings/backendSettings';
-import FrontendSettingsComponent from '../settings/frontendSettings';
+import WorkspaceSettingsComponent from '../settings/workspace';
+import AppearanceSettingsComponent from '../settings/appearance';
+import { DraggableCore } from 'react-draggable';
+import {useLoaderData, useNavigate, useLocation, Outlet } from 'react-router-dom';
+import SubscriptionSettingsComponent from '../settings/subscription';
+import $ from 'jquery';
 const { Header, Footer, Sider, Content } = Layout;
 
 export const HeaderItems = [
-  { label: 'Notes', key: 'user_view'},
-  { label: 'Discovery', key: 'search_view' }, // 菜单项务必填写 key
+  { label: 'Notes', key: 'note'},
+  { label: 'Discovery', key: 'discovery' }, // 菜单项务必填写 key
 ];
+// @ts-ignore
+export async function noteLoader({params}) {
+  const res = await api_utils.getCurrentUserDocs();
+  return {userDocs: res.content};
+};
+export function useForceUpdate() {
+  const [value, setValue] = useState(0); // integer state
+  return () => setValue(value + 1); // update state to force render
+}
 function LayoutComponent(props: {session: Session, config: Config, pluginManager: PluginsManager}) {
+  const forceUpdate = useForceUpdate();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [curPage, setCurPage] = useState<string>(location.pathname.split('/').shift() || 'note');
   const [settingOpen, setSettingOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [curDocId, setCurDocId] = useState(props.session.clientStore.getClientSetting('curDocId'));
-  const [baseInfoModalVisible, setBaseInfoModalVisible] = useState(false);
-  const [subscriptionModalVisible, setSubscriptionModalVisible] = useState(false);
-  const [curPage, setCurPage] = useState(props.session.clientStore.getClientSetting('curView'));
+  const [drawerWidth, setDrawerWidth] = useState(window.innerWidth / 2);
+  const [showHeader, setShowHeader] = useState(props.session.clientStore.getClientSetting('defaultLayout').includes('top'));
+  const [modalVisible, setModalVisible] = useState<{[key: string]: boolean}>({
+    'noteInfo': false,
+    'ocr': false,
+    'rtf': false,
+    'md': false,
+    'export': false,
+    'drawio': false,
+    'png': false,
+    'subscriptionInfo': false,
+  });
   const [curDocInfo, setCurDocInfo] = useState({});
   const [editor, setEditor] = useState<IDomEditor | null>(null);
   const [html, setHtml] = useState('<p>');
+  const [xml, setXml] = useState<string | undefined>();
   const [vd, setVd] = React.useState<Vditor>();
   useEffect(() => {
-    if (!props.session.mdEditorModalVisible) {
-      return;
-    }
-    const vditor = new Vditor('vditor', {
-      upload: {
-        url: API_BASE_URL +  '/upload_image',
-        fieldName: 'wangeditor-uploaded-image',
-        accept: 'image/*',
-        format: (_files, responseText) => {
-          const succMap: any = {};
-          JSON.parse(responseText).data.forEach((file: any) => {
-            succMap[file.alt] = file.href;
-          });
-          const res = JSON.stringify({
-            'msg': '',
-            'code': 0,
-            'data': {
-              succMap
+    props.session.on('importFinished', forceUpdate);
+    props.session.on('modeChange', forceUpdate);
+    props.session.on('changeLayout', (layout) => {
+      setShowHeader(layout.includes('top'));
+    });
+    props.session.on('updateAnyway', () => {
+      logger.debug('updateAnyway');
+      props.session.emit('updateInner');
+      forceUpdate();
+    });
+    props.session.on('openModal', (modalName, data) => {
+      if (modalName === 'rtf') {
+        setHtml(data.html);
+      }
+      if (modalName === 'noteInfo') {
+        setCurDocInfo(data.docInfo);
+      }
+      if (modalName === 'md') {
+        setTimeout(() => {
+          const vditor = new Vditor('vditor', {
+            upload: {
+              url: API_BASE_URL +  '/upload_image',
+              fieldName: 'wangeditor-uploaded-image',
+              accept: 'image/*',
+              format: (_files, responseText) => {
+                const succMap: any = {};
+                JSON.parse(responseText).data.forEach((file: any) => {
+                  succMap[file.alt] = file.href;
+                });
+                const res = JSON.stringify({
+                  'msg': '',
+                  'code': 0,
+                  'data': {
+                    succMap
+                  }
+                });
+                return res;
+              }
+            },
+            preview: {
+              theme : {
+                current: props.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light',
+                path: 'content-theme'
+              }},
+            theme: props.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'classic',
+            height: window.innerHeight - 360,
+            toolbar: ['quote', '|', 'headings', 'bold', 'italic', 'strike', 'inline-code', '|',
+              'list', 'ordered-list', 'check' , '|', 'link', 'upload', 'table', 'code', '|',
+              'insert-before', 'insert-after', 'undo', 'redo'],
+            after: () => {
+              vditor.setValue(data.md || '');
+              setVd(vditor);
             }
           });
-          return res;
-        }
-      },
-      preview: {
-        theme : {
-          current: props.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light',
-          path: 'content-theme'
-      }},
-      theme: props.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'classic',
-      height: window.innerHeight - 360,
-      toolbar: ['quote', '|', 'headings', 'bold', 'italic', 'strike', 'inline-code', '|',
-        'list', 'ordered-list', 'check' , '|', 'link', 'upload', 'table', 'code', '|', 'insert-before', 'insert-after', 'undo', 'redo'],
-      after: () => {
-        vditor.setValue(props.session.md || '');
-        setVd(vditor);
+        }, 100);
       }
+      if (modalName === 'drawio') {
+        setXml(data.xml);
+      }
+      const visible = {...modalVisible};
+      visible[modalName] = true;
+      setModalVisible(visible);
+      props.session.stopMonitor = true;
     });
-  }, [props.session.mdEditorModalVisible]);
-  useEffect(() => {
-    setHtml(props.session.wangEditorHtml);
-  }, [props.session.wangEditorHtml]);
-  const refreshUserDocs = async (openDocId: number) => {
-    const newUserDocs = await api_utils.getCurrentUserDocs();
-    props.session.userDocs = newUserDocs.content;
-    setCurDocId(openDocId);
-  };
-  useEffect(() => {
-    if (baseInfoModalVisible || props.session.pngModalVisible
-      || props.session.wangEditorModalVisible || props.session.ocrModalVisible
-      || props.session.drawioModalVisible || props.session.mdEditorModalVisible
-      || props.session.exportModalVisible || props.session.selectPopoverOpen) {
-      props.session.stopMonitor = true;
-    } else {
-      props.session.stopMonitor = false;
-    }
-  }, [baseInfoModalVisible, props.session.pngModalVisible,
-    props.session.wangEditorModalVisible, props.session.ocrModalVisible,
-    props.session.mdEditorModalVisible, props.session.drawioModalVisible,
-    props.session.exportModalVisible,  props.session.selectPopoverOpen]);
-  useEffect(() => {
-    if (curPage === 'user_view') {
-      props.session.stopMonitor = false;
-    } else {
-      props.session.stopMonitor = true;
-    }
-  }, [curPage]);
+    props.pluginManager.on('status', forceUpdate);
+    props.session.document.store.events.on('saved', forceUpdate);
+    props.session.document.store.events.on('unsaved', forceUpdate);
+  }, []);
   const toolbarConfig: Partial<IToolbarConfig> = {
     excludeKeys: ['group-video', 'divider', 'fullScreen', 'emotion', 'group-justify', 'group-indent']
   };
@@ -153,34 +179,37 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       />
       <Modal
         className={'form_modal'}
-        open={subscriptionModalVisible}
+        open={modalVisible.subscriptionInfo}
         footer={null}
         onCancel={() => {
-          setSubscriptionModalVisible(false);
+          setModalVisible({...modalVisible, subscriptionInfo: false});
+          props.session.stopMonitor = false;
         }}>
         <SubscriptionInfoComponent session={props.session} onFinish={() => {
-          setSubscriptionModalVisible(false);
+          setModalVisible({...modalVisible, subscriptionInfo: false});
+          props.session.stopMonitor = false;
           props.session.showMessage('创建成功');
         }} />
       </Modal>
       <Modal
         style={{width: '500px'}}
         title='导出'
-        open={props.session.exportModalVisible}
+        open={modalVisible.export}
         footer={null}
         onCancel={() => {
-          props.session.exportModalVisible = false;
-          props.session.emit('updateAnyway');
+          setModalVisible({...modalVisible, export: false});
+          props.session.stopMonitor = false;
         }}
       >
         <ExportComponent session={props.session} />
       </Modal>
       <Modal
         className={'form_modal'}
-        open={baseInfoModalVisible}
+        open={modalVisible.noteInfo}
         footer={null}
         onCancel={() => {
-          setBaseInfoModalVisible(false);
+          setModalVisible({...modalVisible, noteInfo: false});
+          props.session.stopMonitor = false;
         }}
       >
         <FileBaseInfoComponent
@@ -188,26 +217,26 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           session={props.session}
           tags={props.session.userDocs.flatMap(doc => JSON.parse(doc.tag || '[]') as Array<string>)}
           onFinish={(docId) => {
-            refreshUserDocs(docId).then(() => {
-              setBaseInfoModalVisible(false);
-              props.session.showMessage('创建成功');
-            });
+            setModalVisible({...modalVisible, noteInfo: false});
+            props.session.stopMonitor = false;
+            navigate(`/note/${docId}`);
           }}
         />
       </Modal>
       <Modal
         width={window.innerWidth - 250}
-        open={props.session.wangEditorModalVisible}
+        open={modalVisible.rtf}
         onCancel={() => {
-          props.session.wangEditorModalVisible = false;
-          props.session.emit('updateAnyway');
+          setModalVisible({...modalVisible, rtf: false});
+          props.session.stopMonitor = false;
         }}
         title='编辑富文本'
         cancelText={'取消'}
         okText={'确认'}
         onOk={() => {
-           props.session.wangEditorModalVisible = false;
-           props.session.wangEditorOnSave(html);
+          setModalVisible({...modalVisible, rtf: false});
+          props.session.stopMonitor = false;
+          props.session.wangEditorOnSave(html);
         }}
       >
         <Toolbar
@@ -227,17 +256,18 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       </Modal>
       <Modal
           width={window.innerWidth - 250}
-          open={props.session.mdEditorModalVisible}
+          open={modalVisible.md}
           onCancel={() => {
-              props.session.mdEditorModalVisible = false;
-              props.session.emit('updateAnyway');
+            setModalVisible({...modalVisible, md: false});
+            props.session.stopMonitor = false;
           }}
           title='编辑markdown'
           cancelText={'取消'}
           okText={'确认'}
           onOk={() => {
-              props.session.mdEditorModalVisible = false;
-              props.session.mdEditorOnSave(vd?.getValue(), vd?.getHTML().replace(/<p>|<\/p>|\n/g, ''));
+            setModalVisible({...modalVisible, md: false});
+            props.session.stopMonitor = false;
+            props.session.mdEditorOnSave(vd?.getValue(), vd?.getHTML().replace(/<p>|<\/p>|\n/g, ''));
           }}
       >
         <div id='vditor' className='vditor' />
@@ -245,17 +275,18 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       <Modal width={window.innerWidth - 10}
              style={{top: 20}}
              title='编辑思维导图'
-             open={props.session.pngModalVisible}
+             open={modalVisible.png}
              cancelText={'取消'}
              okText={'保存'}
              onOk={() => {
                props.session.mindMapRef.current.getContent().then((data: {img_src: any, json: any}) => {
-                 props.session.pngModalVisible = false;
+                 setModalVisible({...modalVisible, png: false});
+                 props.session.stopMonitor = false;
                  props.session.pngOnSave(data.img_src, data.json);
                });
              }} onCancel={() => {
-                props.session.pngModalVisible = false;
-                props.session.emit('updateAnyway');
+               setModalVisible({...modalVisible, png: false});
+               props.session.stopMonitor = false;
              }}>
           <Mindmap ref={props.session.mindMapRef}/>
       </Modal>
@@ -263,58 +294,75 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
              style={{top: 20}}
              footer={null}
              title='编辑流程图'
-             open={props.session.drawioModalVisible}
-             onOk={() => {}} onCancel={() => {
-        props.session.drawioModalVisible = false;
-        props.session.emit('updateAnyway');
-      }}>
-        <DrawioEditor session={props.session} ref={props.session.drawioRef}/>
+             open={modalVisible.drawio}
+             onOk={() => {}}
+             onCancel={() => {
+              setModalVisible({...modalVisible, drawio: false});
+              props.session.stopMonitor = false;
+            }}>
+        <DrawioEditor session={props.session} xml={xml} onFinish={() => {
+          setModalVisible({...modalVisible, drawio: false});
+          props.session.stopMonitor = false;
+        }} ref={props.session.drawioRef}/>
       </Modal>
       <Modal
             className={'form_modal'}
-            open={props.session.ocrModalVisible}
+            open={modalVisible.ocr}
              title='文本识别'
              footer={null}
              onCancel={() => {
-               props.session.ocrModalVisible = false;
-               props.session.emit('updateAnyway');
+               setModalVisible({...modalVisible, ocr: false});
+               props.session.stopMonitor = false;
              }}>
-        <ImageOcr session={props.session}></ImageOcr>
+        <ImageOcr session={props.session} onFinish={() => {
+          setModalVisible({...modalVisible, ocr: false});
+          props.session.stopMonitor = false;
+        }}></ImageOcr>
       </Modal>
       {
-        props.session.showHeader &&
+        showHeader &&
         <Header className='layout-header' style={{
           ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
         }}>
-          <img className='logo' src={'images/icon.png'}></img>
+          <img className='logo' src={'/images/icon.png'}></img>
           <div className='header-title'>Effect</div>
           <Menu style={{borderBottom: 'unset'}} className='header-menu' mode='horizontal'
                 items={HeaderItems}
                 selectedKeys={[curPage]}
                 onClick={(e) => {
-                  props.session.clientStore.setClientSetting('curView', e.key);
                   setCurPage(e.key);
+                  props.session.clientStore.setClientSetting('curView', e.key);
+                  if (e.key === 'note') {
+                    props.session.stopMonitor = false;
+                    const docId = props.session.clientStore.getClientSetting('curDocId');
+                    navigate(`/${e.key}/${docId}`);
+                  } else {
+                    props.session.stopMonitor = true;
+                    navigate(`/${e.key}`);
+                  }
                 }}/>
           {
-            curPage === 'user_view' &&
+            curPage === 'note' &&
             <Button onClick={() => {
                 getServerConfig().then(serverConfig => {
                     if ([serverConfig.gitLocalDir, serverConfig.gitUsername, serverConfig.gitPassword].includes('未配置')) {
                         props.session.showMessage('新建笔记前，请正确填写git配置');
                     } else {
                       setCurDocInfo({});
-                      setBaseInfoModalVisible(true);
+                      setModalVisible({...modalVisible, noteInfo: true});
+                      props.session.stopMonitor = true;
                     }
                 }).catch(() => {
                   setCurDocInfo({});
-                  setBaseInfoModalVisible(true);
+                  setModalVisible({...modalVisible, noteInfo: true});
+                  props.session.stopMonitor = true;
                 });
             }}>新建笔记</Button>
           }
           {
-            curPage === 'search_view' &&
+            curPage === 'discovery' &&
               <Button onClick={() => {
-                setSubscriptionModalVisible(true);
+                setModalVisible({...modalVisible, subscriptionInfo: true});
               }}>添加订阅</Button>
           }
           <SettingOutlined className='header-setting' onClick={() => {
@@ -328,40 +376,47 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
       }}>
         {
-          !refreshing && curPage === 'user_view' &&
-          <YinComponent session={props.session}
-                             pluginManager={props.pluginManager}
-            curDocId={curDocId} onEditBaseInfo={(docInfo: DocInfo) => {
-            setCurDocInfo(docInfo);
-            setBaseInfoModalVisible(true);
-          }} />
-        }
-        {
-          !refreshing && curPage === 'search_view' &&
-          <YangComponent session={props.session} config={props.config}/>
+          !refreshing &&
+            <Outlet/>
         }
       </Content>
       <Drawer drawerStyle={{
         ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
-        }} width='50%' placement='right' open={settingOpen} closable={false} onClose={() => {
+        }} width={drawerWidth} placement='right' open={settingOpen} closable={false} onClose={() => {
         setSettingOpen(false);
         props.session.stopMonitor = false;
       }} >
-        <Tabs style={{
-          ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
-        }} defaultActiveKey='1'>
-          <Tabs.TabPane tab='页面配置' key='1'>
-            <FrontendSettingsComponent session={props.session} config={props.config} refreshFunc={() => {
-              setRefreshing(true);
-              setTimeout(() => {
-                setRefreshing(false);
-              }, 100);
-            }}/>
-          </Tabs.TabPane>
-          <Tabs.TabPane tab='服务端配置' key='2'>
-            <BackendSettingsComponent session={props.session}/>
-          </Tabs.TabPane>
-        </Tabs>
+        <div style={{display: 'flex', height: '100%'}}>
+          <DraggableCore key='drawer_drag' onDrag={(_, ui) => {
+            setDrawerWidth(Math.min(Math.max(drawerWidth - ui.deltaX, 200), window.innerWidth - 50));
+          }}>
+            <div className='horizontal-drag' style={{
+              ...getStyles(props.session.clientStore, ['theme-bg-secondary'])
+            }}></div>
+          </DraggableCore>
+          <Tabs style={{
+            marginLeft: '1em',
+            flexGrow: 1,
+            ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
+          }}
+                type='card'
+                defaultActiveKey='1'>
+            <Tabs.TabPane tab='外观' key='1'>
+              <AppearanceSettingsComponent session={props.session} config={props.config} refreshFunc={() => {
+                setRefreshing(true);
+                setTimeout(() => {
+                  setRefreshing(false);
+                }, 100);
+              }}/>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='工作空间' key='2'>
+              <WorkspaceSettingsComponent session={props.session}/>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='订阅源' key='3'>
+              <SubscriptionSettingsComponent session={props.session}/>
+            </Tabs.TabPane>
+          </Tabs>
+        </div>
       </Drawer>
       {/*<Footer className='layout-footer' style={{*/}
       {/*  ...getStyles(props.session.clientStore, ['theme-bg-primary'])*/}
