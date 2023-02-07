@@ -16,6 +16,11 @@
 
 ## 功能演示
 
+### 笔记页面
+![](./public/images/readme_pic1.png)
+### 订阅检索
+![](./public/images/readme_pic2.png)
+
 
 ## Thanks To
 - [react](https://github.com/facebook/react)
