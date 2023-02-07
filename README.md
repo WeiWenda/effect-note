@@ -9,7 +9,7 @@ Inspired By Confluence & Workflowy
 Project Vision：Empower Personal Knowledge Management And Discovery
 </p>
 
-[在线Demo](https://effect-note-demo-1314328063.cos-website.ap-beijing.myqcloud.com/)
+[在线Demo](https://effect-note-demo-1314328063.cos-website.ap-beijing.myqcloud.com/note/-1)
 
 [Mac客户端下载](https://pan.baidu.com/s/1y0Ouxh_kOxNHQcpjUeArVg?pwd=evzn) 
 
