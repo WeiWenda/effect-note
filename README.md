@@ -1,8 +1,12 @@
 <p align="center">
 <img width="128px" src="./public/images/icon.png">
 <br>
-一款免费的大纲笔记软件，纯文件存储，Gitee云端同步，Inspired By Confluence & Workflowy
+一款免费的大纲笔记软件，纯文件存储，Gitee云端同步
 <br>
+<br>
+Inspired By Confluence & Workflowy
+<br>
+Project Vision：Empower Personal Knowledge Management And Discovery
 </p>
 
 [在线Demo](https://effect-note-demo-1314328063.cos-website.ap-beijing.myqcloud.com/)
@@ -11,8 +15,6 @@
 
 [Windows客户端下载](https://pan.baidu.com/s/1gQTLyW7GHW4iSzroVmy4fQ?pwd=2qmc)
 
-## 愿景
-让知识积累和传播更容易
 
 ## 功能演示
 
