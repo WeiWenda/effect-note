@@ -4,7 +4,7 @@
 一款免费的大纲笔记软件，纯文件存储，Gitee云端同步
 <br>
   <span>
-    <a target="_blank" href="https://demo.effectnote.com/note/-1">在线Demo</a> |
+    <a target="_blank" href="http://demo.effectnote.com/note/-1">在线Demo</a> |
     <a target="_blank" href="https://pan.baidu.com/s/1y0Ouxh_kOxNHQcpjUeArVg?pwd=evzn">Mac客户端下载</a> |
     <a target="_blank" href="https://pan.baidu.com/s/1gQTLyW7GHW4iSzroVmy4fQ?pwd=2qmc">Windows客户端下载</a>
   </span>
