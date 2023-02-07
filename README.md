@@ -3,18 +3,16 @@
 <br>
 一款免费的大纲笔记软件，纯文件存储，Gitee云端同步
 <br>
+  <span>
+    <a target="_blank" href="https://effect-note-demo-1314328063.cos-website.ap-beijing.myqcloud.com/note/-1">在线Demo</a> |
+    <a target="_blank" href="https://pan.baidu.com/s/1y0Ouxh_kOxNHQcpjUeArVg?pwd=evzn">Mac客户端下载</a> |
+    <a target="_blank" href="https://pan.baidu.com/s/1gQTLyW7GHW4iSzroVmy4fQ?pwd=2qmc">Windows客户端下载</a>
+  </span>
 <br>
 Inspired By Confluence & Workflowy
 <br>
 Project Vision：Empower Personal Knowledge Management And Discovery
 </p>
-
-[在线Demo](https://effect-note-demo-1314328063.cos-website.ap-beijing.myqcloud.com/note/-1)
-
-[Mac客户端下载](https://pan.baidu.com/s/1y0Ouxh_kOxNHQcpjUeArVg?pwd=evzn) 
-
-[Windows客户端下载](https://pan.baidu.com/s/1gQTLyW7GHW4iSzroVmy4fQ?pwd=2qmc)
-
 
 ## 功能演示
 
