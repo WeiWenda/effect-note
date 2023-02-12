@@ -32,6 +32,8 @@ export type ClientSettings = Theme & {
   curView: string;
   curDocId: number;
   curTheme: string;
+  curSearch: string;
+  curSearchResult: string;
 };
 
 type ClientSetting = keyof ClientSettings;
@@ -48,6 +50,8 @@ const default_client_settings: ClientSettings =
     openFile: '0',
     curView: 'note',
     curDocId: -1,
+    curSearch: '',
+    curSearchResult: '',
   });
 
 export type LocalDocSettings = {

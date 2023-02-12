@@ -41,6 +41,9 @@ registerPlugin(
           const mode = api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light';
           if (divs.length > 0) {
             Vditor.preview(divs[0] as HTMLDivElement, pluginData.links.md, {mode,
+              hljs: {
+                lineNumber: true
+              },
               transform: (html: string) => {
                 return html.replace('<a ', '<a target="_blank" ');
               },

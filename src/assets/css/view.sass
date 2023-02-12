@@ -94,6 +94,13 @@ $padding-v: 10px
 .vditor-reset.node-markdown
     hr
         margin: 1em 0px
+    blockquote
+        display: flex
+        border-left: solid 3.5px
+        padding: 14px 14px
+        border-bottom-right-radius: 6px
+        border-top-right-radius: 6px
+
 .vditor-reset
     ul
         display: flex
@@ -200,7 +207,7 @@ $sub-after-search-height: 45px
         border-top-right-radius: 6px
         border-left: solid 3.5px
         margin-left: 0px
-        margin-right: 2em
+        margin-inline-end: 0px
     input[type='checkbox']
         margin: 9px 9px
     pre
@@ -259,17 +266,24 @@ $file-toolbar-height: 36px
     margin-bottom: 5px
     border: 1px solid
     border-radius: 6px
+    .effect-block-placehoder
+        background-color: rgb(240, 240, 240, 0.5)
+        padding-right: 1em
+        display: flex
+        flex-grow: 1
+        justify-content: flex-end
+        align-items: center
     .effect-block-header
         background-color: rgb(240, 240, 240, 0.5)
         position: absolute
         top: 0
         right: 0
-        width: auto
         padding-left: 1em
         padding-right: 1em
         display: flex
         justify-content: flex-end
         align-items: center
+        z-index: 2
 
     .effect-block-header-hidden
         opacity: 0

@@ -238,9 +238,11 @@ registerMode({
 });
 
 registerMode({
-  name: 'SETTINGS',
-  cursorBetween: false,
-  // TODO: exit settings on any bad key press?
+  name: 'NODE_OPERATION',
+  cursorBetween: true,
+  async exit(session) {
+    await session.deleteAtCursor();
+  },
 });
 
 registerMode({

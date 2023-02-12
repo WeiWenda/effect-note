@@ -10,7 +10,7 @@ export function SpecialBlock(props: React.PropsWithChildren<{
   tools: any, path: Path, collapse: boolean,
   setCollapseCallback: (collapse: boolean) => void}>) {
   const [fold, setFold] = useState(props.collapse);
-  const [headerVision, setHeaderVision] = useState(false);
+  const [headerVision, setHeaderVision] = useState(props.collapse);
   return (
     <div className={'effect-block-wrapper'} onMouseEnter={() => {
       setHeaderVision(true);
@@ -21,7 +21,14 @@ export function SpecialBlock(props: React.PropsWithChildren<{
     }} style={{
       borderColor: props.session.clientStore.getClientSetting('theme-bg-secondary')
     }}>
-      <div className={`effect-block-header ${headerVision ? '' : 'effect-block-header-hidden'}`} style={{
+      <div className={`${fold ? 'effect-block-placehoder' : 'effect-block-header'} ${headerVision ? '' : 'effect-block-header-hidden'}`}
+           onDoubleClick={() => {
+             if (fold) {
+               setFold(false);
+               props.setCollapseCallback(false);
+             }
+           }}
+           style={{
         height: `${props.session.clientStore.getClientSetting('lineHeight')}px`
       }}>
         <Space style={{opacity: 1}}>

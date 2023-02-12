@@ -6,7 +6,7 @@ import { DownOutlined } from '@ant-design/icons';
 
 function LayoutToolsComponent(props: {session: Session}) {
   const textColor = props.session.clientStore.getClientSetting('theme-text-primary');
-  const selectStyle = `opacity(100%) drop-shadow(0 0 0 ${textColor}) brightness(40)`;
+  const selectStyle = `${props.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'invert(1)' : 'opacity(50%)'} drop-shadow(0 0 0 ${textColor}) saturate(1000%)`;
   const [layout, setLayout] = useState(props.session.clientStore.getClientSetting('defaultLayout'));
   const operationClick: MenuProps['onClick'] = ({ key }) => {
     props.session.emit('changeLayout', key);

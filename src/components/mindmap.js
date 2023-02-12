@@ -20,7 +20,7 @@ export class Mindmap extends Component {
     return {'img_src': data, 'json': jsonData};
   }
   render() {
-    const iframe = '<iframe id="leauiMindMapIfr" src="./mindmap/index.html?i=1?'
+    const iframe = '<iframe id="leauiMindMapIfr" src="/mindmap/index.html?i=1?'
       + new Date().getTime() + '" frameborder="0"'
       + ' width="' + (window.innerWidth - 70) + '"'
       + ' height="' + (window.innerHeight - 170) + '"></iframe>';

@@ -172,11 +172,13 @@ export default class Session extends EventEmitter {
   }
 
   public setHoverRow(path: Path | null) {
-    if (this.hoverOpen) {
-      console.log('setHoverRow');
+    if (this.mode !== 'INSERT') {
       return;
     }
-    // console.log('set hover row ', path);
+    if (path && this.hoverRow?.is(path)) {
+      return;
+    }
+    logger.debug('set hover row ', path);
     this.lastHoverRow = this.hoverRow;
     this.hoverRow = path;
     this.emit('updateInner');
@@ -1758,16 +1760,17 @@ export default class Session extends EventEmitter {
   }
 
   public async yankDelete() {
-    console.log('yankDelete');
     const cursor = this.cursor;
     const anchor = this._anchor;
     if (anchor !== null) {
       if (!cursor.path.is(anchor.path) || this.selectInlinePath === null) {
+        console.log('yankDelete multi line');
         // 多行选中
         const [parent, index1, index2] = await this.getVisualLineSelections();
         await this.delBlocks(parent.row, index1, (index2 - index1) + 1, {addNew: false});
         this.stopAnchor();
       } else {
+        console.log('yankDelete whole line');
         // 单行选中
         this.selectPopoverOpen = false;
         const options = {includeEnd: false, yank: false};

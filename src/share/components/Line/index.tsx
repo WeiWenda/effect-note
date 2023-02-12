@@ -146,6 +146,9 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                               if (newVal === '@') {
                                 this.props.session.setMode('SEARCH');
                               }
+                              if (newVal === '/') {
+                                this.props.session.setMode('NODE_OPERATION');
+                              }
                               this.props.session.emit('updateAnyway');
                               this.setState({input: ''});
                             });

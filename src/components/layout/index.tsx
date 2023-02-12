@@ -69,7 +69,10 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const [vd, setVd] = React.useState<Vditor>();
   useEffect(() => {
     props.session.on('importFinished', forceUpdate);
-    props.session.on('modeChange', forceUpdate);
+    props.session.on('modeChange', () => {
+      logger.debug('modeChange');
+      forceUpdate();
+    });
     props.session.on('changeLayout', (layout) => {
       setShowHeader(layout.includes('top'));
     });
@@ -338,7 +341,17 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     navigate(`/${e.key}/${docId}`);
                   } else {
                     props.session.stopMonitor = true;
-                    navigate(`/${e.key}`);
+                    const lastSearch = props.session.clientStore.getClientSetting('curSearch');
+                    const lastSearchResult = props.session.clientStore.getClientSetting('curSearchResult');
+                    if (lastSearch) {
+                      if (lastSearchResult) {
+                        navigate(`/${e.key}?q=${encodeURIComponent(lastSearch)}&v=${encodeURIComponent(lastSearchResult)}`);
+                      } else {
+                        navigate(`/${e.key}?q=${encodeURIComponent(lastSearch)}`);
+                      }
+                    } else {
+                      navigate(`/${e.key}`);
+                    }
                   }
                 }}/>
           {

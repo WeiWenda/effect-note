@@ -154,7 +154,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
                             placeholder='截止时间' onChange={(_, dateString) => {
                   setOpenKeys([]);
                   setDropDownOpen(false);
-                  props.session.hoverOpen = false;
+                  props.session.setMode('INSERT');
                   setTags('due: ', dateString);
                 }}></DatePicker>
               ),
@@ -166,7 +166,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
                             placeholder='完成时间' onChange={(_, dateString) => {
                   setOpenKeys([]);
                   setDropDownOpen(false);
-                  props.session.hoverOpen = false;
+                  props.session.setMode('INSERT');
                   setTags('end: ', dateString);
                 }}></DatePicker>
               ),
@@ -178,7 +178,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
                             placeholder='开始时间' onChange={(_, dateString) => {
                   setOpenKeys([]);
                   setDropDownOpen(false);
-                  props.session.hoverOpen = false;
+                  props.session.setMode('INSERT');
                   setTags('start: ', dateString);
                 }}></DatePicker>
               ),
@@ -242,7 +242,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       return;
     }
     setDropDownOpen(false);
-    props.session.hoverOpen = false;
+    props.session.setMode('INSERT');
     if (key.startsWith('fold')) {
       const foldLevel = Number(key.split('_').pop());
       props.session.foldBlock(props.path, foldLevel, true).then(() => {
@@ -359,7 +359,11 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       onOpenChange={(open) => {
         setDropDownOpen(open);
         props.session.cursor.reset();
-        props.session.hoverOpen = open;
+        if (open) {
+          props.session.setMode('NODE_OPERATION');
+        } else {
+          props.session.setMode('INSERT');
+        }
       }}
       menu={menusProps} trigger={['click']} >
       {props.bullet}

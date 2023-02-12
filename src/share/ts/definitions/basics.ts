@@ -693,6 +693,17 @@ keyDefinitions.registerAction(new Action(
 ));
 
 keyDefinitions.registerAction(new Action(
+  'exit-and-undo',
+  'Exit back to normal mode',
+  async function({ session }) {
+    await session.setMode('INSERT');
+    await session.addCharsAtCursor(['/']);
+  },
+  // generally dont repeat actions not in normal mode
+  { sequence: SequenceAction.DROP },
+));
+
+keyDefinitions.registerAction(new Action(
   'enter-visual-mode',
   'Enter visual mode',
   async function({ session }) {

@@ -212,6 +212,9 @@ export function appendStyleScript(clientStore: ClientStore) {
                     span::selection{background:${theme['theme-bg-highlight']}}</style>`);
   $('.span-hover-color').remove();
   $('#app').append(`<style class='span-hover-color'>
+                    .vditor-reset{color: ${theme['theme-text-primary']}}
+                    .vditor-reset a{color: ${theme['theme-text-link']}}
+                    .vditor-reset blockquote{color: ${theme['theme-text-primary']};border-left-color: ${theme['theme-bg-cursor']};background-color: ${theme['theme-bg-secondary']}}
                     .ant-pagination .ant-pagination-item-active{border-color: ${theme['theme-text-link']}}
                     .ant-pagination .ant-pagination-item-active:hover a{color: ${theme['theme-text-link']}}
                     .ant-pagination .ant-pagination-item-active:hover{border-color: ${theme['theme-text-link']}}

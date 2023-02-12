@@ -201,8 +201,15 @@ export const SEARCH_MODE_MAPPINGS: HotkeyMapping = Object.assign({
   // 'search-down': [['ctrl+j'], ['down'], ['tab']],
 }, _.pick(INSERT_MOTION_MAPPINGS, SINGLE_LINE_MOTIONS));
 
-export const SETTINGS_MODE_MAPPINGS: HotkeyMapping = {
-  'exit-mode': [['esc'], ['ctrl+c'], ['ctrl+[']],
+export const NODE_OPERATION_MODE_MAPPINGS: HotkeyMapping = {
+  'exit-and-undo': [['esc'], ['ctrl+c'], ['ctrl+[']],
+  'unfold-node': [['o', 'a'], ['o', '1'], ['o', '2'], ['o', '3'], ['o', '0']],
+  'open-markdown': [['i', 'm']],
+  'open-html': [['i', 'r']],
+  'open-drawio': [['i', 'd']],
+  'open-mindmap': [['i', 'b']],
+  'mark-mark': [['m', 'm']],
+  'mark-tag': [['m', 't']],
 };
 
 export const WORKFLOWY_MODE_MAPPINGS: HotkeyMapping = Object.assign({
@@ -253,7 +260,7 @@ const config: Config = {
        VISUAL : VISUAL_MODE_MAPPINGS,
        VISUAL_LINE : VISUAL_LINE_MODE_MAPPINGS,
        SEARCH : SEARCH_MODE_MAPPINGS,
-       SETTINGS : SETTINGS_MODE_MAPPINGS,
+       NODE_OPERATION : NODE_OPERATION_MODE_MAPPINGS,
     }),
 };
 export default config;

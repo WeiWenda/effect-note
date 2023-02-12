@@ -418,6 +418,8 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                     if (session.hoverRow) {
                       const target = session.hoverRow;
                       session.yankDelete().then(() => {
+                        session.selecting = false;
+                        session.dragging = false;
                         session.cursor.setPosition(target, 0).then(() => {
                           session.pasteAfter().then(() => {
                             session.emit('updateInner');
@@ -425,12 +427,6 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                         });
                       });
                     }
-                    setTimeout(() => {
-                      session.selecting = false;
-                      session.stopAnchor();
-                      session.dragging = false;
-                      session.emit('updateInner');
-                    }, 10);
                   }
                 }}
               >

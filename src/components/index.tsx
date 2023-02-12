@@ -306,6 +306,9 @@ $(document).ready(async () => {
   keyEmitter.on('keydown', (key) => {
     if (!session.stopMonitor) {
       keyHandler.queueKey(key);
+      if (session.mode === 'NODE_OPERATION') {
+        return true;
+      }
       // NOTE: this is just a best guess... e.g. the mode could be wrong
       // problem is that we process asynchronously, but need to return synchronously
       return keyBindings.bindings[session.mode].getKey(key) != null ||

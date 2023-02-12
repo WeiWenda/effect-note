@@ -118,6 +118,9 @@ export class MarksPlugin {
 
     // Serialization #
 
+    this.api.registerListener('session', 'setMark', async (row: Row, line: string) => {
+      await this.setMark(row, line);
+    });
     this.api.registerHook('document', 'serializeRow', async (struct, info) => {
       const mark = await this.getMark(info.row);
       if (mark) {

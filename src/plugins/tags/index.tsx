@@ -156,6 +156,12 @@ export class TagsPlugin {
     }
     this.UnsetTag = UnsetTag;
 
+    this.api.registerListener('session', 'startTag', (path: Path) => {
+      this.tagstate = {
+        session: new InMemorySession(),
+        path: path
+      };
+    });
     // Serialization #
 
     this.api.registerHook('document', 'serializeRow', async (struct, info) => {

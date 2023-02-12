@@ -62,6 +62,15 @@ export class LinksPlugin {
                 });
             };
         };
+        this.api.registerListener('session', 'setMindmap', async (row: Row, img_src: string, img_json: string) => {
+            await this.setPng(row, img_src, img_json);
+        });
+        this.api.registerListener('session', 'setDrawio',  (row: Row) => {
+            onInsertDrawio(row);
+        });
+        this.api.registerListener('session', 'setMarkdown', async (row: Row, markdown: string) => {
+            await this.setMarkdown(row, markdown);
+        });
         this.api.registerHook('session', 'renderHoverBullet', function(bullet, {path, rowInfo}) {
               return (
                 <HoverIconDropDownComponent session={that.session} bullet={bullet} path={path} rowInfo={rowInfo}

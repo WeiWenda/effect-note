@@ -10,19 +10,72 @@ import {AimOutlined, SearchOutlined} from '@ant-design/icons';
 import {getSubscriptionFileContent, getSubscriptionFiles, getSubscriptions, searchSubscription} from '../../share/ts/utils/APIUtils';
 import {SessionWithToolbarComponent} from '../session';
 import {mimetypeLookup} from '../../ts/util';
+import { useSearchParams } from 'react-router-dom';
 
 const {Search} = Input;
 
 export function YangComponent(props: {session: Session, config: Config}) {
+  let [searchParams, setSearchParams] = useSearchParams();
   const [fileListWidth, setFileListWidth] = useState(250);
   const [treeData, setTreeData] = useState<DataNode[]>([]);
   const [filter, setFilter] = useState('');
+  const [searchValue, setSearchValue] = useState(searchParams.get('q') || '');
   const [filterOuter, setFilterOuter] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedTreeNode, setSelectedTreeNode] = useState<string[]>([]);
   const [expandedTreeNode, setExpandedTreeNode] = useState<any[]>([]);
   const [selectedResult, setSelectedResult] = useState<string | undefined>(undefined);
   const [searchResult, setSearchResult] = useState<SubscriptionSearchResult[]>([]);
+  const loadDoc = async (res: DocInfo) => {
+    props.session.document.store.setBackend(new InMemory(), res.id!.toString());
+    props.session.document.root = Path.root();
+    props.session.cursor.reset();
+    props.session.document.cache.clear();
+    props.session.stopAnchor();
+    props.session.search = null;
+    props.session.document.removeAllListeners('lineSaved');
+    props.session.document.removeAllListeners('beforeMove');
+    props.session.document.removeAllListeners('beforeAttach');
+    props.session.document.removeAllListeners('beforeDetach');
+    await props.session.reloadContent(res.content, mimetypeLookup(res.name!));
+    props.session.reset_history();
+    props.session.reset_jump_history();
+  };
+  useEffect(() => {
+    const searchTerm = searchParams.get('q');
+    const filepath = searchParams.get('v');
+    if (searchTerm) {
+      let searchResultPromise: Promise<SubscriptionSearchResult[]> = Promise.resolve(searchResult);
+      if (searchTerm !== filter) {
+        setFilter(searchTerm);
+        searchResultPromise = searchSubscription(searchTerm).then(res => {
+          props.session.showMessage(`共找到${res.length}条记录`);
+          setSearchResult(res);
+          return Promise.resolve(res);
+        }).catch(e => {
+          props.session.showMessage(e, {warning: true});
+        });
+      }
+      if (filepath) {
+        searchResultPromise.then((srs) => {
+          if (srs.map(sr => sr.ref).includes(filepath)) {
+            getSubscriptionFileContent(filepath).then(res => {
+              setLoading(true);
+              loadDoc(res).then(() => {
+                setLoading(false);
+                setSelectedResult(filepath);
+                props.session.stopMonitor = true;
+              });
+            });
+          }
+        });
+      }
+    } else {
+      setFilter('');
+      setSearchResult([]);
+      setSelectedResult(undefined);
+    }
+  }, [searchParams]);
   useEffect(() => {
     getSubscriptions().then((res) => {
       const subscriptions = (Object.values(res.data) as SubscriptionInfo[]).filter(sub => {
@@ -61,54 +114,25 @@ export function YangComponent(props: {session: Session, config: Config}) {
     });
   };
   const onSearch = (value: string) => {
-    setFilter(value);
-    if (value) {
-      searchSubscription(value).then(res => {
-        props.session.showMessage(`共找到${res.length}条记录`);
-        setSearchResult(res);
-      }).catch(e => {
-        props.session.showMessage(e, {warning: true});
-      });
-    } else {
-      setSearchResult([]);
-      setSelectedResult(undefined);
-    }
-  };
-  const loadDoc = async (res: DocInfo) => {
-    props.session.document.store.setBackend(new InMemory(), res.id!.toString());
-    props.session.document.root = Path.root();
-    props.session.cursor.reset();
-    props.session.document.cache.clear();
-    props.session.stopAnchor();
-    props.session.search = null;
-    props.session.document.removeAllListeners('lineSaved');
-    props.session.document.removeAllListeners('beforeMove');
-    props.session.document.removeAllListeners('beforeAttach');
-    props.session.document.removeAllListeners('beforeDetach');
-    await props.session.reloadContent(res.content, mimetypeLookup(res.name!));
-    props.session.reset_history();
-    props.session.reset_jump_history();
+    props.session.clientStore.setClientSetting('curSearch', value);
+    setSearchParams({q: value});
   };
   const onSelect = (_selectedKeysValue: React.Key[], info: any) => {
-    const filepath = info.node.key;
-    getSubscriptionFileContent(filepath).then(res => {
-      setLoading(true);
-      loadDoc(res).then(() => {
-        setLoading(false);
-        setSelectedResult(filepath);
-        props.session.stopMonitor = true;
-      });
-    });
+    const filepath = info.node.key as string;
+    props.session.clientStore.setClientSetting('curSearchResult', filepath);
+    setSearchParams({q: filter, v: filepath});
   };
   return (
     <div style={{height: '100%', flexDirection: 'row', display: 'flex', width: '100%'}}>
       <div style={{height: '100%', width: `${fileListWidth}px`, flexShrink: 0, flexGrow: selectedResult ? 0 : 1}}>
         <div className={selectedResult ? '' : filter ? 'sub-after-search' : 'sub-before-search'}>
           <Search
+            value={searchValue}
             placeholder='搜索关键字，前缀：title: 只搜文件名，空格（或） +（必须出现） -（不出现）'
             allowClear
             enterButton='Search'
             size='middle'
+            onChange={(e) => setSearchValue(e.target.value)}
             onSearch={onSearch}
           />
         </div>
