@@ -385,6 +385,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       }
       setFilteredDocIds(res.map(r => Number(r.ref)));
       setFilter(e);
+    }).catch(error => {
+      props.session.showMessage(error, {warning: true});
     });
   };
   return (

@@ -24,6 +24,9 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
   const [curWorkSpace, setCurWorkSpace] = useState<WorkSpaceInfo | undefined>(undefined);
   useEffect(() => {
     getServerConfig().then((res: ServerConfig) => {
+      if (!res.workspaces) {
+        res.workspaces = [];
+      }
       setServerConfig(res);
       setCurWorkSpace(res.workspaces?.find(i => i.active));
       form.setFieldsValue(res.workspaces?.find(i => i.active));
@@ -119,11 +122,15 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
               wrapperCol={{ span: 18 }}
               style={{ maxWidth: 600 }}
               onFinish={(values) => {
-                serverConfig.workspaces = [{ active: true, ...values} , ...serverConfig.workspaces!
-                  .filter(i => i.gitLocalDir !== curWorkSpace.gitLocalDir).map(i => {return {active: false, ...i}; })];
-                saveServerConfig(serverConfig).then(() => {
-                  props.session.showMessage('应用成功');
-                });
+                if (values.gitLocalDir !== '未配置') {
+                  serverConfig.workspaces = [{ active: true, ...values} , ...serverConfig.workspaces!
+                    .filter(i => i.gitLocalDir !== curWorkSpace.gitLocalDir).map(i => {return {active: false, ...i}; })];
+                  saveServerConfig(serverConfig).then(() => {
+                    props.session.showMessage('应用成功');
+                  });
+                } else {
+                  props.session.showMessage('应用失败，请修改配置', {warning: true});
+                }
               }}
               autoComplete='off'
           >
@@ -134,11 +141,15 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                   <Input
                       disabled={true}
                       addonAfter={<EditOutlined onClick={() => {
-                        window.electronAPI.openDirectory().then((files) => {
-                          if (!files.cancelled) {
-                            form.setFieldValue('gitLocalDir', files.filePaths.pop());
-                          }
-                        });
+                        if (window.electronAPI) {
+                          window.electronAPI.openDirectory().then((files) => {
+                            if (!files.cancelled) {
+                              form.setFieldValue('gitLocalDir', files.filePaths.pop());
+                            }
+                          });
+                        } else {
+                          props.session.showMessage('修改工作空间必须在桌面窗口中进行', {warning: true});
+                        }
                       }}/>}/>
               </Form.Item>
               <Form.Item

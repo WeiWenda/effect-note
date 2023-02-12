@@ -252,7 +252,9 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                          trigger='click'
                          onOpenChange={(open) => {
                            if (open) {
-                             getDocVersions(props.curDocId).then(res => setVersions(res));
+                             getDocVersions(props.curDocId).then(res => setVersions(res)).catch(e => {
+                               props.session.showMessage(e, {warning: true});
+                             });
                            }
                          }}>
                   <HistoryOutlined />

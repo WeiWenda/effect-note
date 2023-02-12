@@ -413,7 +413,7 @@ export class TagsPlugin {
 
     this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
       const { path, pluginData } = info;
-      let tags: string[] = pluginData.tags.tags || [];
+      let tags: string[] = pluginData.tags?.tags || [];
       const taskStatus = tags.find(t => ['Delay', 'Done', 'Todo', 'Doing'].includes(t));
       if (taskStatus) {
         const startTag = tags.find(t => t.startsWith('start:'));
@@ -434,7 +434,7 @@ export class TagsPlugin {
       tags = tags
         .filter((t: string) => !new RegExp('((start|end|due):.*)').test(t))
         .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t));
-      if (tags.length > 0 || pluginData.tags.tagging) {
+      if (tags.length > 0 || pluginData.tags?.tagging) {
         const options: any[] = this.tags
           .filter((t: string) => !new RegExp('(start|end|due):.*').test(t))
           .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t))
