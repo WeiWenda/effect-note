@@ -1,65 +1,35 @@
-# ![Vimflowy](/static/images/vimflowy-32.png?raw=true) Vimflowy
+<p align="center">
+<img width="128px" src="./public/images/icon.png">
+<br>
+一款免费的大纲笔记软件，纯文件存储，Gitee云端同步
+<br>
+  <span>
+    <a target="_blank" href="http://demo.effectnote.com/note/-1">在线Demo</a> |
+    <a target="_blank" href="https://pan.baidu.com/s/1y0Ouxh_kOxNHQcpjUeArVg?pwd=evzn">Mac客户端下载</a> |
+    <a target="_blank" href="https://pan.baidu.com/s/1gQTLyW7GHW4iSzroVmy4fQ?pwd=2qmc">Windows客户端下载</a>
+  </span>
+<br>
+Inspired By Confluence & Workflowy
+<br>
+Project Vision：Empower Personal Knowledge Management And Discovery
+</p>
 
-[![Join Gitter chat](https://badges.gitter.im/WuTheFWasThat/vimflowy.svg)](https://gitter.im/WuTheFWasThat/vimflowy)
-[![Build Status](https://travis-ci.org/WuTheFWasThat/vimflowy.svg?branch=master)](https://travis-ci.org/WuTheFWasThat/vimflowy?branch=master)
+## 功能演示
 
-This is a productivity tool which draws some inspiration from workflowy and vim.
+### 笔记页面
+![](./public/images/readme_pic1.png)
+### 订阅检索
+![](./public/images/readme_pic2.png)
 
-[Try it out now!](https://www.wuthejeff.com/vimflowy)
 
-[Deploy yourself with docker!](https://hub.docker.com/r/vimflowy/vimflowy/)
-
-## FEATURES
-
-- Workflowy features
-  - tree-like outlining
-  - collapsing and zooming into bullets
-  - basic text formatting, strike through task completion
-- Vim features
-  - (configurable) vim keybindings
-  - modal editing
-  - undo history, location history, macros, etc.
-- Plugins system (see [plugins.md](docs/plugins.md))
-  - marks (not like vim's)
-  - easy-motion for moving between bullets quickly
-  - time tracking
-  - LaTeX and HTML rendering
-- Other
-  - data import from or export as text file (native Vimflowy format or Workflowy-compatible format)
-  - loads data lazily (good for huge documents)
-  - search (not like vim's)
-  - cloning (bullets duplicated in multiple locations in a document)
-  - customizable visual themes
-
-## LIMITATIONS
-
-- No collaborative editing
-- Global search is slow for large documents (so you'll want to use marks)
-- You may need a relatively modern browser (minimally HTML5 LocalStorage and Flexbox).  I test only in recent versions of Chrome and Firefox.
-
-## DATA STORAGE
-
-Vimflowy was designed to work with multiple storage backends.
-
-By default, you own your own data, as it is stored locally on your computer.
-However, you can let Google host it for you, or host it yourself.
-
-[See here for more info](docs/storage/README.md).
-
-### SELF-HOSTING
-
-See the [deployment documentation](docs/deployment.md) for details.
-You can deploy with docker, or build from source yourself.
-
-## NOTES FOR DEVELOPERS
-
-Contributions are very welcome!
-See [dev_setup.md](docs/dev_setup.md) to see how to get started with a development setup.
-
-#### LICENSE
-
-MIT: https://wuthefwasthat.mit-license.org/
-
-## FAQ (AKA questions I imagine people would ask me)
-
-[see here](docs/FAQ.md)
+## Thanks To
+- [react](https://github.com/facebook/react)
+- [vimflowy](https://github.com/WuTheFWasThat/vimflowy)
+- [ant-design](https://github.com/ant-design/ant-design)
+- [isomorphic-git](https://github.com/isomorphic-git/isomorphic-git)
+- [electron](https://github.com/electron/electron)
+- [wangEditor](https://github.com/wangeditor-team/wangEditor)
+- [vditor](https://github.com/Vanessa219/vditor)
+- [tesseract.js](https://github.com/naptha/tesseract.js)
+- [drawio](https://github.com/jgraph/drawio)
+- [lunr.js](https://github.com/olivernn/lunr.js)
