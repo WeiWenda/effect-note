@@ -7,6 +7,8 @@ const isoHttp = require("isomorphic-git/http/node");
 const {store, getGitConfig} = require("./isomorphicGit");
 const lunr = require("lunr")
 require("lunr-languages/lunr.stemmer.support")(lunr)
+require('lunr-languages/lunr.multi')(lunr)
+require('lunr-languages/lunr.zh')(lunr)
 let subscriptionIndex = null;
 function getSearchDir() {
     return path.join(path.dirname(getGitConfig().gitHome), 'effectnote')
@@ -14,6 +16,7 @@ function getSearchDir() {
 async function refreshIndex() {
     const existList = JSON.parse(store.get('subscription_list', '{}'))
     subscriptionIndex = lunr(function() {
+        this.use(lunr.multiLanguage('en', 'zh'))
         this.use(require('./expressDocCurd').punctuationSplit)
         this.ref("path")
         this.field("title")

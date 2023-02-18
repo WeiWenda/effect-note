@@ -20,6 +20,7 @@ import Path from '../../ts/path';
 import ContentEditable from 'react-contenteditable';
 import $ from 'jquery';
 import {FontStyleToolComponent} from './fontStyleTool';
+import {NodeOperationComponent} from './nodeOperation';
 
 export type LineProps = {
   lineData: Line;
@@ -125,6 +126,8 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                 filterOption={(input, option) => (option?.label ?? '').includes(input)}
                 options={char_info.selectPrompt}
               />);
+            } else if (session.mode === 'NODE_OPERATION' && path) {
+              emit(<NodeOperationComponent key='node-operation' session={session} line={lineData} path={path}/>);
             } else {
               setTimeout(() => {
                 if (!session.stopMonitor) {
@@ -243,7 +246,10 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                     });
                   } else if (mouseDown && session.anchor.col === column) {
                     console.log('onCharClick');
-                    if (session.mode === 'INSERT') {
+                    if (e.shiftKey) {
+                      session.setAnchor(session.cursor.path, session.cursor.col);
+                      session.selecting = true;
+                    } else {
                       session.stopAnchor();
                     }
                     session.cursor.setPosition(path, column).then(() => {

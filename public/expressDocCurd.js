@@ -8,8 +8,11 @@ const lunr = require("lunr");
 const jieba = require('@node-rs/jieba');
 jieba.load();
 require("lunr-languages/lunr.stemmer.support")(lunr)
+require('lunr-languages/lunr.multi')(lunr)
+require('lunr-languages/lunr.zh')(lunr)
 const punctuationSplit = function (builder) {
     const pipelineFunction = function (token) {
+        // console.log('token:' + token.toString());
         return token.toString().split(new RegExp("[^\u4E00-\u9FA5a-zA-Z0-9]")).flatMap(function (str) {
             return jieba.cut(str, true).map(word => {
                 return token.clone().update(function () {
@@ -30,10 +33,16 @@ let subscriptionIndex = null;
 async function refreshIndex() {
     const files = await listFiles();
     subscriptionIndex = lunr(function() {
+        this.use(lunr.multiLanguage('en', 'zh'))
         this.use(punctuationSplit)
         this.ref("id")
         this.field("title")
         this.field("content")
+        // this.add({
+        //     'id': 1,
+        //     'title': '欢迎文档草稿',
+        //     'content': '欢迎文档草稿123214',
+        // })
         const gitHome = getGitConfig().gitHome;
         files.forEach((filepath, index) => {
             const content = fs.readFileSync(path.join(gitHome, filepath), {encoding: 'utf-8'});

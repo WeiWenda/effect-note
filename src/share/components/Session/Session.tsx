@@ -155,14 +155,7 @@ export default class SessionComponent extends React.Component<Props, State> {
           if (anchor === null) {
             return;
           }
-          if (!cursor.path.is(anchor.path) || session.selectInlinePath === null) {
-            const [parent, index1, index2] = await session.getVisualLineSelections();
-            // 多行选中
-            const children = await session.document.getChildRange(parent, index1, index2);
-            children.forEach((child) => {
-              cursorsTree.getPath(child).markVisual();
-            });
-          } else {
+          if (cursor.path.is(anchor.path) && session.selectInlinePath !== null) {
             // 单行选中
             let anchorCol = anchor.col;
             if (anchorCol === -1) {
@@ -178,6 +171,13 @@ export default class SessionComponent extends React.Component<Props, State> {
               cols.push(j);
             }
             cursorNode.markCols(cols);
+          } else {
+            const [parent, index1, index2] = await session.getVisualLineSelections();
+            // 多行选中
+            const children = await session.document.getChildRange(parent, index1, index2);
+            children.forEach((child) => {
+              cursorsTree.getPath(child).markVisual();
+            });
           }
         }
       } else if (session.mode === 'VISUAL_LINE') {

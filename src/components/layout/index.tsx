@@ -71,6 +71,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
     props.session.on('importFinished', forceUpdate);
     props.session.on('modeChange', () => {
       logger.debug('modeChange');
+      props.session.emit('updateInner');
       forceUpdate();
     });
     props.session.on('changeLayout', (layout) => {
@@ -83,7 +84,9 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
     });
     props.session.on('openModal', (modalName, data) => {
       if (modalName === 'rtf') {
-        setHtml(data.html);
+        setTimeout(() => {
+          setHtml(data.html);
+        }, 500);
       }
       if (modalName === 'noteInfo') {
         setCurDocInfo(data.docInfo);

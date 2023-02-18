@@ -159,7 +159,7 @@ registerMode({
     async function(key, context) {
       key = transform_insert_key(key);
       if (key.length === 1) {
-        if ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '.includes(key)) {
+        if ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 \n'.includes(key)) {
           // simply insert the key
           await context.session.addCharsAtCursor([key]);
           await context.session.applyHookAsync('charInserted', {}, { key });

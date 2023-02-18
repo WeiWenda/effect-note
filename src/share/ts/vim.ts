@@ -203,13 +203,13 @@ export const SEARCH_MODE_MAPPINGS: HotkeyMapping = Object.assign({
 
 export const NODE_OPERATION_MODE_MAPPINGS: HotkeyMapping = {
   'exit-and-undo': [['esc'], ['ctrl+c'], ['ctrl+[']],
-  'unfold-node': [['o', 'a'], ['o', '1'], ['o', '2'], ['o', '3'], ['o', '0']],
-  'open-markdown': [['i', 'm']],
-  'open-html': [['i', 'r']],
-  'open-drawio': [['i', 'd']],
-  'open-mindmap': [['i', 'b']],
-  'mark-mark': [['m', 'm']],
-  'mark-tag': [['m', 't']],
+  // 'unfold-node': [['o', 'a'], ['o', '1'], ['o', '2'], ['o', '3'], ['o', '0']],
+  // 'open-markdown': [['i', 'm']],
+  // 'open-html': [['i', 'r']],
+  // 'open-drawio': [['i', 'd']],
+  // 'open-mindmap': [['i', 'b']],
+  // 'mark-mark': [['m', 'm']],
+  // 'mark-tag': [['m', 't']],
 };
 
 export const WORKFLOWY_MODE_MAPPINGS: HotkeyMapping = Object.assign({
