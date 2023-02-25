@@ -315,18 +315,14 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     setLoading(true);
     const curDocInfo = (userDocs as DocInfo[]).find(doc => doc.id === docID)!;
     let initialLoad = false;
-    if (!curDocInfo.loaded) {
-      initialLoad = true;
-      // props.session.showMessage('初始加载中...');
-      curDocInfo.loaded = true;
-    }
     const newDocName = docID.toString();
     props.session.clientStore.setClientSetting('curDocId', docID);
     props.session.clientStore.setDocname(docID);
     props.session.viewRoot = Path.loadFromAncestry(await props.session.clientStore.getLastViewRoot());
-    if (!props.session.viewRoot.isRoot()) {
-      initialLoad = false;
-      curDocInfo.loaded = true;
+    if (!props.session.clientStore.getDocSetting('loaded')) {
+      initialLoad = true;
+      // props.session.showMessage('初始加载中...');
+      props.session.clientStore.setDocSetting('loaded', true);
     }
     document.title = curDocInfo.name!;
     props.session.document.store.setBackend(new IndexedDBBackend(newDocName), newDocName);

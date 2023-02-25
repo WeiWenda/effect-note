@@ -9,7 +9,8 @@ export function FontStyleToolComponent(
   props: React.PropsWithChildren<{session: Session, path: Path, startCol: Col, endCol: Col,
     textContent: string,
     showDelete: boolean,
-    link?: string
+    link?: string,
+    trigger?: string,
   }>) {
   const [allClasses, setAllClasses] = useState<string[]>([]);
   const [link, setLink] = useState<string | undefined>(props.link);
@@ -39,7 +40,7 @@ export function FontStyleToolComponent(
     };
   };
   return (
-      <Popover placement='top' trigger='hover'
+      <Popover placement='top' trigger={props.trigger || 'hover'}
                open={open}
                className={`node-html`}
                onOpenChange={(e) => {

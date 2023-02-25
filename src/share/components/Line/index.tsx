@@ -142,9 +142,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                           const newVal = e.target.value.replace(/&lt;/g, '<')
                             .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
                           this.setState({input: newVal});
-                          if ( (newVal === '——') ||
-                                 (newVal.length === 1 &&
-                                    ! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal))) {
+                          if (! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal.substring(0, 1))) {
                             this.props.session.addCharsAtCursor(newVal.split('')).then(() => {
                               if (newVal === '@') {
                                 this.props.session.setMode('SEARCH');

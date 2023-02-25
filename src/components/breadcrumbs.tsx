@@ -30,30 +30,28 @@ class CrumbComponent extends React.PureComponent<CrumbProps, {}> {
 
 type BreadcrumbsProps = {
   session: Session;
-  viewRoot: Path;
-  crumbContents: {[row: number]: string};
   onCrumbClick: ((...args: any[]) => void) | undefined;
 };
 type BreadcrumbsState = {
-  mindMapRef: any;
-  loaded: boolean;
-  session: Session;
+  viewRoot: Path;
 };
 export default class BreadcrumbsComponent extends React.Component<BreadcrumbsProps, BreadcrumbsState> {
+
   constructor(props: BreadcrumbsProps) {
     super(props);
     this.state = {
-      session: this.props.session,
-      mindMapRef: React.createRef(),
-      loaded: false,
+      viewRoot: props.session.viewRoot
     };
+    props.session.on('changeViewRoot', async (path: Path) => {
+      this.setState({viewRoot: path});
+    });
   }
 
   public render() {
     const session = this.props.session;
 
     const crumbNodes: Array<React.ReactNode> = [];
-    let path = this.props.viewRoot;
+    let path = this.state.viewRoot;
     if (path.parent == null) {
       crumbNodes.push(
           <i key='home' className='fa fa-home'/>
@@ -77,7 +75,7 @@ export default class BreadcrumbsComponent extends React.Component<BreadcrumbsPro
           {
             session.applyHook(
               'renderLineContents',
-              [this.props.crumbContents[path.row]],
+              [cachedRow.info.line.join('')],
               hooksInfo
             )
           }

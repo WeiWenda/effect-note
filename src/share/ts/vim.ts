@@ -41,8 +41,8 @@ export const INSERT_MOTION_MAPPINGS: HotkeyMapping = {
   'motion-right': [['right']],
   'motion-up': [['up']],
   'motion-down': [['down']],
-  'motion-line-beginning': [['home'], ['ctrl+a'], ['meta+left']],
-  'motion-line-end': [['end'], ['ctrl+e'], ['meta+right']],
+  'motion-line-beginning': [['home'], ['ctrl+a']],
+  'motion-line-end': [['end'], ['ctrl+e']],
   'motion-word-beginning': [['alt+b'], ['alt+left']],
   'motion-word-end': [],
   'motion-word-next': [['alt+f'], ['alt+right']],
@@ -188,6 +188,8 @@ export const INSERT_MODE_MAPPINGS: HotkeyMapping = Object.assign({
   'zoom-root': [['ctrl+shift+left']],
   'refresh': [['ctrl+r'], ['meta+r']],
   'save-cloud': [['ctrl+s'], ['meta+s']],
+  'jump-prev': [['meta+left']],
+  'jump-next': [['meta+right']],
 }, INSERT_MOTION_MAPPINGS);
 
 export const SEARCH_MODE_MAPPINGS: HotkeyMapping = Object.assign({

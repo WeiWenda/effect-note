@@ -65,7 +65,8 @@ registerPlugin(
                                           session={api.session} path={info.path}
                                           textContent={textContent[4]}
                                           showDelete={true}
-                                          startCol={token.index} endCol={token.index + token.length}>
+                                          startCol={token.index} endCol={token.index + token.length}
+                                          trigger={'click'}>
                     <span
                       dangerouslySetInnerHTML={{__html: token.text}}
                     />

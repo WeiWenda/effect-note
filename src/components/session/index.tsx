@@ -39,7 +39,6 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const [filterInner, setFilterInner] = useState('');
   const [versions, setVersions] = useState(new Array<DocVersion>());
   const [currentVersion, setCurrentVersion] = useState('');
-  const [crumbContents, setCrumbContents] = useState<{[row: number]: string}>( {});
   const onCrumbClick = async (path: Path) => {
     const session = props.session;
     await session.zoomInto(path);
@@ -93,17 +92,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
       applyFilterInner(props.filterOuter);
     }
   }, [props.filterOuter, props.loading]);
-  const updateCrumbContent = async () => {
-    let path = props.session.viewRoot;
-    const newCrumbContents: {[row: number]: string} = {};
-    while (path.parent != null) {
-      path = path.parent;
-      newCrumbContents[path.row] = await props.session.document.getText(path.row);
-    }
-    setCrumbContents(newCrumbContents);
-  };
   useEffect(() => {
-    updateCrumbContent();
     props.session.on('changeViewRoot', async (path: Path) => {
       setIsRoot(path.isRoot());
       if (props.markPlugin) {
@@ -114,7 +103,6 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
           setMarked(false);
         }
       }
-      updateCrumbContent();
     });
   }, []);
   return (
@@ -145,9 +133,8 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
               }}/>
             <BreadcrumbsComponent key='crumbs'
                                   session={props.session}
-                                  viewRoot={props.session.viewRoot}
                                   onCrumbClick={onCrumbClick}
-                                  crumbContents={crumbContents}/>
+            />
           </Space>
           <Space>
             {

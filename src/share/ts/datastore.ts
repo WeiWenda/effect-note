@@ -55,6 +55,7 @@ const default_client_settings: ClientSettings =
   });
 
 export type LocalDocSettings = {
+  loaded: boolean,
   dataSource: ClientDataBackends.BackendType;
   firebaseId: string | null;
   firebaseApiKey: string | null;
@@ -68,6 +69,7 @@ export type LocalDocSettings = {
 type LocalDocSetting = keyof LocalDocSettings;
 
 const default_local_doc_settings: LocalDocSettings = {
+  loaded: false,
   dataSource: 'local',
   firebaseId: null,
   firebaseApiKey: null,

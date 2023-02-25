@@ -30,6 +30,8 @@ keyDefinitions.registerAction(new Action(
     if (motion == null) {
       throw new Error('Motion command was not passed a motion');
     }
+    session.stopAnchor();
+    session.selecting = false;
     await motion(session.cursor, {pastEnd: true});
   },
   { acceptsMotion: true },
@@ -635,6 +637,9 @@ keyDefinitions.registerAction(new Action(
         text = text.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
         const mimetype = mimetypeLookupByContent(text);
         if (!mimetype) {
+          if (session.getAnchor() !== null && session.selecting) {
+            await session.yankDelete();
+          }
           await session.pasteText(text);
         } else {
           session.showMessage(`识别到${mimetype}格式，导入中...`);
