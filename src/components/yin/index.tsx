@@ -33,18 +33,23 @@ const { Panel } = Collapse;
 type MenuItem = Required<MenuProps>['items'][number];
 class TagTree extends Map<string, TagTree | number> {};
 
-function getTagMap(filteredDocs: DocInfo[]): TagTree {
+function getTagMap(filteredDocs: DocInfo[], recentDocId: number[]): TagTree {
   const tagMap: TagTree = new Map();
   tagMap.set('所有笔记', new Map);
+  tagMap.set('最近访问', new Map);
   filteredDocs.forEach(doc => {
     let menuLabel = doc.name!;
     if (doc.dirtyUpdate) {
       menuLabel = '* ' + menuLabel;
     }
     (tagMap.get('所有笔记') as TagTree).set(menuLabel, doc.id!);
+    if (recentDocId.indexOf(doc.id!) !== -1) {
+      const dir = (JSON.parse(doc.tag!) as string[]).shift();
+      (tagMap.get('最近访问') as TagTree).set(`${menuLabel}${dir ? ' @ ' + dir : ''}`, doc.id!);
+    }
     const tagList: string[] = [];
     if (doc.tag) {
-      const jsonArray =  JSON.parse(doc.tag);
+      const jsonArray = JSON.parse(doc.tag);
       if (Array.isArray(jsonArray)) {
         jsonArray.map(singleTag => {
           tagList.push((singleTag as string) + '/默认分组');
@@ -162,7 +167,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   }
   const updateMenu = (filteredDocs: DocInfo[]) => {
     const menuID2DocID: Array<number> = [];
-    const tagMap = getTagMap(filteredDocs);
+    const tagMap = getTagMap(filteredDocs, props.session.clientStore.getClientSetting('recentDocId'));
     const items = getItems(tagMap, menuID2DocID);
     setMenuItems(items);
     setMenuItem2DocId(menuID2DocID);
@@ -362,6 +367,14 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       setCurMenu(e.key);
       props.session.clientStore.setClientSetting('openFile', e.key);
       const remoteDocId = menuItem2DocId[Number(e.key)];
+      const recentDocId = props.session.clientStore.getClientSetting('recentDocId');
+      if (recentDocId.indexOf(remoteDocId) === -1) {
+        recentDocId.push(remoteDocId);
+        if (recentDocId.length > 5) {
+          recentDocId.shift();
+        }
+      }
+      props.session.clientStore.setClientSetting('recentDocId', recentDocId);
       navigate(`/note/${remoteDocId}`);
     } else {
       props.session.showMessage('正在加载，请勿离开');

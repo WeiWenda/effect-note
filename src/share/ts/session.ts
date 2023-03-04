@@ -1763,13 +1763,7 @@ export default class Session extends EventEmitter {
     const cursor = this.cursor;
     const anchor = this._anchor;
     if (anchor !== null) {
-      if (!cursor.path.is(anchor.path) || this.selectInlinePath === null) {
-        console.log('yankDelete multi line');
-        // 多行选中
-        const [parent, index1, index2] = await this.getVisualLineSelections();
-        await this.delBlocks(parent.row, index1, (index2 - index1) + 1, {addNew: false});
-        this.stopAnchor();
-      } else {
+      if (cursor.path.is(anchor.path) && this.selectInlinePath !== null) {
         console.log('yankDelete whole line');
         // 单行选中
         this.selectPopoverOpen = false;
@@ -1778,6 +1772,12 @@ export default class Session extends EventEmitter {
         this.stopAnchor();
         this.selecting = false;
         this.emit('updateInner');
+      } else {
+        console.log('yankDelete multi line');
+        // 多行选中
+        const [parent, index1, index2] = await this.getVisualLineSelections();
+        await this.delBlocks(parent.row, index1, (index2 - index1) + 1, {addNew: false});
+        this.stopAnchor();
       }
     } else {
       await this.deleteAtCursor();

@@ -14,16 +14,16 @@ const LableAndShortCut = (_client: ClientStore, label: string, shortcut: string)
 export function NodeOperationComponent(props: {session: Session, line: Line, path: Path}) {
   const client = props.session.clientStore;
   const options = [
-    {label: LableAndShortCut(client, '插入 -> markdown', '/im'), value: 'insert-md', shortcut: 'im'},
-    {label: LableAndShortCut(client, '插入 -> 富文本', '/ir'), value: 'insert-rtf', shortcut: 'ir'},
-    {label: LableAndShortCut(client, '插入 -> 思维文本', '/ib'), value: 'insert-mindmap', shortcut: 'ib'},
-    {label: LableAndShortCut(client, '插入 -> 流程图', '/id'), value: 'insert-drawio', shortcut: 'id'},
-    {label: LableAndShortCut(client, '标记 -> 收藏', '/mm'), value: 'mark-mark', shortcut: 'mm'},
-    {label: LableAndShortCut(client, '标记 -> 标签', '/mt'), value: 'mark-tag', shortcut: 'mt'},
-    {label: LableAndShortCut(client, '展开 -> 一级子节点', '/o1'), value: 'unfold-node-1', shortcut: 'o1'},
-    {label: LableAndShortCut(client, '展开 -> 二级子节点', '/o2'), value: 'unfold-node-2', shortcut: 'o2'},
-    {label: LableAndShortCut(client, '展开 -> 三级子节点', '/o3'), value: 'unfold-node-3', shortcut: 'o3'},
-    {label: LableAndShortCut(client, '展开 -> 全部子节点', '/oa'), value: 'unfold-node-100', shortcut: 'oa'},
+    {label: LableAndShortCut(client, 'markdown', '/im'), value: 'insert-md', shortcut: 'im'},
+    {label: LableAndShortCut(client, '富文本', '/ir'), value: 'insert-rtf', shortcut: 'ir'},
+    {label: LableAndShortCut(client, '脑图', '/ib'), value: 'insert-mindmap', shortcut: 'ib'},
+    {label: LableAndShortCut(client, '流程图', '/id'), value: 'insert-drawio', shortcut: 'id'},
+    // {label: LableAndShortCut(client, '标记 -> 收藏', '/mm'), value: 'mark-mark', shortcut: 'mm'},
+    // {label: LableAndShortCut(client, '标记 -> 标签', '/mt'), value: 'mark-tag', shortcut: 'mt'},
+    // {label: LableAndShortCut(client, '展开 -> 一级子节点', '/o1'), value: 'unfold-node-1', shortcut: 'o1'},
+    // {label: LableAndShortCut(client, '展开 -> 二级子节点', '/o2'), value: 'unfold-node-2', shortcut: 'o2'},
+    // {label: LableAndShortCut(client, '展开 -> 三级子节点', '/o3'), value: 'unfold-node-3', shortcut: 'o3'},
+    // {label: LableAndShortCut(client, '展开 -> 全部子节点', '/oa'), value: 'unfold-node-100', shortcut: 'oa'},
   ];
   const onSelect = async (value: string) => {
     switch (value) {

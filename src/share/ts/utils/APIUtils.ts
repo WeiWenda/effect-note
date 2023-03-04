@@ -64,6 +64,17 @@ export function login(loginRequest: any) {
     });
 }
 
+export function uploadImage(file: File) {
+    let formData = new FormData();
+    formData.append('wangeditor-uploaded-image', file);
+    return request({
+        url: API_BASE_URL + '/upload_image',
+        method: 'POST',
+        headers: new Headers({}),
+        body: formData
+    });
+}
+
 export function ocrFile(file: File) {
     let formData = new FormData();
     formData.append('file', file);

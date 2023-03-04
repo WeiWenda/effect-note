@@ -230,8 +230,12 @@ export class TagsPlugin {
       'begin-tag',
       'Tag a line',
       async function({ session }) {
-        await session.setMode('TAG');
-      },
+        that.tagstate = {
+          session: new InMemorySession(),
+          path: session.cursor.path,
+        };
+        await that.api.updatedDataForRender(session.cursor.path.row);
+      }
     );
 
     this.api.registerAction(
@@ -389,11 +393,11 @@ export class TagsPlugin {
     );
 
     this.api.registerDefaultMappings(
-      'NORMAL',
+      'INSERT',
       {
-        'begin-tag': [['#']],
-        'delete-tag': [['d', '#']],
-        'search-tags': [['-']],
+        'begin-tag': [['ctrl+3'], ['meta+3']],
+        // 'delete-tag': [['d', '#']],
+        // 'search-tags': [['-']],
       },
     );
 

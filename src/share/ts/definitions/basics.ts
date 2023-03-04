@@ -2,6 +2,7 @@ import { isLink } from '../utils/text';
 import keyDefinitions, { Action, ActionContext, SequenceAction } from '../keyDefinitions';
 import {RegisterTypes} from '../register';
 import {mimetypeLookupByContent} from '../../../ts/util';
+import {uploadImage} from '../utils/APIUtils';
 
 keyDefinitions.registerAction(new Action(
   'move-cursor-normal',
@@ -633,17 +634,30 @@ keyDefinitions.registerAction(new Action(
   async function({ session }) {
     if (!session.stopMonitor) {
       if (session.register.serialize().type === RegisterTypes.NONE) {
-        let text: string = await navigator.clipboard.readText();
-        text = text.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
-        const mimetype = mimetypeLookupByContent(text);
-        if (!mimetype) {
-          if (session.getAnchor() !== null && session.selecting) {
-            await session.yankDelete();
+        const items = await navigator.clipboard.read();
+        // Loop through all items, looking for any kind of image
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].types.some(type => type.indexOf('image') !== -1)) {
+            // We need to represent the image as a file
+            let blob = await items[i].getType(items[i].types[0]);
+            const uploadRes = await uploadImage(new File([blob], 'clipboard-image'));
+            const uploadUrl = uploadRes.data.pop().url;
+            await session.pasteText(`<div class='node-html'><p><img src="${uploadUrl}" alt="image.png" data-href="${uploadUrl}" style="width: 100%;"/></p></div>`);
+          } else {
+            const blob = await items[i].getType(items[i].types[0]);
+            let text = await blob.text();
+            text = text.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
+            const mimetype = mimetypeLookupByContent(text);
+            if (!mimetype) {
+              if (session.getAnchor() !== null && session.selecting) {
+                await session.yankDelete();
+              }
+              await session.pasteText(text);
+            } else {
+              session.showMessage(`识别到${mimetype}格式，导入中...`);
+              await session.importContent(text, mimetype, session.cursor.path);
+            }
           }
-          await session.pasteText(text);
-        } else {
-          session.showMessage(`识别到${mimetype}格式，导入中...`);
-          await session.importContent(text, mimetype, session.cursor.path);
         }
       } else {
         await session.pasteBefore();

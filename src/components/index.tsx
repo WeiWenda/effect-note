@@ -342,18 +342,35 @@ $(document).ready(async () => {
   //   if (window.getSelection().toString()) { return; }
   //   // $pasteHack.focus();
   // });
-  $(document).on('paste', async (e) => {
-    if (session.stopMonitor) { return; }
-    e.preventDefault();
-    let text: string = ((e.originalEvent || e) as any).clipboardData.getData('text/plain');
-    text = text.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
-    await keyHandler.queue(async () => {
-      // TODO: deal with this better when there are multiple lines
-      // maybe put in insert mode?
-      await session.pasteText(text);
-    });
-    session.emit('updateAnyway');
-  });
+  // $(document).on('paste', async (e) => {
+  //   if (session.stopMonitor) { return; }
+  //   const clipboardData = ((e.originalEvent || e) as any).clipboardData;
+  //   if (clipboardData && clipboardData.items) {
+  //     // Get the items from the clipboard
+  //     let items = clipboardData.items;
+  //     // Loop through all items, looking for any kind of image
+  //     for (let i = 0; i < items.length; i++) {
+  //       if (items[i].type.indexOf('image') !== -1) {
+  //         // We need to represent the image as a file
+  //         let blob = items[i].getAsFile();
+  //         const uploadRes = await uploadImage(blob);
+  //         console.log(uploadRes.data.pop().url);
+  //       } else {
+  //         let text: string = clipboardData.getData('text/plain');
+  //         text = text.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
+  //         await keyHandler.queue(async () => {
+  //           // TODO: deal with this better when there are multiple lines
+  //           // maybe put in insert mode?
+  //           await session.pasteText(text);
+  //         });
+  //       }
+  //     }
+  //     // If we can't handle clipboard data directly (Firefox), we need to read what was pasted from
+  //     // the contenteditable element
+  //   }
+  //   e.preventDefault();
+  //   session.emit('updateAnyway');
+  // });
 
   $(window).on('unload', () => {
     session.exit(); // fire and forget

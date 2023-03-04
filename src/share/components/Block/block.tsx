@@ -406,6 +406,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                 onDrag={(_ , ui) => {
                   if (Math.abs(ui.deltaX) + Math.abs(ui.deltaY) > 0 && !session.dragging) {
                     session.selecting = true;
+                    session.selectInlinePath = null;
                     session.dragging = true;
                     session.setAnchor(path, 0);
                     session.cursor.setPosition(path, 0).then(() => {

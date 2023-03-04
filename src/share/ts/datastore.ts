@@ -34,6 +34,7 @@ export type ClientSettings = Theme & {
   curTheme: string;
   curSearch: string;
   curSearchResult: string;
+  recentDocId: number[];
 };
 
 type ClientSetting = keyof ClientSettings;
@@ -52,6 +53,7 @@ const default_client_settings: ClientSettings =
     curDocId: -1,
     curSearch: '',
     curSearchResult: '',
+    recentDocId: [-1],
   });
 
 export type LocalDocSettings = {
