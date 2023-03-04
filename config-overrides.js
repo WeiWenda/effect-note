@@ -4,6 +4,9 @@ module.exports = function override(config, env) {
     config.resolve.fallback = {
         fs: false
     }
-    config.plugins.push(new MonacoWebpackPlugin());
+    config.plugins.push(new MonacoWebpackPlugin({
+          languages: ['c', 'java', 'scala', 'shell', 'python', 'json', 'sql',
+              'xml', 'yaml', 'go', 'php', 'typescript', 'javascript']
+      }));
     return config;
 }
