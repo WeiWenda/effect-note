@@ -54,8 +54,11 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         props.session.setMode('INSERT');
         break;
       case 'insert-code':
-        props.session.emit('setCode', props.path.row, props.line.slice(0, -1).join(''), 'plaintext');
-        props.session.setMode('INSERT');
+        await props.session.setMode('INSERT');
+        const actualContent = await props.session.document.getLine(props.path.row);
+        await props.session.emitAsync('setCode', props.path.row, actualContent.join(''), 'plaintext');
+        await props.session.delChars(props.path.row, 0, actualContent.length);
+        props.session.emit('updateInner');
         break;
       case 'insert-rtf':
         let html: string = props.line.slice(0, -1).join('');
