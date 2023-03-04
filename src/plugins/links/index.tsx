@@ -68,6 +68,9 @@ export class LinksPlugin {
         this.api.registerListener('session', 'setDrawio',  (row: Row) => {
             onInsertDrawio(row);
         });
+        this.api.registerListener('session', 'setCode', async (row: Row, code: string, language: string) => {
+            await this.setCode(row, code, language);
+        });
         this.api.registerListener('session', 'setMarkdown', async (row: Row, markdown: string) => {
             await this.setMarkdown(row, markdown);
         });
@@ -84,7 +87,8 @@ export class LinksPlugin {
             const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
             const xml = ids_to_xmls[row] || null;
             const md = await this.getMarkdown(row);
-            obj.links = { collapse: collapse, png: png, xml: xml, md: md };
+            const code = await this.getCode(row);
+            obj.links = { collapse, png, xml, md, code};
             return obj;
         });
         this.api.registerHook('document', 'serializeRow', async (struct, info) => {
@@ -104,11 +108,18 @@ export class LinksPlugin {
             if (md != null) {
                 struct.md = md;
             }
+            const code = await this.getCode(info.row);
+            if (code != null) {
+                struct.code = code;
+            }
             return struct;
         });
         this.api.registerListener('document', 'loadRow', async (path, serialized) => {
             if (serialized.collapse) {
                 await this._setCollapse(path.row, true);
+            }
+            if (serialized.code) {
+                await this._setCode(path.row, serialized.code.content, serialized.code.language);
             }
             if (serialized.png?.src && serialized.png?.json) {
                 await this._setPng(path.row, serialized.png.src, serialized.png.json);
@@ -227,6 +238,7 @@ export class LinksPlugin {
         await this.api.setData('ids_to_pngs', {});
         await this.api.setData('ids_to_xmls', {});
         await this.api.setData('ids_to_mds', {});
+        await this.api.setData('ids_to_codes', {});
         await this.api.setData('ids_to_collapses', {});
     }
 
@@ -247,6 +259,29 @@ export class LinksPlugin {
     public async setMarkdown(row: Row, md: String): Promise<void> {
         await this._setMarkdown(row, md);
         await this.api.updatedDataForRender(row);
+    }
+
+    public async getCode(row: Row): Promise<any> {
+        const ids_to_mds = await this.api.getData('ids_to_codes', {});
+        if (ids_to_mds[row]) {
+            const markdown = await this.api.getData(row + ':code', {});
+            return markdown;
+        } else {
+            return null;
+        }
+    }
+
+    public async setCode(row: Row, content: string, language: string): Promise<void> {
+        await this._setCode(row, content, language);
+        await this.api.updatedDataForRender(row);
+    }
+
+    private async _setCode(row: Row, content: string, language: string): Promise<void> {
+        await this.api.setData(row + ':code', {content, language});
+        // 不存在的key查询效率较差
+        const ids_to_mds = await this.api.getData('ids_to_codes', {});
+        ids_to_mds[row] = 1;
+        await this.api.setData('ids_to_codes', ids_to_mds);
     }
 
     private async _setMarkdown(row: Row, md: String): Promise<void> {

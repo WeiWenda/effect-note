@@ -35,6 +35,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
       showDragHint: false
     };
     if (props.cached.pluginData.links?.md || props.cached.pluginData.links?.xml ||
+      props.cached.pluginData.links?.code ||
       props.cached.line.join('').startsWith('<div class=\'node-html\'>')) {
       this.isNormalRow = false;
     }
@@ -159,8 +160,8 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
         onMouseDown={(e) => {
           if (!this.props.session.selectPopoverOpen) {
             if (!this.isNormalRow) {
-              session.cursor.reset();
-              session.emit('updateInner');
+              // session.cursor.reset();
+              // session.emit('updateInner');
             } else if (e.detail === 1) {
               console.log('onLineMouseDown');
               session.selecting = false;

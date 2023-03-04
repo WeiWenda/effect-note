@@ -13,6 +13,7 @@ import './clone_tags';
 import './bracket_completion';
 import './links';
 import './markdown';
+import './code';
 
 // for developers: uncomment the following lines
 /*

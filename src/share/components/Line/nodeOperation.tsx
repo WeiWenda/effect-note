@@ -14,10 +14,11 @@ const LableAndShortCut = (_client: ClientStore, label: string, shortcut: string)
 export function NodeOperationComponent(props: {session: Session, line: Line, path: Path}) {
   const client = props.session.clientStore;
   const options = [
-    {label: LableAndShortCut(client, 'markdown', '/im'), value: 'insert-md', shortcut: 'im'},
-    {label: LableAndShortCut(client, '富文本', '/ir'), value: 'insert-rtf', shortcut: 'ir'},
-    {label: LableAndShortCut(client, '脑图', '/ib'), value: 'insert-mindmap', shortcut: 'ib'},
-    {label: LableAndShortCut(client, '流程图', '/id'), value: 'insert-drawio', shortcut: 'id'},
+    {label: LableAndShortCut(client, 'markdown', '/md'), value: 'insert-md', shortcut: 'md'},
+    {label: LableAndShortCut(client, '富文本', '/r'), value: 'insert-rtf', shortcut: 'r'},
+    {label: LableAndShortCut(client, '代码', '/c'), value: 'insert-code', shortcut: 'c'},
+    {label: LableAndShortCut(client, '脑图', '/mi'), value: 'insert-mindmap', shortcut: 'mi'},
+    {label: LableAndShortCut(client, '流程图', '/d'), value: 'insert-drawio', shortcut: 'd'},
     // {label: LableAndShortCut(client, '标记 -> 收藏', '/mm'), value: 'mark-mark', shortcut: 'mm'},
     // {label: LableAndShortCut(client, '标记 -> 标签', '/mt'), value: 'mark-tag', shortcut: 'mt'},
     // {label: LableAndShortCut(client, '展开 -> 一级子节点', '/o1'), value: 'unfold-node-1', shortcut: 'o1'},
@@ -50,6 +51,10 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
             props.session.emit('updateAnyway');
           });
         };
+        props.session.setMode('INSERT');
+        break;
+      case 'insert-code':
+        props.session.emit('setCode', props.path.row, props.line.slice(0, -1).join(''), 'plaintext');
         props.session.setMode('INSERT');
         break;
       case 'insert-rtf':

@@ -6,15 +6,18 @@ import {useState} from 'react';
 import {FolderOutlined, FolderOpenOutlined, EnterOutlined, CopyOutlined} from '@ant-design/icons';
 
 export function SpecialBlock(props: React.PropsWithChildren<{
-  blockType: string, session: Session,
-  tools: any, path: Path, collapse: boolean,
+  blockType: any, session: Session,
+  tools?: any, path: Path, collapse: boolean,
+  specialClass?: string,
   setCollapseCallback: (collapse: boolean) => void}>) {
   const [fold, setFold] = useState(props.collapse);
   const [headerVision, setHeaderVision] = useState(props.collapse);
   return (
-    <div className={'effect-block-wrapper'} onMouseEnter={() => {
+    <div className={`effect-block-wrapper ${props.specialClass || ''}`} onMouseEnter={() => {
       setHeaderVision(true);
+      props.session.stopMonitor = true;
     }} onMouseLeave={() => {
+      props.session.stopMonitor = false;
       if (!fold) {
         setHeaderVision(false);
       }

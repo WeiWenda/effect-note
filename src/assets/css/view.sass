@@ -258,6 +258,9 @@ $file-toolbar-height: 36px
     padding-bottom: 8em
     overflow: auto
 
+.effect-block-wrapper.effect-code-block
+    border-radius: 0px
+
 .effect-block-wrapper
     position: relative
     margin-right: 1em
@@ -271,6 +274,8 @@ $file-toolbar-height: 36px
         flex-grow: 1
         justify-content: flex-end
         align-items: center
+        .ant-select-selector
+            background: unset
     .effect-block-header
         background-color: rgb(240, 240, 240, 0.5)
         position: absolute
@@ -282,6 +287,8 @@ $file-toolbar-height: 36px
         justify-content: flex-end
         align-items: center
         z-index: 2
+        .ant-select-selector
+            background: unset
 
     .effect-block-header-hidden
         opacity: 0
