@@ -233,8 +233,8 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
     if (childrens.length > 0) {
       await props.session.attachBlocks(newRow[0], childrens);
     }
+    await props.session.cursor.setPosition(newRow[0], 0);
     await props.session.delBlocks(parent.row, index, 1);
-    props.session.cursor.setPosition(newRow[0], 0);
     props.session.emit('updateInner');
   };
   const onClick: MenuProps['onClick'] = ({ key }) => {

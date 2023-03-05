@@ -242,6 +242,7 @@ registerMode({
   cursorBetween: true,
   async exit(session) {
     await session.deleteAtCursor();
+    await session.cursor.reset();
   },
 });
 
