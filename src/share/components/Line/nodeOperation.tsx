@@ -45,15 +45,18 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         props.session.setMode('INSERT');
         break;
       case 'insert-md':
-        props.session.emit('openModal', 'md', {'md': props.line.slice(0, -1).join('')});
+        // 消除前导/
+        await props.session.setMode('INSERT');
+        const newContent = await props.session.document.getLine(props.path.row);
+        props.session.emit('openModal', 'md', {'md': newContent.join('')});
         props.session.mdEditorOnSave = (markdown: string, _html: string) => {
           props.session.emitAsync('setMarkdown', props.path.row, markdown).then(() => {
             props.session.emit('updateAnyway');
           });
         };
-        props.session.setMode('INSERT');
         break;
       case 'insert-code':
+        // 消除前导/
         await props.session.setMode('INSERT');
         const actualContent = await props.session.document.getLine(props.path.row);
         await props.session.emitAsync('setCode', props.path.row, actualContent.join(''), 'plaintext');
@@ -61,19 +64,21 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         props.session.emit('updateInner');
         break;
       case 'insert-rtf':
-        let html: string = props.line.slice(0, -1).join('');
-        if (props.line.join('').startsWith('<div class=\'node-html\'>')) {
-          html = props.line.join('').slice('<div class=\'node-html\'>'.length, -6);
+        // 消除前导/
+        await props.session.setMode('INSERT');
+        const lineContent = await props.session.document.getLine(props.path.row);
+        let html = lineContent.join('');
+        if (html.startsWith('<div class=\'node-html\'>')) {
+          html = html.slice('<div class=\'node-html\'>'.length, -6);
         }
         props.session.emit('openModal', 'rtf', {html});
         props.session.wangEditorOnSave = (content: any) => {
           let wrappedHtml = `<div class='node-html'>${content}</div>`;
-          props.session.changeChars(props.path.row, 0, props.line.length,
+          props.session.changeChars(props.path.row, 0, lineContent.length,
             (_ ) => wrappedHtml.split('')).then(() => {
             props.session.emit('updateAnyway');
           });
         };
-        props.session.setMode('INSERT');
         break;
       case 'insert-drawio':
         props.session.emit('setDrawio', props.path.row);
@@ -110,7 +115,7 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
       onSearch={(value) => {
         const matchItem = options.filter(o => o.shortcut.startsWith(value));
         if (matchItem.length === 1) {
-          onSelect(matchItem.pop()!.value);
+          onSelect(matchItem[0].value);
         }
         if (matchItem.length === 0) {
           props.session.addCharsAtCursor(('/' + value).split(''));
