@@ -11,6 +11,11 @@ jieba.load();
 require("lunr-languages/lunr.stemmer.support")(lunr)
 require('lunr-languages/lunr.multi')(lunr)
 require('lunr-languages/lunr.zh')(lunr)
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
 const punctuationSplit = function (builder) {
     const pipelineFunction = function (token) {
         // console.log('token:' + token.toString());
@@ -41,16 +46,20 @@ async function refreshIndex() {
         //     'content': '欢迎文档草稿123214',
         // })
         const gitHome = getGitConfig().gitHome;
-        files.forEach((filepath, index) => {
-            const docId = filepath.split('/').pop().split('#').shift()
-            docId2path[docId] = filepath;
-            const content = fs.readFileSync(path.join(gitHome, filepath), {encoding: 'utf-8'});
-            this.add({
-                'id': index,
-                'title': filepath,
-                'content': content,
-            })
-        }, this)
+        files.reduce((p, filepath, index) => {
+            return p.then(() => {
+                const docId = filepath.split('/').pop().split('#').shift()
+                console.log(filepath);
+                docId2path[docId] = filepath;
+                const content = fs.readFileSync(path.join(gitHome, filepath), {encoding: 'utf-8'});
+                this.add({
+                    'id': index,
+                    'title': filepath,
+                    'content': content,
+                })
+                return sleep(500)
+            });
+        }, Promise.resolve())
     })
 }
 refreshIndex();
@@ -180,7 +189,7 @@ router.put('/:docId', async (req, res) => {
         } else {
             console.log('重命名或移动目录')
             // 重命名或移动目录
-            deleteFile(path.join(gitHome, files[docId])).then(() => {
+            deleteFile(path.join(gitHome, docId2path[docId])).then(() => {
                 writeFile(dir, actualFilename, content).then(() => {
                     commit().then(() => {
                         refreshIndex();
