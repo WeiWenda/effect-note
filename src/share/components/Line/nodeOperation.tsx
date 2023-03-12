@@ -15,12 +15,13 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
   const client = props.session.clientStore;
   const options = [
     {label: LableAndShortCut(client, 'markdown', '/md'), value: 'insert-md', shortcut: 'md'},
-    {label: LableAndShortCut(client, '富文本', '/r'), value: 'insert-rtf', shortcut: 'r'},
-    {label: LableAndShortCut(client, '代码', '/c'), value: 'insert-code', shortcut: 'c'},
-    {label: LableAndShortCut(client, '脑图', '/mi'), value: 'insert-mindmap', shortcut: 'mi'},
-    {label: LableAndShortCut(client, '流程图', '/d'), value: 'insert-drawio', shortcut: 'd'},
-    // {label: LableAndShortCut(client, '标记 -> 收藏', '/mm'), value: 'mark-mark', shortcut: 'mm'},
-    // {label: LableAndShortCut(client, '标记 -> 标签', '/mt'), value: 'mark-tag', shortcut: 'mt'},
+    {label: LableAndShortCut(client, '富文本', '/rtf'), value: 'insert-rtf', shortcut: 'rtf'},
+    {label: LableAndShortCut(client, '代码', '/code'), value: 'insert-code', shortcut: 'code'},
+    {label: LableAndShortCut(client, '脑图', '/mindmap'), value: 'insert-mindmap', shortcut: 'mindmap'},
+    {label: LableAndShortCut(client, '流程图', '/draw'), value: 'insert-drawio', shortcut: 'draw'},
+    {label: LableAndShortCut(client, '收藏', '/mark'), value: 'mark-mark', shortcut: 'mark'},
+    {label: LableAndShortCut(client, '标签', '/tag'), value: 'mark-tag', shortcut: 'tag'},
+    {label: LableAndShortCut(client, '任务', '/task'), value: 'mark-task', shortcut: 'task'},
     // {label: LableAndShortCut(client, '展开 -> 一级子节点', '/o1'), value: 'unfold-node-1', shortcut: 'o1'},
     // {label: LableAndShortCut(client, '展开 -> 二级子节点', '/o2'), value: 'unfold-node-2', shortcut: 'o2'},
     // {label: LableAndShortCut(client, '展开 -> 三级子节点', '/o3'), value: 'unfold-node-3', shortcut: 'o3'},
@@ -42,6 +43,10 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
       case 'mark-tag':
         props.session.emit('startTag', props.path);
         await props.session.document.updateCachedPluginData(props.path.row);
+        props.session.setMode('INSERT');
+        break;
+      case 'mark-task':
+        await props.session.emitAsync('markTask', props.path);
         props.session.setMode('INSERT');
         break;
       case 'insert-md':
@@ -106,6 +111,7 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
     <Select
       showSearch
       showArrow={false}
+      bordered={false}
       autoFocus={true}
       defaultOpen={true}
       id='operation-select'
@@ -118,8 +124,10 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
           onSelect(matchItem[0].value);
         }
         if (matchItem.length === 0) {
-          props.session.addCharsAtCursor(('/' + value).split(''));
-          props.session.setMode('INSERT');
+          props.session.mode = 'INSERT';
+          props.session.addCharsAtCursor(value.split('')).then(() => {
+            props.session.emit('modeChange', 'NODE_OPERATION', 'INSERT');
+          });
         }
       }}
       filterOption={(input, option) => (option?.shortcut ?? '').startsWith(input)}

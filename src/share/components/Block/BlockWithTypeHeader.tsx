@@ -15,9 +15,14 @@ export function SpecialBlock(props: React.PropsWithChildren<{
   return (
     <div className={`effect-block-wrapper ${props.specialClass || ''}`} onMouseEnter={() => {
       setHeaderVision(true);
-      props.session.stopMonitor = true;
+      if (typeof props.blockType !== 'string') {
+        // 代码段编辑需要控制光标
+        props.session.stopKeyMonitor('code-block');
+      }
     }} onMouseLeave={() => {
-      props.session.stopMonitor = false;
+      if (typeof props.blockType !== 'string') {
+        props.session.startKeyMonitor();
+      }
       if (!fold) {
         setHeaderVision(false);
       }

@@ -67,6 +67,11 @@ function constructDocInfo(content, filepath) {
         filename: filepath.split('/').pop(),
         tag: tag ? JSON.stringify([tag].concat(otherTags)) : JSON.stringify([]), content, id}
 }
+router.get('/reindex', (req, res) => {
+    refreshIndex().then(() => {
+        res.send({message: '更新成功！'})
+    })
+})
 
 router.get('/search', (req, res) => {
     res.send(subscriptionIndex.search(req.query.search))
@@ -95,6 +100,7 @@ router.post('/', (req, res) => {
     const content = req.body.content;
     writeFile(dir, actualFilename, content).then(() => {
         commit().then(() => {
+            docId2path[docId] = path.join(dir, actualFilename);
             res.send({message: 'save success', id: docId});
         })
     });
@@ -147,6 +153,7 @@ router.delete('/:docId', async (req, res) => {
     const {gitHome} = getGitConfig();
     const docId = Number(req.params.docId);
     const filepath = docId2path[docId];
+    delete docId2path[docId];
     deleteFile(path.join(gitHome, filepath)).then(() => {
         commit().then(() => {
             res.send({message: 'delete success!'});
@@ -182,6 +189,7 @@ router.put('/:docId', async (req, res) => {
             deleteFile(path.join(gitHome, docId2path[docId])).then(() => {
                 writeFile(dir, actualFilename, content).then(() => {
                     commit().then(() => {
+                        docId2path[docId] = path.join(dir, actualFilename);
                         res.send({message: 'save success', id: req.params.docId});
                     })
                 });

@@ -64,7 +64,6 @@ export function YangComponent(props: {session: Session, config: Config}) {
               loadDoc(res).then(() => {
                 setLoading(false);
                 setSelectedResult(filepath);
-                props.session.stopMonitor = true;
               });
             });
           }

@@ -150,8 +150,8 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
               value={filterInner}
               onChange={(e) => onSearchContent(e.target.value)}
               onPressEnter={(e: any) => {onSearchContent(e.target.value); }}
-              onFocus={() => {props.session.stopMonitor = true; } }
-              onBlur={() => {props.session.stopMonitor = false; } }/>
+              onFocus={() => {props.session.stopKeyMonitor('search-in-file'); } }
+              onBlur={() => {props.session.startKeyMonitor(); } }/>
             {
               props.showLayoutIcon &&
               <LayoutToolsComponent session={props.session} />

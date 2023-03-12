@@ -154,12 +154,11 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
              this.setState({showDragHint: false});
            }}
         onMouseDown={(e) => {
-          if (!this.props.session.selectPopoverOpen) {
-            if (e.detail === 1) {
-              console.log('onLineMouseDown');
-              session.selecting = false;
-              session.setAnchor(path, -1);
-            }
+          if (e.detail === 1 && !this.props.session.selectPopoverOpen) {
+            // 颜色面板在其他block上层
+            console.log('onLineMouseDown');
+            session.selecting = false;
+            session.setAnchor(path, -1);
           }
         }}
         onMouseUp={(e) => {

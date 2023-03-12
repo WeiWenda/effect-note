@@ -1,10 +1,9 @@
 import {CachedRowInfo, InMemorySession, Path, Row, Session} from '../../share';
-import {DatePicker, Dropdown, MenuProps, message} from 'antd';
+import { Dropdown, MenuProps, message} from 'antd';
 import * as React from 'react';
 import {useState} from 'react';
 import {TagsPlugin} from '../tags';
 import {LinksPlugin} from './index';
-import dayjs from 'dayjs';
 import {MarksPlugin} from '../marks';
 import $ from 'jquery';
 import {downloadFile} from '../../ts/util';
@@ -64,21 +63,6 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
 }) {
   const [dropDownOpen, setDropDownOpen ] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
-  const setTags = (prefix: string, dateString: string) => {
-    props.tagsPlugin.getTags(props.path.row).then(tags => {
-      let filteredTags = tags?.filter(t => !t.startsWith(prefix))
-        .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t)) || [];
-      filteredTags = [prefix + dateString,  ...filteredTags];
-      filteredTags = [getTaskStatus(filteredTags)!, ...filteredTags];
-      props.tagsPlugin.setTags(props.path.row, filteredTags).then(() => {
-        props.session.emit('updateAnyway');
-      });
-    });
-  };
-  const getDateString = (prefix: string) => {
-    const dateString = props.rowInfo.pluginData.tags?.tags?.find((t: string) => t.startsWith(prefix))?.split(prefix)[1];
-    return dateString ? dayjs(dateString, 'YYYY-MM-DD HH:mm:ss') : undefined;
-  };
   const items: MenuProps['items'] = [
     {
       label: '展开',
@@ -147,44 +131,6 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         {
           label: '任务',
           key: 'mark_task',
-          children: [
-            {
-              label: (
-                <DatePicker showTime={true} defaultValue={getDateString('due: ')}
-                            placeholder='截止时间' onChange={(_, dateString) => {
-                  setOpenKeys([]);
-                  setDropDownOpen(false);
-                  props.session.setMode('INSERT');
-                  setTags('due: ', dateString);
-                }}></DatePicker>
-              ),
-              key: 'mark_task_deadline'
-            },
-            {
-              label: (
-                <DatePicker showTime={true} defaultValue={getDateString('end: ')}
-                            placeholder='完成时间' onChange={(_, dateString) => {
-                  setOpenKeys([]);
-                  setDropDownOpen(false);
-                  props.session.setMode('INSERT');
-                  setTags('end: ', dateString);
-                }}></DatePicker>
-              ),
-              key: 'mark_task_end'
-            },
-            {
-              label: (
-                <DatePicker showTime={true} defaultValue={getDateString('start: ')}
-                            placeholder='开始时间' onChange={(_, dateString) => {
-                  setOpenKeys([]);
-                  setDropDownOpen(false);
-                  props.session.setMode('INSERT');
-                  setTags('start: ', dateString);
-                }}></DatePicker>
-              ),
-              key: 'mark_task_start'
-            },
-          ]
         }
       ]
     },
@@ -238,10 +184,8 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
     props.session.emit('updateInner');
   };
   const onClick: MenuProps['onClick'] = ({ key }) => {
-    if (key.startsWith('mark_task')) {
-      return;
-    }
     setDropDownOpen(false);
+    props.session.selectPopoverOpen = false;
     props.session.setMode('INSERT');
     if (key.startsWith('fold')) {
       const foldLevel = Number(key.split('_').pop());
@@ -274,6 +218,15 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         };
         props.linksPlugin.api.updatedDataForRender(props.path.row).then(() => {
           props.session.emit('updateInner');
+        });
+        break;
+      case 'mark_task':
+        props.tagsPlugin.getTags(props.path.row).then(tags => {
+          if (tags === null ||  tags.every((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t))) {
+            props.tagsPlugin.setTags(props.path.row, ['Todo', ...(tags || [])]).then(() => {
+              props.session.emit('updateAnyway');
+            });
+          }
         });
         break;
       case 'ocr':
@@ -347,9 +300,9 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
     onClick,
     openKeys: openKeys,
     onOpenChange: (newOpenKeys: string[]) => {
-      if (openKeys.length === 2 && newOpenKeys.length === 0) {
-        return;
-      }
+      // if (openKeys.length === 2 && newOpenKeys.length === 0) {
+      //   return;
+      // }
       setOpenKeys(newOpenKeys);
     }
   };
@@ -358,11 +311,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       open={dropDownOpen}
       onOpenChange={(open) => {
         setDropDownOpen(open);
-        props.session.cursor.reset();
         if (open) {
-          props.session.setMode('NODE_OPERATION');
+          props.session.selectPopoverOpen = true;
         } else {
-          props.session.setMode('INSERT');
+          props.session.selectPopoverOpen = false;
         }
       }}
       menu={menusProps} trigger={['click']} >

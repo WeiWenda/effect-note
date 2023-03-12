@@ -79,10 +79,10 @@ export default class Profile extends React.Component<Props> {
                   <Form
                     name='basic'
                     onFocus={() => {
-                        this.props.session.stopMonitor = true;
+                        this.props.session.startKeyMonitor();
                     }}
                     onBlur={() => {
-                        this.props.session.stopMonitor = false;
+                        this.props.session.stopKeyMonitor('profile');
                     }}
                     labelCol={{ span: 6 }}
                     wrapperCol={{ span: 16 }}
@@ -121,10 +121,10 @@ export default class Profile extends React.Component<Props> {
                   <Form
                     name='basic'
                     onFocus={() => {
-                        this.props.session.stopMonitor = true;
+                        this.props.session.stopKeyMonitor('profile');
                     }}
                     onBlur={() => {
-                        this.props.session.stopMonitor = false;
+                        this.props.session.startKeyMonitor();
                     }}
                     labelCol={{ span: 6 }}
                     wrapperCol={{ span: 16 }}

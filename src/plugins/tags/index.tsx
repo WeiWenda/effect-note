@@ -23,6 +23,7 @@ import {Popover, Select, Tag} from 'antd';
 import type { CustomTagProps } from 'rc-select/lib/BaseSelect';
 import Moment from 'moment';
 import {onlyUnique} from '../../ts/util';
+import {TaskMenuComponent} from './taskMenu';
 const { Option } = Select;
 
 // TODO: do this elsewhere
@@ -161,6 +162,12 @@ export class TagsPlugin {
         session: new InMemorySession(),
         path: path
       };
+    });
+    this.api.registerListener('session', 'markTask', async (path: Path) => {
+      const tags = await this.getTags(path.row);
+      if (tags === null ||  tags.every((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t))) {
+          await this.setTags(path.row, ['Todo', ...(tags || [])]);
+      }
     });
     // Serialization #
 
@@ -426,17 +433,24 @@ export class TagsPlugin {
       let tags: string[] = pluginData.tags?.tags || [];
       const taskStatus = tags.find(t => ['Delay', 'Done', 'Todo', 'Doing'].includes(t));
       if (taskStatus) {
-        const startTag = tags.find(t => t.startsWith('start:'));
-        const endTag = tags.find(t => t.startsWith('end:'));
-        const dueTag = tags.find(t => t.startsWith('due:'));
         lineContents.push(
-          <Popover key={'status'} content={(
-            <ul style={{paddingInlineStart: '1em'}}>
-              {[startTag, endTag, dueTag].filter(t => t).map((t, index) => (
-                <li key={index} >{t}</li>
-              ))}
-            </ul>
-          )}>
+          <Popover key={'status'}
+                   trigger='click'
+                   onOpenChange={(open) => {
+                     if (open) {
+                       this.session.cursor.reset();
+                       this.session.stopKeyMonitor('tag-task');
+                     } else {
+                       this.session.startKeyMonitor();
+                     }
+                   }}
+                   content={(
+                      <TaskMenuComponent tags={tags} setTags={(newTags: string[]) => {
+                        this.setTags(path.row, newTags).then(() => {
+                          this.session.emit('updateAnyway');
+                        });
+                      }}/>
+                    )}>
             <Tag style={{marginLeft: '10px'}} color={colorMap[taskStatus]}>{taskStatus}</Tag>
           </Popover>
         );
@@ -460,8 +474,8 @@ export class TagsPlugin {
                   value={tags}
                   tagRender={tagRender}
                   options={options}
-                  onFocus={() => this.session.stopMonitor = true}
-                  onBlur={() => this.session.stopMonitor = false}
+                  onFocus={() => this.session.stopKeyMonitor('tag-normal')}
+                  onBlur={() => this.session.startKeyMonitor()}
                   onClick={(e) => {
                    e.preventDefault();
                    e.stopPropagation();

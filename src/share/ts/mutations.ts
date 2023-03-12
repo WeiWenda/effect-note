@@ -209,6 +209,9 @@ export class ChangeChars extends Mutation {
     await session.document.writeChars(this.row, this.col, this.newChars);
   }
 
+  public async moveCursor(cursor: Cursor) {
+    await cursor.setCol(this.col + this.newChars!.length);
+  }
   // doesn't move cursors
 }
 

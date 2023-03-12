@@ -11,7 +11,7 @@ import update from 'immutability-helper';
 import type { ColumnsType } from 'antd/es/table';
 import {
   getServerConfig,
-  getSubscriptions,
+  getSubscriptions, reindexWorkSpace,
   setServerConfig as saveServerConfig,
   updateSubscriptions,
   workspaceRebuild
@@ -64,6 +64,9 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                 key: 'rebuild',
                 label: '重建',
               }, {
+                key: 'reindex',
+                label: '更新索引'
+              }, {
                 key: 'delete',
                 label: '删除',
               }, {
@@ -82,6 +85,11 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                           props.session.showMessage('重建成功');
                         });
                       }
+                    });
+                    break;
+                  case 'reindex':
+                    reindexWorkSpace().then(res => {
+                      props.session.showMessage(res.message);
                     });
                     break;
                   case 'delete':

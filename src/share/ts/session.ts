@@ -171,8 +171,18 @@ export default class Session extends EventEmitter {
     await this.emitAsync('exit');
   }
 
+  public startKeyMonitor() {
+    console.log('startKeyMonitor');
+    this.stopMonitor = this.clientStore.getClientSetting('curView') !== 'note';
+  }
+
+  public stopKeyMonitor(caller: string) {
+    console.log('stopKeyMonitor from:', caller);
+    this.stopMonitor = true;
+  }
+
   public setHoverRow(path: Path | null) {
-    if (this.mode !== 'INSERT') {
+    if (this.selectPopoverOpen) {
       return;
     }
     if (path && this.hoverRow?.is(path)) {
@@ -536,7 +546,9 @@ export default class Session extends EventEmitter {
 
   public async newFile(name: string, tags: string[]) {
       this.showMessage('正在创建...', { time: 0 });
+      const docId = Math.max(...this.userDocs.map(d => d.id!)) + 1;
       const docDetail = await uploadDoc({
+        id: docId,
         name: name, tag: JSON.stringify(tags), content: JSON.stringify({text: ''})})
         .catch(e => {
           this.showMessage(e, {warning: true});
@@ -1192,7 +1204,6 @@ export default class Session extends EventEmitter {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (i !== 0) {
-        await this.newLineAtCursor();
       }
       await this.addCharsAtCursor(line.split(''));
     }

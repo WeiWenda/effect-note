@@ -715,8 +715,7 @@ keyDefinitions.registerAction(new Action(
   'exit-and-undo',
   'Exit back to normal mode',
   async function({ session }) {
-    await session.setMode('INSERT');
-    await session.addCharsAtCursor(['/']);
+    session.mode = 'INSERT';
   },
   // generally dont repeat actions not in normal mode
   { sequence: SequenceAction.DROP },

@@ -12,7 +12,7 @@ import {
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import type {MenuProps} from 'antd';
-import {Collapse, Input, Menu} from 'antd';
+import {Collapse, Input, Menu, Badge, Tag, Space} from 'antd';
 import logger from '../../ts/logger';
 import {PluginsManager} from '../../ts/plugins';
 import {MarksPlugin} from '../../plugins/marks';
@@ -42,9 +42,9 @@ function getTagMap(filteredDocs: DocInfo[], recentDocId: number[]): TagTree {
     if (doc.dirtyUpdate) {
       menuLabel = '* ' + menuLabel;
     }
-    (tagMap.get('所有笔记') as TagTree).set(menuLabel, doc.id!);
+    const dir = (JSON.parse(doc.tag!) as string[]).shift();
+    (tagMap.get('所有笔记') as TagTree).set(`${menuLabel}${dir ? ' @ ' + dir : ''}`, doc.id!);
     if (recentDocId.indexOf(doc.id!) !== -1) {
-      const dir = (JSON.parse(doc.tag!) as string[]).shift();
       (tagMap.get('最近访问') as TagTree).set(`${menuLabel}${dir ? ' @ ' + dir : ''}`, doc.id!);
     }
     const tagList: string[] = [];
@@ -119,13 +119,40 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     icon?: React.ReactNode,
     type?: 'group',
   ): MenuItem {
-    let realLabel: React.ReactNode = label;
+    let plainLabel: string = label;
+    let isModified = label.startsWith('* ');
+    if (isModified) {
+      plainLabel = label.slice(2);
+    }
+    let dirTag = '';
+    if (plainLabel.split(' @ ').length > 1) {
+      dirTag = plainLabel.split(' @ ').pop()!;
+      plainLabel = plainLabel.split(' @ ').shift()!;
+    }
+    let realLabel: React.ReactNode = plainLabel;
     if (!children) {
       realLabel = (
         <FileToolsComponent session={props.session} curDocId={docId!}
                             tagPlugin={tagPlugin}
                             trigger={['contextMenu']}>
-          <div>{label}</div>
+          <Space>
+            {
+              isModified &&
+                <Badge dot>
+                    <div>{plainLabel}</div>
+                </Badge>
+            }
+            {
+              !isModified &&
+              <div>{plainLabel}</div>
+            }
+            {
+              dirTag &&
+              <Tag>
+                {dirTag}
+              </Tag>
+            }
+          </Space>
         </FileToolsComponent>
       );
     }
@@ -381,7 +408,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     }
   };
   const onOpenChange: MenuProps['onOpenChange'] = keys => {
-    const filteredKeys = keys.filter(key => menuItem2DocId.length > Number(key) && menuItem2DocId[Number(key)] === -2);
+    // const filteredKeys = keys.filter(key => menuItem2DocId.length > Number(key) && menuItem2DocId[Number(key)] === -2);
+    const filteredKeys = keys;
     props.session.clientStore.setClientSetting('openMenus', JSON.stringify(filteredKeys));
     setOpenKeys(filteredKeys);
   };
@@ -408,8 +436,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
                   allowClear
                   onSearch={onSearchFileList}
                   onPressEnter={(e: any) => {onSearchFileList(e.target.value); }}
-                  onFocus={() => {props.session.stopMonitor = true; } }
-                  onBlur={() => {props.session.stopMonitor = false; } }/>
+                  onFocus={() => {props.session.stopKeyMonitor('search-among-file'); } }
+                  onBlur={() => {props.session.startKeyMonitor(); } }/>
               <Menu
                   onClick={onClick}
                   selectedKeys={[curMenu]}

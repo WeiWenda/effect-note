@@ -35,6 +35,8 @@ export function FontStyleToolComponent(
           return `<span class='${newClasses.join(' ')}'>${props.textContent}</span>`.split('');
         }
       }).then(() => {
+        props.session.stopAnchor();
+        props.session.selecting = false;
         props.session.emit('updateInner');
       });
     };
@@ -62,7 +64,11 @@ export function FontStyleToolComponent(
             <Popover open={showLink}
                      trigger={'click'}
                      onOpenChange={e => {
-                       props.session.stopMonitor = e;
+                       if (e) {
+                         props.session.stopKeyMonitor('add-link');
+                       } else {
+                         props.session.startKeyMonitor();
+                       }
                        setShowLink(e);
                      }}
                      content={
@@ -73,8 +79,9 @@ export function FontStyleToolComponent(
                 }}
                 addonBefore='链接到:' addonAfter={
                 <CheckOutlined onClick={() => {
+                  props.session.startKeyMonitor();
+                  props.session.selectPopoverOpen = false;
                   switchClass('')();
-                  props.session.stopMonitor = false;
                   setShowLink(false);
                 }}/>
               }/>

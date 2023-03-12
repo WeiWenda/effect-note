@@ -192,6 +192,13 @@ export function searchSubscription(query: string) {
     });
 }
 
+export function reindexWorkSpace() {
+    return request({
+        url: API_BASE_URL + `/docs/reindex`,
+        method: 'GET',
+    });
+}
+
 export function searchDoc(query: string) {
     return request({
         url: API_BASE_URL + `/docs/search?search=${query}`,

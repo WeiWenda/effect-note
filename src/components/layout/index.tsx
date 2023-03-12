@@ -136,7 +136,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       const visible = {...modalVisible};
       visible[modalName] = true;
       setModalVisible(visible);
-      props.session.stopMonitor = true;
+      props.session.stopKeyMonitor('block-modal');
     });
     props.pluginManager.on('status', forceUpdate);
     props.session.document.store.events.on('saved', forceUpdate);
@@ -189,11 +189,11 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         footer={null}
         onCancel={() => {
           setModalVisible({...modalVisible, subscriptionInfo: false});
-          props.session.stopMonitor = false;
+          props.session.startKeyMonitor();
         }}>
         <SubscriptionInfoComponent session={props.session} onFinish={() => {
           setModalVisible({...modalVisible, subscriptionInfo: false});
-          props.session.stopMonitor = false;
+          props.session.startKeyMonitor();
           props.session.showMessage('创建成功');
         }} />
       </Modal>
@@ -204,7 +204,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         footer={null}
         onCancel={() => {
           setModalVisible({...modalVisible, export: false});
-          props.session.stopMonitor = false;
+          props.session.startKeyMonitor();
         }}
       >
         <ExportComponent session={props.session} />
@@ -215,7 +215,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         footer={null}
         onCancel={() => {
           setModalVisible({...modalVisible, noteInfo: false});
-          props.session.stopMonitor = false;
+          props.session.startKeyMonitor();
         }}
       >
         <FileBaseInfoComponent
@@ -224,7 +224,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           tags={props.session.userDocs.flatMap(doc => JSON.parse(doc.tag || '[]') as Array<string>)}
           onFinish={(docId) => {
             setModalVisible({...modalVisible, noteInfo: false});
-            props.session.stopMonitor = false;
+            props.session.startKeyMonitor();
             navigate(`/note/${docId}`);
           }}
         />
@@ -234,14 +234,14 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         open={modalVisible.rtf}
         onCancel={() => {
           setModalVisible({...modalVisible, rtf: false});
-          props.session.stopMonitor = false;
+          props.session.startKeyMonitor();
         }}
         title='编辑富文本'
         cancelText={'取消'}
         okText={'确认'}
         onOk={() => {
           setModalVisible({...modalVisible, rtf: false});
-          props.session.stopMonitor = false;
+          props.session.startKeyMonitor();
           props.session.wangEditorOnSave(html);
         }}
       >
@@ -265,14 +265,14 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           open={modalVisible.md}
           onCancel={() => {
             setModalVisible({...modalVisible, md: false});
-            props.session.stopMonitor = false;
+            props.session.startKeyMonitor();
           }}
           title='编辑markdown'
           cancelText={'取消'}
           okText={'确认'}
           onOk={() => {
             setModalVisible({...modalVisible, md: false});
-            props.session.stopMonitor = false;
+            props.session.startKeyMonitor();
             props.session.mdEditorOnSave(vd?.getValue(), vd?.getHTML().replace(/<p>|<\/p>|\n/g, ''));
           }}
       >
@@ -287,12 +287,12 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
              onOk={() => {
                props.session.mindMapRef.current.getContent().then((data: {img_src: any, json: any}) => {
                  setModalVisible({...modalVisible, png: false});
-                 props.session.stopMonitor = false;
+                 props.session.startKeyMonitor();
                  props.session.pngOnSave(data.img_src, data.json);
                });
              }} onCancel={() => {
                setModalVisible({...modalVisible, png: false});
-               props.session.stopMonitor = false;
+               props.session.startKeyMonitor();
              }}>
           <Mindmap ref={props.session.mindMapRef}/>
       </Modal>
@@ -304,11 +304,11 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
              onOk={() => {}}
              onCancel={() => {
               setModalVisible({...modalVisible, drawio: false});
-              props.session.stopMonitor = false;
+              props.session.startKeyMonitor();
             }}>
         <DrawioEditor session={props.session} xml={xml} onFinish={() => {
           setModalVisible({...modalVisible, drawio: false});
-          props.session.stopMonitor = false;
+          props.session.startKeyMonitor();
         }} ref={props.session.drawioRef}/>
       </Modal>
       <Modal
@@ -318,11 +318,11 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
              footer={null}
              onCancel={() => {
                setModalVisible({...modalVisible, ocr: false});
-               props.session.stopMonitor = false;
+               props.session.startKeyMonitor();
              }}>
         <ImageOcr session={props.session} onFinish={() => {
           setModalVisible({...modalVisible, ocr: false});
-          props.session.stopMonitor = false;
+          props.session.startKeyMonitor();
         }}></ImageOcr>
       </Modal>
       {
@@ -339,11 +339,11 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                   setCurPage(e.key);
                   props.session.clientStore.setClientSetting('curView', e.key);
                   if (e.key === 'note') {
-                    props.session.stopMonitor = false;
+                    props.session.startKeyMonitor();
                     const docId = props.session.clientStore.getClientSetting('curDocId');
                     navigate(`/${e.key}/${docId}`);
                   } else {
-                    props.session.stopMonitor = true;
+                    props.session.stopKeyMonitor('header');
                     const lastSearch = props.session.clientStore.getClientSetting('curSearch');
                     const lastSearchResult = props.session.clientStore.getClientSetting('curSearchResult');
                     if (lastSearch) {
@@ -366,12 +366,12 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     } else {
                       setCurDocInfo({});
                       setModalVisible({...modalVisible, noteInfo: true});
-                      props.session.stopMonitor = true;
+                      props.session.stopKeyMonitor('create-note');
                     }
                 }).catch(() => {
                   setCurDocInfo({});
                   setModalVisible({...modalVisible, noteInfo: true});
-                  props.session.stopMonitor = true;
+                  props.session.stopKeyMonitor('create-note');
                 });
             }}>新建笔记</Button>
           }
@@ -383,7 +383,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           }
           <SettingOutlined className='header-setting' onClick={() => {
             setSettingOpen(true);
-            props.session.stopMonitor = true;
+            props.session.stopKeyMonitor('setting');
           }} />
         </Header>
       }
@@ -400,7 +400,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
         }} width={drawerWidth} placement='right' open={settingOpen} closable={false} onClose={() => {
         setSettingOpen(false);
-        props.session.stopMonitor = false;
+        props.session.startKeyMonitor();
       }} >
         <div style={{display: 'flex', height: '100%'}}>
           <DraggableCore key='drawer_drag' onDrag={(_, ui) => {
