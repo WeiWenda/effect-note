@@ -226,7 +226,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                         {
                           versions.map(version => {
                             return (
-                              <Radio value={version.commitId}>
+                              <Radio key={version.commitId} value={version.commitId}>
                                 {Moment.unix(version.time).format('yyyy-MM-DD HH:mm:ss')}
                               </Radio>
                             );

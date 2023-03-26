@@ -34,22 +34,32 @@ type BreadcrumbsProps = {
 };
 type BreadcrumbsState = {
   viewRoot: Path;
+  loaded: boolean;
 };
 export default class BreadcrumbsComponent extends React.Component<BreadcrumbsProps, BreadcrumbsState> {
 
   constructor(props: BreadcrumbsProps) {
     super(props);
     this.state = {
-      viewRoot: props.session.viewRoot
+      viewRoot: props.session.viewRoot,
+      loaded: true
     };
     props.session.on('changeViewRoot', async (path: Path) => {
       this.setState({viewRoot: path});
     });
   }
 
-  public render() {
+  private async fetchAndRerender() {
     const session = this.props.session;
+    await session.document.forceLoadPath(this.state.viewRoot);
+    this.setState({
+      loaded: true
+    });
+  }
 
+  public render() {
+    if (!this.state.loaded) { return <Spinner/>; }
+    const session = this.props.session;
     const crumbNodes: Array<React.ReactNode> = [];
     let path = this.state.viewRoot;
     if (path.parent == null) {
@@ -61,6 +71,8 @@ export default class BreadcrumbsComponent extends React.Component<BreadcrumbsPro
       while (path.parent != null) {
         const cachedRow = session.document.cache.get(path.row);
         if (!cachedRow) {
+          this.setState({loaded: false});
+          this.fetchAndRerender();
           return (<Spinner/>);
         }
         const hooksInfo = {
