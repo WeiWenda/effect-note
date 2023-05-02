@@ -103,7 +103,6 @@ export default class Session extends EventEmitter {
   public drawioOnSave: (xml: any) => void;
   public wangEditorOnSave: (html: any) => void;
   public mdEditorOnSave: (markdown: any, html: any) => void;
-  public hoverOpen: boolean = false;
   // 记录上次选中内容的path，3种情况下不为空：
   // 1. onCharMouseUp
   // 2. onLineMouseUp
@@ -1218,6 +1217,9 @@ export default class Session extends EventEmitter {
   //     insert a new node after
   //     if the node has children, this is the new first child
   public async newLineAtCursor() {
+    if (this.cursor.path.isRoot()) {
+      return;
+    }
     if (this.cursor.col === (await this.document.getLength(this.cursor.row))) {
       await this.newLineBelow({cursorOptions: {}});
     } else {
@@ -1648,6 +1650,7 @@ export default class Session extends EventEmitter {
       await this.document.getCommonAncestor(cursor.path, anchor.path);
     if (ancestors1.length === 0) {
       if (common.parent == null) {
+        console.log(cursor, anchor);
         throw new Error('Invalid state: cursor was at root?');
       }
       // anchor is underneath cursor

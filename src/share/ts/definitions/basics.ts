@@ -634,6 +634,9 @@ keyDefinitions.registerAction(new Action(
   async function({ session }) {
     if (!session.stopMonitor) {
       if (session.register.serialize().type === RegisterTypes.NONE) {
+        if (session.cursor.path.isRoot()) {
+          return;
+        }
         const items = await navigator.clipboard.read();
         // Loop through all items, looking for any kind of image
         for (let i = 0; i < items.length; i++) {

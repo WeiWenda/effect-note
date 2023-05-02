@@ -17,6 +17,7 @@ export function SpecialBlock(props: React.PropsWithChildren<{
       setHeaderVision(true);
       if (typeof props.blockType !== 'string') {
         // 代码段编辑需要控制光标
+        props.session.stopAnchor();
         props.session.stopKeyMonitor('code-block');
       }
     }} onMouseLeave={() => {

@@ -172,7 +172,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                 </Button>
             </Dropdown>
             {
-              props.session.lockEdit && props.showLayoutIcon &&
+              props.session.lockEdit && props.showLockIcon &&
               <LockOutlined onClick={() => {
                 props.session.lockEdit = false;
                 props.session.showMessage('进入编辑模式');

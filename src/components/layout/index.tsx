@@ -352,6 +352,8 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                       } else {
                         navigate(`/${e.key}?q=${encodeURIComponent(lastSearch)}`);
                       }
+                    } else if (lastSearchResult) {
+                      navigate(`/${e.key}?v=${encodeURIComponent(lastSearchResult)}`);
                     } else {
                       navigate(`/${e.key}`);
                     }

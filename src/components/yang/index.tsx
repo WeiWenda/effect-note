@@ -69,6 +69,14 @@ export function YangComponent(props: {session: Session, config: Config}) {
           }
         });
       }
+    } else if (filepath) {
+      getSubscriptionFileContent(filepath).then(res => {
+        setLoading(true);
+        loadDoc(res).then(() => {
+          setLoading(false);
+          setSelectedResult(filepath);
+        });
+      });
     } else {
       setFilter('');
       setSearchResult([]);

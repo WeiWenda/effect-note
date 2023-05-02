@@ -1,11 +1,11 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {registerPlugin} from '../../ts/plugins';
 import {LinksPlugin, linksPluginName} from '../links';
-import MonacoEditor from 'react-monaco-editor';
 import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
 import {ShareAltOutlined} from '@ant-design/icons';
 import {copyToClipboard} from '../../components';
-import {Space, Select} from 'antd';
+import {Select} from 'antd';
+import {MonacoEditorWrapper} from './MonacoEditorWrapper';
 
 const languages = ['plaintext', 'c', 'java', 'scala', 'shell', 'python', 'json', 'sql',
   'xml', 'yaml', 'go', 'php', 'typescript', 'javascript'];
@@ -20,7 +20,6 @@ registerPlugin(
     const linksPlugin = api.getPlugin(linksPluginName) as LinksPlugin;
     api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData}) => {
       if (pluginData.links?.code) {
-        const lines = pluginData.links.code.content.split('\n').length;
         elements.push(
           <SpecialBlock key={'code-block'}
                         specialClass={'effect-code-block'}
@@ -51,19 +50,14 @@ registerPlugin(
                             }} />
                         }
           >
-            <MonacoEditor
-              width='100%'
-              height={Math.min(Math.max(lines * 20, 20), 400)}
+            <MonacoEditorWrapper
               key='code'
-              language={pluginData.links.code.language}
+              pluginData={pluginData}
               theme={api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'vs-dark' : 'vs-light'}
-              value={pluginData.links.code.content || ''}
-              options={{lineHeight: 20, lineNumbersMinChars: 5, scrollBeyondLastLine: false,
-                readOnly: api.session.lockEdit}}
+              lockEdit={api.session.lockEdit}
               onChange={(newValue) => {
                 linksPlugin.setCode(path.row, newValue, pluginData.links.code.language);
-              }}
-            />
+              }}/>
           </SpecialBlock>
         );
       }

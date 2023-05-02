@@ -135,7 +135,7 @@ export default class KeyHandler extends EventEmitter {
   // general handling
 
   public queueKey(key: Key) {
-    logger.info('Handling key:', key);
+    logger.info('Handling key:', this.session.mode, key);
     this.keyStream.enqueue(key);
     this.processKeys(); // FIRE AND FORGET
   }

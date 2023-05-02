@@ -96,14 +96,14 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
       {
         key: 'remove',
         label: '删除',
+      },
+      {
+        key: 'save',
+        label: '保存',
       });
   }
   if (!props.trigger) {
     items.push({
-        key: 'save',
-        label: '保存',
-      },
-      {
       label: '导出',
       key: 'export',
       children: [
