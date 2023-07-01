@@ -163,7 +163,7 @@ async function startExpress(args) {
 
     const fileNameWithOutExt = fileName.slice(0, pointLastIndexOf) // "a.123"
     const ext = fileName.slice(pointLastIndexOf + 1, length) // "png"
-    return `${fileNameWithOutExt}-${r}.${ext}`
+    return `.${fileNameWithOutExt}-${r}.${ext}`
   }
 
   function downloadImage(url, filepath) {

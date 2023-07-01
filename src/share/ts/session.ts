@@ -249,7 +249,7 @@ export default class Session extends EventEmitter {
       isOutline: boolean,
     }> = [];
     const headNumber = /^#+/;
-    const pictureUrl = /!\[\]\((.*?)\)/;
+    const pictureUrl = /!\[\]\(([http|https]:\/\/.*?)\)/;
     const content_lines = content.split('\n');
     let currentIndent = 0;
     let inCodeBlock = false;
@@ -266,28 +266,32 @@ export default class Session extends EventEmitter {
           isOutline = true;
           currentIndent = indent + 1;
         }
-        if (line.length > 0) {
-          let trimedLine = line.replace(/^#*\s/, '');
-          const urlMatches = pictureUrl.exec(trimedLine);
-          if (urlMatches) {
-            return downloadImage(urlMatches[1]).then((res) => {
-              const originalUrl = res.data.originalURL;
-              const localUrl = res.data.url;
-              lines.push({
-                isOutline,
-                indent,
-                line: trimedLine.replace(originalUrl, localUrl),
-              });
-              return Promise.resolve();
-            });
-          } else {
-            lines.push({
-              isOutline,
-              indent,
-              line: trimedLine,
-            });
-          }
-        }
+        let trimedLine = line.replace(/^#*\s/, '');
+        // const urlMatches = pictureUrl.exec(trimedLine);
+        // if (urlMatches) {
+        //   // 微信图片不能跨域查看
+        //   return downloadImage(urlMatches[1]).then((res) => {
+        //     const originalUrl = res.data.originalURL;
+        //     const localUrl = res.data.url;
+        //     lines.push({
+        //       isOutline,
+        //       indent,
+        //       line: trimedLine.replace(originalUrl, localUrl),
+        //     });
+        //     return Promise.resolve();
+        //   });
+        // } else {
+        //   lines.push({
+        //     isOutline,
+        //     indent,
+        //     line: trimedLine,
+        //   });
+        // }
+        lines.push({
+          isOutline,
+          indent,
+          line: trimedLine,
+        });
         return Promise.resolve();
       }), Promise.resolve());
     while (lines[lines.length - 1].line === '') { // Strip trailing blank line(s)
@@ -322,7 +326,9 @@ export default class Session extends EventEmitter {
           child.children = result.children;
           child.collapsed = false;
         }
-        children.push(child);
+        if (child.text.length > 0 || child.plugins?.md?.length > 0 || child.children?.length > 0) {
+          children.push(child);
+        }
       }
       return { children, lineNumber };
     };
@@ -494,9 +500,9 @@ export default class Session extends EventEmitter {
         const children = node.children || [];
         if (node.plugins?.md) {
           lines.push(node.plugins.md);
-        } else if (children.length > 0 && curDepth <= 6) {
+        } else if (children.length > 0 && curDepth <= 6 && curDepth > 0) {
           lines.push(`${'#'.repeat(curDepth)} ${node.text}`);
-        } else {
+        } else if (node.text.length > 0) {
           lines.push(`${node.text}`);
         }
         children.forEach((child: any) => {
@@ -1759,7 +1765,7 @@ export default class Session extends EventEmitter {
     console.log('yankCopy');
     const cursor = this.cursor;
     const anchor = this._anchor;
-    if (anchor !== null) {
+    if (anchor !== null && !cursor.path.isRoot()) {
       if (!cursor.path.is(anchor.path) || this.selectInlinePath === null) {
         // 多行选中
         const [parent, index1, index2] = await this.getVisualLineSelections();

@@ -37,64 +37,18 @@ export function YangComponent(props: {session: Session, config: Config}) {
     props.session.document.removeAllListeners('beforeMove');
     props.session.document.removeAllListeners('beforeAttach');
     props.session.document.removeAllListeners('beforeDetach');
-    await props.session.reloadContent(res.content, mimetypeLookup(res.name!));
+    let content = res.content!;
+    const curDir = searchParams.get('v')!.split('/');
+    const subName = curDir[0];
+    curDir.pop();
+    content = content.replace(/- \[(.*?)\]\((?!http)\/(.*?)\)/g, `- [$1](/discovery?v=${subName}/$2)`);
+    content = content.replace(/- \[(.*?)\]\((?!http)(.*?)\)/g, `- [$1](/discovery?v=${curDir.join('/')}/$2)`);
+    content = content.replace(/!\[(.*?)\]\((?!http)\/?(.*?)\)/g,
+      `![$1](http://localhost:51223/api/subscription/img/${curDir.join('/')}/$2)`);
+    await props.session.reloadContent(content, mimetypeLookup(res.name!));
     props.session.reset_history();
     props.session.reset_jump_history();
   };
-  useEffect(() => {
-    const searchTerm = searchParams.get('q');
-    const filepath = searchParams.get('v');
-    if (searchTerm) {
-      let searchResultPromise: Promise<SubscriptionSearchResult[]> = Promise.resolve(searchResult);
-      if (searchTerm !== filter) {
-        setFilter(searchTerm);
-        searchResultPromise = searchSubscription(searchTerm).then(res => {
-          props.session.showMessage(`共找到${res.length}条记录`);
-          setSearchResult(res);
-          return Promise.resolve(res);
-        }).catch(e => {
-          props.session.showMessage(e, {warning: true});
-        });
-      }
-      if (filepath) {
-        searchResultPromise.then((srs) => {
-          if (srs.map(sr => sr.ref).includes(filepath)) {
-            getSubscriptionFileContent(filepath).then(res => {
-              setLoading(true);
-              loadDoc(res).then(() => {
-                setLoading(false);
-                setSelectedResult(filepath);
-              });
-            });
-          }
-        });
-      }
-    } else if (filepath) {
-      getSubscriptionFileContent(filepath).then(res => {
-        setLoading(true);
-        loadDoc(res).then(() => {
-          setLoading(false);
-          setSelectedResult(filepath);
-        });
-      });
-    } else {
-      setFilter('');
-      setSearchResult([]);
-      setSelectedResult(undefined);
-    }
-  }, [searchParams]);
-  useEffect(() => {
-    getSubscriptions().then((res) => {
-      const subscriptions = (Object.values(res.data) as SubscriptionInfo[]).filter(sub => {
-        return !sub.disabled;
-      }).sort((a, b) => {
-        return (a.order || 0) - (b.order || 0);
-      }).map(sub => { return {title: sub.name, key: sub.name}; });
-      setTreeData(subscriptions);
-    }).catch(e => {
-      props.session.showMessage(e, {warning: true});
-    });
-  }, []);
   const updateTreeData = (list: DataNode[], key: React.Key, children: DataNode[]): DataNode[] =>
     list.map((node) => {
       if (node.key === key) {
@@ -120,6 +74,77 @@ export function YangComponent(props: {session: Session, config: Config}) {
       return updateTreeData(origin, key,  sub_files.data);
     });
   };
+  const focusSelected = async (filename: string) => {
+    const keys: string[] = [];
+    const paths = filename.split('/');
+    while (paths.length > 1) {
+      paths.pop();
+      keys.unshift(paths.join('/'));
+    }
+    await Promise.all(keys.map(key => {
+      return onLoadData({key});
+    })).then(() => {
+      setExpandedTreeNode(keys);
+      setSelectedTreeNode([filename]);
+    });
+  };
+  useEffect(() => {
+    const searchTerm = searchParams.get('q');
+    const filepath = searchParams.get('v');
+    if (searchTerm) {
+      let searchResultPromise: Promise<SubscriptionSearchResult[]> = Promise.resolve(searchResult);
+      if (searchTerm !== filter) {
+        setFilter(searchTerm);
+        searchResultPromise = searchSubscription(searchTerm).then(res => {
+          props.session.showMessage(`共找到${res.length}条记录`);
+          setSearchResult(res);
+          return Promise.resolve(res);
+        }).catch(e => {
+          props.session.showMessage(e, {warning: true});
+        });
+      }
+      if (filepath) {
+        searchResultPromise.then((srs) => {
+          if (srs.map(sr => sr.ref).includes(filepath)) {
+            getSubscriptionFileContent(filepath).then(res => {
+              setLoading(true);
+              loadDoc(res).then(() => {
+                setLoading(false);
+                setSelectedResult(filepath);
+                focusSelected(filepath);
+              });
+            });
+          }
+        });
+      }
+    } else if (filepath) {
+      getSubscriptionFileContent(filepath).then(res => {
+        setLoading(true);
+        loadDoc(res).then(() => {
+          setLoading(false);
+          setSelectedResult(filepath);
+          focusSelected(filepath);
+        });
+      });
+    } else {
+      setFilter('');
+      setSearchResult([]);
+      setSelectedResult(undefined);
+    }
+  }, [searchParams]);
+  useEffect(() => {
+    getSubscriptions().then((res) => {
+      const subscriptions = (Object.values(res.data) as SubscriptionInfo[]).filter(sub => {
+        return !sub.disabled;
+      }).sort((a, b) => {
+        return (a.order || 0) - (b.order || 0);
+      }).map(sub => { return {title: sub.name, key: sub.name}; });
+      setTreeData(subscriptions);
+    }).catch(e => {
+      props.session.showMessage(e, {warning: true});
+    });
+  }, []);
+
   const onSearch = (value: string) => {
     props.session.clientStore.setClientSetting('curSearch', value);
     setSearchParams({q: value});
@@ -134,6 +159,8 @@ export function YangComponent(props: {session: Session, config: Config}) {
       <div style={{height: '100%', width: `${fileListWidth}px`, flexShrink: 0, flexGrow: selectedResult ? 0 : 1}}>
         <div className={selectedResult ? '' : filter ? 'sub-after-search' : 'sub-before-search'}>
           <Search
+            onFocus={() => {props.session.stopKeyMonitor('subscription-search'); } }
+            onBlur={() => {props.session.startKeyMonitor(); } }
             value={searchValue}
             placeholder='搜索关键字，前缀：title: 只搜文件名，空格（或） +（必须出现） -（不出现）'
             allowClear
@@ -154,8 +181,11 @@ export function YangComponent(props: {session: Session, config: Config}) {
                           ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
                         }}
                         loadData={onLoadData}
+                        expandedKeys={expandedTreeNode}
+                        selectedKeys={selectedTreeNode}
                         treeData={[subscription]}
                         onSelect={onSelect}
+                        onExpand={(keys) => setExpandedTreeNode(keys.map(k => k))}
                   />
                 );
               })
@@ -181,20 +211,7 @@ export function YangComponent(props: {session: Session, config: Config}) {
                 <List.Item
                   key={item.ref}
                   actions={[
-                    <AimOutlined onClick={() => {
-                      const keys: string[] = [];
-                      const paths = item.ref.split('/');
-                      while (paths.length > 1) {
-                        paths.pop();
-                        keys.unshift(paths.join('/'));
-                      }
-                      Promise.all(keys.map(key => {
-                        return onLoadData({key});
-                      })).then(() => {
-                        setExpandedTreeNode(keys);
-                        setSelectedTreeNode([item.ref]);
-                      });
-                    }}/>,
+                    <AimOutlined onClick={() => focusSelected(item.ref)}/>,
                     <SearchOutlined onClick={() => {
                       onSelect([], {node: {key: item.ref}});
                       setFilterOuter(filter);
@@ -236,7 +253,7 @@ export function YangComponent(props: {session: Session, config: Config}) {
       {
         selectedResult &&
         <SessionWithToolbarComponent curDocId={-1} loading={loading} session={props.session} filterOuter={filterOuter}
-                                     showLayoutIcon={false} showLockIcon={false}/>
+                                     showLayoutIcon={false} showLockIcon={true}/>
       }
     </div>
   );

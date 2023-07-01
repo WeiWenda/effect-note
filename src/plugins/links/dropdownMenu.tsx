@@ -131,6 +131,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         {
           label: '任务',
           key: 'mark_task',
+        },
+        {
+          label: '看板',
+          key: 'mark_board',
         }
       ]
     },
@@ -210,6 +214,9 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         props.markPlugin.setMark(props.path.row, props.rowInfo.line.join('')).then(() => {
           props.session.emit('updateInner');
         });
+        break;
+      case 'mark_board':
+        props.session.emit('toggleBoard', props.path.row);
         break;
       case 'mark_tag':
         props.tagsPlugin.tagstate = {

@@ -198,6 +198,7 @@ type BlockProps = {
   onFoldClick: ((path: Path) => void) | undefined;
   topLevel: boolean;
   viewOnly?: boolean;
+  isBoardNode?: boolean;
   nothingMessage?: string;
   iconTopLevel?: string;
   iconDirFold?: string;
@@ -430,7 +431,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
         }
         bullet = session.applyHook('renderBullet', bullet, { path, rowInfo });
         return (
-          <div key={path.row}>
+          <div key={path.row} className={'block-with-icon'}>
             {hoverIcon}
             {foldIcon}
             {/*{cloneIcon}*/}
@@ -452,6 +453,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                             cursorBetween={this.props.cursorBetween}
                             fetchData={this.props.fetchData}
                             viewOnly={this.props.viewOnly}
+                            isBoardNode={rowInfo.pluginData.links.is_board || false}
            />
           </div>
         );
@@ -463,7 +465,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
       }
 
       pathElements.push(
-        <div key='children' className={this.props.viewOnly ? 'dense_block' : 'block'}>
+        <div key='children' className={this.props.viewOnly ? 'dense_block' : this.props.isBoardNode ? 'block board-block' : 'block'}>
           {childrenDivs}
         </div>
       );

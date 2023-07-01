@@ -60,6 +60,10 @@ router.get('/file_tree', (req, res) => {
     });
     res.send({data})
 })
+router.get(`/img/*`, function (req, res) {
+    const pictureName = req.params[0] ? req.params[0] : 'index.html';
+    res.sendFile(pictureName, {root: getSearchDir()})
+})
 router.get('/file_content', (req, res) => {
     const filepath = req.query.filepath;
     const name = filepath.split('/').pop()

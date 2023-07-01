@@ -19,9 +19,10 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
     {label: LableAndShortCut(client, '代码', '/code'), value: 'insert-code', shortcut: 'code'},
     {label: LableAndShortCut(client, '脑图', '/mindmap'), value: 'insert-mindmap', shortcut: 'mindmap'},
     {label: LableAndShortCut(client, '流程图', '/draw'), value: 'insert-drawio', shortcut: 'draw'},
-    {label: LableAndShortCut(client, '收藏', '/mark'), value: 'mark-mark', shortcut: 'mark'},
-    {label: LableAndShortCut(client, '标签', '/tag'), value: 'mark-tag', shortcut: 'tag'},
-    {label: LableAndShortCut(client, '任务', '/task'), value: 'mark-task', shortcut: 'task'},
+    // {label: LableAndShortCut(client, '收藏', '/mark'), value: 'mark-mark', shortcut: 'mark'},
+    // {label: LableAndShortCut(client, '标签', '/tag'), value: 'mark-tag', shortcut: 'tag'},
+    // {label: LableAndShortCut(client, '任务', '/task'), value: 'mark-task', shortcut: 'task'},
+    // {label: LableAndShortCut(client, '看板', '/board'), value: 'mark-board', shortcut: 'board'},
     // {label: LableAndShortCut(client, '展开 -> 一级子节点', '/o1'), value: 'unfold-node-1', shortcut: 'o1'},
     // {label: LableAndShortCut(client, '展开 -> 二级子节点', '/o2'), value: 'unfold-node-2', shortcut: 'o2'},
     // {label: LableAndShortCut(client, '展开 -> 三级子节点', '/o3'), value: 'unfold-node-3', shortcut: 'o3'},
@@ -38,6 +39,10 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         break;
       case 'mark-mark':
         props.session.emit('setMark', props.path.row, props.line.join(''));
+        props.session.setMode('INSERT');
+        break;
+      case 'mark-board':
+        props.session.emit('toggleBoard', props.path.row);
         props.session.setMode('INSERT');
         break;
       case 'mark-tag':

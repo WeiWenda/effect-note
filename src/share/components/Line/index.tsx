@@ -130,7 +130,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
               emit(<NodeOperationComponent key='node-operation' session={session} line={lineData} path={path}/>);
             } else {
               setTimeout(() => {
-                if (!session.stopMonitor) {
+                if (!session.stopMonitor && path && session.hoverRow && path.is(session.hoverRow)) {
                   $('#input-hack').focus();
                 }
               }, 100);

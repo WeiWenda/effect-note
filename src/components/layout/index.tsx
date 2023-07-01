@@ -77,6 +77,9 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
     props.session.on('changeLayout', (layout) => {
       setShowHeader(layout.includes('top'));
     });
+    props.session.cursor.on('rowChange', async (_oldPath: Path, newPath: Path) => {
+      props.session.setHoverRow(newPath);
+    });
     props.session.on('updateAnyway', () => {
       logger.debug('updateAnyway');
       props.session.emit('updateInner');
@@ -343,7 +346,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     const docId = props.session.clientStore.getClientSetting('curDocId');
                     navigate(`/${e.key}/${docId}`);
                   } else {
-                    props.session.stopKeyMonitor('header');
+                    // props.session.stopKeyMonitor('header');
                     const lastSearch = props.session.clientStore.getClientSetting('curSearch');
                     const lastSearchResult = props.session.clientStore.getClientSetting('curSearchResult');
                     if (lastSearch) {

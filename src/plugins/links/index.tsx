@@ -74,6 +74,14 @@ export class LinksPlugin {
         this.api.registerListener('session', 'setMarkdown', async (row: Row, markdown: string) => {
             await this.setMarkdown(row, markdown);
         });
+        this.api.registerListener('session', 'toggleBoard', async (row: Row) => {
+            const isBoardNow = await this.getIsBoard(row);
+            if (isBoardNow) {
+                await this.setIsBoard(row, false);
+            } else {
+                await this.setIsBoard(row, true);
+            }
+        });
         this.api.registerHook('session', 'renderHoverBullet', function(bullet, {path, rowInfo}) {
               return (
                 <HoverIconDropDownComponent session={that.session} bullet={bullet} path={path} rowInfo={rowInfo}
@@ -81,6 +89,7 @@ export class LinksPlugin {
               );
           });
         this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
+            const is_board = await this.getIsBoard(row);
             const collapse = await this.getCollapse(row);
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
             const png = ids_to_pngs[row] || null;
@@ -88,13 +97,17 @@ export class LinksPlugin {
             const xml = ids_to_xmls[row] || null;
             const md = await this.getMarkdown(row);
             const code = await this.getCode(row);
-            obj.links = { collapse, png, xml, md, code};
+            obj.links = { is_board, collapse, png, xml, md, code};
             return obj;
         });
         this.api.registerHook('document', 'serializeRow', async (struct, info) => {
             const collapse = await this.getCollapse(info.row);
             if (collapse !== null) {
                 struct.collapse = collapse;
+            }
+            const isBoard = await this.getIsBoard(info.row);
+            if (isBoard) {
+                struct.is_board = isBoard;
             }
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
             if (ids_to_pngs[info.row] != null) {
@@ -117,6 +130,9 @@ export class LinksPlugin {
         this.api.registerListener('document', 'loadRow', async (path, serialized) => {
             if (serialized.collapse) {
                 await this._setCollapse(path.row, true);
+            }
+            if (serialized.is_board) {
+                await this._setIsBoard(path.row, true);
             }
             if (serialized.code) {
                 await this._setCode(path.row, serialized.code.content, serialized.code.language);
@@ -240,6 +256,7 @@ export class LinksPlugin {
         await this.api.setData('ids_to_mds', {});
         await this.api.setData('ids_to_codes', {});
         await this.api.setData('ids_to_collapses', {});
+        await this.api.setData('ids_to_board', {});
     }
 
     public async getPng(row: Row): Promise<any> {
@@ -330,10 +347,25 @@ export class LinksPlugin {
         const ids_to_collapses = await this.api.getData('ids_to_collapses', {});
         return ids_to_collapses[row] || null;
     }
+
     private async _setCollapse(row: Row, mark: boolean) {
         const ids_to_collapses = await this.api.getData('ids_to_collapses', {});
         ids_to_collapses[row] = mark;
         await this.api.setData('ids_to_collapses', ids_to_collapses);
+    }
+
+    public async getIsBoard(row: Row): Promise<boolean | null> {
+        const ids_to_board = await this.api.getData('ids_to_board', {});
+        return ids_to_board[row] || null;
+    }
+    public async setIsBoard(row: Row, is_board: boolean) {
+        await this._setIsBoard(row, is_board);
+        await this.api.updatedDataForRender(row);
+    }
+    private async _setIsBoard(row: Row, mark: boolean) {
+        const ids_to_board = await this.api.getData('ids_to_board', {});
+        ids_to_board[row] = mark;
+        await this.api.setData('ids_to_board', ids_to_board);
     }
 }
 export const linksPluginName = 'Links';
