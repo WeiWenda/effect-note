@@ -1,6 +1,7 @@
 import {DocInfo, SubscriptionInfo} from '../types';
 import {ServerConfig} from '../../../ts/server_config';
 import config from '../vim';
+import COS from 'cos-js-sdk-v5';
 
 export const API_BASE_URL = 'http://localhost:51223/api';
 export const ACCESS_TOKEN = 'accessToken';
@@ -251,6 +252,41 @@ export function uploadDoc(docInfo: DocInfo) {
     }
 }
 
+function makeid(length: number) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+    }
+    return result;
+}
+
+export function shareDoc(content: string) {
+    const Bucket = 'fileserver-1314328063';
+    const Region = 'ap-beijing';
+    const cos = new COS({
+        SecretId: 'xxx',
+        SecretKey: 'xxx',
+    });
+    const randomId = makeid(10) + '.effect.json';
+    return cos.uploadFile({
+        Bucket,
+        Region,
+        Key: randomId,
+        Body: content,
+        SliceSize: 1024 * 1024 * 5,
+    }).then((err: any) => {
+        if (err) {
+            return randomId;
+        } else {
+            return '';
+        }
+    });
+}
+
 export function getDocVersions(docId: number) {
     return request({
         url: API_BASE_URL + '/docs/' + docId + '/versions',
@@ -266,6 +302,36 @@ export function getCurrentUser() {
     return request({
         url: API_BASE_URL + '/user/me',
         method: 'GET'
+    });
+}
+
+export function getShareDocContent(filename: string) {
+    const Bucket = 'fileserver-1314328063';
+    const Region = 'ap-beijing';
+    const cos = new COS({
+        EnableTracker: false,
+        SecretId: 'xxx',
+        SecretKey: 'xxx',
+    });
+    return new Promise(function (resolve, reject) {
+      cos.getObjectUrl({
+          Bucket,
+          Region,
+          Key: filename
+      }, (err: any , data: any) => {
+          if (err) {
+              reject(err);
+          } else {
+              fetch(data.Url, {}).then(response =>
+                  response.text().then(json => {
+                      if (!response.ok) {
+                          reject(json);
+                      }
+                      resolve(json);
+                  })
+              );
+          }
+      });
     });
 }
 

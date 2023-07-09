@@ -431,32 +431,32 @@ export class TagsPlugin {
     this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
       const { path, pluginData } = info;
       let tags: string[] = pluginData.tags?.tags || [];
-      const taskStatus = tags.find(t => ['Delay', 'Done', 'Todo', 'Doing'].includes(t));
-      if (taskStatus) {
-        lineContents.push(
-          <Popover key={'status'}
-                   trigger='click'
-                   onOpenChange={(open) => {
-                     if (open) {
-                       this.session.cursor.reset();
-                       this.session.stopKeyMonitor('tag-task');
-                     } else {
-                       this.session.startKeyMonitor();
-                     }
-                   }}
-                   content={(
-                      <TaskMenuComponent tags={tags} setTags={(newTags: string[]) => {
-                        this.setTags(path.row, newTags).then(() => {
-                          this.session.emit('updateAnyway');
-                        });
-                      }}/>
-                    )}>
-            <Tag style={{marginLeft: '10px'}} color={colorMap[taskStatus]}>{taskStatus}</Tag>
-          </Popover>
-        );
-      }
+      // const taskStatus = tags.find(t => ['Delay', 'Done', 'Todo', 'Doing'].includes(t));
+      // if (taskStatus) {
+      //   lineContents.push(
+      //     <Popover key={'status'}
+      //              trigger='click'
+      //              onOpenChange={(open) => {
+      //                if (open) {
+      //                  this.session.cursor.reset();
+      //                  this.session.stopKeyMonitor('tag-task');
+      //                } else {
+      //                  this.session.startKeyMonitor();
+      //                }
+      //              }}
+      //              content={(
+      //                 <TaskMenuComponent tags={tags} setTags={(newTags: string[]) => {
+      //                   this.setTags(path.row, newTags).then(() => {
+      //                     this.session.emit('updateAnyway');
+      //                   });
+      //                 }}/>
+      //               )}>
+      //       <Tag style={{marginLeft: '10px'}} color={colorMap[taskStatus]}>{taskStatus}</Tag>
+      //     </Popover>
+      //   );
+      // }
       tags = tags
-        .filter((t: string) => !new RegExp('((start|end|due):.*)').test(t))
+        .filter((t: string) => !new RegExp('((create|start|end|due):.*)').test(t))
         .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t));
       if (tags.length > 0 || pluginData.tags?.tagging) {
         const options: any[] = this.tags

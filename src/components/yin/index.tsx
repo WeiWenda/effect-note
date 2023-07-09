@@ -25,7 +25,7 @@ import {LinksPlugin} from '../../plugins/links';
 import {SessionWithToolbarComponent} from '../session';
 import {mimetypeLookup} from '../../ts/util';
 import FileToolsComponent from '../fileTools';
-import {useParams, useNavigate, useLoaderData} from 'react-router-dom';
+import {useParams, useNavigate, useLoaderData, useSearchParams} from 'react-router-dom';
 
 const { Search } = Input;
 const { Panel } = Collapse;
@@ -91,6 +91,7 @@ async function toggleRecursiveCollapse(document: Document, path: Path, collapse:
 function YinComponent(props: {session: Session, pluginManager: PluginsManager}) {
   // @ts-ignore
   const { curDocId } = useParams();
+  let [searchParams, setSearchParams] = useSearchParams();
   // @ts-ignore
   const {userDocs} = useLoaderData();
   const navigate = useNavigate();
@@ -343,6 +344,47 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     props.session.document.removeAllListeners('beforeAttach');
     props.session.document.removeAllListeners('beforeDetach');
   };
+  const loadShareDoc = async (shareUrl: string) => {
+    setLoading(true);
+    const curDocInfo = {
+      name: '网络分享',
+      filename: shareUrl
+    };
+    let initialLoad = true;
+    const docID = -2;
+    const newDocName = docID.toString();
+    props.session.clientStore.setClientSetting('curDocId', docID);
+    props.session.clientStore.setDocname(docID);
+    await props.session.changeViewRoot(Path.loadFromAncestry(await props.session.clientStore.getLastViewRoot()));
+    if (!props.session.clientStore.getDocSetting('loaded')) {
+      initialLoad = true;
+      // props.session.showMessage('初始加载中...');
+      props.session.clientStore.setDocSetting('loaded', true);
+    }
+    document.title = curDocInfo.name!;
+    props.session.document.store.setBackend(new IndexedDBBackend(newDocName), newDocName);
+    await beforeLoadDoc();
+    console.time(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo.name}`);
+    if (initialLoad) {
+      let docContent = await api_utils.getShareDocContent(shareUrl);
+      await markPlugin.clearMarks();
+      await props.session.changeViewRoot(Path.root());
+      await tagPlugin.clearTags();
+      await linkPlugin.clearLinks();
+      await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo.filename!)).then(() => {
+        props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'],
+          () => markDirty(docID, true));
+        return afterLoadDoc();
+      });
+      setLoading(false);
+    } else {
+      props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'],
+        () => markDirty(docID, true));
+      await afterLoadDoc();
+      setLoading(false);
+    }
+    console.timeEnd(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo.name}`);
+  };
   const loadDoc = async (docID: number) => {
     setLoading(true);
     const curDocInfo = (userDocs as DocInfo[]).find(doc => doc.id === docID)!;
@@ -387,8 +429,13 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     console.timeEnd(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo.name}`);
   };
   useEffect(() => {
-    loadDoc(Number(curDocId));
-  }, [curDocId]);
+    const shareUrl = searchParams.get('s');
+    if (shareUrl) {
+      loadShareDoc(shareUrl);
+    } else {
+      loadDoc(Number(curDocId));
+    }
+  }, [curDocId, searchParams]);
   const onClick: MenuProps['onClick'] = e => {
     if (!loading) {
       setCurMenu(e.key);

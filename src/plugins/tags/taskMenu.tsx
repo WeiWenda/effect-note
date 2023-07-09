@@ -9,25 +9,35 @@ export function TaskMenuComponent(props: {tags: string[], setTags: (newTags: str
   };
   const setTags = (prefix: string, dateString: string) => {
       let filteredTags = props.tags?.filter(t => !t.startsWith(prefix))
-        .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t)) || [];
+        .filter(t => !['Delay', 'Done', 'Todo', 'Doing'].includes(t)) || [];
       if (dateString) {
         filteredTags = [prefix + dateString,  ...filteredTags];
       }
-      filteredTags = [getTaskStatus(filteredTags)!, ...filteredTags];
+      const newStatus = getTaskStatus(filteredTags);
+      if (newStatus) {
+        filteredTags = [newStatus, ...filteredTags];
+      }
       props.setTags(filteredTags);
   };
   return (
     <Space style={{display: 'flex', flexDirection: 'column'}}>
       <DatePicker showTime={true}
-                  defaultValue={getDateString('due: ')}
+                  value={getDateString('create: ')}
+                  placeholder='创建时间' onChange={(_, dateString) => {
+        setTags('create: ', dateString);
+      }}></DatePicker>
+      <DatePicker showTime={true}
+                  value={getDateString('due: ')}
                   placeholder='截止时间' onChange={(_, dateString) => {
         setTags('due: ', dateString);
       }}></DatePicker>
-      <DatePicker showTime={true} defaultValue={getDateString('end: ')}
+      <DatePicker showTime={true}
+                  value={getDateString('end: ')}
                   placeholder='完成时间' onChange={(_, dateString) => {
         setTags('end: ', dateString);
       }}></DatePicker>
-      <DatePicker showTime={true} defaultValue={getDateString('start: ')}
+      <DatePicker showTime={true}
+                  value={getDateString('start: ')}
                   placeholder='开始时间' onChange={(_, dateString) => {
         setTags('start: ', dateString);
       }}></DatePicker>

@@ -5,7 +5,7 @@ import { useReactToPrint } from 'react-to-print';
 import {ExclamationCircleOutlined, MoreOutlined} from '@ant-design/icons';
 import {api_utils, DocInfo, Path, Session} from '../../share';
 import {downloadFile, encodeHtml} from '../../ts/util';
-import {exportAction} from '../../plugins/links/dropdownMenu';
+import {exportAction, shareAction} from '../../plugins/links/dropdownMenu';
 import {TagsPlugin} from '../../plugins/tags';
 import {useNavigate} from 'react-router-dom';
 
@@ -55,6 +55,9 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
             props.session.showMessage('正在保存，请勿重复保存');
           }
         });
+        break;
+      case 'export_url':
+        shareAction(props.session, Path.root(), 'application/json');
         break;
       case 'export_md':
         exportAction(props.session, Path.root(), 'text/markdown', docName);
@@ -114,6 +117,10 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
         {
           label: '导出为markdown',
           key: 'export_md',
+        },
+        {
+          label: '生成分享链接',
+          key: 'export_url',
         },
         {
           label: '导出为json（用于EffectNote导入）',

@@ -8,6 +8,7 @@ import {MarksPlugin} from '../marks';
 import $ from 'jquery';
 import {downloadFile} from '../../ts/util';
 import Moment from 'moment/moment';
+import {shareDoc} from '../../share/ts/utils/APIUtils';
 
 export function exportAction(session: Session, path: Path, mimeType: string, filename?: string) {
   session.getCurrentContent(path, mimeType).then(content => {
@@ -22,9 +23,19 @@ export function exportAction(session: Session, path: Path, mimeType: string, fil
   });
 }
 
+export function shareAction(session: Session, path: Path, mimeType: string) {
+  session.getCurrentContent(path, mimeType).then(content =>
+    shareDoc(content).then(shortLink => {
+      session.exportModalContent = 'http://demo.effectnote.com/note/-2?s=' + shortLink;
+      session.exportFileFunc = () => {};
+      session.emit('openModal', 'export');
+    })
+  );
+}
+
 export const getTaskStatus = (tags: string[]) => {
   let status: string | undefined = undefined;
-  if (tags.some((t: string) => new RegExp('(start|end|due):.*').test(t))) {
+  if (tags.some((t: string) => new RegExp('(create|start|end|due):.*').test(t))) {
     const startTag = tags.find(t => t.startsWith('start:'));
     const endTag = tags.find(t => t.startsWith('end:'));
     const dueTag = tags.find(t => t.startsWith('due:'));
@@ -49,6 +60,8 @@ export const getTaskStatus = (tags: string[]) => {
       } else {
         status = 'Todo';
       }
+    } else {
+      status = 'Todo';
     }
   }
   return status;
@@ -128,9 +141,13 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           label: '标签',
           key: 'mark_tag',
         },
+        // {
+        //   label: '时间',
+        //   key: 'mark_task',
+        // },
         {
           label: '任务',
-          key: 'mark_task',
+          key: 'mark_check',
         },
         {
           label: '看板',
@@ -178,6 +195,8 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
   const replaceEmptyBlock = async () => {
     const parent = props.path.parent!;
     const index = await props.session.document.indexInParent(props.path);
+    // 避免check状态清空不了
+    props.session.cursor.reset();
     const newRow = await props.session.addBlocks(parent, index + 1, [''], {});
     const childrens = await props.session.document._getChildren(props.path.row);
     if (childrens.length > 0) {
@@ -215,8 +234,15 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           props.session.emit('updateInner');
         });
         break;
+      case 'mark_check':
+        props.session.emitAsync('toggleCheck', props.path.row).then(() => {
+          props.session.emit('updateInner');
+        });
+        break;
       case 'mark_board':
-        props.session.emit('toggleBoard', props.path.row);
+        props.session.emitAsync('toggleBoard', props.path.row).then(() => {
+          props.session.emit('updateInner');
+        });
         break;
       case 'mark_tag':
         props.tagsPlugin.tagstate = {

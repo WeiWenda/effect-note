@@ -1,15 +1,18 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Document, Mutation, Row, Session} from '../../share';
-import {Dropdown, Image, Menu, MenuProps, message, Modal, Space, Tag} from 'antd';
-import {EditOutlined, ExclamationCircleOutlined, PictureOutlined, ZoomInOutlined, ZoomOutOutlined} from '@ant-design/icons';
+import {Dropdown, Image, Menu, MenuProps, message, Modal, Popover, Space, Tag } from 'antd';
+import {EditOutlined, ExclamationCircleOutlined, PictureOutlined, ZoomInOutlined,
+    ZoomOutOutlined, CheckSquareOutlined, BorderOutlined} from '@ant-design/icons';
 import {Logger} from '../../ts/logger';
 import {getStyles} from '../../share/ts/themes';
 import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
 import {DrawioViewer} from '../../components/drawioViewer';
-import {HoverIconDropDownComponent} from './dropdownMenu';
+import {getTaskStatus, HoverIconDropDownComponent} from './dropdownMenu';
 import {MarksPlugin, pluginName} from '../marks';
 import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
+import {TaskMenuComponent} from '../tags/taskMenu';
+import Moment from 'moment/moment';
 
 export class LinksPlugin {
     public api: PluginApi;
@@ -52,6 +55,17 @@ export class LinksPlugin {
             }
         }
         this.SetCollapse = SetCollapse;
+        const onCheckChange = (tags: string[], prefix: string, row: number) => {
+            const dateString = Moment().format('yyyy-MM-DD HH:mm:ss');
+            let filteredTags = tags?.filter(t => !t.startsWith(prefix))
+              .filter(t => !['Delay', 'Done', 'Todo', 'Doing'].includes(t)) || [];
+            filteredTags = [prefix + dateString,  ...filteredTags];
+            const newStatus = getTaskStatus(filteredTags);
+            if (newStatus) {
+                filteredTags = [newStatus, ...filteredTags];
+            }
+            return this.tagsPlugin.setTags(row, filteredTags);
+        };
         const onInsertDrawio = (row: Row) => {
             that.getXml(row).then(xml => {
                 that.session.emit('openModal', 'drawio', {xml: xml});
@@ -82,6 +96,16 @@ export class LinksPlugin {
                 await this.setIsBoard(row, true);
             }
         });
+        this.api.registerListener('session', 'toggleCheck', async (row: Row) => {
+            const isCheckNow = await this.getIsCheck(row);
+            if (isCheckNow === null) {
+                await this.setIsCheck(row, false);
+                const tags = await this.tagsPlugin.getTags(row) || [];
+                await onCheckChange(tags, 'create: ', row);
+            } else {
+                await this.unsetIsCheck(row);
+            }
+        });
         this.api.registerHook('session', 'renderHoverBullet', function(bullet, {path, rowInfo}) {
               return (
                 <HoverIconDropDownComponent session={that.session} bullet={bullet} path={path} rowInfo={rowInfo}
@@ -90,6 +114,7 @@ export class LinksPlugin {
           });
         this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
             const is_board = await this.getIsBoard(row);
+            const is_check = await this.getIsCheck(row);
             const collapse = await this.getCollapse(row);
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
             const png = ids_to_pngs[row] || null;
@@ -97,7 +122,7 @@ export class LinksPlugin {
             const xml = ids_to_xmls[row] || null;
             const md = await this.getMarkdown(row);
             const code = await this.getCode(row);
-            obj.links = { is_board, collapse, png, xml, md, code};
+            obj.links = { is_board, is_check, collapse, png, xml, md, code};
             return obj;
         });
         this.api.registerHook('document', 'serializeRow', async (struct, info) => {
@@ -108,6 +133,10 @@ export class LinksPlugin {
             const isBoard = await this.getIsBoard(info.row);
             if (isBoard) {
                 struct.is_board = isBoard;
+            }
+            const isCheck = await this.getIsCheck(info.row);
+            if (isCheck !== null) {
+                struct.is_check = isCheck;
             }
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
             if (ids_to_pngs[info.row] != null) {
@@ -134,6 +163,14 @@ export class LinksPlugin {
             if (serialized.is_board) {
                 await this._setIsBoard(path.row, true);
             }
+            if (serialized.is_check !== undefined) {
+                await this._setIsCheck(path.row, serialized.is_check);
+            } else {
+                const cursorIsCheck = await this.getIsCheck(this.session.cursor.path.row);
+                if (cursorIsCheck !== null) {
+                    await this._setIsCheck(path.row, false);
+                }
+            }
             if (serialized.code) {
                 await this._setCode(path.row, serialized.code.content, serialized.code.language);
             }
@@ -147,6 +184,57 @@ export class LinksPlugin {
                 await this._setMarkdown(path.row, serialized.md);
             }
             await this.api.updatedDataForRender(path.row);
+        });
+        async function addStrikeThrough(session: Session, row: Row) {
+            await session.addChars(row, -1, ['~', '~']);
+            await session.addChars(row, 0, ['~', '~']);
+        }
+
+        async function removeStrikeThrough(session: Session, row: Row) {
+            await session.delChars(row, -2, 2);
+            await session.delChars(row, 0, 2);
+        }
+        this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
+            const { path, pluginData } = info;
+            let tags: string[] = pluginData.tags?.tags || [];
+            if (pluginData.links.is_check !== null) {
+                lineContents.unshift(<Popover key={'status'}
+                         trigger='hover'
+                         onOpenChange={(open) => {
+                             if (open) {
+                                 this.session.cursor.reset();
+                                 this.session.stopKeyMonitor('tag-task');
+                             } else {
+                                 this.session.startKeyMonitor();
+                             }
+                         }}
+                         content={(
+                           <TaskMenuComponent tags={tags} setTags={(newTags: string[]) => {
+                               this.tagsPlugin.setTags(path.row, newTags).then(() => {
+                                   this.session.emit('updateAnyway');
+                               });
+                           }}/>
+                         )}>
+                    {
+                        pluginData.links.is_check ? <CheckSquareOutlined className={'check-icon'} onClick={() => {
+                            this.setIsCheck(path.row, false).then(() => {
+                                removeStrikeThrough(this.session, path.row).then(() => {
+                                    this.session.emit('updateInner');
+                                });
+                            });
+                        }} /> : <BorderOutlined className={'check-icon'} onClick={() => {
+                                    onCheckChange(tags, 'end: ', path.row).then(() => {
+                                        this.setIsCheck(path.row, true).then(() => {
+                                            addStrikeThrough(this.session, path.row).then(() => {
+                                                this.session.emit('updateAnyway');
+                                            });
+                                        });
+                                    });
+                        }}/>
+                    }
+                </Popover>);
+            }
+            return lineContents;
         });
         this.api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData}) => {
             if (pluginData.links?.xml != null) {
@@ -257,6 +345,7 @@ export class LinksPlugin {
         await this.api.setData('ids_to_codes', {});
         await this.api.setData('ids_to_collapses', {});
         await this.api.setData('ids_to_board', {});
+        await this.api.setData('ids_to_check', {});
     }
 
     public async getPng(row: Row): Promise<any> {
@@ -352,6 +441,27 @@ export class LinksPlugin {
         const ids_to_collapses = await this.api.getData('ids_to_collapses', {});
         ids_to_collapses[row] = mark;
         await this.api.setData('ids_to_collapses', ids_to_collapses);
+    }
+
+    public async getIsCheck(row: Row): Promise<boolean | null> {
+        const ids_to_check = await this.api.getData('ids_to_check', {});
+        return ids_to_check[row] !== undefined ? ids_to_check[row] : null;
+    }
+    public async setIsCheck(row: Row, is_board: boolean) {
+        await this._setIsCheck(row, is_board);
+        await this.api.updatedDataForRender(row);
+    }
+    public async unsetIsCheck(row: Row) {
+        const ids_to_check = await this.api.getData('ids_to_check', {});
+        delete ids_to_check[row];
+        await this.api.setData('ids_to_check', ids_to_check);
+        await this.api.updatedDataForRender(row);
+    }
+
+    private async _setIsCheck(row: Row, mark: boolean) {
+        const ids_to_check = await this.api.getData('ids_to_check', {});
+        ids_to_check[row] = mark;
+        await this.api.setData('ids_to_check', ids_to_check);
     }
 
     public async getIsBoard(row: Row): Promise<boolean | null> {
