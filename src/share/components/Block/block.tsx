@@ -23,6 +23,7 @@ type RowProps = {
   cursorsTree: CursorsInfoTree;
   cursorBetween: boolean;
   viewOnly?: boolean;
+  parentBoardNode?: boolean;
 };
 class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
   private onClick: (() => void) | undefined = undefined;
@@ -95,7 +96,8 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
       });
     }
     let lineoptions: LineProps = {
-      lineData,
+      lineData: (this.props.parentBoardNode && Object.keys(cursors).length === 0)
+          ? `<span class='yellow-background'>${lineData.join('')}</span>`.split('') : lineData,
       cursors,
       cursorStyle: getStyles(session.clientStore, ['theme-cursor']),
       highlights,
@@ -198,7 +200,7 @@ type BlockProps = {
   onFoldClick: ((path: Path) => void) | undefined;
   topLevel: boolean;
   viewOnly?: boolean;
-  isBoardNode?: boolean;
+  parentBoardNode?: boolean;
   nothingMessage?: string;
   iconTopLevel?: string;
   iconDirFold?: string;
@@ -279,6 +281,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
           session={session} path={parent}
           onCharClick={this.props.onCharClick}
           cached={cached}
+          parentBoardNode={this.props.parentBoardNode}
           viewOnly={this.props.viewOnly}
           onClick={this.props.onLineClick}
         />
@@ -453,7 +456,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                             cursorBetween={this.props.cursorBetween}
                             fetchData={this.props.fetchData}
                             viewOnly={this.props.viewOnly}
-                            isBoardNode={rowInfo.pluginData.links.is_board || false}
+                            parentBoardNode={cached.pluginData.links?.is_board || false}
            />
           </div>
         );
@@ -463,9 +466,15 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
         this.props.fetchData();
         childrenDivs = [<Spinner key='spinner'/>];
       }
-
+      const classes = ['block'];
+      if (cached.pluginData.links?.is_board) {
+        classes.push('board-block');
+      }
+      if (this.props.parentBoardNode) {
+        classes.push('board-vertical-block');
+      }
       pathElements.push(
-        <div key='children' className={this.props.viewOnly ? 'dense_block' : this.props.isBoardNode ? 'block board-block' : 'block'}>
+        <div key='children' className={this.props.viewOnly ? 'dense_block' : classes.join(' ')}>
           {childrenDivs}
         </div>
       );
