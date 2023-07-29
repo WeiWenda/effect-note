@@ -868,6 +868,9 @@ export default class Session extends EventEmitter {
       cursor_before: this.cursor.clone(),
     });
     this.jumpIndex += 1;
+
+    this.emit('changeJumpHistory', this.jumpHistory.length, this.jumpIndex);
+
   }
 
   // try going to jump, return true if succeeds
@@ -916,6 +919,7 @@ export default class Session extends EventEmitter {
       jumpIndex -= 1;
       const oldjump = this.jumpHistory[jumpIndex];
       this.jumpIndex = jumpIndex;
+      this.emit('changeJumpHistory', this.jumpHistory.length, this.jumpIndex);
       if (await this.tryJump(oldjump)) {
         return true;
       }
@@ -935,6 +939,7 @@ export default class Session extends EventEmitter {
       jumpIndex += 1;
       const newjump = this.jumpHistory[jumpIndex];
       this.jumpIndex = jumpIndex;
+      this.emit('changeJumpHistory', this.jumpHistory.length, this.jumpIndex);
       if (await this.tryJump(newjump)) {
         return true;
       }

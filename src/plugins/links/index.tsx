@@ -3,7 +3,7 @@ import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Document, Mutation, Row, Session} from '../../share';
 import {Dropdown, Image, Menu, MenuProps, message, Modal, Popover, Space, Tag } from 'antd';
 import {EditOutlined, ExclamationCircleOutlined, PictureOutlined, ZoomInOutlined,
-    ZoomOutOutlined, CheckSquareOutlined, BorderOutlined} from '@ant-design/icons';
+    ZoomOutOutlined, CheckSquareOutlined, BorderOutlined, ArrowRightOutlined, ArrowLeftOutlined} from '@ant-design/icons';
 import {Logger} from '../../ts/logger';
 import {getStyles} from '../../share/ts/themes';
 import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
@@ -96,6 +96,14 @@ export class LinksPlugin {
                 await this.setIsBoard(row, true);
             }
         });
+        this.api.registerListener('session', 'toggleOrder', async (row: Row) => {
+            const isOrderNow = await this.getIsOrder(row);
+            if (isOrderNow) {
+                await this.setIsOrder(row, false);
+            } else {
+                await this.setIsOrder(row, true);
+            }
+        });
         this.api.registerListener('session', 'toggleCheck', async (row: Row) => {
             const isCheckNow = await this.getIsCheck(row);
             if (isCheckNow === null) {
@@ -114,6 +122,7 @@ export class LinksPlugin {
           });
         this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
             const is_board = await this.getIsBoard(row);
+            const is_order = await this.getIsOrder(row);
             const is_check = await this.getIsCheck(row);
             const collapse = await this.getCollapse(row);
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
@@ -122,7 +131,7 @@ export class LinksPlugin {
             const xml = ids_to_xmls[row] || null;
             const md = await this.getMarkdown(row);
             const code = await this.getCode(row);
-            obj.links = { is_board, is_check, collapse, png, xml, md, code};
+            obj.links = { is_order, is_board, is_check, collapse, png, xml, md, code};
             return obj;
         });
         this.api.registerHook('document', 'serializeRow', async (struct, info) => {
@@ -133,6 +142,10 @@ export class LinksPlugin {
             const isBoard = await this.getIsBoard(info.row);
             if (isBoard) {
                 struct.is_board = isBoard;
+            }
+            const isOrder = await this.getIsOrder(info.row);
+            if (isOrder) {
+                struct.is_order = isOrder;
             }
             const isCheck = await this.getIsCheck(info.row);
             if (isCheck !== null) {
@@ -162,6 +175,9 @@ export class LinksPlugin {
             }
             if (serialized.is_board) {
                 await this._setIsBoard(path.row, true);
+            }
+            if (serialized.is_order) {
+                await this._setIsOrder(path.row, true);
             }
             if (serialized.is_check !== undefined) {
                 await this._setIsCheck(path.row, serialized.is_check);
@@ -195,8 +211,15 @@ export class LinksPlugin {
             await session.delChars(row, 0, 2);
         }
         this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
-            const { path, pluginData } = info;
+            const { path, pluginData, parentBoard, indexInParent } = info;
             let tags: string[] = pluginData.tags?.tags || [];
+            if (indexInParent) {
+                lineContents.unshift(<span>{indexInParent}. </span>);
+            }
+            if (parentBoard) {
+                lineContents.unshift(<ArrowRightOutlined className={'header-icon-left'}/>);
+                lineContents.push(<ArrowLeftOutlined className={'header-icon-right'}/>);
+            }
             if (pluginData.links.is_check !== null) {
                 lineContents.unshift(<Popover key={'status'}
                          trigger='hover'
@@ -345,6 +368,7 @@ export class LinksPlugin {
         await this.api.setData('ids_to_codes', {});
         await this.api.setData('ids_to_collapses', {});
         await this.api.setData('ids_to_board', {});
+        await this.api.setData('ids_to_order', {});
         await this.api.setData('ids_to_check', {});
     }
 
@@ -476,6 +500,19 @@ export class LinksPlugin {
         const ids_to_board = await this.api.getData('ids_to_board', {});
         ids_to_board[row] = mark;
         await this.api.setData('ids_to_board', ids_to_board);
+    }
+    public async getIsOrder(row: Row): Promise<boolean | null> {
+        const ids_to_order = await this.api.getData('ids_to_order', {});
+        return ids_to_order[row] || null;
+    }
+    public async setIsOrder(row: Row, is_order: boolean) {
+        await this._setIsOrder(row, is_order);
+        await this.api.updatedDataForRender(row);
+    }
+    private async _setIsOrder(row: Row, mark: boolean) {
+        const ids_to_order = await this.api.getData('ids_to_order', {});
+        ids_to_order[row] = mark;
+        await this.api.setData('ids_to_order', ids_to_order);
     }
 }
 export const linksPluginName = 'Links';

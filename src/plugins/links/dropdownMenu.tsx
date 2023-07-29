@@ -152,6 +152,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         {
           label: '看板',
           key: 'mark_board',
+        },
+        {
+          label: '序号',
+          key: 'mark_order',
         }
       ]
     },
@@ -241,6 +245,11 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         break;
       case 'mark_board':
         props.session.emitAsync('toggleBoard', props.path.row).then(() => {
+          props.session.emit('updateInner');
+        });
+        break;
+      case 'mark_order':
+        props.session.emitAsync('toggleOrder', props.path.row).then(() => {
           props.session.emit('updateInner');
         });
         break;

@@ -34,7 +34,7 @@
     "profiletest": "npm test -- --prof",
     "eject": "react-scripts eject",
     "package": "electron-forge package",
-    "make": "export REACT_APP_BUILD_PROFILE=local && npm run build && electron-forge make --platform darwin",
+    "make": "export REACT_APP_BUILD_PROFILE=local && rm -rf ./node_modules/.cache && npm run build && electron-forge make --platform darwin",
     "makewin": "set \"REACT_APP_BUILD_PROFILE=local\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build && electron-forge make --platform win32"
   },
   "main": "public/electron.js",

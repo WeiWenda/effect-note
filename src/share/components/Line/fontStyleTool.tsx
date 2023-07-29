@@ -1,9 +1,10 @@
 import {Col, DocInfo, Path, Session} from '../../ts';
 import {BoldOutlined, FontColorsOutlined,
-  HighlightOutlined, ItalicOutlined, DeleteOutlined, LinkOutlined, CheckOutlined} from '@ant-design/icons';
+  HighlightOutlined, ItalicOutlined, DeleteOutlined, LinkOutlined, CheckOutlined, CopyOutlined} from '@ant-design/icons';
 import {Space, Popover, Input, Button} from 'antd';
 import * as React from 'react';
 import {useState} from 'react';
+import {copyToClipboard} from '../../../components/index';
 
 export function FontStyleToolComponent(
   props: React.PropsWithChildren<{session: Session, path: Path, startCol: Col, endCol: Col,
@@ -100,6 +101,10 @@ export function FontStyleToolComponent(
             <HighlightOutlined onClick={switchClass('cyan-background')} className={'cyan-background'}/>
             <HighlightOutlined onClick={switchClass('blue-background')} className={'blue-background'}/>
             <HighlightOutlined onClick={switchClass('purple-background')} className={'purple-background'}/>
+            <CopyOutlined onClick={() => {
+               copyToClipboard(props.textContent);
+               props.session.showMessage('复制成功');
+            }}/>
             {
               props.showDelete &&
               <DeleteOutlined onClick={() => {

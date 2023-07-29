@@ -33,6 +33,8 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   curDocId: number,
   markPlugin?: MarksPlugin,
   tagPlugin?: TagsPlugin}) {
+  const [stackSize, setStackSize] = useState(props.session.jumpHistory.length);
+  const [curJumpIndex, setCurJumpIndex] = useState(props.session.jumpIndex);
   const [isMarked, setMarked] = useState(false);
   const [unfoldLevel, setUnfoldLevel] = useState(100);
   const [isRoot, setIsRoot] = useState(props.session.viewRoot.isRoot());
@@ -93,6 +95,10 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
     }
   }, [props.filterOuter, props.loading]);
   useEffect(() => {
+    props.session.on('changeJumpHistory', (newStackSize: number, index: number) => {
+      setStackSize(newStackSize);
+      setCurJumpIndex(index);
+    });
     props.session.on('changeViewRoot', async (path: Path) => {
       setIsRoot(path.isRoot());
       if (props.markPlugin) {
@@ -122,14 +128,14 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                 props.session.jumpPrevious();
               }}
               style={{
-                filter:  props.session.jumpIndex === 0 ? unselectStyle : selectStyle
+                filter: curJumpIndex === 0 ? unselectStyle : selectStyle
               }}/>
             <RightOutlined
               onClick={() => {
                 props.session.jumpNext();
               }}
               style={{
-                filter: (props.session.jumpIndex + 1 >= props.session.jumpHistory.length ) ? unselectStyle : selectStyle
+                filter: (curJumpIndex + 1 >= stackSize ) ? unselectStyle : selectStyle
               }}/>
             <BreadcrumbsComponent key='crumbs'
                                   session={props.session}

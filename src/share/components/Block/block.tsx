@@ -24,6 +24,7 @@ type RowProps = {
   cursorBetween: boolean;
   viewOnly?: boolean;
   parentBoardNode?: boolean;
+  indexInParent?: number;
 };
 class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
   private onClick: (() => void) | undefined = undefined;
@@ -96,8 +97,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
       });
     }
     let lineoptions: LineProps = {
-      lineData: (this.props.parentBoardNode && Object.keys(cursors).length === 0)
-          ? `<span class='yellow-background'>${lineData.join('')}</span>`.split('') : lineData,
+      lineData,
       cursors,
       cursorStyle: getStyles(session.clientStore, ['theme-cursor']),
       highlights,
@@ -112,7 +112,10 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
 
     const hooksInfo = {
       path, pluginData: this.props.cached.pluginData,
-      has_cursor, has_highlight, lockEdit: this.props.session.lockEdit,
+      has_cursor, has_highlight,
+      parentBoard: this.props.parentBoardNode,
+      indexInParent: this.props.indexInParent,
+      lockEdit: this.props.session.lockEdit,
       line: this.props.cached.line
     };
 
@@ -201,6 +204,7 @@ type BlockProps = {
   topLevel: boolean;
   viewOnly?: boolean;
   parentBoardNode?: boolean;
+  indexInParent?: number;
   nothingMessage?: string;
   iconTopLevel?: string;
   iconDirFold?: string;
@@ -282,6 +286,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
           onCharClick={this.props.onCharClick}
           cached={cached}
           parentBoardNode={this.props.parentBoardNode}
+          indexInParent={this.props.indexInParent}
           viewOnly={this.props.viewOnly}
           onClick={this.props.onLineClick}
         />
@@ -309,14 +314,13 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
       );
     } else if (children.length && ((!collapsed) || this.props.topLevel)) {
       let childrenLoaded = true;
-      let childrenDivs = cached.children.filter(cachedChild => {
-        return !this.props.filteredRows ||
+      let childrenDivs = cached.children.map((cachedChild, index) => {
+        if (!this.props.filteredRows ||
           this.props.session.search?.results.accentMap.has(parent.row) ||
-          this.props.filteredRows.has(cachedChild?.row!);
-      }).map((cachedChild) => {
+          this.props.filteredRows.has(cachedChild?.row!)) {
         if (cachedChild === null) {
-          childrenLoaded = false;
-          return null;
+         childrenLoaded = false;
+         return null;
         }
 
         const row = cachedChild.row;
@@ -457,9 +461,13 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                             fetchData={this.props.fetchData}
                             viewOnly={this.props.viewOnly}
                             parentBoardNode={cached.pluginData.links?.is_board || false}
+                            indexInParent={cached.pluginData.links?.is_order ? index + 1 : undefined}
            />
           </div>
         );
+        } else {
+          return null;
+        }
       });
 
       if (!childrenLoaded) {
