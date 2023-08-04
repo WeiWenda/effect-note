@@ -111,11 +111,12 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
     };
 
     const hooksInfo = {
+      session: this.props.session,
       path, pluginData: this.props.cached.pluginData,
       has_cursor, has_highlight,
       parentBoard: this.props.parentBoardNode,
       indexInParent: this.props.indexInParent,
-      lockEdit: this.props.session.lockEdit,
+      editDisable: this.props.session.lockEdit || this.props.viewOnly,
       line: this.props.cached.line
     };
 

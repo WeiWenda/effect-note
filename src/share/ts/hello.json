@@ -586,7 +586,10 @@
               "text": "笔记操作快捷键",
               "children": [
                 {
-                  "text": "<div class='node-html'><table style=\"width: auto;\"><tbody><tr><th colSpan=\"1\" rowSpan=\"1\" width=\"153\">操作</th><th colSpan=\"1\" rowSpan=\"1\" width=\"161.1\">window快捷键</th><th colSpan=\"1\" rowSpan=\"1\" width=\"165.65\">mac快捷键</th></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">撤销</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+z</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+z</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">重做</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+shift+z</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+shift+z</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">复制</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+c</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+c</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">粘贴</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+v</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+v</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">剪切</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+x</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+x</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">删除</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">delete</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">delete</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记完成</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+enter</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+enter</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">保存</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+s</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+s</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">刷新</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+r</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+r</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">缩进&gt;&gt;</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">tab</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">tab</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">缩进&lt;&lt;</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+tab</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+tab</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">光标至行首</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">home</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">home</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">光标至行尾</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">end</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">end</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">键盘选中内容</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+上下左右</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+上下左右</td></tr></tbody></table><p><br></p></div>"
+                  "text": "<div class='node-html'><table style=\"width: auto;\"><tbody><tr><th colSpan=\"1\" rowSpan=\"1\" width=\"153\">操作</th><th colSpan=\"1\" rowSpan=\"1\" width=\"161.1\">window快捷键</th><th colSpan=\"1\" rowSpan=\"1\" width=\"165.65\">mac快捷键</th></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">撤销</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+z</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+z</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">重做</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+shift+z</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+shift+z</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">复制</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+c</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+c</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">粘贴</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+v</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+v</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">剪切</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+x</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+x</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">删除</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">delete</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">delete</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记完成</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+enter</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+enter</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">保存</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+s</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+s</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">刷新</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">ctrl+r</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">command+r</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">缩进&gt;&gt;</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">tab</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">tab</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">缩进&lt;&lt;</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+tab</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+tab</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">光标至行首</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">home</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">home</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">光标至行尾</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">end</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">end</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">键盘选中内容</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+上下左右</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">shift+上下左右</td></tr></tbody></table><p><br></p></div>",
+                  "plugins": {
+                    "collapse": true
+                  }
                 }
               ]
             },
@@ -594,7 +597,92 @@
               "text": "节点操作快捷键",
               "children": [
                 {
-                  "text": "<div class='node-html'><table style=\"width: auto;\"><tbody><tr><th colSpan=\"1\" rowSpan=\"1\" width=\"191\">操作</th><th colSpan=\"1\" rowSpan=\"1\" width=\"212\">快捷键</th></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入markdown</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/md</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入rtf</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/rtf</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入代码</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/code</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入drawio</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/draw</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入百度脑图</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/mindmap</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记标签</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/tag</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记收藏</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/mark</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记任务</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/task</td></tr></tbody></table><p><br></p></div>"
+                  "text": "<div class='node-html'><table style=\"width: auto;\"><tbody><tr><th colSpan=\"1\" rowSpan=\"1\" width=\"191\">操作</th><th colSpan=\"1\" rowSpan=\"1\" width=\"212\">快捷键</th></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入markdown</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/md</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入rtf</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/rtf</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入代码</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/code</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入drawio</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/draw</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">插入百度脑图</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/mindmap</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记标签</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/tag</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记收藏</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/mark</td></tr><tr><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">标记任务</td><td colSpan=\"1\" rowSpan=\"1\" width=\"auto\">/task</td></tr></tbody></table><p><br></p></div>",
+                  "plugins": {
+                    "collapse": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "text": "推荐订阅源",
+      "children": [
+        {
+          "text": "计算机领域",
+          "collapsed": true,
+          "children": [
+            {
+              "text": "CS-Notes",
+              "children": [
+                {
+                  "text": "github地址：<a class='' target=\"_blank\" href=\"https://github.com/CyC2018/CS-Notes\">https://github.com/CyC2018/CS-Notes</a>"
+                },
+                {
+                  "text": "在线阅读：<a class='' target=\"_blank\" href=\"http://www.cyc2018.xyz/\">http://www.cyc2018.xyz/</a>"
+                }
+              ]
+            },
+            {
+              "text": "开发快速参考",
+              "plugins": {
+                "is_board": true
+              },
+              "children": [
+                {
+                  "text": "中文版",
+                  "children": [
+                    {
+                      "text": "github地址：<a class='' target=\"_blank\" href=\"https://github.com/jaywcjlove/reference\">https://github.com/jaywcjlove/reference</a>"
+                    },
+                    {
+                      "text": "在线阅读：<a class='' target=\"_blank\" href=\"https://wangchujiang.com/reference/\">https://wangchujiang.com/reference/</a>"
+                    }
+                  ]
+                },
+                {
+                  "text": "英文版",
+                  "children": [
+                    {
+                      "text": "github地址：<a class='' target=\"_blank\" href=\"https://github.com/Fechin/reference\">https://github.com/Fechin/reference</a>"
+                    },
+                    {
+                      "text": "在线阅读：<a class='' target=\"_blank\" href=\"https://cheatsheets.zip/\">https://cheatsheets.zip/</a>"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "小林coding",
+              "children": [
+                {
+                  "text": "github地址：<a class='' target=\"_blank\" href=\"https://github.com/xiaolincoder/CS-Base\">https://github.com/xiaolincoder/CS-Base</a>"
+                },
+                {
+                  "text": "在线阅读：<a class='' target=\"_blank\" href=\"https://xiaolincoding.com/\">https://xiaolincoding.com/</a>"
+                }
+              ]
+            },
+            {
+              "text": "JavaGuide",
+              "children": [
+                {
+                  "text": "github地址：<a class='' target=\"_blank\" href=\"https://github.com/Snailclimb/JavaGuide\">https://github.com/Snailclimb/JavaGuide</a>"
+                },
+                {
+                  "text": "在线阅读<a class='' target=\"_blank\" href=\"https://javaguide.cn/\">：https://javaguide.cn/</a>"
+                }
+              ]
+            },
+            {
+              "text": "JavaFamily",
+              "children": [
+                {
+                  "text": "github地址：<a class='' target=\"_blank\" href=\"https://github.com/AobingJava/JavaFamily\">https://github.com/AobingJava/JavaFamily</a>"
                 }
               ]
             }
@@ -778,6 +866,60 @@
               "children": [
                 {
                   "text": "增加Monaco代码块"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "v0.2.6",
+          "collapsed": true,
+          "plugins": {
+            "is_board": true
+          },
+          "children": [
+            {
+              "text": "New Features",
+              "children": [
+                {
+                  "text": "增加标记看板功能"
+                },
+                {
+                  "text": "~~增加标记任务功能~~",
+                  "plugins": {
+                    "tags": [
+                      "Done",
+                      "create: 2023-07-29 13:19:06",
+                      "end: 2023-07-29 13:19:07"
+                    ],
+                    "is_check": true
+                  }
+                },
+                {
+                  "text": "增加标记序号功能",
+                  "collapsed": true,
+                  "plugins": {
+                    "is_order": true
+                  },
+                  "children": [
+                    {
+                      "text": "子节点"
+                    },
+                    {
+                      "text": "子节点"
+                    }
+                  ]
+                },
+                {
+                  "text": "增加文本选中复制功能"
+                }
+              ]
+            },
+            {
+              "text": "Improvement",
+              "children": [
+                {
+                  "text": "优化Discovery的阅读体验"
                 }
               ]
             }

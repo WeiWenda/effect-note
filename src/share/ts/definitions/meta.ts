@@ -22,10 +22,12 @@ keyDefinitions.registerAction(new Action(
   'Persist to cloud',
   async function({ session }) {
     const indexDB = session.document.store.backend as IndexedDBBackend;
-    indexDB.getLastSave().then(() => {
+    if (session.document.store.isBusy()) {
+      session.showMessage('正在加载，请勿刷新');
+    } else {
       session.showMessage('正在刷新');
       window.location.reload();
-    });
+    }
   },
   {
     sequence: SequenceAction.DROP,

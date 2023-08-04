@@ -57,6 +57,7 @@ import {appendStyleScript} from '../share/ts/themes';
 import LayoutComponent, {noteLoader} from './layout';
 import YinComponent from './yin';
 import {YangComponent} from './yang';
+import localforage from 'localforage';
 
 declare const window: any; // because we attach globals for debugging
 
@@ -105,6 +106,7 @@ $(document).ready(async () => {
   const noLocalStorage = (typeof localStorage === 'undefined' || localStorage === null);
   let clientStore: ClientStore = new ClientStore(new SynchronousLocalStorageBackend());
   let backend_type: BackendType = 'local';
+  localforage.setDriver(localforage.LOCALSTORAGE);
   const docname = clientStore.getClientSetting('curDocId').toString();
   let docStore: DocumentStore = new DocumentStore(new IndexedDBBackend(docname), docname);
   let doc;
@@ -187,7 +189,7 @@ $(document).ready(async () => {
   // load plugins
 
   const pluginManager = new PluginsManager(session, config, keyBindings);
-  let enabledPlugins = await docStore.getSetting('enabledPlugins');
+  let enabledPlugins = ['Marks', 'Tags', 'Links', 'HTML', 'Todo', 'Markdown', 'CodeSnippet', 'LaTeX'];
   if (typeof enabledPlugins.slice === 'undefined') { // for backwards compatibility
     enabledPlugins = Object.keys(enabledPlugins);
   }

@@ -22,6 +22,10 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
     domEvent.preventDefault();
     domEvent.stopPropagation();
     switch (key) {
+      case 'reload':
+        props.session.clientStore.setDocSetting('loaded', false);
+        window.location.reload();
+        break;
       case 'open-in-browser':
         window.open(`/note/${props.curDocId}`, '_blank');
         break;
@@ -90,6 +94,10 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
   const items: MenuProps['items'] = [{
     key: 'open-in-browser',
     label: '在新页面打开',
+  },
+  {
+    key: 'reload',
+    label: '重新加载',
   }];
   if (props.curDocId !== -1) {
     items.push({

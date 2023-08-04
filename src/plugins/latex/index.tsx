@@ -18,10 +18,10 @@ registerPlugin(
   },
   function(api) {
     api.registerHook('session', 'renderLineTokenHook', (tokenizer, info) => {
-      if (info.has_cursor && !info.lockEdit) {
+      if (info.has_cursor && !info.editDisable) {
         return tokenizer;
       }
-      if (info.has_highlight && !info.lockEdit) {
+      if (info.has_highlight && !info.editDisable) {
         return tokenizer;
       }
       return tokenizer.then(RegexTokenizerSplitter(

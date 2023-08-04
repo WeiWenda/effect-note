@@ -4,7 +4,7 @@ import './index.sass';
 
 import { Session, Row, hideBorderAndModify, RegexTokenizerModifier } from '../../share';
 import { registerPlugin } from '../../ts/plugins';
-import { matchWordRegex } from '../../ts//text';
+import { matchWordRegex } from '../../ts/text';
 import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
 import Moment from 'moment';
 import {getTaskStatus} from '../links/dropdownMenu';
@@ -12,6 +12,13 @@ import {getTaskStatus} from '../links/dropdownMenu';
 const strikethroughClass = 'strikethrough';
 
 export const pluginName = 'Todo';
+
+export function struckThroughHook(tokenizer: any) {
+  return tokenizer.then(RegexTokenizerModifier(
+    matchWordRegex('\\~\\~(\\n|.)+?\\~\\~'),
+    hideBorderAndModify(2, 2, (char_info) => { char_info.renderOptions.classes[strikethroughClass] = true; })
+  ));
+}
 
 registerPlugin(
   {
@@ -21,12 +28,7 @@ registerPlugin(
     dependencies: [tagsPluginName],
   },
   function(api) {
-    api.registerHook('session', 'renderLineTokenHook', (tokenizer, _hooksInfo) => {
-      return tokenizer.then(RegexTokenizerModifier(
-        matchWordRegex('\\~\\~(\\n|.)+?\\~\\~'),
-        hideBorderAndModify(2, 2, (char_info) => { char_info.renderOptions.classes[strikethroughClass] = true; })
-      ));
-    });
+    api.registerHook('session', 'renderLineTokenHook', struckThroughHook);
 
     async function isStruckThrough(session: Session, row: Row) {
       // for backwards compatibility

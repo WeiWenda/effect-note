@@ -26,6 +26,8 @@ import {SessionWithToolbarComponent} from '../session';
 import {mimetypeLookup} from '../../ts/util';
 import FileToolsComponent from '../fileTools';
 import {useParams, useNavigate, useLoaderData, useSearchParams} from 'react-router-dom';
+import {struckThroughHook} from '../../plugins/todo';
+import {htmlHook} from '../../plugins/html';
 
 const { Search } = Input;
 const { Panel } = Collapse;
@@ -244,6 +246,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     props.session.reset_jump_history();
     const previewDocument = new Document(docStore, '', true);
     const newPreviewSession = new Session(props.session.clientStore, previewDocument, {});
+    newPreviewSession.addHook('renderLineTokenHook', struckThroughHook);
+    newPreviewSession.addHook('renderLineTokenHook', htmlHook);
     async function reloadRow(row: number) {
       await previewDocument.getInfo(row, true);
     }
@@ -276,7 +280,10 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
           const originInfo = await markDocument.getInfo(mark[1].row);
           markDocument.cache.loadRow(mark[1].row, {...originInfo.info, parentRows: [0], collapsed: true});
         })).then(() => {
-          setMarkSession(new Session(props.session.clientStore, markDocument, {}));
+            const newMarkSession = new Session(props.session.clientStore, markDocument, {});
+            newMarkSession.addHook('renderLineTokenHook', struckThroughHook);
+            newMarkSession.addHook('renderLineTokenHook', htmlHook);
+            setMarkSession(newMarkSession);
         });
       });
     };
@@ -284,10 +291,12 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     const refreshTagSession = () => {
       const tagDocument = new Document(docStore, '');
       const newTagSession = new Session(props.session.clientStore, tagDocument, {});
+      newTagSession.addHook('renderLineTokenHook', struckThroughHook);
+      newTagSession.addHook('renderLineTokenHook', htmlHook);
       tagPlugin.listTags().then(tags => {
         const childRows: number[] = [];
         const loadTagPromises = Object.entries(tags)
-          .filter((t) => !new RegExp('(start|end|due):.*').test(t[0]))
+          .filter((t) => !new RegExp('(start|end|due|create):.*').test(t[0]))
           .reduce((p: Promise<void>, tag) =>
             p.then(() =>
                 // 修改标签block
@@ -396,10 +405,10 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     if (!props.session.clientStore.getDocSetting('loaded')) {
       initialLoad = true;
       // props.session.showMessage('初始加载中...');
-      props.session.clientStore.setDocSetting('loaded', true);
     }
     document.title = curDocInfo.name!;
     props.session.document.store.setBackend(new IndexedDBBackend(newDocName), newDocName);
+    props.session.document.store.resetSetCounter(!initialLoad);
     await beforeLoadDoc();
     console.time(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo.name}`);
     if (initialLoad) {
@@ -437,7 +446,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     }
   }, [curDocId, searchParams]);
   const onClick: MenuProps['onClick'] = e => {
-    if (!loading) {
+    if (!loading && !props.session.document.store.isBusy()) {
       setCurMenu(e.key);
       props.session.clientStore.setClientSetting('openFile', e.key);
       const remoteDocId = menuItem2DocId[Number(e.key)];

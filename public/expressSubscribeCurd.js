@@ -79,10 +79,26 @@ router.post('/', async (req, res) => {
     const dirname = req.body.name;
     const gitRemote = req.body.gitRemote;
     const rootDir = req.body.rootDir;
+    const gitPull = req.body.gitPull;
     const localDir = path.join(getSearchDir(), dirname + '_whole')
     const existList = JSON.parse(store.get('subscription_list', '{}'))
     if (existList.hasOwnProperty(dirname)) {
-        res.status(500).send({message: '名称重复'})
+        if (gitPull) {
+            await git.pull({
+                fs,
+                http: isoHttp,
+                dir: path.join(getSearchDir(), dirname + '_whole'),
+                singleBranch: true,
+                author: {
+                    name: 'effect',
+                    email: 'effect@effect.com'
+                }
+            })
+            refreshIndex()
+            res.send({message: 'git pull success'})
+        } else {
+            res.status(500).send({message: '名称重复'})
+        }
     } else {
         existList[dirname] = req.body;
         store.set('subscription_list', JSON.stringify(existList))
@@ -104,7 +120,13 @@ router.get('/refresh', async (req, res) => {
     res.send({message: '索引构建成功'})
 })
 router.get('/search', (req, res) => {
-    res.send(subscriptionIndex.search(req.query.search))
+    if (req.query.search.includes(' ')) {
+        res.send(subscriptionIndex.search(req.query.search));
+    } else {
+        const terms = require('./expressDocCurd').searchSplitFunction(req.query.search);
+        console.debug(terms);
+        res.send(subscriptionIndex.search(terms.map(t => `+${t}`).join(' ')))
+    }
 })
 
 module.exports = router;

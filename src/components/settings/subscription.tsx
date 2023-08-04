@@ -1,22 +1,14 @@
-import {Button, Col, Form, Input, Menu, MenuProps, Row, Select, Divider, Dropdown, Modal, Table, Space, Checkbox} from 'antd';
-import {EditOutlined, ExclamationCircleOutlined, PlusSquareOutlined, DeleteOutlined, StopOutlined} from '@ant-design/icons';
+import {Button, Checkbox, Space, Table} from 'antd';
+import {CloudDownloadOutlined, DeleteOutlined} from '@ant-design/icons';
 import * as React from 'react';
-import {useEffect, useState, useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Session, SubscriptionInfo} from '../../share';
-import {EMPTY_WORKSPACE_INFO, ServerConfig, WorkSpaceInfo} from '../../ts/server_config';
-import {SERVER_CONFIG} from '../../ts/constants';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import {DndProvider} from 'react-dnd';
+import {HTML5Backend} from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
-import type { ColumnsType } from 'antd/es/table';
-import {
-  getServerConfig,
-  getSubscriptions,
-  setServerConfig as saveServerConfig,
-  updateSubscriptions,
-  workspaceRebuild
-} from '../../share/ts/utils/APIUtils';
-import { DraggableBodyRow } from './dragRow';
+import type {ColumnsType} from 'antd/es/table';
+import {addSubscription, getSubscriptions, updateSubscriptions} from '../../share/ts/utils/APIUtils';
+import {DraggableBodyRow} from './dragRow';
 
 function SubscriptionSettingsComponent(props: { session: Session}) {
   const [subscriptions, setSubscriptions] = useState<SubscriptionInfo[]>([]);
@@ -70,6 +62,11 @@ function SubscriptionSettingsComponent(props: { session: Session}) {
           <DeleteOutlined onClick={() => {
             const filtered = subscriptions.filter(sub => sub.name !== record.name);
             setSubscriptions([...filtered]);
+          }}/>
+          <CloudDownloadOutlined onClick={() => {
+            addSubscription({name: record.name, gitPull: true}).then(() => {
+               props.session.showMessage('更新成功！');
+            });
           }}/>
         </Space>
       ),

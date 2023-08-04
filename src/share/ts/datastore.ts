@@ -107,6 +107,7 @@ export class ClientStore {
         return this.cache[key];
       }
     }
+    // logger.info('getting from storage', key);
     let value: any = this.backend.get(key);
     try {
       value = JSON.parse(value);
@@ -232,6 +233,9 @@ const decodeParents = (parents: number | Array<number>): Array<number> => {
 
 export class DocumentStore {
   private lastId: number | null;
+  private backendSetCounter: number = 0;
+  public backendSetFinishMarker: number = 0;
+  public lastProgress: number = 0;
   private prefix: string;
   private docname: string;
   private cache: {[key: string]: any} = {};
@@ -267,6 +271,8 @@ export class DocumentStore {
         return this.cache[key];
       }
     }
+    // logger.info('getting from storage', key);
+    // console.time(key);
     let value: any = await this.backend.get(key);
     try {
       // need typeof check because of backwards compatibility plus stupidness like
@@ -278,10 +284,11 @@ export class DocumentStore {
     let decodedValue: T;
     if (value === null) {
       decodedValue = default_value;
-      logger.debug('tried getting', key, 'defaulted to', decodedValue);
+      // logger.info('tried getting', key, 'defaulted to', decodedValue);
+      // console.timeEnd(key);
     } else {
       decodedValue = decode(value);
-      logger.debug('got from storage', key, decodedValue);
+      // logger.info('got from storage', key, decodedValue);
     }
     if (this.use_cache) {
       this.cache[key] = decodedValue;
@@ -300,9 +307,34 @@ export class DocumentStore {
     const encodedValue = encode(value);
     logger.debug('setting to storage', key, encodedValue);
     // NOTE: fire and forget
-    this.backend.set(key, JSON.stringify(encodedValue)).catch((err) => {
+    this.backendSetCounter++;
+    this.backend.set(key, JSON.stringify(encodedValue)).then(() => {
+      this.backendSetFinishMarker++;
+      if (this.backendSetFinishMarker >= this.backendSetCounter) {
+        this.resetSetCounter(true);
+      } else if (this.getProgress() - this.lastProgress > 2) {
+        this.lastProgress = this.getProgress();
+        this.events.emit('loadProgressChange', true, this.lastProgress);
+      }
+      logger.debug(this.backendSetFinishMarker, this.backendSetCounter);
+    }).catch((err) => {
       setTimeout(() => { throw err; });
     });
+  }
+
+  public resetSetCounter(loaded: boolean) {
+    this.backendSetCounter = 0;
+    this.backendSetFinishMarker = 0;
+    this.lastProgress = 0;
+    this.events.emit('loadProgressChange', !loaded, this.lastProgress);
+  }
+
+  public isBusy() {
+    return this.backendSetCounter !== 0;
+  }
+
+  public getProgress() {
+    return (this.backendSetFinishMarker / this.backendSetCounter) * 100;
   }
 
   private _lastIDKey_() {

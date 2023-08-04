@@ -6,7 +6,7 @@ import {base64toFile, loadFileFromUrl} from '../../ts/file';
 import {FormOutlined} from '@ant-design/icons';
 import {UploadImageInfo} from './index';
 import {RcFile} from 'antd/es/upload';
-import {context} from 'rc-image/es/PreviewGroup';
+// import {context} from 'rc-image/es/PreviewGroup';
 
 export interface ImageEditCompProps {
   buttonVisible?: boolean;
@@ -132,9 +132,9 @@ export function ImageEditComp(props: ImageEditCompProps) {
       <Button type='text' onClick={() => showEditor()} icon={<FormOutlined/>}/>
     </div>
     <div className='image-editor'>
-      <Spin spinning={loading}>
-        <div ref={editorDivRef}/>
-      </Spin>
+      {/*<Spin spinning={loading}>*/}
+      {/*  <div ref={editorDivRef}/>*/}
+      {/*</Spin>*/}
     </div>
     {editorVisible && (
       <div className='image-editor-button flex-e m-r-10_c'>

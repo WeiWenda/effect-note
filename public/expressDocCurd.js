@@ -7,10 +7,16 @@ const path = require("path");
 const lunr = require("lunr");
 const jieba = require('@node-rs/jieba');
 const docId2path = {};
+const IMAGES_FOLDER = 'images'
 jieba.load();
 require("lunr-languages/lunr.stemmer.support")(lunr)
 require('lunr-languages/lunr.multi')(lunr)
 require('lunr-languages/lunr.zh')(lunr)
+const searchSplitFunction = function (search) {
+    return search.split(new RegExp("[^\u4E00-\u9FA5a-zA-Z0-9]")).flatMap(function (str) {
+        return jieba.cut(str, true);
+    });
+}
 const punctuationSplit = function (builder) {
     const pipelineFunction = function (token) {
         // console.log('token:' + token.toString());
@@ -46,7 +52,7 @@ async function refreshIndex() {
             docId2path[docId] = filepath;
             const content = fs.readFileSync(path.join(gitHome, filepath), {encoding: 'utf-8'});
             this.add({
-                'id': index,
+                'id': docId,
                 'title': filepath,
                 'content': content,
             })
@@ -74,7 +80,13 @@ router.get('/reindex', (req, res) => {
 })
 
 router.get('/search', (req, res) => {
-    res.send(subscriptionIndex.search(req.query.search))
+    if (req.query.search.includes(' ')) {
+        res.send(subscriptionIndex.search(req.query.search));
+    } else {
+        const terms = searchSplitFunction(req.query.search);
+        console.debug(terms);
+        res.send(subscriptionIndex.search(terms.map(t => `+${t}`).join(' ')))
+    }
 })
 
 router.get('/', (req, res, next) => {
@@ -154,7 +166,11 @@ router.delete('/:docId', async (req, res) => {
     const docId = Number(req.params.docId);
     const filepath = docId2path[docId];
     delete docId2path[docId];
-    deleteFile(path.join(gitHome, filepath)).then(() => {
+    deleteFile(path.join(gitHome, filepath)).then(async () => {
+        const imageDir = path.join(gitHome, IMAGES_FOLDER, docId.toString())
+        if (fs.existsSync(imageDir)) {
+            fs.rmdirSync(imageDir, {recursive: true, force: true})
+        }
         commit().then(() => {
             res.send({message: 'delete success!'});
         })
@@ -199,4 +215,4 @@ router.put('/:docId', async (req, res) => {
 });
 
 // this is required
-module.exports = {router, punctuationSplit};
+module.exports = {router, punctuationSplit, searchSplitFunction, IMAGES_FOLDER};

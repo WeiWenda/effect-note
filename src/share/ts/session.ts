@@ -15,7 +15,7 @@ import { XMLParser, XMLBuilder, XMLValidator } from 'fast-xml-parser';
 import * as Modes from './modes';
 
 import {ModeId, CursorOptions, Row, Col, Chars, SerializedBlock, UserInfo, KityMinderNode, DocInfo} from './types';
-import {downloadImage, updateDoc, uploadDoc} from './utils/APIUtils';
+import { updateDoc, uploadDoc} from './utils/APIUtils';
 import React from 'react';
 import Search from './search';
 

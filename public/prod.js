@@ -10,8 +10,8 @@ const { createWorker } = require('tesseract.js');
 const express = require('express');
 const git = require('isomorphic-git');
 const {store, getGitConfig} = require("./isomorphicGit");
+const {IMAGES_FOLDER} = require("./expressDocCurd");
 const isWindows = os.type().toLowerCase().indexOf('windows') >= 0
-const IMAGES_FOLDER = 'images'
 
 async function startExpress(args) {
   if (args.help || args.h) {
@@ -61,10 +61,10 @@ async function startExpress(args) {
   }));
   app.use('/api/docs', require('./expressDocCurd').router);
   app.use('/api/subscription', require('./expressSubscribeCurd'));
-  app.post('/api/upload_image', multer().array('wangeditor-uploaded-image'), async function (req, res) {
+  app.post('/api/upload_image/:docId', multer().array('wangeditor-uploaded-image'), async function (req, res) {
     const {gitHome} = getGitConfig();
-    const storePath = path.resolve(gitHome, IMAGES_FOLDER)
-    const data = await saveFiles(req.files, storePath)
+    const storePath = path.resolve(gitHome, IMAGES_FOLDER, req.params.docId)
+    const data = await saveFiles(req.files, storePath, req.params.docId)
     res.send(data)
   })
   app.post('/api/download_image', async function (req, res) {
@@ -163,7 +163,7 @@ async function startExpress(args) {
 
     const fileNameWithOutExt = fileName.slice(0, pointLastIndexOf) // "a.123"
     const ext = fileName.slice(pointLastIndexOf + 1, length) // "png"
-    return `.${fileNameWithOutExt}-${r}.${ext}`
+    return `${fileNameWithOutExt}-${r}.${ext}`
   }
 
   function downloadImage(url, filepath) {
@@ -187,7 +187,7 @@ async function startExpress(args) {
    * @param {Object} req request
    * @param {number} time time 用于测试超时
    */
-  function saveFiles(files, storePath) {
+  function saveFiles(files, storePath, docId) {
     return new Promise((resolve, reject) => {
       const imgLinks = []
         // 存储图片的文件夹
@@ -207,7 +207,7 @@ async function startExpress(args) {
           // 将临时文件保存为正式文件
           fs.writeFileSync(fullFileName, fileForm.buffer)
           // 存储链接
-          const url = `http://localhost:${port}/api/${IMAGES_FOLDER}/${fileName}`
+          const url = `http://localhost:${port}/api/${IMAGES_FOLDER}/${docId}/${fileName}`
           imgLinks.push({ url, alt: fileName, href: url })
         })
         resolve({

@@ -65,11 +65,11 @@ export function login(loginRequest: any) {
     });
 }
 
-export function uploadImage(file: File) {
+export function uploadImage(file: File, docId: number) {
     let formData = new FormData();
     formData.append('wangeditor-uploaded-image', file);
     return request({
-        url: API_BASE_URL + '/upload_image',
+        url: API_BASE_URL + '/upload_image/' + docId,
         method: 'POST',
         headers: new Headers({}),
         body: formData

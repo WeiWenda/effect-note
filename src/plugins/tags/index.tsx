@@ -472,6 +472,7 @@ export class TagsPlugin {
                   key='tags'
                   mode='tags'
                   value={tags}
+                  suffixIcon={<div/>}
                   tagRender={tagRender}
                   options={options}
                   onFocus={() => this.session.stopKeyMonitor('tag-normal')}

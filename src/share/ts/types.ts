@@ -71,6 +71,7 @@ export type SubscriptionInfo = {
   disabled?: boolean;
   gitRemote?: string;
   rootDir?: string;
+  gitPull?: boolean;
 };
 
 export type SubscriptionSearchResult = {

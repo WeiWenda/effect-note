@@ -61,6 +61,7 @@
     ]
   },
   "devDependencies": {
+    "@ant-design/icons": "^5.2.4",
     "@electron-forge/cli": "^6.0.4",
     "@electron-forge/maker-squirrel": "^6.0.4",
     "@electron-forge/maker-wix": "^6.0.4",
@@ -80,14 +81,14 @@
     "@types/lodash": "^4.14.166",
     "@types/minimist": "^1.2.0",
     "@types/node": "^18.11.18",
-    "@types/react": "^18.0.0",
+    "@types/react": "^18.2.18",
     "@types/react-color": "^3.0.4",
-    "@types/react-dom": "^18.0.0",
+    "@types/react-dom": "^18.2.7",
     "@types/react-highlight": "^0.12.5",
     "@types/ws": "0.0.41",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-react": "^1.0.6",
-    "antd": "^5.1.0",
+    "antd": "^5.3.0",
     "electron": "^21.3.1",
     "eslint": "^8.1.0",
     "events": "^3.3.0",
@@ -126,7 +127,7 @@
     "ts-node": "^3.3.0",
     "tslint": "^4.5.1",
     "tui-image-editor": "^3.15.3",
-    "typescript": "^4.7.4",
+    "typescript": "^5.1.6",
     "vditor": "^3.8.18"
   }
 }

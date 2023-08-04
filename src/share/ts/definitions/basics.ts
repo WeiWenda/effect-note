@@ -643,7 +643,8 @@ keyDefinitions.registerAction(new Action(
           if (items[i].types.some(type => type.indexOf('image') !== -1)) {
             // We need to represent the image as a file
             let blob = await items[i].getType(items[i].types[0]);
-            const uploadRes = await uploadImage(new File([blob], 'clipboard-image'));
+            const uploadRes = await uploadImage(new File([blob], 'clipboard-image'),
+              session.clientStore.getClientSetting('curDocId'));
             const uploadUrl = uploadRes.data.pop().url;
             await session.pasteText(`<div class='node-html'><p><img src="${uploadUrl}" alt="image.png" data-href="${uploadUrl}" style="width: 100%;"/></p></div>`);
           } else {

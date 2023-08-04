@@ -224,7 +224,8 @@ export function appendStyleScript(clientStore: ClientStore) {
                     .ant-modal .ant-modal-title{color: ${theme['theme-text-primary']}}
                     .ant-select:not(.ant-select-disabled):not(.ant-select-customize-input):not(.ant-pagination-size-changer):hover .ant-select-selector{border-color:${theme['theme-text-link']}}
                     .ant-input:hover{border-color:${theme['theme-text-link']}}
-                    .ant-btn-default:not(:disabled):hover{border-color:${theme['theme-text-link']};color:${theme['theme-text-link']}}
+                    .ant-btn-default:not(:disabled):not(.ant-btn-disabled):hover{border-color:${theme['theme-text-link']};color:${theme['theme-text-link']}}
+                    .ant-btn-primary:not(:disabled):not(.ant-btn-disabled):hover{color:${theme['theme-text-link']}}
                     .file-toolbar .ant-btn{color: ${theme['theme-text-primary']}}
                     .node-html a{color: ${theme['theme-text-link']}}
                     .ant-input-group .ant-input-group-addon{color: ${theme['theme-text-primary']}}

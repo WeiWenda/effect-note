@@ -15,7 +15,7 @@ import {Mindmap} from '../mindmap';
 import { Editor, Toolbar } from '@wangeditor/editor-for-react';
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
 import {DrawioEditor} from '../drawioEditor';
-import {API_BASE_URL, getServerConfig} from '../../share/ts/utils/APIUtils';
+import {API_BASE_URL, getServerConfig, uploadImage} from '../../share/ts/utils/APIUtils';
 import Vditor from 'vditor';
 import {mimetypeLookup} from '../../ts/util';
 import logger from '../../ts/logger';
@@ -29,6 +29,7 @@ import {useLoaderData, useNavigate, useLocation, Outlet } from 'react-router-dom
 import SubscriptionSettingsComponent from '../settings/subscription';
 import $ from 'jquery';
 const { Header, Footer, Sider, Content } = Layout;
+type InsertFnType = (url: string, alt: string, href: string) => void;
 
 export const HeaderItems = [
   { label: 'Notes', key: 'note'},
@@ -98,7 +99,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         setTimeout(() => {
           const vditor = new Vditor('vditor', {
             upload: {
-              url: API_BASE_URL +  '/upload_image',
+              url: API_BASE_URL +  '/upload_image/' + props.session.clientStore.getClientSetting('curDocId'),
               fieldName: 'wangeditor-uploaded-image',
               accept: 'image/*',
               format: (_files, responseText) => {
@@ -152,7 +153,12 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
     placeholder: '请输入内容...',
     MENU_CONF: {
       uploadImage: {
-        server: API_BASE_URL + '/upload_image',
+        async customUpload(file: File, insertFn: InsertFnType) {  // TS 语法
+          uploadImage(file, props.session.clientStore.getClientSetting('curDocId')).then((res) => {
+            const {url, alt, href} = res.data[0];
+            insertFn(url, alt, href);
+          });
+        }
       }
     }
   };

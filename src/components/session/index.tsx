@@ -1,5 +1,5 @@
 import {DocVersion, Modes, Path, Session, SessionComponent, SpinnerComponent} from '../../share';
-import {Button, Dropdown, Input, MenuProps, Popover, Radio, Space} from 'antd';
+import {Button, Dropdown, Input, MenuProps, Popover, Progress, Radio, Space} from 'antd';
 import {
   HistoryOutlined,
   LeftOutlined,
@@ -41,6 +41,8 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const [filterInner, setFilterInner] = useState('');
   const [versions, setVersions] = useState(new Array<DocVersion>());
   const [currentVersion, setCurrentVersion] = useState('');
+  const [showProgress, setShowProgress] = useState(false);
+  const [progress, setProgress] = useState(0);
   const onCrumbClick = async (path: Path) => {
     const session = props.session;
     await session.zoomInto(path);
@@ -95,6 +97,13 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
     }
   }, [props.filterOuter, props.loading]);
   useEffect(() => {
+    props.session.document.store.events.on('loadProgressChange', (show: boolean, newProgress: number) => {
+      if (!show) {
+        props.session.clientStore.setDocSetting('loaded', true);
+      }
+      setShowProgress(show);
+      setProgress(newProgress);
+    });
     props.session.on('changeJumpHistory', (newStackSize: number, index: number) => {
       setStackSize(newStackSize);
       setCurJumpIndex(index);
@@ -161,6 +170,10 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
             {
               props.showLayoutIcon &&
               <LayoutToolsComponent session={props.session} />
+            }
+            {
+              showProgress &&
+                <Progress type='circle' percent={progress} size={20} />
             }
             <Dropdown menu={{
               items: unfoldMenus,
@@ -254,7 +267,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                 </Popover>
             }
             <FileToolsComponent session={props.session} curDocId={props.curDocId}
-                                tagPlugin={props.tagPlugin}>
+                                tagPlugin={props.tagPlugin!}>
                 <MoreOutlined style={{float: 'right', paddingRight: '10px'}} onClick={e => e.preventDefault()}/>
             </FileToolsComponent>
           </Space>
