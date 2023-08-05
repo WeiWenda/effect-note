@@ -1,5 +1,6 @@
 module.exports = {
   packagerConfig: {
+    osxSign: {},
     icon: './public/images/icon',
     ignore: [
       "^\\/src$",
@@ -19,6 +20,10 @@ module.exports = {
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],
+    },
+    {
+      name: '@electron-forge/maker-pkg',
+      config: {}
     }
   ],
 };

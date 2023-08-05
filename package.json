@@ -35,7 +35,8 @@
     "eject": "react-scripts eject",
     "package": "electron-forge package",
     "make": "export REACT_APP_BUILD_PROFILE=local && rm -rf ./node_modules/.cache && npm run build && electron-forge make --platform darwin",
-    "makewin": "set \"REACT_APP_BUILD_PROFILE=local\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build && electron-forge make --platform win32"
+    "makewin": "set \"REACT_APP_BUILD_PROFILE=local\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build && electron-forge make --platform win32",
+    "makemas": "set \"REACT_APP_BUILD_PROFILE=local\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build && electron-forge make --platform mas"
   },
   "main": "public/electron.js",
   "module": "dist/index.js",
@@ -63,6 +64,7 @@
   "devDependencies": {
     "@ant-design/icons": "^5.2.4",
     "@electron-forge/cli": "^6.0.4",
+    "@electron-forge/maker-pkg": "^6.2.1",
     "@electron-forge/maker-squirrel": "^6.0.4",
     "@electron-forge/maker-wix": "^6.0.4",
     "@electron-forge/maker-zip": "^6.0.3",
