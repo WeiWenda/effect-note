@@ -7,7 +7,7 @@ import 'vditor/dist/index.css';
 import {getStyles} from '../../share/ts/themes';
 import {api_utils, DocInfo, KeyHandler, Path, Session} from '../../share';
 import {useEffect, useState} from 'react';
-import {ImageOcr} from '../ImageOcr';
+// import {ImageOcr} from '../ImageOcr';
 import Config from '../../share/ts/config';
 import FileBaseInfoComponent from '../fileBaseInfo';
 import {PluginsManager} from '../../ts/plugins';
@@ -320,20 +320,20 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           props.session.startKeyMonitor();
         }} ref={props.session.drawioRef}/>
       </Modal>
-      <Modal
-            className={'form_modal'}
-            open={modalVisible.ocr}
-             title='文本识别'
-             footer={null}
-             onCancel={() => {
-               setModalVisible({...modalVisible, ocr: false});
-               props.session.startKeyMonitor();
-             }}>
-        <ImageOcr session={props.session} onFinish={() => {
-          setModalVisible({...modalVisible, ocr: false});
-          props.session.startKeyMonitor();
-        }}></ImageOcr>
-      </Modal>
+      {/*<Modal*/}
+      {/*      className={'form_modal'}*/}
+      {/*      open={modalVisible.ocr}*/}
+      {/*       title='文本识别'*/}
+      {/*       footer={null}*/}
+      {/*       onCancel={() => {*/}
+      {/*         setModalVisible({...modalVisible, ocr: false});*/}
+      {/*         props.session.startKeyMonitor();*/}
+      {/*       }}>*/}
+      {/*  <ImageOcr session={props.session} onFinish={() => {*/}
+      {/*    setModalVisible({...modalVisible, ocr: false});*/}
+      {/*    props.session.startKeyMonitor();*/}
+      {/*  }}></ImageOcr>*/}
+      {/*</Modal>*/}
       {
         showHeader &&
         <Header className='layout-header' style={{

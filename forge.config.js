@@ -1,6 +1,9 @@
 module.exports = {
   packagerConfig: {
-    osxSign: {},
+    appBundleId: 'com.effectnote.desktop',
+    osxSign: {
+      identity: 'Developer ID Installer: wenda wei (8NFNDJ5TWD)',
+    },
     icon: './public/images/icon',
     ignore: [
       "^\\/src$",
@@ -23,7 +26,9 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-pkg',
-      config: {}
+      config: {
+        identity: 'Developer ID Installer: wenda wei (8NFNDJ5TWD)'
+      }
     }
   ],
 };

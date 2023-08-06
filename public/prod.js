@@ -6,7 +6,7 @@ const path = require('path');
 const isoHttp = require('isomorphic-git/http/node');
 const multer = require('multer')
 const cors = require('cors');
-const { createWorker } = require('tesseract.js');
+// const { createWorker } = require('tesseract.js');
 const express = require('express');
 const git = require('isomorphic-git');
 const {store, getGitConfig} = require("./isomorphicGit");
@@ -44,17 +44,17 @@ async function startExpress(args) {
   let port = args.port || 3000;
   let host = args.host || 'localhost';
   const app = express();
-  const worker = await createWorker({
-    cachePath: path.join(__dirname, 'lang-data'),
-    logger: m => console.log(m),
-  }).then(async (worker) => {
-    const lang = 'eng+chi_sim';
-    return worker.loadLanguage(lang).then(() => {
-       return worker.initialize(lang).then(() => {
-         return worker;
-       });
-    });
-  });
+  // const worker = await createWorker({
+  //   cachePath: path.join(__dirname, 'lang-data'),
+  //   logger: m => console.log(m),
+  // }).then(async (worker) => {
+  //   const lang = 'eng+chi_sim';
+  //   return worker.loadLanguage(lang).then(() => {
+  //      return worker.initialize(lang).then(() => {
+  //        return worker;
+  //      });
+  //   });
+  // });
   app.use(express.json({limit: '50mb'}));
   app.use(cors({
     origin: 'http://localhost:3000'
@@ -78,12 +78,12 @@ async function startExpress(args) {
       res.send({data: {originalURL: picUrl, url: picUrl}})
     })
   })
-  app.post('/api/ocr_image', multer().single('file'), async function(req, res) {
-    const { data: { text } } = await worker.recognize(req.file.buffer);
-    console.log(text);
-    // await worker.terminate();
-    res.send({content: text});
-  });
+  // app.post('/api/ocr_image', multer().single('file'), async function(req, res) {
+  //   const { data: { text } } = await worker.recognize(req.file.buffer);
+  //   console.log(text);
+  //   // await worker.terminate();
+  //   res.send({content: text});
+  // });
 
   app.get('/api/config', (_, res) => {
     const {gitRemote, gitHome, gitUsername, gitPassword, gitDepth} = getGitConfig();

@@ -123,10 +123,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           label: '插入流程图（Drawio）',
           key: 'insert_drawio',
         },
-        {
-          label: '插入文本识别',
-          key: 'ocr',
-        }
+        // {
+        //   label: '插入文本识别',
+        //   key: 'ocr',
+        // }
       ]
     },
     {
