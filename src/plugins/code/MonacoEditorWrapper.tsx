@@ -8,6 +8,7 @@ export function MonacoEditorWrapper(props: {
   lockEdit: boolean,
   onChange: (newValue: string) => void}) {
   const [height, setHeight] = useState(20);
+  const [value, setValue] = useState(props.pluginData.links.code.content || '');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   return (
     <MonacoEditor
@@ -15,7 +16,7 @@ export function MonacoEditorWrapper(props: {
       height={Math.min(height, 400)}
       language={props.pluginData.links.code.language}
       theme={props.theme}
-      value={props.pluginData.links.code.content || ''}
+      value={value}
       options={{lineHeight: 20, lineNumbersMinChars: 5, scrollBeyondLastLine: false,
         wordWrap: 'on',
         readOnly: props.lockEdit}}
@@ -24,6 +25,7 @@ export function MonacoEditorWrapper(props: {
         editorRef.current = editor;
       }}
       onChange={(newValue: string) => {
+        setValue(newValue);
         props.onChange(newValue);
         setHeight(editorRef.current!.getContentHeight());
       }}

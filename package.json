@@ -1,6 +1,6 @@
 {
   "name": "EffectNote",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "private": true,
   "homepage": "/",
   "author": "weiwenda",
@@ -16,8 +16,7 @@
     "lunr": "^2.3.9",
     "lunr-languages": "^1.10.0",
     "moment": "^2.29.4",
-    "multer": "^1.4.5-lts.1",
-    "tesseract.js": "^4.0.2"
+    "multer": "^1.4.5-lts.1"
   },
   "scripts": {
     "rollup": "rollup -c",
@@ -25,7 +24,7 @@
     "typecheck": "tsc -p . --noEmit",
     "verify": "npm run lint && npm run typecheck && npm test",
     "electron": "electron public/electron.js",
-    "start": "export REACT_APP_BUILD_PROFILE=local && npm run build && electron-forge start",
+    "start": "electron-forge start",
     "startdev": "export REACT_APP_BUILD_PROFILE=cloud && react-app-rewired start",
     "startdemo": "export REACT_APP_BUILD_PROFILE=demo && react-app-rewired start",
     "build": "react-app-rewired build",
@@ -34,11 +33,15 @@
     "profiletest": "npm test -- --prof",
     "eject": "react-scripts eject",
     "package": "electron-forge package",
-    "make": "export REACT_APP_BUILD_PROFILE=local && rm -rf ./node_modules/.cache && npm run build && electron-forge make --platform darwin",
-    "makewin": "set \"REACT_APP_BUILD_PROFILE=local\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build && electron-forge make --platform win32",
-    "makemas": "set \"REACT_APP_BUILD_PROFILE=local\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build && electron-forge make --platform mas"
+    "build-drawin": "export REACT_APP_BUILD_PROFILE=local && export REACT_APP_BUILD_PLATFORM=darwin && npm run build",
+    "build-win32": "set \"REACT_APP_BUILD_PROFIL=local\" && set \"REACT_APP_BUILD_PLATFORM=win32\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build",
+    "build-mas": "export REACT_APP_BUILD_PROFILE=local && export REACT_APP_BUILD_PLATFORM=mas && npm run build",
+    "rmcache": "rm -rf ./node_modules/.cache",
+    "make": "npm run build-drawin && npm run rmcache && electron-forge make --platform darwin",
+    "makewin": "npm run build-win32 && npm run rmcache && electron-forge make --platform win32",
+    "makemas": "npm run build-mas && npm run rmcache && electron-builder --config builder.config.js"
   },
-  "main": "public/electron.js",
+  "main": "main/electron.js",
   "module": "dist/index.js",
   "files": [
     "dist"
@@ -64,10 +67,9 @@
   "devDependencies": {
     "@ant-design/icons": "^5.2.4",
     "@electron-forge/cli": "^6.0.4",
-    "@electron-forge/maker-pkg": "^6.2.1",
+    "@electron-forge/maker-dmg": "^6.2.1",
     "@electron-forge/maker-squirrel": "^6.0.4",
     "@electron-forge/maker-wix": "^6.0.4",
-    "@electron-forge/maker-zip": "^6.0.3",
     "@rollup/plugin-babel": "^6.0.0",
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-image": "^2.1.1",
@@ -92,6 +94,7 @@
     "@wangeditor/editor-for-react": "^1.0.6",
     "antd": "^5.3.0",
     "electron": "^21.3.1",
+    "electron-builder": "^22.14.13",
     "eslint": "^8.1.0",
     "events": "^3.3.0",
     "fast-xml-parser": "^4.0.8",

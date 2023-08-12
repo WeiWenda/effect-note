@@ -1,19 +1,28 @@
-module.exports = {
-  packagerConfig: {
-    appBundleId: 'com.effectnote.desktop',
-    osxSign: {
-      identity: 'Developer ID Installer: wenda wei (8NFNDJ5TWD)',
-    },
-    icon: './public/images/icon',
-    ignore: [
-      "^\\/src$",
-      "^\\/server$",
-      "^\\/test$",
-      "^\\/docs$",
-      "^\\/[.].+",
-      // [...]
-    ]
+const packagerConfig = {
+  appBundleId: 'com.effectnote.desktop',
+  osxSign: {
+    identity: 'Developer ID Application: wenda wei (8NFNDJ5TWD)',
   },
+  // osxNotarize: {
+  //   tool: 'notarytool',
+  //   appleId: process.env.APPLE_ID,
+  //   appleIdPassword: process.env.APPLE_PASSWORD,
+  //   teamId: process.env.APPLE_TEAM_ID,
+  // },
+  icon: './public/images/icon',
+  ignore: [
+    "^\\/src$",
+    "^\\/server$",
+    "^\\/test$",
+    "^\\/docs$",
+    "^\\/public$",
+    "^\\/dist$",
+    "^\\/[.].+",
+    // [...]
+  ]
+};
+module.exports = {
+  packagerConfig: packagerConfig,
   rebuildConfig: {},
   makers: [
     {
@@ -21,13 +30,11 @@ module.exports = {
       config: {},
     },
     {
-      name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
-    },
-    {
-      name: '@electron-forge/maker-pkg',
+      name: '@electron-forge/maker-dmg',
       config: {
-        identity: 'Developer ID Installer: wenda wei (8NFNDJ5TWD)'
+        format: 'ULFO',
+        icon: './public/images/icon.icns',
+        name: 'EffectNote'
       }
     }
   ],

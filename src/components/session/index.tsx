@@ -41,8 +41,8 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const [filterInner, setFilterInner] = useState('');
   const [versions, setVersions] = useState(new Array<DocVersion>());
   const [currentVersion, setCurrentVersion] = useState('');
-  const [showProgress, setShowProgress] = useState(false);
-  const [progress, setProgress] = useState(0);
+  // const [showProgress, setShowProgress] = useState(false);
+  // const [progress, setProgress] = useState(0);
   const onCrumbClick = async (path: Path) => {
     const session = props.session;
     await session.zoomInto(path);
@@ -101,8 +101,8 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
       if (!show) {
         props.session.clientStore.setDocSetting('loaded', true);
       }
-      setShowProgress(show);
-      setProgress(newProgress);
+      // setShowProgress(show);
+      // setProgress(newProgress);
     });
     props.session.on('changeJumpHistory', (newStackSize: number, index: number) => {
       setStackSize(newStackSize);
@@ -171,10 +171,10 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
               props.showLayoutIcon &&
               <LayoutToolsComponent session={props.session} />
             }
-            {
-              showProgress &&
-                <Progress type='circle' percent={progress} size={20} />
-            }
+            {/*{*/}
+            {/*  showProgress &&*/}
+            {/*    <Progress type='circle' percent={progress} size={20} />*/}
+            {/*}*/}
             <Dropdown menu={{
               items: unfoldMenus,
               onClick: ({ key }) => {

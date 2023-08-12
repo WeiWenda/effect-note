@@ -11,7 +11,7 @@ export function FontStyleToolComponent(
     textContent: string,
     showDelete: boolean,
     link?: string,
-    trigger?: string,
+    trigger: string | string[],
   }>) {
   const [allClasses, setAllClasses] = useState<string[]>([]);
   const [link, setLink] = useState<string | undefined>(props.link);
@@ -43,7 +43,7 @@ export function FontStyleToolComponent(
     };
   };
   return (
-      <Popover placement='top' trigger={props.trigger || 'hover'}
+      <Popover placement='top' trigger={props.trigger}
                open={open}
                className={`node-html`}
                onOpenChange={(e) => {

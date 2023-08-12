@@ -55,7 +55,7 @@ export function htmlHook(tokenizer: any, info: any) {
                                       textContent={textContent[4]}
                                       showDelete={true}
                                       startCol={token.index} endCol={token.index + token.length}
-                                      trigger={'click'}>
+                                      trigger={['click', 'contextMenu']}>
                     <span
                       dangerouslySetInnerHTML={{__html: token.text}}
                     />
@@ -67,6 +67,7 @@ export function htmlHook(tokenizer: any, info: any) {
                                       session={session} path={info.path}
                                       textContent={textContent[10]}
                                       link={textContent[9]}
+                                      trigger={'contextMenu'}
                                       showDelete={true}
                                       startCol={token.index} endCol={token.index + token.length}>
                     <span

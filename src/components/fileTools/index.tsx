@@ -126,10 +126,10 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
           label: '导出为markdown',
           key: 'export_md',
         },
-        {
-          label: '生成分享链接',
-          key: 'export_url',
-        },
+        // {
+        //   label: '生成分享链接',
+        //   key: 'export_url',
+        // },
         {
           label: '导出为json（用于EffectNote导入）',
           key: 'export_json',

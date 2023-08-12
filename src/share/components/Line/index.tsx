@@ -209,6 +209,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                                     startCol={token.index + firstIndexOfHighlight}
                                     endCol={token.index + firstIndexOfHighlight + highlightNumber}
                                     showDelete={false}
+                                    trigger={['hover']}
                                     textContent={token.text.slice(firstIndexOfHighlight, firstIndexOfHighlight + highlightNumber)} >
               {element}
             </FontStyleToolComponent>

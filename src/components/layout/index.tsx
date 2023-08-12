@@ -52,6 +52,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const [settingOpen, setSettingOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [drawerWidth, setDrawerWidth] = useState(window.innerWidth / 2);
+  const [activeSetting, setActiveSetting] = useState('1');
   const [showHeader, setShowHeader] = useState(props.session.clientStore.getClientSetting('defaultLayout').includes('top'));
   const [modalVisible, setModalVisible] = useState<{[key: string]: boolean}>({
     'noteInfo': false,
@@ -372,13 +373,19 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
             curPage === 'note' &&
             <Button onClick={() => {
                 getServerConfig().then(serverConfig => {
-                    if ([serverConfig.gitLocalDir, serverConfig.gitUsername, serverConfig.gitPassword].includes('未配置')) {
-                        props.session.showMessage('新建笔记前，请正确填写git配置');
-                    } else {
-                      setCurDocInfo({});
-                      setModalVisible({...modalVisible, noteInfo: true});
-                      props.session.stopKeyMonitor('create-note');
-                    }
+                  const activeWorkSpace = serverConfig.workspaces.filter(w => w.active);
+                  if (activeWorkSpace.length > 0 && activeWorkSpace[0].gitLocalDir === '未配置') {
+                    props.session.showMessage('新建笔记前，请先设置工作空间', {time: 0.5});
+                    setTimeout(() => {
+                      setActiveSetting('2');
+                      setSettingOpen(true);
+                      props.session.stopKeyMonitor('setting');
+                    }, 600);
+                  } else {
+                    setCurDocInfo({});
+                    setModalVisible({...modalVisible, noteInfo: true});
+                    props.session.stopKeyMonitor('create-note');
+                  }
                 }).catch(() => {
                   setCurDocInfo({});
                   setModalVisible({...modalVisible, noteInfo: true});
@@ -427,7 +434,10 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
             ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
           }}
                 type='card'
-                defaultActiveKey='1'>
+                activeKey={activeSetting}
+                onChange={(newActiveSetting) => {
+                  setActiveSetting(newActiveSetting);
+                }}>
             <Tabs.TabPane tab='外观' key='1'>
               <AppearanceSettingsComponent session={props.session} config={props.config} refreshFunc={() => {
                 setRefreshing(true);

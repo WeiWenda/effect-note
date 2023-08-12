@@ -12,12 +12,14 @@ export type WorkSpaceInfo = {
   gitLocalDir?: string,
   gitUsername?: string,
   gitDepth?: number,
-  gitPassword?: string
+  gitPassword?: string,
+  sycType?: string
 };
 
 export const EMPTY_WORKSPACE_INFO: WorkSpaceInfo = {
   active: false,
   gitRemote: 'https://gitee.com/xxx/xxx',
+  sycType: 'never',
   gitLocalDir: '未配置',
   gitUsername: '未配置',
   gitDepth: 100,

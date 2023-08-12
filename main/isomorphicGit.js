@@ -7,8 +7,8 @@ const store = new Store();
 const git = require("isomorphic-git");
 const fs = require("fs");
 const getGitConfig = () => {
-    const gitRemote = store.get('gitRemote', 'https://gitee.com/xxx/xxx')
-    const gitHome = store.get('gitHome', '未配置')
+    const gitRemote = store.get('gitRemote', '未配置')
+    const gitHome = store.get('gitHome', '默认')
     const gitUsername = store.get('gitUsername', '未配置')
     const gitPassword = store.get('gitPassword', '未配置')
     const gitDepth = store.get('gitDepth', 100)
@@ -38,6 +38,13 @@ async function deleteFile(file) {
 
 async function commit() {
     const gitConfig = getGitConfig()
+    try {
+        const rootStatus = await git.log({fs, dir: gitConfig.gitHome})
+        // console.log(rootStatus)
+    } catch (e) {
+        console.log('need git initialize')
+        await git.init({fs, dir: gitConfig.gitHome})
+    }
     const status = await git.statusMatrix({fs, dir: gitConfig.gitHome});
     if (status.every(([filepath, c1, c2, c3]) => (filepath.split('/').pop().startsWith('.') || (c1 === 1 && c2 === 1 && c3 === 1)))) {
         console.log('nothing changed!')
@@ -54,12 +61,14 @@ async function commit() {
         {fs, dir: gitConfig.gitHome, author: {name: 'auto saver', email : '994184916@qq.com'},
             message: Moment().format('yyyy-MM-DD HH:mm:ss')}
     );
-    await git.push({fs,
-        http: isoHttp,
-        dir: gitConfig.gitHome,
-        remote: 'origin',
-        onAuth: () => ({ username: gitConfig.gitUsername, password: gitConfig.gitPassword}),
-    });
+    if (gitConfig.gitRemote && gitConfig.gitRemote !== '未配置') {
+        await git.push({fs,
+            http: isoHttp,
+            dir: gitConfig.gitHome,
+            remote: 'origin',
+            onAuth: () => ({ username: gitConfig.gitUsername, password: gitConfig.gitPassword}),
+        });
+    }
 }
 module.exports = {getGitConfig, listFiles, writeFile, deleteFile, commit, store}
 

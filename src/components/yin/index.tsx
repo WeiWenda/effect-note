@@ -396,7 +396,10 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   };
   const loadDoc = async (docID: number) => {
     setLoading(true);
-    const curDocInfo = (userDocs as DocInfo[]).find(doc => doc.id === docID)!;
+    const curDocInfo = (userDocs as DocInfo[]).find(doc => doc.id === docID);
+    if (curDocInfo === undefined) {
+      navigate(`/note/-1`);
+    }
     let initialLoad = false;
     const newDocName = docID.toString();
     props.session.clientStore.setClientSetting('curDocId', docID);

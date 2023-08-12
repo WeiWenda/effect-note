@@ -1,43 +1,37 @@
-import {Button, Col, Form, Input, Menu, MenuProps, Row, Select, Divider, Dropdown, Modal, Table, Space, Checkbox} from 'antd';
-import {EditOutlined, ExclamationCircleOutlined, PlusSquareOutlined, DeleteOutlined, StopOutlined} from '@ant-design/icons';
+import {Button, Col, Divider, Dropdown, Form, Input, Modal, Radio, Row, Select} from 'antd';
+import {EditOutlined, ExclamationCircleOutlined, PlusSquareOutlined} from '@ant-design/icons';
 import * as React from 'react';
-import {useEffect, useState, useCallback} from 'react';
-import {Session, SubscriptionInfo} from '../../share';
+import {useEffect, useState} from 'react';
+import {Session} from '../../share';
 import {EMPTY_WORKSPACE_INFO, ServerConfig, WorkSpaceInfo} from '../../ts/server_config';
 import {SERVER_CONFIG} from '../../ts/constants';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import update from 'immutability-helper';
-import type { ColumnsType } from 'antd/es/table';
-import {
-  getServerConfig,
-  getSubscriptions, reindexWorkSpace,
-  setServerConfig as saveServerConfig,
-  updateSubscriptions,
-  workspaceRebuild
-} from '../../share/ts/utils/APIUtils';
-import { DraggableBodyRow } from './dragRow';
+import {getServerConfig, reindexWorkSpace, setServerConfig as saveServerConfig, workspaceRebuild} from '../../share/ts/utils/APIUtils';
 
 function WorkspaceSettingsComponent(props: { session: Session}) {
   const [serverConfig, setServerConfig] = useState(SERVER_CONFIG);
   const [form] = Form.useForm();
   const [curWorkSpace, setCurWorkSpace] = useState<WorkSpaceInfo | undefined>(undefined);
+  const [sycType, setSrcType] = useState('');
   useEffect(() => {
     getServerConfig().then((res: ServerConfig) => {
       if (!res.workspaces) {
         res.workspaces = [];
       }
       setServerConfig(res);
-      setCurWorkSpace(res.workspaces?.find(i => i.active));
-      form.setFieldsValue(res.workspaces?.find(i => i.active));
+      const activeWorkSpace = res.workspaces?.find(i => i.active);
+      setCurWorkSpace(activeWorkSpace);
+      setSrcType(activeWorkSpace.sycType || 'never');
+      form.setFieldsValue(activeWorkSpace);
     });
   }, []);
   const onSelect = (value: String) => {
     const workspace = serverConfig.workspaces?.find(i => i.gitLocalDir === value);
     setCurWorkSpace(workspace);
     form.setFieldsValue(workspace);
-    serverConfig.workspaces = [{ active: true, ...workspace} , ...serverConfig.workspaces!
-      .filter(i => i.gitLocalDir !== workspace?.gitLocalDir).map(i => {return {active: false, ...i}; })];
+    const updatedWorkSpace = { active: true, ...workspace} as WorkSpaceInfo;
+    const updatedWorkSpaces = [...serverConfig.workspaces!.filter(i => i.gitLocalDir !== value)];
+    updatedWorkSpaces.forEach(w => w.active = false);
+    serverConfig.workspaces = [updatedWorkSpace].concat(updatedWorkSpaces);
     saveServerConfig(serverConfig);
   };
   return (
@@ -94,10 +88,15 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                     break;
                   case 'delete':
                     if (serverConfig.workspaces?.length && serverConfig.workspaces.length > 1) {
-                      serverConfig.workspaces = [...serverConfig.workspaces!
-                        .filter(i => i.gitLocalDir !== curWorkSpace?.gitLocalDir).map(i => {return {active: false, ...i}; })];
+                      const updatedWorkSpaces = [...serverConfig.workspaces!.filter(i => i.gitLocalDir !== curWorkSpace?.gitLocalDir)];
+                      updatedWorkSpaces.forEach(w => w.active = false);
                       serverConfig.workspaces[0].active = true;
-                      saveServerConfig(serverConfig);
+                      serverConfig.workspaces = updatedWorkSpaces;
+                      saveServerConfig(serverConfig).then(() => {
+                        setServerConfig(serverConfig);
+                        setCurWorkSpace(serverConfig.workspaces[0]);
+                        form.setFieldsValue(serverConfig.workspaces[0]);
+                      });
                     }
                     break;
                   case 'duplicate':
@@ -129,11 +128,20 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
               labelCol={{ span: 6 }}
               wrapperCol={{ span: 18 }}
               style={{ maxWidth: 600 }}
+              onValuesChange={(changedValues, values) => {
+                if (changedValues.hasOwnProperty('sycType')) {
+                  setSrcType(changedValues.sycType);
+                }
+              }}
               onFinish={(values) => {
                 if (values.gitLocalDir !== '未配置') {
-                  serverConfig.workspaces = [{ active: true, ...values} , ...serverConfig.workspaces!
-                    .filter(i => i.gitLocalDir !== curWorkSpace.gitLocalDir).map(i => {return {active: false, ...i}; })];
+                  const updatedWorkSpace = { active: true, ...values} as WorkSpaceInfo;
+                  const updatedWorkSpaces = [...serverConfig.workspaces!.filter(i => i.gitLocalDir !== curWorkSpace.gitLocalDir)];
+                  updatedWorkSpaces.forEach(w => w.active = false);
+                  serverConfig.workspaces = [updatedWorkSpace].concat(updatedWorkSpaces);
                   saveServerConfig(serverConfig).then(() => {
+                    setServerConfig(serverConfig);
+                    setCurWorkSpace(updatedWorkSpace);
                     props.session.showMessage('应用成功');
                   });
                 } else {
@@ -142,6 +150,8 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
               }}
               autoComplete='off'
           >
+            {
+              (process.env.REACT_APP_BUILD_PLATFORM in ['darwin', 'win32']) &&
               <Form.Item
                   label='本地目录'
                   name='gitLocalDir'
@@ -160,34 +170,57 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                         }
                       }}/>}/>
               </Form.Item>
+            }
+            {
+              process.env.REACT_APP_BUILD_PLATFORM === 'mas' &&
+                <Form.Item
+                    label='名称'
+                    name='gitLocalDir'
+                >
+                    <Input />
+                </Form.Item>
+            }
               <Form.Item
-                  label='Git仓库'
-                  name='gitRemote'
-              >
-                  <Input />
+                  label='同步方式'
+                  name='sycType'
+                >
+                  <Radio.Group>
+                      <Radio value={'never'}>不同步</Radio>
+                      <Radio value={'gitee'}>同步至Gitee</Radio>
+                      {/*<Radio value={'github'}>同步至GitHub</Radio>*/}
+                  </Radio.Group>
               </Form.Item>
+            {
+              sycType === 'gitee' &&
+                <div>
+                  <Form.Item
+                      label='Git仓库'
+                      name='gitRemote'
+                  >
+                      <Input />
+                  </Form.Item>
+                  <Form.Item
+                      label='Git登录帐号'
+                      name='gitUsername'
+                  >
+                      <Input />
+                  </Form.Item>
 
-              <Form.Item
-                  label='Git登录帐号'
-                  name='gitUsername'
-              >
-                  <Input />
-              </Form.Item>
+                  <Form.Item
+                      label='Git登录密码'
+                      name='gitPassword'
+                  >
+                      <Input.Password />
+                  </Form.Item>
 
-              <Form.Item
-                  label='Git登录密码'
-                  name='gitPassword'
-              >
-                  <Input.Password />
-              </Form.Item>
-
-              <Form.Item
-                  label='保留近多少次修改'
-                  name='gitDepth'
-              >
-                  <Input />
-              </Form.Item>
-
+                  <Form.Item
+                      label='保留近多少次修改'
+                      name='gitDepth'
+                  >
+                      <Input />
+                  </Form.Item>
+                </div>
+              }
               <Form.Item wrapperCol={{ offset: 21 }}>
                   <Button type='primary' htmlType='submit'>
                       应用

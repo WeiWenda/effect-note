@@ -90,11 +90,8 @@ async function startExpress(args) {
     const serverConfig = store.get('serverConfig', JSON.stringify({
       workspaces: [{
         active: true,
-        gitRemote: gitRemote,
         gitLocalDir: gitHome,
-        gitUsername,
-        gitPassword,
-        gitDepth}]
+        sycType: 'never'}]
     }));
     res.send(serverConfig);
   });
@@ -117,11 +114,16 @@ async function startExpress(args) {
   app.post('/api/config', async (req, res) => {
     const activeWorkSpace = req.body.workspaces.find(i => i.active)
     if (activeWorkSpace) {
-      store.set('gitRemote', activeWorkSpace.gitRemote);
       store.set('gitHome', activeWorkSpace.gitLocalDir);
-      store.set('gitUsername', activeWorkSpace.gitUsername);
-      store.set('gitPassword', activeWorkSpace.gitPassword);
-      store.set('gitDepth', activeWorkSpace.gitDepth);
+      if (activeWorkSpace.sycType === 'never') {
+        store.delete('gitRemote')
+      }
+      if (activeWorkSpace.sycType === 'gitee') {
+        store.set('gitRemote', activeWorkSpace.gitRemote);
+        store.set('gitUsername', activeWorkSpace.gitUsername);
+        store.set('gitPassword', activeWorkSpace.gitPassword);
+        store.set('gitDepth', activeWorkSpace.gitDepth);
+      }
     }
     store.set('serverConfig', JSON.stringify(req.body))
     res.send({message: 'save success'});
