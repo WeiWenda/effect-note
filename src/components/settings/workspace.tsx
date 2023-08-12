@@ -151,7 +151,7 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
               autoComplete='off'
           >
             {
-              (process.env.REACT_APP_BUILD_PLATFORM in ['darwin', 'win32']) &&
+              ['darwin', 'win32'].includes(process.env.REACT_APP_BUILD_PLATFORM) &&
               <Form.Item
                   label='本地目录'
                   name='gitLocalDir'
