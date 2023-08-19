@@ -1,6 +1,6 @@
 {
   "name": "EffectNote",
-  "version": "0.2.7",
+  "version": "0.2.9",
   "private": true,
   "homepage": "/",
   "author": "weiwenda",
@@ -39,7 +39,7 @@
     "rmcache": "rm -rf ./node_modules/.cache",
     "make": "npm run build-drawin && npm run rmcache && electron-forge make --platform darwin",
     "makewin": "npm run build-win32 && npm run rmcache && electron-forge make --platform win32",
-    "makemas": "npm run build-mas && npm run rmcache && electron-builder --config builder.config.js"
+    "makemas": "npm run build-mas && npm run rmcache && electron-forge make --platform mas"
   },
   "main": "main/electron.js",
   "module": "dist/index.js",
@@ -66,8 +66,9 @@
   },
   "devDependencies": {
     "@ant-design/icons": "^5.2.4",
-    "@electron-forge/cli": "^6.0.4",
-    "@electron-forge/maker-dmg": "^6.2.1",
+    "@electron-forge/cli": "^6.3.0",
+    "@electron-forge/maker-dmg": "^6.3.0",
+    "@electron-forge/maker-pkg": "^6.3.0",
     "@electron-forge/maker-squirrel": "^6.0.4",
     "@electron-forge/maker-wix": "^6.0.4",
     "@rollup/plugin-babel": "^6.0.0",
@@ -93,7 +94,7 @@
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-react": "^1.0.6",
     "antd": "^5.3.0",
-    "electron": "^21.3.1",
+    "electron": "26.0.0",
     "electron-builder": "^22.14.13",
     "eslint": "^8.1.0",
     "events": "^3.3.0",

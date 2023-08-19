@@ -10,24 +10,13 @@ module.exports = {
         "./build/**"
     ],
     mac: {
-        bundleVersion: "0.2.7.1",
-        bundleShortVersion: "0.2.7",
+        entitlements: './sign/entitlements.mas.plist',
+        entitlementsInherit: './sign/entitlements.mas.inherit.plist',
+        entitlementsLoginHelper: './sign/entitlements.mas.loginhelper.plist',
+        provisioningProfile: '/Users/mac/Downloads/masdevelop.provisionprofile',
         "icon": "./public/images/icon.icns",
-        target: ['mas', 'mas-dev'],
-    },
-    masDev: {
-        entitlements: './sign/entitlements.mas.plist',
-        entitlementsInherit: './sign/entitlements.mas.inherit.plist',
-        entitlementsLoginHelper: './sign/entitlements.mas.loginhelper.plist',
         hardenedRuntime: true,
-        type: 'development',
-    },
-    mas: {
-        entitlements: './sign/entitlements.mas.plist',
-        entitlementsInherit: './sign/entitlements.mas.inherit.plist',
-        entitlementsLoginHelper: './sign/entitlements.mas.loginhelper.plist',
-        hardenedRuntime: true,
-        provisioningProfile: '/Users/weiwenda/Downloads/embedded.provisionprofile',
-        type: 'distribution',
-    },
+        gatekeeperAssess: false,
+        target: ['mas-dev'],
+    }
 };

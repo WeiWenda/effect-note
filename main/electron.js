@@ -38,6 +38,7 @@ function createWindow() {
       createWindow();
     })
   });
+  app.commandLine.appendSwitch('js-flags', '--lite-mode')
   app.on('ready', e => {
     ipcMain.handle('dialog:openDirectory', async (_) => {
       const result = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] })

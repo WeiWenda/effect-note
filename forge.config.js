@@ -1,24 +1,31 @@
 const packagerConfig = {
   appBundleId: 'com.effectnote.desktop',
   osxSign: {
-    identity: 'Developer ID Application: wenda wei (8NFNDJ5TWD)',
+    identity: 'Apple Distribution: wenda wei (8NFNDJ5TWD)',
     preEmbedProvisioningProfile: true,
-    provisioningProfile: '/Users/weiwenda/Downloads/nonmas.provisionprofile',
+    provisioningProfile: '/Users/mac/Downloads/mas.provisionprofile',
     optionsForFile: (filePath) => {
-      // Here, we keep it simple and return a single entitlements.plist file.
-      // You can use this callback to map different sets of entitlements
-      // to specific files in your packaged app.
-      return {
-        entitlements: './sign/entitlements.nomas.plist'
-      };
+      if (filePath.endsWith("EffectNote.app")) {
+        return {
+          entitlements: './sign/entitlements.mas.plist'
+        }
+      } else if (filePath.includes("Library/LoginItems")) {
+        return {
+          entitlements: './sign/entitlements.mas.loginhelper.plist'
+        };
+      } else {
+        return {
+          entitlements: './sign/entitlements.mas.inherit.plist'
+        };
+      }
     }
   },
-  osxNotarize: {
-    tool: 'notarytool',
-    appleId: process.env.APPLE_ID,
-    appleIdPassword: process.env.APPLE_PASSWORD,
-    teamId: process.env.APPLE_TEAM_ID,
-  },
+  // osxNotarize: {
+  //   tool: 'notarytool',
+  //   appleId: process.env.APPLE_ID,
+  //   appleIdPassword: process.env.APPLE_PASSWORD,
+  //   teamId: process.env.APPLE_TEAM_ID,
+  // },
   icon: './public/images/icon',
   ignore: [
     "^\\/src$",
@@ -46,6 +53,10 @@ module.exports = {
         icon: './public/images/icon.icns',
         name: 'EffectNote'
       }
+    },
+    {
+      name: '@electron-forge/maker-pkg',
+      config: {}
     }
   ],
 };
