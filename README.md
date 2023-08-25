@@ -4,15 +4,38 @@
 一款免费的大纲笔记软件，纯文件存储，Gitee云端同步
 <br>
   <span>
-    <a target="_blank" href="http://demo.effectnote.com/note/-1">在线Demo</a> |
-    <a target="_blank" href="https://pan.baidu.com/s/1y0Ouxh_kOxNHQcpjUeArVg?pwd=evzn">Mac客户端下载</a> |
-    <a target="_blank" href="https://pan.baidu.com/s/1gQTLyW7GHW4iSzroVmy4fQ?pwd=2qmc">Windows客户端下载</a>
+    <a target="_blank" href="http://demo.effectnote.com/note/-1">在线Demo</a>
   </span>
 <br>
-Inspired By Confluence & Workflowy
+  Inspired By Confluence & Workflowy
 <br>
 Project Vision：Empower Personal Knowledge Management And Discovery
 </p>
+  <table align="center">
+    <tr>
+      <th>
+        Mac客户端下载
+      </th>
+      <td>
+         <image src="./public/images/mas_en.svg" href="https://apps.apple.com/cn/app/effectnote/id6458540943?mt=12" /> 
+      </td>
+       <td>
+          <a target="_blank" href="https://pan.baidu.com/s/1y0Ouxh_kOxNHQcpjUeArVg?pwd=evzn">直接下载</a>
+       </td>
+    </tr>
+    <tr>
+      <th>
+         Window客户端下载
+      </th>
+      <td>
+         -
+      </td>
+       <td>
+          <a target="_blank" href="https://pan.baidu.com/s/1gQTLyW7GHW4iSzroVmy4fQ?pwd=2qmc">直接下载</a>
+       </td>
+     </tr>
+  </table>
+
 
 ## 功能演示
 
