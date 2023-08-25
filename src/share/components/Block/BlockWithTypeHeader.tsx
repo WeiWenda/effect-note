@@ -9,6 +9,7 @@ export function SpecialBlock(props: React.PropsWithChildren<{
   blockType: any, session: Session,
   tools?: any, path: Path, collapse: boolean,
   specialClass?: string,
+  onCopy?: () => void,
   setCollapseCallback: (collapse: boolean) => void}>) {
   const [fold, setFold] = useState(props.collapse);
   const [headerVision, setHeaderVision] = useState(props.collapse);
@@ -73,6 +74,9 @@ export function SpecialBlock(props: React.PropsWithChildren<{
           }} />
           <CopyOutlined onClick={() => {
             props.session.yankBlocks(props.path, 1).then(() => {
+              if (props.onCopy) {
+                props.onCopy();
+              }
               props.session.showMessage('复制成功');
             });
           }}/>

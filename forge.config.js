@@ -1,6 +1,20 @@
+const fs = require('fs');
 const packagerConfig = {
   appBundleId: 'com.effectnote.desktop',
-  osxSign: {
+  icon: './public/images/icon',
+  ignore: [
+    "^\\/src$",
+    "^\\/server$",
+    "^\\/test$",
+    "^\\/docs$",
+    "^\\/public$",
+    "^\\/dist$",
+    "^\\/[.].+",
+    // [...]
+  ]
+};
+if (process.argv[3] === 'mas') {
+  packagerConfig.osxSign = {
     identity: 'Apple Distribution: wenda wei (8NFNDJ5TWD)',
     preEmbedProvisioningProfile: true,
     provisioningProfile: '/Users/mac/Downloads/mas.provisionprofile',
@@ -19,26 +33,32 @@ const packagerConfig = {
         };
       }
     }
-  },
-  // osxNotarize: {
-  //   tool: 'notarytool',
-  //   appleId: process.env.APPLE_ID,
-  //   appleIdPassword: process.env.APPLE_PASSWORD,
-  //   teamId: process.env.APPLE_TEAM_ID,
-  // },
-  icon: './public/images/icon',
-  ignore: [
-    "^\\/src$",
-    "^\\/server$",
-    "^\\/test$",
-    "^\\/docs$",
-    "^\\/public$",
-    "^\\/dist$",
-    "^\\/[.].+",
-    // [...]
-  ]
-};
+  }
+}
+if (process.argv[3] === 'darwin') {
+  packagerConfig.osxSign = {
+    identity: 'Developer ID Application: wenda wei (8NFNDJ5TWD)',
+    preEmbedProvisioningProfile: true,
+    provisioningProfile: '/Users/mac/Downloads/nomas.provisionprofile',
+  }
+  packagerConfig.osxNotarize = {
+    tool: 'notarytool',
+    appleId: process.env.APPLE_ID,
+    appleIdPassword: process.env.APPLE_PASSWORD,
+    teamId: process.env.APPLE_TEAM_ID,
+  }
+}
 module.exports = {
+  hooks: {
+    generateAssets: async () => {
+      fs.writeFileSync(
+          './role.json',
+          JSON.stringify({
+            role: process.env.PLATFORM
+          })
+      );
+    }
+  },
   packagerConfig: packagerConfig,
   rebuildConfig: {},
   makers: [

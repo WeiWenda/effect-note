@@ -1,5 +1,5 @@
-import {Button, Col, Divider, Dropdown, Form, Input, Modal, Radio, Row, Select} from 'antd';
-import {EditOutlined, ExclamationCircleOutlined, PlusSquareOutlined} from '@ant-design/icons';
+import {Button, Col, Divider, Dropdown, Form, Input, Modal, Radio, Row, Select, Space, Tooltip} from 'antd';
+import {DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined, PlusSquareOutlined, CloudSyncOutlined, ReloadOutlined} from '@ant-design/icons';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {Session} from '../../share';
@@ -39,83 +39,79 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
       <div style={{paddingBottom: '1em'}}>当前工作空间：</div>
       <Row style={{alignItems: 'center'}}>
         <Col>
-          <Select
-            value={curWorkSpace?.gitLocalDir}
-            style={{ maxWidth: 600 }}
-            onChange={onSelect}
-            options={
-              serverConfig.workspaces?.map(info => {
-                return {
-                  value: info.gitLocalDir,
-                  label: info.gitLocalDir
-                };
-              })}
-          />
-        </Col>
-        <Col>
-          <Dropdown.Button
-            menu={{ items: [{
-                key: 'rebuild',
-                label: '重建',
-              }, {
-                key: 'reindex',
-                label: '更新索引'
-              }, {
-                key: 'delete',
-                label: '删除',
-              }, {
-                key: 'duplicate',
-                label: '复制'
-              }], onClick: (e) => {
-                switch (e.key) {
-                  case 'rebuild':
-                    Modal.confirm({
-                      title: `${curWorkSpace?.gitLocalDir} 将被重建，请确认！`,
-                      icon: <ExclamationCircleOutlined />,
-                      okText: '确认',
-                      cancelText: '取消',
-                      onOk: () => {
-                        workspaceRebuild().then(() => {
-                          props.session.showMessage('重建成功');
-                        });
-                      }
-                    });
-                    break;
-                  case 'reindex':
-                    reindexWorkSpace().then(res => {
-                      props.session.showMessage(res.message);
-                    });
-                    break;
-                  case 'delete':
-                    if (serverConfig.workspaces?.length && serverConfig.workspaces.length > 1) {
+          <Space>
+            <Select
+              value={curWorkSpace?.gitLocalDir}
+              style={{ maxWidth: 600 }}
+              onChange={onSelect}
+              options={
+                serverConfig.workspaces?.map(info => {
+                  return {
+                    value: info.gitLocalDir,
+                    label: info.gitLocalDir
+                  };
+                })}
+            />
+            <Tooltip title='增加工作空间'>
+              <PlusOutlined onClick={() => {
+                serverConfig.workspaces?.push(EMPTY_WORKSPACE_INFO);
+                setServerConfig(serverConfig);
+                setCurWorkSpace(EMPTY_WORKSPACE_INFO);
+                form.setFieldsValue(EMPTY_WORKSPACE_INFO);
+              }} />
+            </Tooltip>
+            <Tooltip title='重建查找索引'>
+              <ReloadOutlined onClick={() => {
+                reindexWorkSpace().then(res => {
+                  props.session.showMessage(res.message);
+                });
+              }} />
+            </Tooltip>
+            {
+              serverConfig.workspaces?.length && serverConfig.workspaces.length > 1 &&
+              <Tooltip title='删除当前工作空间'>
+                <DeleteOutlined onClick={() => {
+                  Modal.confirm({
+                    title: `${curWorkSpace?.gitLocalDir} 将被删除，请确认！`,
+                    icon: <ExclamationCircleOutlined/>,
+                    okText: '确认',
+                    cancelText: '取消',
+                    onOk: () => {
                       const updatedWorkSpaces = [...serverConfig.workspaces!.filter(i => i.gitLocalDir !== curWorkSpace?.gitLocalDir)];
                       updatedWorkSpaces.forEach(w => w.active = false);
+                      // @ts-ignore
                       serverConfig.workspaces[0].active = true;
                       serverConfig.workspaces = updatedWorkSpaces;
                       saveServerConfig(serverConfig).then(() => {
                         setServerConfig(serverConfig);
+                        // @ts-ignore
                         setCurWorkSpace(serverConfig.workspaces[0]);
+                        // @ts-ignore
                         form.setFieldsValue(serverConfig.workspaces[0]);
                       });
                     }
-                    break;
-                  case 'duplicate':
-                    const workspace = {...curWorkSpace, gitLocalDir: curWorkSpace?.gitLocalDir + '(copy)'};
-                    serverConfig.workspaces?.push(workspace);
-                    setServerConfig(serverConfig);
-                    setCurWorkSpace(workspace);
-                    form.setFieldsValue(workspace);
-                    break;
-                  default:
-                  // do nothing
-                }
-              }
-            }}><PlusSquareOutlined onClick={() => {
-            serverConfig.workspaces?.push(EMPTY_WORKSPACE_INFO);
-            setServerConfig(serverConfig);
-            setCurWorkSpace(EMPTY_WORKSPACE_INFO);
-            form.setFieldsValue(EMPTY_WORKSPACE_INFO);
-          }} /></Dropdown.Button>
+                  });
+                }}/>
+              </Tooltip>
+            }
+            <Tooltip title='重建当前工作空间（rm -rf && git clone）'>
+              <CloudSyncOutlined onClick={() => {
+                Modal.confirm({
+                  title: `${curWorkSpace?.gitLocalDir} 将被重建，请确认！`,
+                  icon: <ExclamationCircleOutlined />,
+                  okText: '确认',
+                  cancelText: '取消',
+                  onOk: () => {
+                    props.session.emit('openModal', 'loading');
+                    workspaceRebuild().then(() => {
+                      props.session.emit('closeModal', 'loading');
+                      props.session.showMessage('重建成功');
+                    });
+                  }
+                });
+              }}/>
+            </Tooltip>
+          </Space>
         </Col>
       </Row>
       <Divider />
@@ -186,7 +182,7 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                 >
                   <Radio.Group>
                       <Radio value={'never'}>不同步</Radio>
-                      <Radio value={'gitee'}>同步至Gitee</Radio>
+                      <Radio value={'gitee'}>同步至Git远程仓库</Radio>
                       {/*<Radio value={'github'}>同步至GitHub</Radio>*/}
                   </Radio.Group>
               </Form.Item>
@@ -194,20 +190,20 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
               sycType === 'gitee' &&
                 <div>
                   <Form.Item
-                      label='Git仓库'
+                      label='仓库地址'
                       name='gitRemote'
                   >
                       <Input />
                   </Form.Item>
                   <Form.Item
-                      label='Git登录帐号'
+                      label='登录帐号'
                       name='gitUsername'
                   >
                       <Input />
                   </Form.Item>
 
                   <Form.Item
-                      label='Git登录密码'
+                      label='AccessToken'
                       name='gitPassword'
                   >
                       <Input.Password />

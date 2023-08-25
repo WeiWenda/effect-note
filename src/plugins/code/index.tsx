@@ -43,15 +43,11 @@ registerPlugin(
                           />
                         }
                         session={api.session}
-                        tools={
-                            <ShareAltOutlined onClick={() => {
+                        onCopy={() => {
                               copyToClipboard(pluginData.links.code.content);
-                              api.session.showMessage('已复制');
-                            }} />
-                        }
+                        }}
           >
             <MonacoEditorWrapper
-              key='code'
               pluginData={pluginData}
               theme={api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'vs-dark' : 'vs-light'}
               lockEdit={api.session.lockEdit}

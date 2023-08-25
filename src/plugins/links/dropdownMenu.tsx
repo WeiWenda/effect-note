@@ -42,7 +42,7 @@ export const getTaskStatus = (tags: string[]) => {
     if (endTag) {
       const endTime = Moment(endTag.split('end:')[1]);
       if (dueTag && endTime.isAfter(Moment(dueTag.split('due:')[1]))) {
-        status = 'Delay';
+        status = 'Done';
       } else {
         status = 'Done';
       }

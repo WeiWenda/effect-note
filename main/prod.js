@@ -194,7 +194,7 @@ async function startExpress(args) {
       const imgLinks = []
         // 存储图片的文件夹
         if (!fs.existsSync(storePath)) {
-          fs.mkdirSync(storePath)
+          fs.mkdirSync(storePath, {recursive: true})
         }
         files.forEach(fileForm => {
           const name = Buffer.from(fileForm.originalname, "latin1").toString(

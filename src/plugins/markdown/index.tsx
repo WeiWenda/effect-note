@@ -5,6 +5,7 @@ import Vditor from 'vditor';
 import {EditOutlined} from '@ant-design/icons';
 import $ from 'jquery';
 import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
+import {copyToClipboard} from '../../components';
 
 registerPlugin(
   {
@@ -23,6 +24,9 @@ registerPlugin(
                         path={path}
                         collapse={pluginData.links.collapse || false}
                         setCollapseCallback={(collapse) => linksPlugin.setBlockCollapse(path.row, collapse)}
+                        onCopy={() => {
+                          copyToClipboard(pluginData.links.md);
+                        }}
                         blockType={'Markdown'} tools={
             <EditOutlined onClick={() => {
               api.session.mdEditorOnSave = (markdown: string, _html: string) => {

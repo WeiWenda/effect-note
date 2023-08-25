@@ -8,6 +8,7 @@ import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
 import {htmlRegex, htmlTypes} from '../../ts/util';
 import {FontStyleToolComponent} from '../../share/components/Line/fontStyleTool';
 import {LinksPlugin, linksPluginName} from '../links';
+import {copyToClipboard} from '../../components';
 
 export function htmlHook(tokenizer: any, info: any) {
   // if (info.has_cursor && !info.lockEdit) {
@@ -28,6 +29,9 @@ export function htmlHook(tokenizer: any, info: any) {
                           path={info.path}
                           collapse={info.pluginData.links?.collapse || false}
                           setCollapseCallback={(collapse) => session.emit('setBlockCollapse', info.path.row, collapse)}
+                          onCopy={() => {
+                            copyToClipboard(htmlContent);
+                          }}
                           blockType={'RTF'} session={session} tools={
               <EditOutlined onClick={() => {
                 const path = info.path;

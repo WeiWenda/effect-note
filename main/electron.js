@@ -1,5 +1,6 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron');
 const {startExpress} = require('./prod');
+const { role } = require('../role.json');
 const path = require('path')
 const Store = require('electron-store');
 
@@ -7,6 +8,28 @@ const port = 51223;
 
 if (require('electron-squirrel-startup')) app.quit();
 
+if (process.platform === 'darwin') {
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+    { role: 'appMenu' },
+    // { role: 'fileMenu' }
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'New Window',
+          accelerator: 'Command+N',
+          click: () => {
+            createWindow();
+          }
+        },
+        { role: 'close' }
+      ]
+    },
+    { role: 'editMenu' },
+    { role: 'viewMenu' },
+    { role: 'windowMenu' }
+  ]));
+}
 function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
@@ -17,9 +40,9 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     },
   });
-  win.webContents.on('new-window', function(e, url) {
-    e.preventDefault();
-    require('electron').shell.openExternal(url);
+  win.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
+    return {action: 'deny'};
   });
   // and load the index.html of the app.
   // win.loadFile("index.html");
@@ -38,7 +61,9 @@ function createWindow() {
       createWindow();
     })
   });
-  app.commandLine.appendSwitch('js-flags', '--lite-mode')
+  if (role === 'mas') {
+    app.commandLine.appendSwitch('js-flags', '--lite-mode')
+  }
   app.on('ready', e => {
     ipcMain.handle('dialog:openDirectory', async (_) => {
       const result = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] })

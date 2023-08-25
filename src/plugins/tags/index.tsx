@@ -457,10 +457,10 @@ export class TagsPlugin {
       // }
       tags = tags
         .filter((t: string) => !new RegExp('((create|start|end|due):.*)').test(t))
-        .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t));
+        .filter((t: string) => !['Todo', 'Done'].includes(t));
       if (tags.length > 0 || pluginData.tags?.tagging) {
         const options: any[] = this.tags
-          .filter((t: string) => !new RegExp('(start|end|due):.*').test(t))
+          .filter((t: string) => !new RegExp('(create|start|end|due):.*').test(t))
           .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t))
           .concat(['重要', '关键', '注意']).filter( onlyUnique )
           .map(tag => { return {label: tag, value: tag}; });

@@ -222,8 +222,10 @@ export function appendStyleScript(clientStore: ClientStore) {
                     .ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn{color: ${theme['theme-text-link']}}
                     .ant-modal .ant-modal-close{color: ${theme['theme-text-primary']}}
                     .ant-modal .ant-modal-title{color: ${theme['theme-text-primary']}}
+                    .ant-tag.ant-tag-default{color: ${theme['theme-text-primary']}}
                     .ant-select:not(.ant-select-disabled):not(.ant-select-customize-input):not(.ant-pagination-size-changer):hover .ant-select-selector{border-color:${theme['theme-text-link']}}
                     .ant-input:hover{border-color:${theme['theme-text-link']}}
+                    .ant-radio-wrapper{color: ${theme['theme-text-primary']}}
                     .ant-btn-default:not(:disabled):not(.ant-btn-disabled):hover{border-color:${theme['theme-text-link']};color:${theme['theme-text-link']}}
                     .ant-btn-primary:not(:disabled):not(.ant-btn-disabled):hover{color:${theme['theme-text-link']}}
                     .file-toolbar .ant-btn{color: ${theme['theme-text-primary']}}

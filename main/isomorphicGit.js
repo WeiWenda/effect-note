@@ -1,14 +1,19 @@
 const isoHttp = require('isomorphic-git/http/node');
 const path = require('path');
 const Moment = require('moment');
-
+const { role } = require('../role.json');
 const Store = require('electron-store');
 const store = new Store();
 const git = require("isomorphic-git");
 const fs = require("fs");
 const getGitConfig = () => {
     const gitRemote = store.get('gitRemote', '未配置')
-    const gitHome = store.get('gitHome', '默认')
+    let gitHome;
+    if (role === 'mas') {
+        gitHome = store.get('gitHome', '默认')
+    } else {
+        gitHome = store.get('gitHome', '未配置')
+    }
     const gitUsername = store.get('gitUsername', '未配置')
     const gitPassword = store.get('gitPassword', '未配置')
     const gitDepth = store.get('gitDepth', 100)

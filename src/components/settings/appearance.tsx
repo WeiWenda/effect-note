@@ -1,4 +1,4 @@
-import {Col, Dropdown, InputNumber, Row, Select, Input, Space, Popover, Button, Divider} from 'antd';
+import {Col, Tooltip, InputNumber, Row, Select, Input, Space, Popover, Button, Divider} from 'antd';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {Session} from '../../share';
@@ -114,35 +114,43 @@ function AppearanceSettingsComponent(props: { session: Session, config: Config, 
                 onChange={changeTheme}
               />
             }
-            <CopyOutlined onClick={() => {
-              serverConfig.themes![currentTheme + '(copy)'] = {...serverConfig.themes![currentTheme]};
-              setCurrentTheme(currentTheme + '(copy)');
-              setServerConfig(serverConfig);
-              saveServerConfig(serverConfig);
-            }}/>
-            {
-              !themes.hasOwnProperty(currentTheme) &&
-              <DeleteOutlined onClick={() => {
-                delete serverConfig.themes![currentTheme];
+            <Tooltip title='复制当前主题'>
+              <CopyOutlined onClick={() => {
+                serverConfig.themes![currentTheme + '(copy)'] = {...serverConfig.themes![currentTheme]};
+                setCurrentTheme(currentTheme + '(copy)');
                 setServerConfig(serverConfig);
                 saveServerConfig(serverConfig);
-                changeTheme('Default');
-              }} />
+              }}/>
+            </Tooltip>
+            {
+              !themes.hasOwnProperty(currentTheme) &&
+              <Tooltip title='删除当前主题'>
+                <DeleteOutlined onClick={() => {
+                  delete serverConfig.themes![currentTheme];
+                  setServerConfig(serverConfig);
+                  saveServerConfig(serverConfig);
+                  changeTheme('Default');
+                }} />
+              </Tooltip>
             }
             {
               !themes.hasOwnProperty(currentTheme) &&
-              <EditOutlined onClick={() => {
-                setEditing(true);
-              }} />
+              <Tooltip title='修改当前主题名称'>
+                <EditOutlined onClick={() => {
+                  setEditing(true);
+                }} />
+              </Tooltip>
             }
             {
               themes.hasOwnProperty(currentTheme) &&
-              <RollbackOutlined onClick={() => {
-                serverConfig.themes![currentTheme] = {...themes[currentTheme]};
-                setServerConfig(serverConfig);
-                saveServerConfig(serverConfig);
-                changeTheme(currentTheme);
-              }} />
+              <Tooltip title='恢复默认'>
+                <RollbackOutlined onClick={() => {
+                  serverConfig.themes![currentTheme] = {...themes[currentTheme]};
+                  setServerConfig(serverConfig);
+                  saveServerConfig(serverConfig);
+                  changeTheme(currentTheme);
+                }} />
+              </Tooltip>
             }
           </Space>
         </Col>

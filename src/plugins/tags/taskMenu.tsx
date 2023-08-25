@@ -21,26 +21,38 @@ export function TaskMenuComponent(props: {tags: string[], setTags: (newTags: str
   };
   return (
     <Space style={{display: 'flex', flexDirection: 'column'}}>
-      <DatePicker showTime={true}
-                  value={getDateString('create: ')}
-                  placeholder='创建时间' onChange={(_, dateString) => {
-        setTags('create: ', dateString);
-      }}></DatePicker>
-      <DatePicker showTime={true}
-                  value={getDateString('due: ')}
-                  placeholder='截止时间' onChange={(_, dateString) => {
-        setTags('due: ', dateString);
-      }}></DatePicker>
-      <DatePicker showTime={true}
-                  value={getDateString('end: ')}
-                  placeholder='完成时间' onChange={(_, dateString) => {
-        setTags('end: ', dateString);
-      }}></DatePicker>
-      <DatePicker showTime={true}
-                  value={getDateString('start: ')}
-                  placeholder='开始时间' onChange={(_, dateString) => {
-        setTags('start: ', dateString);
-      }}></DatePicker>
+      <div>
+        <span>创建时间：</span>
+        <DatePicker showTime={true}
+                    value={getDateString('create: ')}
+                    placeholder='创建时间' onChange={(_, dateString) => {
+          setTags('create: ', dateString);
+        }}></DatePicker>
+      </div>
+      <div>
+        <span>截止时间：</span>
+        <DatePicker showTime={true}
+                    value={getDateString('due: ')}
+                    placeholder='截止时间' onChange={(_, dateString) => {
+          setTags('due: ', dateString);
+        }}></DatePicker>
+      </div>
+      <div>
+        <span>开始时间：</span>
+        <DatePicker showTime={true}
+                    value={getDateString('start: ')}
+                    placeholder='开始时间' onChange={(_, dateString) => {
+          setTags('start: ', dateString);
+        }}></DatePicker>
+      </div>
+      <div>
+        <span>完成时间：</span>
+        <DatePicker showTime={true}
+                    value={getDateString('end: ')}
+                    placeholder='完成时间' onChange={(_, dateString) => {
+          setTags('end: ', dateString);
+        }}></DatePicker>
+      </div>
     </Space>
   );
 }

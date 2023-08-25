@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Layout, Menu, Avatar, Switch, Drawer, Button, Tabs, Modal} from 'antd';
+import {Layout, Menu, Spin, Switch, Drawer, Button, Tabs, Modal} from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
 
 import '@wangeditor/editor/dist/css/style.css';
@@ -86,6 +86,12 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       logger.debug('updateAnyway');
       props.session.emit('updateInner');
       forceUpdate();
+    });
+    props.session.on('closeModal', (modalName) => {
+      const visible = {...modalVisible};
+      visible[modalName] = false;
+      setModalVisible(visible);
+      props.session.startKeyMonitor();
     });
     props.session.on('openModal', (modalName, data) => {
       if (modalName === 'rtf') {
@@ -193,6 +199,20 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           props.session.showMessage(`Error reading data: ${error}`, {text_class: 'error'});
         }}
       />
+      <Modal
+        open={modalVisible.loading}
+        footer={null}
+        maskClosable={false}
+        keyboard={false}
+        closeIcon={false}
+      >
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+          <Spin style={{paddingBottom: '20px'}} />
+          <div>
+            执行中...暂时无法进行其他操作
+          </div>
+        </div>
+      </Modal>
       <Modal
         className={'form_modal'}
         open={modalVisible.subscriptionInfo}
