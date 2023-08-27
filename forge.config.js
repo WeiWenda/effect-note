@@ -64,7 +64,11 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        iconUrl: 'https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/icon.ico',
+        // The ICO file to use as the icon for the generated Setup.exe
+        setupIcon: './public/images/icon.ico'
+      },
     },
     {
       name: '@electron-forge/maker-dmg',
