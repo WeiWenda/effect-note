@@ -168,6 +168,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       key: 'load',
       children: [
         {
+          label: '导入pdf',
+          key: 'load_pdf',
+        },
+        {
           label: '导入markdown',
           key: 'load_md',
         },
@@ -229,6 +233,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       return;
     }
     switch (key) {
+      case 'load_pdf':
+        props.session.fileInputRef.current.setPath(props.path);
+        $('#file-uploader').trigger('click');
+        break;
       case 'load_md':
         props.session.fileInputRef.current.setPath(props.path);
         $('#file-uploader').trigger('click');

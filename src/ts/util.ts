@@ -59,6 +59,7 @@ export function mimetypeLookup(filename: string): string | undefined {
     const parts = filename.split('.');
     const extension = parts.length > 1 ? parts[parts.length - 1] : '';
     const extensionLookup: {[key: string]: string} = {
+        'pdf': 'application/pdf',
         'md': 'text/markdown',
         'opml': 'text/x-opml',
         'json': 'application/json',

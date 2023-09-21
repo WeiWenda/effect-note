@@ -1,6 +1,8 @@
 import * as React from 'react';
 import $ from 'jquery';
 import {Path} from '../share';
+import {mimetypeLookup} from '../ts/util';
+import AppState from '../components/pdf-to-markdown/models/AppState';
 
 type Props = {
   onSelect?: (filename: string) => void;
@@ -11,20 +13,24 @@ type Props = {
 };
 
 export const load_file = function(file: File): Promise<{name: string, contents: string}> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsText(file, 'UTF-8');
-    reader.onload = function(evt) {
-      const content = (evt.target as any).result;
-      return resolve({
-        name: file.name,
-        contents: content,
-      });
-    };
-    reader.onerror = function(err) {
-      reject(`Failed to reading file: ${err}`);
-    };
-  });
+  if (mimetypeLookup(file.name) === 'application/pdf') {
+
+  } else {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsText(file, 'UTF-8');
+      reader.onload = function(evt) {
+        const content = (evt.target as any).result;
+        return resolve({
+          name: file.name,
+          contents: content,
+        });
+      };
+      reader.onerror = function(err) {
+        reject(`Failed to reading file: ${err}`);
+      };
+    });
+  }
 };
 
 export default class FileInput extends React.Component<Props, {path: Path}> {
