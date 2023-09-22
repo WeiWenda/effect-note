@@ -14,7 +14,18 @@ type Props = {
 
 export const load_file = function(file: File): Promise<{name: string, contents: string}> {
   if (mimetypeLookup(file.name) === 'application/pdf') {
-
+    return new Promise((resolve, _reject) => {
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        const appState = new AppState();
+        const fileBuffer = evt.target!.result as ArrayBuffer;
+        return resolve({
+          name: file.name,
+          contents: appState.tranform(new Uint8Array(fileBuffer))
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    });
   } else {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
