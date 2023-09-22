@@ -16,7 +16,7 @@ WordType.initEnum({
         plainTextFormat: true,
         toText(string) {
             return `^${string}`
-        // return `<sup>[${string}](#${string})</sup>`;
+            // return `<sup>[${string}](#${string})</sup>`;
         }
     },
     FOOTNOTE: {

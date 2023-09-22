@@ -61,9 +61,9 @@ class WordDetectionStream extends StashingStream {
         this.formattedWords = 0
         this.containLinks = false;
 
-        this.firstY;
+        this.firstY = null;
         this.stashedNumber = false;
-        this.currentItem;
+        this.currentItem = null;
     }
 
     shouldStash(item) { // eslint-disable-line no-unused-vars

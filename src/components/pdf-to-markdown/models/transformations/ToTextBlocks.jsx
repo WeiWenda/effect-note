@@ -1,6 +1,6 @@
 import React from 'react';
 import Transformation from './Transformation.jsx';
-import TextPageView from '../../components/debug/TextPageView.jsx';
+// import TextPageView from '../../components/debug/TextPageView.jsx';
 import ParseResult from '../ParseResult.jsx';
 import { blockToText } from '../markdown/BlockType.jsx';
 
@@ -10,9 +10,9 @@ export default class ToTextBlocks extends Transformation {
         super("To Text Blocks", "TextBlock");
     }
 
-    createPageView(page, modificationsOnly) { // eslint-disable-line no-unused-vars
-        return <TextPageView key={ page.index } page={ page } />;
-    }
+    // createPageView(page, modificationsOnly) { // eslint-disable-line no-unused-vars
+    //     return <TextPageView key={ page.index } page={ page } />;
+    // }
 
     transform(parseResult:ParseResult) {
         parseResult.pages.forEach(page => {

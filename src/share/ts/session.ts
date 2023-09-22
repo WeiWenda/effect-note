@@ -294,7 +294,7 @@ export default class Session extends EventEmitter {
         });
         return Promise.resolve();
       }), Promise.resolve());
-    while (lines[lines.length - 1].line === '') { // Strip trailing blank line(s)
+    while (lines[lines.length - 1]?.line === '') { // Strip trailing blank line(s)
       lines = lines.splice(0, lines.length - 1);
     }
 

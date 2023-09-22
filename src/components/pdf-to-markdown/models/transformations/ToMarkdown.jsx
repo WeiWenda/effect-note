@@ -1,5 +1,5 @@
 import React from 'react';
-import MarkdownPageView from '../../components/debug/MarkdownPageView.jsx';
+// import MarkdownPageView from '../../components/debug/MarkdownPageView.jsx';
 import Transformation from './Transformation.jsx';
 import ParseResult from '../ParseResult.jsx';
 
@@ -9,9 +9,9 @@ export default class ToMarkdown extends Transformation {
         super("To Markdown", "String");
     }
 
-    createPageView(page, modificationsOnly) { // eslint-disable-line no-unused-vars
-        return <MarkdownPageView key={ page.index } page={ page } />;
-    }
+    // createPageView(page, modificationsOnly) { // eslint-disable-line no-unused-vars
+    //     return <MarkdownPageView key={ page.index } page={ page } />;
+    // }
 
     transform(parseResult:ParseResult) {
         parseResult.pages.forEach(page => {

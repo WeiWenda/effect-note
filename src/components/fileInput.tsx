@@ -19,9 +19,11 @@ export const load_file = function(file: File): Promise<{name: string, contents: 
       reader.onload = function (evt) {
         const appState = new AppState();
         const fileBuffer = evt.target!.result as ArrayBuffer;
-        return resolve({
-          name: file.name,
-          contents: appState.tranform(new Uint8Array(fileBuffer))
+        appState.tranform(new Uint8Array(fileBuffer)).then((contents) => {
+          resolve({
+            name: file.name + '.md',
+            contents
+          });
         });
       };
       reader.readAsArrayBuffer(file);

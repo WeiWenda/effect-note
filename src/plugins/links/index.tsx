@@ -217,11 +217,11 @@ export class LinksPlugin {
             const { path, pluginData, parentBoard, indexInParent } = info;
             let tags: string[] = pluginData.tags?.tags || [];
             if (indexInParent) {
-                lineContents.unshift(<span>{indexInParent}. </span>);
+                lineContents.unshift(<span key={'row-number'}>{indexInParent}. </span>);
             }
             if (parentBoard) {
-                lineContents.unshift(<ArrowRightOutlined className={'header-icon-left'}/>);
-                lineContents.push(<ArrowLeftOutlined className={'header-icon-right'}/>);
+                lineContents.unshift(<ArrowRightOutlined key='board-right-arrow' className={'header-icon-left'}/>);
+                lineContents.push(<ArrowLeftOutlined key='board-left-arrow' className={'header-icon-right'}/>);
             }
             if (pluginData.links && pluginData.links.is_check !== null) {
                 lineContents.unshift(<Popover key={'status'}

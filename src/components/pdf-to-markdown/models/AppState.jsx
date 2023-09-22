@@ -17,6 +17,9 @@ import Metadata from "./Metadata";
 import Page from "./Page";
 import TextItem from "./TextItem";
 import ParseResult from "./ParseResult";
+import workerSrc from 'pdfjs-dist/build/pdf.worker.entry';
+
+pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
 
 // Holds the state of the Application
 export default class AppState {
@@ -39,20 +42,14 @@ export default class AppState {
             new ToTextBlocks(),
             new ToMarkdown()
         ];
+        this.tranform = this.tranform.bind(this);
     }
 
-    metadataParsed(metadata) {
-
-        // console.debug(new Metadata(metadata));
-        this.setState({
-
-        });
-    }
-
-    tranform(fileBuffer: Uint8Array) {
+    async tranform(fileBuffer: Uint8Array) {
         const fontIds = new Set();
         const fontMap = new Map();
-        pdfjs.getDocument({
+        const that = this;
+        await pdfjs.getDocument({
             data: fileBuffer,
             cMapUrl: 'cmaps/',
             cMapPacked: true
@@ -60,22 +57,22 @@ export default class AppState {
             // console.debug(pdfDocument);
             pdfDocument.getMetadata().then(function(metadata) {
                 // console.debug(metadata);
-                this.metadata = new Metadata(metadata);
+                that.metadata = new Metadata(metadata);
             });
-            this.pages = [];
             const numPages = pdfDocument.numPages;
             for (var i = 0; i < numPages; i++) {
-                this.pages.push(new Page({
+                that.pages.push(new Page({
                     index: i
                 }));
             }
+            const pageReadPromises = [];
             for (var j = 1; j <= pdfDocument.numPages; j++) {
-                pdfDocument.getPage(j).then(function(page) {
+                pageReadPromises.push(pdfDocument.getPage(j).then(function(page) {
                     // console.debug(page);
                     var scale = 1.0;
                     var viewport = page.getViewport({scale: scale});
 
-                    page.getTextContent().then(function(textContent) {
+                    const pageReadPromise = page.getTextContent().then(function(textContent) {
                         // console.debug(textContent);
                         const textItems = textContent.items.map(function(item) {
                             //trigger resolving of fonts
@@ -103,20 +100,22 @@ export default class AppState {
                                 font: item.fontName
                             });
                         });
-                        this.pages[page._pageIndex] = textItems;
+                        that.pages[page._pageIndex].items = textItems;
                     });
                     page.getOperatorList().then(function() {
                         // do nothing... this is only for triggering the font retrieval
                     });
-                });
+                    return pageReadPromise;
+                }));
             }
-        });
-        this.transformations.unshift(new CalculateGlobalStats(fontMap))
+            return Promise.all(pageReadPromises);
+        })
+        that.transformations.unshift(new CalculateGlobalStats(fontMap))
         var parseResult = new ParseResult({
-            pages: this.pages
+            pages: that.pages
         });
         var lastTransformation;
-        this.transformations.forEach(transformation => {
+        that.transformations.forEach(transformation => {
             if (lastTransformation) {
                 parseResult = lastTransformation.completeTransform(parseResult);
             }
