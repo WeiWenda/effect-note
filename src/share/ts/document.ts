@@ -778,12 +778,21 @@ export default class Document extends EventEmitter {
 
     const paths = this.traverseSubtree(root);
     for await (let path of paths) {
-      const text = await this.getText(path.row);
+      const rowInfo = await this.getInfo(path.row);
+      const text = rowInfo.line.join('');
       const line = canonicalize(text);
+      const {md, code} = rowInfo.pluginData.links;
+      const extendContent = canonicalize((md || '') + (code?.content || ''));
       const matches: Array<number> = [];
       if (_.every(query_words.map((word) => {
         const index = line.indexOf(word);
-        if (index === -1) { return false; }
+        if (index === -1) {
+          if (extendContent.includes(word)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
         for (let j = index; j < index + word.length; j++) {
           matches.push(j);
         }
