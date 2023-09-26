@@ -33,6 +33,9 @@ export default class CalculateGlobalStats extends ToTextItemTransformation {
         parseResult.pages.forEach(page => {
             var lastItemOfMostUsedHeight;
             page.items.forEach(item => {
+                if (item.height == 0) {
+                    return;
+                }
                 if (item.height == mostUsedHeight && item.text.trim().length > 0) {
                     if (lastItemOfMostUsedHeight && item.y != lastItemOfMostUsedHeight.y) {
                         const distance = lastItemOfMostUsedHeight.y - item.y;

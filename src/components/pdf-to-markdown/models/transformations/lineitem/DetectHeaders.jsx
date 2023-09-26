@@ -97,10 +97,11 @@ export default class DetectHeaders extends ToLineItemTransformation {
             parseResult.pages.forEach(page => {
                 var lastItem;
                 page.items.forEach(item => {
+                    // const upperCaseStartChar = item.text().replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
                     if (!item.type
                             && item.height == mostUsedHeight
                             && item.font !== mostUsedFont
-                            && (!lastItem || lastItem.y < item.y || (lastItem.type && lastItem.type.headline) || (lastItem.y - item.y > mostUsedDistance * 2))
+                            && (!lastItem || lastItem.y < item.y || (lastItem.type && lastItem.type.headline) || (lastItem.y - item.y > mostUsedDistance * 1.8))
                             && item.text() === item.text().toUpperCase()
                     ) {
                         detectedHeaders++;

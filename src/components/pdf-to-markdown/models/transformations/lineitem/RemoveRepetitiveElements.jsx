@@ -38,13 +38,17 @@ export default class RemoveRepetitiveElements extends ToLineItemTransformation {
         const maxLineHashRepetitions = {};
         parseResult.pages.forEach(page => {
             const minMaxItems = page.items.reduce((itemStore, item) => {
-                if (item.y < itemStore.minY) {
+                if (item.annotation === REMOVED_ANNOTATION) {
+                    // do nothing
+                } else if (item.y < itemStore.minY) {
                     itemStore.minElements = [item];
                     itemStore.minY = item.y;
                 } else if (item.y == itemStore.minY) {
                     itemStore.minElements.push(item);
                 }
-                if (item.y > itemStore.maxY) {
+                if (item.annotation === REMOVED_ANNOTATION) {
+                    // do nothing
+                } else if (item.y > itemStore.maxY) {
                     itemStore.maxElements = [item];
                     itemStore.maxY = item.y;
                 } else if (item.y == itemStore.maxY) {
@@ -88,13 +92,20 @@ export default class RemoveRepetitiveElements extends ToLineItemTransformation {
             }
         });
 
-        return new ParseResult({
+        const newResult = new ParseResult({
             ...parseResult,
             messages: [
                 'Removed Header: ' + removedHeader,
                 'Removed Footers: ' + removedFooter
             ]
         });
+
+        if (removedHeader > 0 || removedFooter > 0) {
+            return this.transform(newResult);
+        } else {
+            return newResult;
+        }
+
     }
 
 }

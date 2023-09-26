@@ -36,7 +36,7 @@ export default class AppState {
             new DetectListItems(),
 
             new GatherBlocks(),
-            new DetectCodeQuoteBlocks(),
+            // new DetectCodeQuoteBlocks(),
             new DetectListLevels(),
 
             new ToTextBlocks(),
