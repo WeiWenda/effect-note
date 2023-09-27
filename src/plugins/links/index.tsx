@@ -188,6 +188,8 @@ export class LinksPlugin {
                 const cursorIsCheck = await this.getIsCheck(this.session.cursor.path.row);
                 if (cursorIsCheck !== null) {
                     await this._setIsCheck(path.row, false);
+                    const tags: string[] = [];
+                    await onCheckChange(tags, 'create: ', path.row);
                 }
             }
             if (serialized.code) {
