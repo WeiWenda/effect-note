@@ -1,7 +1,7 @@
 import {Path, Session} from '../../ts';
 import {getStyles} from '../../ts/themes';
 import * as React from 'react';
-import {Space} from 'antd';
+import {Popover, Space} from 'antd';
 import {useState} from 'react';
 import {FolderOutlined, FolderOpenOutlined, EnterOutlined, CopyOutlined} from '@ant-design/icons';
 
@@ -13,7 +13,8 @@ export function SpecialBlock(props: React.PropsWithChildren<{
   setCollapseCallback: (collapse: boolean) => void}>) {
   const [fold, setFold] = useState(props.collapse);
   const [headerVision, setHeaderVision] = useState(props.collapse);
-  return (
+  const [popOverOpen, setPopOverOpen] = useState(false);
+  const content = (
     <div className={`effect-block-wrapper ${props.specialClass || ''}`} onMouseEnter={() => {
       setHeaderVision(true);
       if (typeof props.blockType !== 'string') {
@@ -39,8 +40,8 @@ export function SpecialBlock(props: React.PropsWithChildren<{
              }
            }}
            style={{
-        height: `${props.session.clientStore.getClientSetting('lineHeight')}px`
-      }}>
+             height: `${props.session.clientStore.getClientSetting('lineHeight')}px`
+           }}>
         <Space style={{opacity: 1}}>
           {
             // !props.session.lockEdit &&
@@ -48,17 +49,17 @@ export function SpecialBlock(props: React.PropsWithChildren<{
           }
           {
             fold &&
-            <FolderOutlined onClick={() => {
-              setFold(false);
-              props.setCollapseCallback(false);
-            }} />
+              <FolderOutlined onClick={() => {
+                setFold(false);
+                props.setCollapseCallback(false);
+              }} />
           }
           {
             !fold &&
-            <FolderOpenOutlined onClick={() => {
-              setFold(true);
-              props.setCollapseCallback(true);
-            }} />
+              <FolderOpenOutlined onClick={() => {
+                setFold(true);
+                props.setCollapseCallback(true);
+              }} />
           }
           {
             !props.session.lockEdit &&
@@ -84,10 +85,35 @@ export function SpecialBlock(props: React.PropsWithChildren<{
       </div>
       {
         !fold &&
-        <div className={'effect-block-content'} >
-          {props.children}
-        </div>
+          <div className={'effect-block-content'} >
+            {props.children}
+          </div>
       }
     </div>
   );
+  if (fold) {
+    return (
+      <Popover placement='top' trigger='hover'
+               open={popOverOpen}
+               onOpenChange={(e) => {
+                 if (e) {
+                   props.session.selectPopoverOpen = true;
+                   setPopOverOpen(true);
+                 } else {
+                   props.session.selectPopoverOpen = false;
+                   setPopOverOpen(false);
+                 }
+               }}
+               content={
+                <div style={{maxHeight: window.innerHeight / 2, width: window.innerWidth / 2, overflowY: 'auto'}}>
+                  {props.children}
+                </div>
+               }
+      >
+        {content}
+      </Popover>
+    );
+  } else {
+    return content;
+  }
 }
