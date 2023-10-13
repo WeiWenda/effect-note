@@ -45,6 +45,46 @@ async function addDocToIndex(dir, lunrIdx) {
             }
         })
 }
+
+async function addSubscribe(dirname, gitRemote, rootDir, gitPull, res) {
+    const localDir = path.join(getSearchDir(), dirname + '_whole')
+    const existList = JSON.parse(store.get('subscription_list', '{}'))
+    if (existList.hasOwnProperty(dirname)) {
+        if (gitPull) {
+            await git.pull({
+                fs,
+                http: isoHttp,
+                dir: path.join(getSearchDir(), dirname + '_whole'),
+                singleBranch: true,
+                author: {
+                    name: 'effect',
+                    email: 'effect@effect.com'
+                }
+            })
+            refreshIndex()
+            res.send({message: 'git pull success'})
+        } else {
+            res.status(500).send({message: '名称重复'})
+        }
+    } else {
+        existList[dirname] = {name: dirname, gitRemote, rootDir};
+        store.set('subscription_list', JSON.stringify(existList))
+        if (fs.existsSync(path.join(getSearchDir(), dirname))) {
+            await fs.unlinkSync(path.join(getSearchDir(), dirname))
+        }
+        await git.clone({
+            fs,
+            http: isoHttp,
+            dir: path.join(getSearchDir(), dirname + '_whole'),
+            url: gitRemote,
+            singleBranch: true,
+            depth: 1,
+        })
+        fs.symlinkSync(path.join(localDir, rootDir), path.join(getSearchDir(), dirname))
+        refreshIndex()
+        res.send({message: 'subscription success'})
+    }
+}
 router.get('/', async (req, res) => {
     const existList = JSON.parse(store.get('subscription_list', '{}'))
     res.send({data: existList})
@@ -75,45 +115,12 @@ router.put('/', (req, res) => {
     refreshIndex()
     res.send({message: 'update subscription success'})
 })
+
+router.get('/quick_add', async (req, res) => {
+    addSubscribe(req.query.name, req.query.remote, req.query.dir || '', false, res)
+})
 router.post('/', async (req, res) => {
-    const dirname = req.body.name;
-    const gitRemote = req.body.gitRemote;
-    const rootDir = req.body.rootDir;
-    const gitPull = req.body.gitPull;
-    const localDir = path.join(getSearchDir(), dirname + '_whole')
-    const existList = JSON.parse(store.get('subscription_list', '{}'))
-    if (existList.hasOwnProperty(dirname)) {
-        if (gitPull) {
-            await git.pull({
-                fs,
-                http: isoHttp,
-                dir: path.join(getSearchDir(), dirname + '_whole'),
-                singleBranch: true,
-                author: {
-                    name: 'effect',
-                    email: 'effect@effect.com'
-                }
-            })
-            refreshIndex()
-            res.send({message: 'git pull success'})
-        } else {
-            res.status(500).send({message: '名称重复'})
-        }
-    } else {
-        existList[dirname] = req.body;
-        store.set('subscription_list', JSON.stringify(existList))
-        await git.clone({
-            fs,
-            http: isoHttp,
-            dir: path.join(getSearchDir(), dirname + '_whole'),
-            url: gitRemote,
-            singleBranch: true,
-            depth: 1,
-        })
-        fs.symlinkSync(path.join(localDir, rootDir), path.join(getSearchDir(), dirname))
-        refreshIndex()
-        res.send({message: 'subscription success'})
-    }
+    addSubscribe(req.body.name, req.body.gitRemote, req.body.rootDir, req.body.gitPull, res)
 })
 router.get('/refresh', async (req, res) => {
     await refreshIndex()
