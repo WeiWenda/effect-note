@@ -455,6 +455,8 @@ export class TagsPlugin {
       //     </Popover>
       //   );
       // }
+      const taskTags = tags
+        .filter((t: string) => new RegExp('((create|start|end|due):.*)').test(t) || ['Todo', 'Done'].includes(t));
       tags = tags
         .filter((t: string) => !new RegExp('((create|start|end|due):.*)').test(t))
         .filter((t: string) => !['Todo', 'Done'].includes(t));
@@ -465,7 +467,7 @@ export class TagsPlugin {
           .concat(['重要', '关键', '注意']).filter( onlyUnique )
           .map(tag => { return {label: tag, value: tag}; });
         const handleChange = (newTags: string[]) => {
-          this.setTags(path.row, newTags);
+          this.setTags(path.row, newTags.concat(taskTags));
         };
         lineContents.push(
           <Select
