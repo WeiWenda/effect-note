@@ -631,7 +631,7 @@ export class TagsPlugin {
     const rowsToTags = await this._getRowsToTags();
     await Promise.all(Object.keys(rowsToTags).map(async (row) => {
       const tags = rowsToTags[Number(row)];
-      if (tags.some(tag => tag.startsWith('end:'))) {
+      if (tags.some(tag => tag !== null && tag.startsWith('end:'))) {
         let content = (await this.session.document.getLine(Number(row))).join('');
         if (content.startsWith('~~')) {
           content = content.slice(2, -2);
