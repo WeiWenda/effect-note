@@ -227,7 +227,7 @@ export class LinksPlugin {
             }
             if (pluginData.links && pluginData.links.is_check !== null) {
                 lineContents.unshift(<Popover key={'status'}
-                         trigger='hover'
+                         trigger='contextMenu'
                          onOpenChange={(open) => {
                              if (open) {
                                  this.session.cursor.reset();
