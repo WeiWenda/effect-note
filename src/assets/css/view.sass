@@ -252,11 +252,22 @@ $file-toolbar-height: 36px
     padding: 5px 0
     border-bottom: 2px solid
 
-.session-content
+.session-area
     @include calc(height, '100% - #{$file-toolbar-height}')
+    position: relative
+    display: flex
+    flex-direction: row
+    overflow: auto
     padding-top: 10px
     padding-bottom: 8em
-    overflow: auto
+.comment-area
+    width: 250px
+    border-left: 1px solid black
+    flex-shrink: 0
+.session-content
+    flex-grow: 1
+    height: fit-content
+    @include calc(max-width, '100% - 250px')
 
 .effect-block-wrapper.effect-code-block
     border-radius: 0px

@@ -486,7 +486,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     });
   };
   return (
-    <div style={{height: '100%', flexDirection: 'row', display: 'flex', width: '100%'}}>
+    <div style={{height: '100%', flexDirection: 'row', display: 'flex'}}>
       {
          showFileList &&
           <div style={{width: `${fileListWidth}px`, overflow: 'auto', flexShrink: 0}}>
@@ -517,15 +517,18 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
               }}></div>
           </DraggableCore>
       }
-      <SessionWithToolbarComponent session={props.session} loading={loading} markPlugin={markPlugin}
-                                   curDocId={Number(curDocId)}
-                                   beforeLoadDoc={beforeLoadDoc}
-                                   afterLoadDoc={afterLoadDoc}
-                                   filterOuter={filter}
-                                   showLayoutIcon={true}
-                                   showLockIcon={true}
-                                   tagPlugin={tagPlugin}
-      />
+      <div style={{width: window.innerWidth - (showPreview ? previewWidth + 3 : 3) - (showFileList ? fileListWidth + 3 : 3),
+                  height: '100%'}}>
+        <SessionWithToolbarComponent session={props.session} loading={loading} markPlugin={markPlugin}
+                                     curDocId={Number(curDocId)}
+                                     beforeLoadDoc={beforeLoadDoc}
+                                     afterLoadDoc={afterLoadDoc}
+                                     filterOuter={filter}
+                                     showLayoutIcon={true}
+                                     showLockIcon={true}
+                                     tagPlugin={tagPlugin}
+        />
+      </div>
       {
         showPreview &&
           <DraggableCore key='preview_drag' onDrag={(_, ui) => {

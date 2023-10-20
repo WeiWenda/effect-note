@@ -17,7 +17,7 @@ import {getDocContent, getDocVersions} from '../../share/ts/utils/APIUtils';
 import Moment from 'moment/moment';
 import FileToolsComponent from '../fileTools';
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import {ReactNode, useEffect, useState} from 'react';
 import {MarksPlugin} from '../../plugins/marks';
 import {default as FileSearch} from '../../share/ts/search';
 import {TagsPlugin} from '../../plugins/tags';
@@ -41,6 +41,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const [filterInner, setFilterInner] = useState('');
   const [versions, setVersions] = useState(new Array<DocVersion>());
   const [currentVersion, setCurrentVersion] = useState('');
+  const [comments, setComments] = useState(new Array<ReactNode>);
   // const [showProgress, setShowProgress] = useState(false);
   // const [progress, setProgress] = useState(0);
   const onCrumbClick = async (path: Path) => {
@@ -119,9 +120,16 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
         }
       }
     });
+    props.session.on('changeComment', async () => {
+      const newComment = await props.session.applyHookAsync('renderComments', [], props.session);
+      setComments(newComment);
+    });
+    setTimeout(() => {
+      props.session.emit('changeComment');
+    }, 1000);
   }, []);
   return (
-    <div style={{flexGrow: 1, overflow: 'auto'}}>
+    <div style={{width: '100%', height: '100%'}}>
       {
         props.loading &&
         <SpinnerComponent/>
@@ -275,7 +283,15 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
       }
       {
         !props.loading &&
-        <SessionComponent ref={props.session.sessionRef} session={props.session} />
+          <div className={'session-area'}>
+            <SessionComponent ref={props.session.sessionRef} session={props.session} />
+            {
+              comments.length > 0 &&
+              <div className={'comment-area'}>
+                {comments}
+              </div>
+            }
+            </div>
       }
     </div>
   );

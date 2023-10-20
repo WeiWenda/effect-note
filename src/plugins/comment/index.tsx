@@ -1,6 +1,7 @@
 import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Logger} from '../../ts/logger';
 import {Col, Document, Row, Session} from '../../share';
+import {HeightAnchor} from './HeightAnchor';
 
 export class CommentPlugin {
   private api: PluginApi;
@@ -41,6 +42,30 @@ export class CommentPlugin {
       const comments = await this.getComments(row);
       obj.comments = comments;
       return obj;
+    });
+    this.api.registerHook('session', 'renderComments', async (comments, session) => {
+      const ids_to_comments = await this.api.getData('ids_to_comments', {});
+      await Promise.all(Object.keys(ids_to_comments).map(async (key)  => {
+        const row = Number(key);
+        const curComments = await this.getComments(row);
+        const rowRef = session.rowRef[row];
+        if (rowRef) {
+          const height = rowRef.current!.offsetTop;
+          Object.keys(curComments).forEach((colPair) => {
+            comments.push(<div key={`commit-${row}-${colPair}`} style={{position: 'absolute', top: height}}>
+              {curComments[colPair].content}
+            </div>);
+          });
+        }
+      }));
+      return comments;
+    });
+    this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
+      const { path, pluginData } = info;
+      if (pluginData.comments) {
+        lineContents.push(<HeightAnchor key={'height-anchor'} session={this.session} row={path.row}/>);
+      }
+      return lineContents;
     });
   }
 

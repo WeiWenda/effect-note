@@ -16,7 +16,7 @@ import * as Modes from './modes';
 
 import {ModeId, CursorOptions, Row, Col, Chars, SerializedBlock, UserInfo, KityMinderNode, DocInfo} from './types';
 import { updateDoc, uploadDoc} from './utils/APIUtils';
-import React from 'react';
+import React, {MutableRefObject, Ref} from 'react';
 import Search from './search';
 
 type SessionOptions = {
@@ -77,6 +77,7 @@ export default class Session extends EventEmitter {
 
   private mutations: Array<Mutation> = [];
   private history: Array<HistoryLogEntry> = [];
+  public rowRef: {[key: number]: MutableRefObject<null | HTMLDivElement>} = {};
   private historyIndex: number = 0;
   public jumpHistory: Array<JumpLogEntry> = [];
   public jumpIndex: number = 0;
