@@ -1,6 +1,6 @@
 import {Col, DocInfo, Path, Session} from '../../ts';
 import {BoldOutlined, FontColorsOutlined,
-  HighlightOutlined, ItalicOutlined, DeleteOutlined, LinkOutlined, CheckOutlined, CopyOutlined} from '@ant-design/icons';
+  HighlightOutlined, ItalicOutlined, DeleteOutlined, LinkOutlined, CheckOutlined, CopyOutlined, MessageOutlined} from '@ant-design/icons';
 import {Space, Popover, Input, Button} from 'antd';
 import * as React from 'react';
 import {useState} from 'react';
@@ -15,8 +15,10 @@ export function FontStyleToolComponent(
   }>) {
   const [allClasses, setAllClasses] = useState<string[]>([]);
   const [link, setLink] = useState<string | undefined>(props.link);
+  const [comment, setComment] = useState<string>('');
   const [open, setOpen] = useState(false);
   const [showLink, setShowLink] = useState(false);
+  const [showComment, setShowComment] = useState(false);
   const switchClass = (newClass: string) => {
     return () => {
       let newClasses: string[] = allClasses;
@@ -88,6 +90,35 @@ export function FontStyleToolComponent(
               }/>
             }>
               <LinkOutlined />
+            </Popover>
+            <Popover open={showComment}
+                     trigger={'click'}
+                     onOpenChange={e => {
+                       if (e) {
+                         props.session.stopKeyMonitor('add-comment');
+                       } else {
+                         props.session.startKeyMonitor();
+                       }
+                       setShowComment(e);
+                     }}
+                     content={
+                       <Input
+                         value={comment}
+                         onChange={(v) => {
+                           setComment(v.target.value);
+                         }}
+                         addonBefore='备注内容:' addonAfter={
+                         <CheckOutlined onClick={() => {
+                           props.session.startKeyMonitor();
+                           props.session.selectPopoverOpen = false;
+                           props.session.emitAsync('addComment', props.path.row, props.startCol, props.endCol, comment).then(() => {
+                             props.session.emit('updateInner');
+                           });
+                           setShowComment(false);
+                         }}/>
+                       }/>
+                     }>
+              <MessageOutlined />
             </Popover>
             <FontColorsOutlined onClick={switchClass('red-color')} className={'red-color'}/>
             <FontColorsOutlined onClick={switchClass('yellow-color')} className={'yellow-color'}/>

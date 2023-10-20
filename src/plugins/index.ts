@@ -14,6 +14,7 @@ import './bracket_completion';
 import './links';
 import './markdown';
 import './code';
+import './comment';
 
 // for developers: uncomment the following lines
 /*
