@@ -2,6 +2,8 @@ import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Logger} from '../../ts/logger';
 import {Col, Document, Row, Session} from '../../share';
 import {HeightAnchor} from './HeightAnchor';
+import {CommentBox} from './CommentBox';
+import Moment from 'moment';
 
 export class CommentPlugin {
   private api: PluginApi;
@@ -21,6 +23,12 @@ export class CommentPlugin {
   public async enable() {
     this.api.registerListener('session', 'addComment', async (row: Row, startCol: Col, endCol: Col, comment: string) => {
       await this.setComments(row, startCol, endCol, comment);
+    });
+    this.api.registerListener('session', 'removeComment', async (row: Row, startCol: Col, endCol: Col) => {
+      await this.removeComments(row, startCol, endCol);
+    });
+    this.api.registerListener('session', 'resolveComment', async (row: Row, startCol: Col, endCol: Col) => {
+      await this.resolveComments(row, startCol, endCol);
     });
     this.api.registerHook('document', 'serializeRow', async (struct, info) => {
       const comment = await this.getComments(info.row);
@@ -52,8 +60,16 @@ export class CommentPlugin {
         if (rowRef) {
           const height = rowRef.current!.offsetTop;
           Object.keys(curComments).forEach((colPair) => {
-            comments.push(<div key={`commit-${row}-${colPair}`} style={{position: 'absolute', top: height}}>
-              {curComments[colPair].content}
+            comments.push(
+              <div key={`commit-${row}-${colPair}`} style={{position: 'absolute', top: height}}>
+                <CommentBox
+                  colPair={colPair}
+                  row={row}
+                  session={session}
+                  content={curComments[colPair].content}
+                  resolved={curComments[colPair].resolve}
+                  createTime={curComments[colPair].createTime}
+                />
             </div>);
           });
         }
@@ -70,7 +86,35 @@ export class CommentPlugin {
   }
 
   public async setComments(row: Row, startCol: Col, endCol: Col, comment: string): Promise<void> {
-    await this._setComments(row, startCol, endCol, {content: comment, resolve: false});
+    await this._setComments(row, startCol, endCol, {content: comment, resolve: false, createTime: Moment().format('yyyy-MM-DD HH:mm:ss')});
+    await this.api.updatedDataForRender(row);
+  }
+
+  public async removeComments(row: Row, startCol: Col, endCol: Col): Promise<void> {
+    const ids_to_comments = await this.api.getData('ids_to_comments', {});
+    const before: number[] = JSON.parse(ids_to_comments[row] || '[]') as number[];
+    const after: number[] = [];
+    while (before.length > 0) {
+      const startCol1 = before.shift()!;
+      const endCol1 = before.shift()!;
+      if ((startCol1 >= startCol && startCol1 <= endCol) || (endCol1 >= startCol && endCol1 <= endCol)) {
+        continue;
+      } else {
+        after.push(startCol1, endCol1);
+      }
+    }
+    if (after.length > 0) {
+      ids_to_comments[row] = JSON.stringify(after);
+    } else {
+      delete ids_to_comments[row];
+    }
+    await this.api.setData('ids_to_comments', ids_to_comments);
+    await this.api.updatedDataForRender(row);
+  }
+
+  public async resolveComments(row: Row, startCol: Col, endCol: Col): Promise<void> {
+    const oldComment = await this.api.getData(`${row}:${startCol}-${endCol}:comment`, {});
+    await this._setComments(row, startCol, endCol, {...oldComment, resolve: true});
     await this.api.updatedDataForRender(row);
   }
 

@@ -92,7 +92,7 @@
     "@types/ws": "0.0.41",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-react": "^1.0.6",
-    "antd": "^5.3.0",
+    "antd": "^5.10.2",
     "electron": "26.0.0",
     "electron-builder": "^22.14.13",
     "enumify": "^1.0.4",

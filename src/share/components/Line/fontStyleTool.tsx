@@ -1,6 +1,6 @@
 import {Col, DocInfo, Path, Session} from '../../ts';
 import {BoldOutlined, FontColorsOutlined,
-  HighlightOutlined, ItalicOutlined, DeleteOutlined, LinkOutlined, CheckOutlined, CopyOutlined, MessageOutlined} from '@ant-design/icons';
+  HighlightOutlined, ItalicOutlined, DeleteOutlined, LinkOutlined, CheckOutlined, CopyOutlined, MessageOutlined, BgColorsOutlined} from '@ant-design/icons';
 import {Space, Popover, Input, Button} from 'antd';
 import * as React from 'react';
 import {useState} from 'react';
@@ -15,10 +15,10 @@ export function FontStyleToolComponent(
   }>) {
   const [allClasses, setAllClasses] = useState<string[]>([]);
   const [link, setLink] = useState<string | undefined>(props.link);
-  const [comment, setComment] = useState<string>('');
+  // const [comment, setComment] = useState<string>('');
   const [open, setOpen] = useState(false);
   const [showLink, setShowLink] = useState(false);
-  const [showComment, setShowComment] = useState(false);
+  // const [showComment, setShowComment] = useState(false);
   const switchClass = (newClass: string) => {
     return () => {
       let newClasses: string[] = allClasses;
@@ -91,47 +91,62 @@ export function FontStyleToolComponent(
             }>
               <LinkOutlined />
             </Popover>
-            <Popover open={showComment}
-                     trigger={'click'}
-                     onOpenChange={e => {
-                       if (e) {
-                         props.session.stopKeyMonitor('add-comment');
-                       } else {
-                         props.session.startKeyMonitor();
-                       }
-                       setShowComment(e);
-                     }}
-                     content={
-                       <Input
-                         value={comment}
-                         onChange={(v) => {
-                           setComment(v.target.value);
-                         }}
-                         addonBefore='备注内容:' addonAfter={
-                         <CheckOutlined onClick={() => {
-                           props.session.startKeyMonitor();
-                           props.session.selectPopoverOpen = false;
-                           props.session.emitAsync('addComment', props.path.row, props.startCol, props.endCol, comment).then(() => {
-                             props.session.emit('updateInner');
-                           });
-                           setShowComment(false);
-                         }}/>
-                       }/>
-                     }>
-              <MessageOutlined />
+            {/*<Popover open={showComment}*/}
+            {/*         trigger={'click'}*/}
+            {/*         onOpenChange={e => {*/}
+            {/*           if (e) {*/}
+            {/*             props.session.stopKeyMonitor('add-comment');*/}
+            {/*           } else {*/}
+            {/*             props.session.startKeyMonitor();*/}
+            {/*           }*/}
+            {/*           setShowComment(e);*/}
+            {/*         }}*/}
+            {/*         content={*/}
+            {/*           <Input*/}
+            {/*             value={comment}*/}
+            {/*             onChange={(v) => {*/}
+            {/*               setComment(v.target.value);*/}
+            {/*             }}*/}
+            {/*             addonBefore='备注内容:' addonAfter={*/}
+            {/*             <CheckOutlined onClick={() => {*/}
+            {/*               props.session.startKeyMonitor();*/}
+            {/*               props.session.selectPopoverOpen = false;*/}
+            {/*               props.session.emitAsync('addComment', props.path.row, props.startCol, props.endCol, comment).then(() => {*/}
+            {/*                 props.session.emit('updateInner');*/}
+            {/*               });*/}
+            {/*               setShowComment(false);*/}
+            {/*             }}/>*/}
+            {/*           }/>*/}
+            {/*         }>*/}
+            {/*</Popover>*/}
+            <MessageOutlined onClick={() => {
+              props.session.emitAsync('addComment', props.path.row, props.startCol, props.endCol, '').then(() => {
+                props.session.stopAnchor();
+                props.session.selecting = false;
+                props.session.emit('updateInner');
+              });
+            }}/>
+            <Popover
+               trigger={'hover'}
+               content={
+                 <Space className={'rtf-toolbox node-html'}>
+                  <FontColorsOutlined onClick={switchClass('red-color')} className={'red-color'}/>
+                  <FontColorsOutlined onClick={switchClass('yellow-color')} className={'yellow-color'}/>
+                  <FontColorsOutlined onClick={switchClass('green-color')} className={'green-color'}/>
+                  <FontColorsOutlined onClick={switchClass('blue-color')} className={'blue-color'}/>
+                  <FontColorsOutlined onClick={switchClass('purple-color')} className={'purple-color'}/>
+                  <FontColorsOutlined onClick={switchClass('grey-color')} className={'grey-color'}/>
+                  <HighlightOutlined onClick={switchClass('red-background')} className={'red-background'}/>
+                  <HighlightOutlined onClick={switchClass('yellow-background')} className={'yellow-background'}/>
+                  <HighlightOutlined onClick={switchClass('green-background')} className={'green-background'}/>
+                  <HighlightOutlined onClick={switchClass('cyan-background')} className={'cyan-background'}/>
+                  <HighlightOutlined onClick={switchClass('blue-background')} className={'blue-background'}/>
+                  <HighlightOutlined onClick={switchClass('purple-background')} className={'purple-background'}/>
+                 </Space>
+               }
+            >
+              <BgColorsOutlined />
             </Popover>
-            <FontColorsOutlined onClick={switchClass('red-color')} className={'red-color'}/>
-            <FontColorsOutlined onClick={switchClass('yellow-color')} className={'yellow-color'}/>
-            <FontColorsOutlined onClick={switchClass('green-color')} className={'green-color'}/>
-            <FontColorsOutlined onClick={switchClass('blue-color')} className={'blue-color'}/>
-            <FontColorsOutlined onClick={switchClass('purple-color')} className={'purple-color'}/>
-            <FontColorsOutlined onClick={switchClass('grey-color')} className={'grey-color'}/>
-            <HighlightOutlined onClick={switchClass('red-background')} className={'red-background'}/>
-            <HighlightOutlined onClick={switchClass('yellow-background')} className={'yellow-background'}/>
-            <HighlightOutlined onClick={switchClass('green-background')} className={'green-background'}/>
-            <HighlightOutlined onClick={switchClass('cyan-background')} className={'cyan-background'}/>
-            <HighlightOutlined onClick={switchClass('blue-background')} className={'blue-background'}/>
-            <HighlightOutlined onClick={switchClass('purple-background')} className={'purple-background'}/>
             <CopyOutlined onClick={() => {
                copyToClipboard(props.textContent);
                props.session.showMessage('复制成功');
