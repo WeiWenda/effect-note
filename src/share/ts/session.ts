@@ -77,7 +77,7 @@ export default class Session extends EventEmitter {
 
   private mutations: Array<Mutation> = [];
   private history: Array<HistoryLogEntry> = [];
-  public rowRef: {[key: number]: MutableRefObject<null | HTMLDivElement>} = {};
+  public commentRef: {[key: string]: MutableRefObject<null | HTMLDivElement>} = {};
   private historyIndex: number = 0;
   public jumpHistory: Array<JumpLogEntry> = [];
   public jumpIndex: number = 0;

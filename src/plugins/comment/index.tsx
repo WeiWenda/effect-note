@@ -1,6 +1,6 @@
 import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Logger} from '../../ts/logger';
-import {Col, Document, Row, Session} from '../../share';
+import {Col, Document, EmitFn, PartialUnfolder, Row, Session, SplitToken, Token, Tokenizer} from '../../share';
 import {HeightAnchor} from './HeightAnchor';
 import {CommentBox} from './CommentBox';
 import Moment from 'moment';
@@ -52,40 +52,66 @@ export class CommentPlugin {
     });
     this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
       const comments = await this.getComments(row);
-      obj.comments = comments;
+      if (comments) {
+        obj.comments = Object.keys(comments).flatMap(r => r.split('-')).map(i => Number(i))
+          .sort((n1, n2) => n1 - n2);
+      } else {
+        obj.comments = [];
+      }
       return obj;
+    });
+    this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, info) => {
+      const comments = [...info.pluginData.comments as number[]];
+      if (comments.length > 0) {
+        return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
+          token: Token, emit: EmitFn<React.ReactNode>, wrapped: Tokenizer
+        ) => {
+          let endCol = 0;
+          while (comments.length > 0) {
+            const startCol = comments.shift()!;
+            let filler_token;
+            [filler_token, token] = SplitToken(token, startCol - endCol);
+            endCol = comments.shift()!;
+            emit(...wrapped.unfold(filler_token));
+            [filler_token, token] = SplitToken(token, endCol - startCol);
+            emit(<HeightAnchor key={`height-anchor-${startCol}`}
+                               session={this.session}
+                               row={info.path.row}
+                               startCol={startCol}
+                               text={filler_token.text}/>);
+            emit(...wrapped.unfold(token));
+          }
+        }));
+      } else {
+        return tokenizer;
+      }
     });
     this.api.registerHook('session', 'renderComments', async (comments, session) => {
       const ids_to_comments = await this.api.getData('ids_to_comments', {});
       await Promise.all(Object.keys(ids_to_comments).map(async (key)  => {
         const row = Number(key);
         const curComments = await this.getComments(row);
-        const rowRef = session.rowRef[row];
-        if (rowRef && rowRef.current != null) {
-          const height = rowRef.current.offsetTop;
-          Object.keys(curComments).forEach((colPair) => {
+        Object.keys(curComments).forEach((colPair) => {
+          const commentId = `${row}-${colPair.split('-').shift()}`;
+          const commentRef = session.commentRef[commentId];
+          if (commentRef && commentRef.current != null) {
+            const height = commentRef.current.offsetTop;
             comments.push(
               <div key={`commit-${row}-${colPair}`} style={{position: 'absolute', top: height}}>
                 <CommentBox
-                  colPair={colPair}
+                  startCol={Number(colPair.split('-').shift())}
+                  endCol={Number(colPair.split('-').pop())}
                   row={row}
                   session={session}
                   content={curComments[colPair].content}
                   resolved={curComments[colPair].resolve}
                   createTime={curComments[colPair].createTime}
                 />
-            </div>);
-          });
-        }
+              </div>);
+          }
+        });
       }));
       return comments;
-    });
-    this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
-      const { path, pluginData } = info;
-      if (pluginData.comments) {
-        lineContents.push(<HeightAnchor key={'height-anchor'} session={this.session} row={path.row}/>);
-      }
-      return lineContents;
     });
   }
 

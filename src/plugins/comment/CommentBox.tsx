@@ -3,36 +3,32 @@ import React, {useState} from 'react';
 import Meta from 'antd/es/card/Meta';
 import { EditOutlined, CheckOutlined, DeleteOutlined, RollbackOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import ContentEditable from 'react-contenteditable';
-import {Row, Session} from '../../share';
+import {Col, Row, Session} from '../../share';
 import $ from 'jquery';
 import {getStyles} from '../../share/ts/themes';
 
-export function CommentBox(props: {session: Session, row: Row, content: string, resolved: boolean, createTime: string, colPair: string}) {
+export function CommentBox(props: {session: Session, row: Row, content: string, resolved: boolean,
+  createTime: string, startCol: Col, endCol: Col}) {
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(props.content);
+  const commentId = `${props.row}-${props.startCol}`;
   const normalActions = [
     <EditOutlined key='edit' onClick={() => {
       setEditing(true);
       setTimeout(() => {
-        $(`#commit-edit-${props.row}`).focus();
+        $(`#commit-edit-${commentId}`).focus();
       }, 100);
     }} />,
     <CheckOutlined key='resolve' onClick={() => {
-      const startCol = Number(props.colPair.split('-').shift());
-      const endCol = Number(props.colPair.split('-').pop());
-      props.session.emit('resolveComment', props.row, startCol, endCol);
+      props.session.emit('resolveComment', props.row, props.startCol, props.endCol);
     }}/>,
     <DeleteOutlined key='delete' onClick={() => {
-      const startCol = Number(props.colPair.split('-').shift());
-      const endCol = Number(props.colPair.split('-').pop());
-      props.session.emit('removeComment', props.row, startCol, endCol);
+      props.session.emit('removeComment', props.row, props.startCol, props.endCol);
     }}/>
   ];
   const editActions = [
     <CheckCircleOutlined key='save' onClick={() => {
-      const startCol = Number(props.colPair.split('-').shift());
-      const endCol = Number(props.colPair.split('-').pop());
-      props.session.emitAsync('addComment', props.row, startCol, endCol, content).then(() => {
+      props.session.emitAsync('addComment', props.row, props.startCol, props.endCol, content).then(() => {
         setEditing(false);
       });
     }}/>,
@@ -43,8 +39,12 @@ export function CommentBox(props: {session: Session, row: Row, content: string, 
   ];
   return (
     <Card
-      onFocus={() => {props.session.stopKeyMonitor('comment-box'); } }
-      onBlur={() => {props.session.startKeyMonitor(); } }
+      onMouseEnter={() => {
+        props.session.commentRef[commentId].current?.classList.add('comment_underline_focus');
+      } }
+      onMouseLeave={() => {
+        props.session.commentRef[commentId].current?.classList.remove('comment_underline_focus');
+      } }
       className={'comment-box'}
           actions={props.resolved ? [] : editing ? editActions : normalActions}>
       <Meta
@@ -61,7 +61,13 @@ export function CommentBox(props: {session: Session, row: Row, content: string, 
               opacity: props.resolved ? 0.3 : 1,
               ...getStyles(props.session.clientStore, ['theme-text-primary'])}}
             dangerouslySetInnerHTML={{__html: content}}
-          /> : <ContentEditable id={`commit-edit-${props.row}`}
+          /> : <ContentEditable id={`commit-edit-${commentId}`}
+                                onFocus={() => {
+                                  props.session.stopKeyMonitor('comment-box');
+                                }}
+                                onBlur={() => {
+                                  props.session.startKeyMonitor();
+                                }}
                                 style={{...getStyles(props.session.clientStore, ['theme-text-primary'])}}
                                 html={content}
                                 onChange={(e) => {
