@@ -260,16 +260,21 @@ $file-toolbar-height: 36px
     overflow: auto
     padding-top: 10px
     padding-bottom: 8em
+.session-content
+    flex-grow: 1
+    height: fit-content
+
+.session-area-with-comment
+    .session-content
+        @include calc(max-width, '100% - 250px')
 .comment-area
     width: 250px
     flex-shrink: 0
 .comment-box
     width: 240px
     padding: 5px
-.session-content
-    flex-grow: 1
-    height: fit-content
-    @include calc(max-width, '100% - 250px')
+
+
 
 .effect-block-wrapper.effect-code-block
     border-radius: 0px

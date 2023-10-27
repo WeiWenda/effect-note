@@ -17,7 +17,7 @@ import {getDocContent, getDocVersions} from '../../share/ts/utils/APIUtils';
 import Moment from 'moment/moment';
 import FileToolsComponent from '../fileTools';
 import * as React from 'react';
-import {ReactNode, useEffect, useState} from 'react';
+import {ReactNode, useEffect, useRef, useState} from 'react';
 import {MarksPlugin} from '../../plugins/marks';
 import {default as FileSearch} from '../../share/ts/search';
 import {TagsPlugin} from '../../plugins/tags';
@@ -120,13 +120,13 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
         }
       }
     });
+    setTimeout(() => {
+      props.session.emit('changeComment');
+    }, 1000);
     props.session.on('changeComment', async () => {
       const newComment = await props.session.applyHookAsync('renderComments', [], props.session);
       setComments(newComment);
     });
-    setTimeout(() => {
-      props.session.emit('changeComment');
-    }, 1000);
   }, []);
   return (
     <div style={{width: '100%', height: '100%'}}>
@@ -283,7 +283,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
       }
       {
         !props.loading &&
-          <div className={'session-area'}>
+          <div className={`session-area ${comments.length ? 'session-area-with-comment' : ''}`}>
             <SessionComponent ref={props.session.sessionRef} session={props.session} />
             {
               comments.length > 0 &&

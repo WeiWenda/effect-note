@@ -21,14 +21,18 @@ export class CommentPlugin {
   }
 
   public async enable() {
+    const that = this;
     this.api.registerListener('session', 'addComment', async (row: Row, startCol: Col, endCol: Col, comment: string) => {
       await this.setComments(row, startCol, endCol, comment);
+      that.session.emit('changeComment');
     });
     this.api.registerListener('session', 'removeComment', async (row: Row, startCol: Col, endCol: Col) => {
       await this.removeComments(row, startCol, endCol);
+      that.session.emit('changeComment');
     });
     this.api.registerListener('session', 'resolveComment', async (row: Row, startCol: Col, endCol: Col) => {
       await this.resolveComments(row, startCol, endCol);
+      that.session.emit('changeComment');
     });
     this.api.registerHook('document', 'serializeRow', async (struct, info) => {
       const comment = await this.getComments(info.row);
@@ -57,8 +61,8 @@ export class CommentPlugin {
         const row = Number(key);
         const curComments = await this.getComments(row);
         const rowRef = session.rowRef[row];
-        if (rowRef) {
-          const height = rowRef.current!.offsetTop;
+        if (rowRef && rowRef.current != null) {
+          const height = rowRef.current.offsetTop;
           Object.keys(curComments).forEach((colPair) => {
             comments.push(
               <div key={`commit-${row}-${colPair}`} style={{position: 'absolute', top: height}}>
