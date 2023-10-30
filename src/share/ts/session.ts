@@ -18,6 +18,7 @@ import {ModeId, CursorOptions, Row, Col, Chars, SerializedBlock, UserInfo, KityM
 import { updateDoc, uploadDoc} from './utils/APIUtils';
 import React, {MutableRefObject, Ref} from 'react';
 import Search from './search';
+import {monaco} from 'react-monaco-editor';
 
 type SessionOptions = {
   initialMode?: ModeId,
@@ -78,6 +79,7 @@ export default class Session extends EventEmitter {
   private mutations: Array<Mutation> = [];
   private history: Array<HistoryLogEntry> = [];
   public commentRef: {[key: string]: MutableRefObject<null | HTMLDivElement>} = {};
+  public codeRef: {[key: Row]: MutableRefObject<undefined | monaco.editor.IStandaloneCodeEditor>} = {};
   private historyIndex: number = 0;
   public jumpHistory: Array<JumpLogEntry> = [];
   public jumpIndex: number = 0;
@@ -1806,7 +1808,12 @@ export default class Session extends EventEmitter {
         this.stopAnchor();
       }
     } else {
-      await this.deleteAtCursor();
+      const lineInfo = await this.document.getInfo(this.cursor.row);
+      if (this.cursor.col === 0 && lineInfo.pluginData.links?.is_check !== null) {
+        await this.emitAsync('toggleCheck', this.cursor.row);
+      } else {
+        await this.deleteAtCursor();
+      }
     }
   }
 }

@@ -1,8 +1,11 @@
 import MonacoEditor, {monaco} from 'react-monaco-editor';
 import * as React from 'react';
 import {useRef, useState} from 'react';
+import {Path, Session} from '../../share';
 
 export function MonacoEditorWrapper(props: {
+  session: Session,
+  path: Path,
   pluginData: any,
   theme: string,
   lockEdit: boolean,
@@ -10,6 +13,7 @@ export function MonacoEditorWrapper(props: {
   const [height, setHeight] = useState(20);
   const [value, setValue] = useState(props.pluginData.links.code.content || '');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+  props.session.codeRef[props.path.row] = editorRef;
   return (
     <div style={{paddingTop: '2em'}}>
       <MonacoEditor

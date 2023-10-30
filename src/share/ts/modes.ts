@@ -240,10 +240,10 @@ registerMode({
 registerMode({
   name: 'NODE_OPERATION',
   cursorBetween: true,
-  async exit(session) {
-    await session.deleteAtCursor();
-    await session.cursor.reset();
-  },
+  // async exit(session) {
+    // await session.deleteAtCursor();
+    // await session.cursor.reset();
+  // },
 });
 
 registerMode({

@@ -14,14 +14,14 @@ const LableAndShortCut = (_client: ClientStore, label: string, shortcut: string)
 export function NodeOperationComponent(props: {session: Session, line: Line, path: Path}) {
   const client = props.session.clientStore;
   const options = [
+    {label: LableAndShortCut(client, '任务', '/task'), value: 'mark-task', shortcut: 'task'},
+    {label: LableAndShortCut(client, '代码', '/code'), value: 'insert-code', shortcut: 'code'},
     {label: LableAndShortCut(client, 'markdown', '/md'), value: 'insert-md', shortcut: 'md'},
     {label: LableAndShortCut(client, '富文本', '/rtf'), value: 'insert-rtf', shortcut: 'rtf'},
-    {label: LableAndShortCut(client, '代码', '/code'), value: 'insert-code', shortcut: 'code'},
     {label: LableAndShortCut(client, '脑图', '/mindmap'), value: 'insert-mindmap', shortcut: 'mindmap'},
     {label: LableAndShortCut(client, '流程图', '/draw'), value: 'insert-drawio', shortcut: 'draw'},
     // {label: LableAndShortCut(client, '收藏', '/mark'), value: 'mark-mark', shortcut: 'mark'},
     // {label: LableAndShortCut(client, '标签', '/tag'), value: 'mark-tag', shortcut: 'tag'},
-    // {label: LableAndShortCut(client, '任务', '/task'), value: 'mark-task', shortcut: 'task'},
     // {label: LableAndShortCut(client, '看板', '/board'), value: 'mark-board', shortcut: 'board'},
     // {label: LableAndShortCut(client, '展开 -> 一级子节点', '/o1'), value: 'unfold-node-1', shortcut: 'o1'},
     // {label: LableAndShortCut(client, '展开 -> 二级子节点', '/o2'), value: 'unfold-node-2', shortcut: 'o2'},
@@ -29,6 +29,8 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
     // {label: LableAndShortCut(client, '展开 -> 全部子节点', '/oa'), value: 'unfold-node-100', shortcut: 'oa'},
   ];
   const onSelect = async (value: string) => {
+    // 消除前导/
+    await props.session.deleteAtCursor();
     switch (value) {
       case 'unfold-node-1':
       case 'unfold-node-2':
@@ -39,24 +41,18 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         break;
       case 'mark-mark':
         props.session.emit('setMark', props.path.row, props.line.join(''));
-        props.session.setMode('INSERT');
         break;
       case 'mark-board':
         props.session.emit('toggleBoard', props.path.row);
-        props.session.setMode('INSERT');
         break;
       case 'mark-tag':
         props.session.emit('startTag', props.path);
         await props.session.document.updateCachedPluginData(props.path.row);
-        props.session.setMode('INSERT');
         break;
       case 'mark-task':
-        await props.session.emitAsync('markTask', props.path);
-        props.session.setMode('INSERT');
+        await props.session.emitAsync('toggleCheck', props.path.row);
         break;
       case 'insert-md':
-        // 消除前导/
-        await props.session.setMode('INSERT');
         const newContent = await props.session.document.getLine(props.path.row);
         props.session.emit('openModal', 'md', {'md': newContent.join('')});
         props.session.mdEditorOnSave = (markdown: string, _html: string) => {
@@ -66,16 +62,18 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         };
         break;
       case 'insert-code':
-        // 消除前导/
-        await props.session.setMode('INSERT');
         const actualContent = await props.session.document.getLine(props.path.row);
         await props.session.emitAsync('setCode', props.path.row, actualContent.join(''), 'plaintext');
         await props.session.delChars(props.path.row, 0, actualContent.length);
+        await props.session.cursor.reset();
         props.session.emit('updateInner');
+        setTimeout(() => {
+          if (props.session.codeRef[props.path.row]) {
+            props.session.codeRef[props.path.row].current?.focus();
+          }
+        });
         break;
       case 'insert-rtf':
-        // 消除前导/
-        await props.session.setMode('INSERT');
         const lineContent = await props.session.document.getLine(props.path.row);
         let html = lineContent.join('');
         if (html.startsWith('<div class=\'node-html\'>')) {
@@ -92,7 +90,6 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         break;
       case 'insert-drawio':
         props.session.emit('setDrawio', props.path.row);
-        props.session.setMode('INSERT');
         break;
       case 'insert-mindmap':
         props.session.emit('openModal', 'png');
@@ -106,7 +103,6 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
             props.session.mindMapRef.current.setContent(kmnode);
           });
         }, 1000);
-        props.session.setMode('INSERT');
         break;
       default:
         props.session.showMessage(`${value} clicked!`);
@@ -115,13 +111,17 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
   return (
     <Select
       showSearch
-      showArrow={false}
+      suffixIcon={null}
       bordered={false}
       autoFocus={true}
       defaultOpen={true}
       id='operation-select'
       onSelect={(value, _option) => {
-        onSelect(value);
+        onSelect(value).then(() => {
+          setTimeout(() => {
+            props.session.setMode('INSERT');
+          }, 100);
+        });
       }}
       onSearch={(value) => {
         const matchItem = options.filter(o => o.shortcut.startsWith(value));

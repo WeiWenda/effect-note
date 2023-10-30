@@ -48,6 +48,8 @@ registerPlugin(
                         }}
           >
             <MonacoEditorWrapper
+              session={api.session}
+              path={path}
               pluginData={pluginData}
               theme={api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'vs-dark' : 'vs-light'}
               lockEdit={api.session.lockEdit}
