@@ -22,6 +22,7 @@ import {MarksPlugin} from '../../plugins/marks';
 import {default as FileSearch} from '../../share/ts/search';
 import {TagsPlugin} from '../../plugins/tags';
 import { useForceUpdate } from '../layout';
+import $ from 'jquery';
 
 const {Search} = Input;
 
@@ -126,6 +127,26 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
     props.session.on('changeComment', async () => {
       const newComment = await props.session.applyHookAsync('renderComments', [], props.session);
       setComments(newComment);
+      setTimeout(() => {
+        const divs = $('.comment-wrapper');
+        let curTop = 0;
+        // 遍历每个元素并修改样式
+        divs.each(function() {
+          const position = $(this).position();
+          const height = $(this).height()!;
+          if (curTop < position.top) {
+            // 未重叠的情况
+            curTop = position.top + height;
+          } else {
+            curTop = curTop + 10;
+            console.log('find overlap, move {} to {}', position, curTop);
+            $(this).css({
+              'top': curTop + 'px'
+            });
+            curTop = curTop + height;
+          }
+        });
+      }, 100);
     });
   }, []);
   return (

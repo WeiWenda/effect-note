@@ -79,8 +79,8 @@ export class CommentPlugin {
                                row={info.path.row}
                                startCol={startCol}
                                text={filler_token.text}/>);
-            emit(...wrapped.unfold(token));
           }
+          emit(...wrapped.unfold(token));
         }));
       } else {
         return tokenizer;
@@ -97,7 +97,7 @@ export class CommentPlugin {
           if (commentRef && commentRef.current != null) {
             const height = commentRef.current.offsetTop;
             comments.push(
-              <div key={`commit-${row}-${colPair}`} style={{position: 'absolute', top: height}}>
+              <div key={`comment-${row}-${colPair}`} className={'comment-wrapper'} style={{position: 'absolute', top: height}}>
                 <CommentBox
                   startCol={Number(colPair.split('-').shift())}
                   endCol={Number(colPair.split('-').pop())}
