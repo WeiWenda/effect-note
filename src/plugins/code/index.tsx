@@ -4,7 +4,7 @@ import {LinksPlugin, linksPluginName} from '../links';
 import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
 import {ShareAltOutlined} from '@ant-design/icons';
 import {copyToClipboard} from '../../components';
-import {Select} from 'antd';
+import {Select, Space, Tooltip} from 'antd';
 import {MonacoEditorWrapper} from './MonacoEditorWrapper';
 
 const languages = ['plaintext', 'c', 'java', 'scala', 'shell', 'python', 'json', 'sql',
@@ -20,6 +20,7 @@ registerPlugin(
     const linksPlugin = api.getPlugin(linksPluginName) as LinksPlugin;
     api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData}) => {
       if (pluginData.links?.code) {
+        const wrap = pluginData.links?.code.wrap;
         elements.push(
           <SpecialBlock key={'code-block'}
                         specialClass={'effect-code-block'}
@@ -34,13 +35,29 @@ registerPlugin(
                             value={pluginData.links.code.language}
                             onChange={(value: string) => {
                               linksPlugin.getCode(path.row).then((code) => {
-                                linksPlugin.setCode(path.row, code.content, value).then(() => {
+                                linksPlugin.setCode(path.row, code.content, value, code.wrap).then(() => {
                                   api.session.emit('updateInner');
                                 });
                               });
                             }}
                             options={languages.map(l => {return {value: l, label: l}; } )}
                           />
+                        }
+                        tools={
+                          <Space>
+                            <Tooltip title={wrap ? '当前展示方式：自动换行' : '当前展示方式：内容溢出'}>
+                              <img style={{position: 'relative', top: '2px'}}
+                                   onClick={() => {
+                                     linksPlugin.getCode(path.row).then((code) => {
+                                       linksPlugin.setCode(path.row, code.content, code.language, !code.wrap).then(() => {
+                                         api.session.emit('updateInner');
+                                       });
+                                     });
+                                   }}
+                                   src={`${process.env.PUBLIC_URL}/images/${wrap ? 'wrap' : 'nowrap'}.png`}
+                                   height={api.session.clientStore.getClientSetting('fontSize') + 2} />
+                            </Tooltip>
+                          </Space>
                         }
                         session={api.session}
                         onCopy={() => {
@@ -54,7 +71,7 @@ registerPlugin(
               theme={api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'vs-dark' : 'vs-light'}
               lockEdit={api.session.lockEdit}
               onChange={(newValue) => {
-                linksPlugin.setCode(path.row, newValue, pluginData.links.code.language);
+                linksPlugin.setCode(path.row, newValue, pluginData.links.code.language, pluginData.links.code.wrap);
               }}/>
           </SpecialBlock>
         );

@@ -85,8 +85,8 @@ export class LinksPlugin {
         this.api.registerListener('session', 'setDrawio',  (row: Row) => {
             onInsertDrawio(row);
         });
-        this.api.registerListener('session', 'setCode', async (row: Row, code: string, language: string) => {
-            await this.setCode(row, code, language);
+        this.api.registerListener('session', 'setCode', async (row: Row, code: string, language: string, wrap: boolean) => {
+            await this.setCode(row, code, language, wrap);
         });
         this.api.registerListener('session', 'setMarkdown', async (row: Row, markdown: string) => {
             await this.setMarkdown(row, markdown);
@@ -193,7 +193,7 @@ export class LinksPlugin {
                 }
             }
             if (serialized.code) {
-                await this._setCode(path.row, serialized.code.content, serialized.code.language);
+                await this._setCode(path.row, serialized.code.content, serialized.code.language, serialized.code.wrap || true);
             }
             if (serialized.png?.src && serialized.png?.json) {
                 await this._setPng(path.row, serialized.png.src, serialized.png.json);
@@ -406,13 +406,13 @@ export class LinksPlugin {
         }
     }
 
-    public async setCode(row: Row, content: string, language: string): Promise<void> {
-        await this._setCode(row, content, language);
+    public async setCode(row: Row, content: string, language: string, wrap: boolean): Promise<void> {
+        await this._setCode(row, content, language, wrap);
         await this.api.updatedDataForRender(row);
     }
 
-    private async _setCode(row: Row, content: string, language: string): Promise<void> {
-        await this.api.setData(row + ':code', {content, language});
+    private async _setCode(row: Row, content: string, language: string, wrap: boolean): Promise<void> {
+        await this.api.setData(row + ':code', {content, language, wrap});
         // 不存在的key查询效率较差
         const ids_to_mds = await this.api.getData('ids_to_codes', {});
         ids_to_mds[row] = 1;

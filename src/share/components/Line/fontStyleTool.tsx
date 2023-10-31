@@ -1,6 +1,6 @@
 import {Col, DocInfo, Path, Session} from '../../ts';
 import {BoldOutlined, FontColorsOutlined,
-  HighlightOutlined, ItalicOutlined, DeleteOutlined, LinkOutlined, CheckOutlined, CopyOutlined, MessageOutlined, BgColorsOutlined} from '@ant-design/icons';
+  HighlightOutlined, ItalicOutlined, DeleteOutlined, LinkOutlined, CheckOutlined, CopyOutlined, MessageOutlined} from '@ant-design/icons';
 import {Space, Popover, Input, Button} from 'antd';
 import * as React from 'react';
 import {useState} from 'react';
@@ -127,15 +127,24 @@ export function FontStyleToolComponent(
               });
             }}/>
             <Popover
-               trigger={'hover'}
-               content={
-                 <Space className={'rtf-toolbox node-html'}>
+              trigger={'hover'}
+              content={
+                <Space className={'rtf-toolbox node-html'}>
                   <FontColorsOutlined onClick={switchClass('red-color')} className={'red-color'}/>
                   <FontColorsOutlined onClick={switchClass('yellow-color')} className={'yellow-color'}/>
                   <FontColorsOutlined onClick={switchClass('green-color')} className={'green-color'}/>
                   <FontColorsOutlined onClick={switchClass('blue-color')} className={'blue-color'}/>
                   <FontColorsOutlined onClick={switchClass('purple-color')} className={'purple-color'}/>
                   <FontColorsOutlined onClick={switchClass('grey-color')} className={'grey-color'}/>
+                </Space>
+              }
+            >
+              <FontColorsOutlined/>
+            </Popover>
+            <Popover
+               trigger={'hover'}
+               content={
+                 <Space className={'rtf-toolbox node-html'}>
                   <HighlightOutlined onClick={switchClass('red-background')} className={'red-background'}/>
                   <HighlightOutlined onClick={switchClass('yellow-background')} className={'yellow-background'}/>
                   <HighlightOutlined onClick={switchClass('green-background')} className={'green-background'}/>
@@ -145,7 +154,9 @@ export function FontStyleToolComponent(
                  </Space>
                }
             >
-              <BgColorsOutlined />
+              <img style={{position: 'relative', top: '4px'}}
+                   onClick={e => e.preventDefault()}
+                   src={`${process.env.PUBLIC_URL}/images/font_background.png`} height={24} />
             </Popover>
             <CopyOutlined onClick={() => {
                copyToClipboard(props.textContent);
