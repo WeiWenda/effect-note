@@ -43,6 +43,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const [versions, setVersions] = useState(new Array<DocVersion>());
   const [currentVersion, setCurrentVersion] = useState('');
   const [comments, setComments] = useState(new Array<ReactNode>);
+  const elementRef = useRef<HTMLDivElement>(null);
   // const [showProgress, setShowProgress] = useState(false);
   // const [progress, setProgress] = useState(0);
   const onCrumbClick = async (path: Path) => {
@@ -99,12 +100,15 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
     }
   }, [props.filterOuter, props.loading]);
   useEffect(() => {
-    props.session.document.store.events.on('loadProgressChange', (show: boolean, newProgress: number) => {
+    props.session.document.store.events.on('loadProgressChange', (show: boolean, _newProgress: number) => {
       if (!show) {
         props.session.clientStore.setDocSetting('loaded', true);
       }
       // setShowProgress(show);
       // setProgress(newProgress);
+    });
+    const observer = new ResizeObserver(() => {
+      props.session.emit('updateAnyway');
     });
     props.session.on('changeJumpHistory', (newStackSize: number, index: number) => {
       setStackSize(newStackSize);
@@ -123,6 +127,9 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
     });
     setTimeout(() => {
       props.session.emit('changeComment');
+      if (elementRef.current) {
+        observer.observe(elementRef.current);
+      }
     }, 1000);
     props.session.on('changeComment', async () => {
       const newComment = await props.session.applyHookAsync('renderComments', [], props.session);
@@ -148,6 +155,10 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
         });
       }, 100);
     });
+    return () => {
+      // Cleanup the observer by unobserving all elements
+      observer.disconnect();
+    };
   }, []);
   return (
     <div style={{width: '100%', height: '100%'}}>
@@ -304,7 +315,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
       }
       {
         !props.loading &&
-          <div className={`session-area ${comments.length ? 'session-area-with-comment' : ''}`}>
+          <div ref={elementRef} className={`session-area ${comments.length ? 'session-area-with-comment' : ''}`}>
             <SessionComponent ref={props.session.sessionRef} session={props.session} />
             {
               comments.length > 0 &&
