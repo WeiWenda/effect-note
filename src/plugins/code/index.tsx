@@ -6,6 +6,7 @@ import {ShareAltOutlined} from '@ant-design/icons';
 import {copyToClipboard} from '../../components';
 import {Select, Space, Tooltip} from 'antd';
 import {MonacoEditorWrapper} from './MonacoEditorWrapper';
+import {EmitFn, PartialUnfolder, Token, Tokenizer} from '../../share';
 
 const languages = ['plaintext', 'c', 'java', 'scala', 'shell', 'python', 'json', 'sql',
   'xml', 'yaml', 'go', 'php', 'typescript', 'javascript'];
@@ -18,7 +19,7 @@ registerPlugin(
   },
   function(api) {
     const linksPlugin = api.getPlugin(linksPluginName) as LinksPlugin;
-    api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData}) => {
+    api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData, line}) => {
       if (pluginData.links?.code) {
         const wrap = pluginData.links?.code.wrap;
         elements.push(
@@ -30,7 +31,7 @@ registerPlugin(
                         blockType={
                           <Select
                             showSearch
-                            style={{ width: 100 }}
+                            style={{width: 100}}
                             bordered={false}
                             value={pluginData.links.code.language}
                             onChange={(value: string) => {
@@ -40,7 +41,9 @@ registerPlugin(
                                 });
                               });
                             }}
-                            options={languages.map(l => {return {value: l, label: l}; } )}
+                            options={languages.map(l => {
+                              return {value: l, label: l};
+                            })}
                           />
                         }
                         tools={
@@ -55,17 +58,18 @@ registerPlugin(
                                      });
                                    }}
                                    src={`${process.env.PUBLIC_URL}/images/${wrap ? 'wrap' : 'nowrap'}.png`}
-                                   height={api.session.clientStore.getClientSetting('fontSize') + 2} />
+                                   height={api.session.clientStore.getClientSetting('fontSize') + 2}/>
                             </Tooltip>
                           </Space>
                         }
                         session={api.session}
                         onCopy={() => {
-                              copyToClipboard(pluginData.links.code.content);
+                          copyToClipboard(pluginData.links.code.content);
                         }}
           >
             <MonacoEditorWrapper
               session={api.session}
+              title={line.join('')}
               path={path}
               pluginData={pluginData}
               theme={api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'vs-dark' : 'vs-light'}
@@ -77,6 +81,17 @@ registerPlugin(
         );
       }
       return elements;
+    });
+    api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
+        if (pluginData.links?.code) {
+          return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
+            _token: Token, _emit: EmitFn<React.ReactNode>, _wrapped: Tokenizer
+          ) => {
+            // do nothing
+          }));
+        } else {
+          return tokenizer;
+        }
     });
   },
   (api => api.deregisterAll()),
