@@ -1,10 +1,9 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {registerPlugin} from '../../ts/plugins';
 import {LinksPlugin, linksPluginName} from '../links';
-import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
-import {ShareAltOutlined} from '@ant-design/icons';
+import {SpecialBlock} from '../../share/components/Block/SpecialBlock';
 import {copyToClipboard} from '../../components';
-import {Select, Space, Tooltip} from 'antd';
+import {Input, Select, Space, Tooltip} from 'antd';
 import {MonacoEditorWrapper} from './MonacoEditorWrapper';
 import {EmitFn, PartialUnfolder, Token, Tokenizer} from '../../share';
 
@@ -26,15 +25,22 @@ registerPlugin(
           <SpecialBlock key={'code-block'}
                         specialClass={'effect-code-block'}
                         path={path}
+                        title={line.join('')}
                         collapse={pluginData.links.collapse || false}
-                        setCollapseCallback={(collapse) => linksPlugin.setBlockCollapse(path.row, collapse)}
                         blockType={
                           <Select
-                            showSearch
                             style={{width: 100}}
                             bordered={false}
+                            onFocus={() => {
+                              api.session.stopAnchor();
+                              api.session.selectPopoverOpen = true;
+                            }}
+                            onBlur={() => {
+                              api.session.selectPopoverOpen = false;
+                            }}
                             value={pluginData.links.code.language}
                             onChange={(value: string) => {
+                              api.session.selectPopoverOpen = false;
                               linksPlugin.getCode(path.row).then((code) => {
                                 linksPlugin.setCode(path.row, code.content, value, code.wrap).then(() => {
                                   api.session.emit('updateInner');
@@ -69,7 +75,6 @@ registerPlugin(
           >
             <MonacoEditorWrapper
               session={api.session}
-              title={line.join('')}
               path={path}
               pluginData={pluginData}
               theme={api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'vs-dark' : 'vs-light'}

@@ -10,7 +10,7 @@ import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
 import {DrawioViewer} from '../../components/drawioViewer';
 import {getTaskStatus, HoverIconDropDownComponent} from './dropdownMenu';
 import {MarksPlugin, pluginName} from '../marks';
-import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
+import {SpecialBlock} from '../../share/components/Block/SpecialBlock';
 import {TaskMenuComponent} from '../tags/taskMenu';
 import Moment from 'moment/moment';
 
@@ -271,7 +271,6 @@ export class LinksPlugin {
                   <SpecialBlock key={'special-block'}
                                 path={path}
                                 collapse={pluginData.links.collapse || false}
-                                setCollapseCallback={(collapse) => this.setBlockCollapse(path.row, collapse)}
                                 blockType={'Drawio'} session={that.session} tools={
                       <Space>
                           <ZoomInOutlined onClick={() => {ref.current!.zoomIn(); }}/>

@@ -4,7 +4,7 @@ import {Token, RegexTokenizerSplitter, EmitFn, Tokenizer, Session} from '../../s
 import { registerPlugin } from '../../ts/plugins';
 import Highlight from 'react-highlight';
 import {EditOutlined} from '@ant-design/icons';
-import {SpecialBlock} from '../../share/components/Block/BlockWithTypeHeader';
+import {SpecialBlock} from '../../share/components/Block/SpecialBlock';
 import {htmlRegex, htmlTypes} from '../../ts/util';
 import {FontStyleToolComponent} from '../../share/components/Line/fontStyleTool';
 import {LinksPlugin, linksPluginName} from '../links';
@@ -28,7 +28,6 @@ export function htmlHook(tokenizer: any, info: any) {
             <SpecialBlock key={`html-${token.index}`}
                           path={info.path}
                           collapse={info.pluginData.links?.collapse || false}
-                          setCollapseCallback={(collapse) => session.emit('setBlockCollapse', info.path.row, collapse)}
                           onCopy={() => {
                             copyToClipboard(htmlContent);
                           }}
