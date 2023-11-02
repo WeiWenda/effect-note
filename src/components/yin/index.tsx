@@ -28,6 +28,7 @@ import FileToolsComponent from '../fileTools';
 import {useParams, useNavigate, useLoaderData, useSearchParams} from 'react-router-dom';
 import {struckThroughHook} from '../../plugins/todo';
 import {htmlHook} from '../../plugins/html';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 const { Search } = Input;
 const { Panel } = Collapse;
@@ -35,13 +36,13 @@ const { Panel } = Collapse;
 type MenuItem = Required<MenuProps>['items'][number];
 class TagTree extends Map<string, TagTree | number> {};
 
-function getTagMap(filteredDocs: DocInfo[], recentDocId: number[]): TagTree {
+function getTagMap(filteredDocs: DocInfo[], recentDocId: number[], dirtyDocId: number[]): TagTree {
   const tagMap: TagTree = new Map();
   tagMap.set('所有笔记', new Map);
   tagMap.set('最近访问', new Map);
   filteredDocs.forEach(doc => {
     let menuLabel = doc.name!;
-    if (doc.dirtyUpdate) {
+    if (dirtyDocId.indexOf(doc.id!) !== -1) {
       menuLabel = '* ' + menuLabel;
     }
     const dir = (JSON.parse(doc.tag!) as string[]).shift();
@@ -138,24 +139,21 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
         <FileToolsComponent session={props.session} curDocId={docId!}
                             tagPlugin={tagPlugin}
                             trigger={['contextMenu']}>
-          <Space>
+          <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            <Space>
+              <div>{plainLabel}</div>
+              {
+                dirTag &&
+                <Tag>
+                  {dirTag}
+                </Tag>
+              }
+            </Space>
             {
               isModified &&
-                <Badge dot>
-                    <div>{plainLabel}</div>
-                </Badge>
+                <ExclamationCircleOutlined style={{color: '#fc9403'}} />
             }
-            {
-              !isModified &&
-              <div>{plainLabel}</div>
-            }
-            {
-              dirTag &&
-              <Tag>
-                {dirTag}
-              </Tag>
-            }
-          </Space>
+          </div>
         </FileToolsComponent>
       );
     }
@@ -197,7 +195,9 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   }
   const updateMenu = (filteredDocs: DocInfo[]) => {
     const menuID2DocID: Array<number> = [];
-    const tagMap = getTagMap(filteredDocs, props.session.clientStore.getClientSetting('recentDocId'));
+    const tagMap = getTagMap(filteredDocs,
+      props.session.clientStore.getClientSetting('recentDocId'),
+      props.session.clientStore.getClientSetting('dirtyDocId'));
     const items = getItems(tagMap, menuID2DocID);
     setMenuItems(items);
     setMenuItem2DocId(menuID2DocID);
@@ -224,9 +224,14 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     updateMenuWithFilter(userDocs, filter);
   }, [userDocs]);
   const markDirty = (docID: number, isDirty: boolean) => {
-    const docInfo = props.session.userDocs.find(doc => doc.id === docID);
-    if (docInfo) {
-      docInfo.dirtyUpdate = isDirty;
+    const old = props.session.clientStore.getClientSetting('dirtyDocId');
+    if (!old.includes(docID) && isDirty) {
+      old.push(docID);
+      props.session.clientStore.setClientSetting('dirtyDocId', old);
+      updateMenuWithFilter(props.session.userDocs, filter);
+    } else if (old.includes(docID) && !isDirty) {
+      old.splice(old.indexOf(docID), 1);
+      props.session.clientStore.setClientSetting('dirtyDocId', old);
       updateMenuWithFilter(props.session.userDocs, filter);
     }
   };

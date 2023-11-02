@@ -62,7 +62,6 @@ export type DocInfo = {
     filename?: string;
     tag?: string;
     content?: string;
-    dirtyUpdate?: boolean;
 };
 
 export type SubscriptionInfo = {
