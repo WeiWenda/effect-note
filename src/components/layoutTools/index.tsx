@@ -14,11 +14,18 @@ function LayoutToolsComponent(props: {session: Session}) {
     setLayout(key);
   };
   const items: MenuProps['items'] = [
+    // {
+    //   key: 'top_left_right',
+    //   label: (
+    //     <img onClick={e => e.preventDefault()}
+    //          src={`${process.env.PUBLIC_URL}/images/top_left_right.png`} height={18} />
+    //   ),
+    // },
     {
-      key: 'top_left_right',
+      key: 'top_left',
       label: (
         <img onClick={e => e.preventDefault()}
-             src={`${process.env.PUBLIC_URL}/images/top_left_right.png`} height={18} />
+             src={`${process.env.PUBLIC_URL}/images/top_left.png`} height={18} />
       ),
     },
     {
@@ -28,20 +35,13 @@ function LayoutToolsComponent(props: {session: Session}) {
              src={`${process.env.PUBLIC_URL}/images/full_screen.png`} height={18} />
       ),
     },
-    {
-      key: 'top_left',
-      label: (
-        <img onClick={e => e.preventDefault()}
-             src={`${process.env.PUBLIC_URL}/images/top_left.png`} height={18} />
-      ),
-    },
-    {
-      key: 'top_right',
-      label: (
-        <img onClick={e => e.preventDefault()}
-             src={`${process.env.PUBLIC_URL}/images/top_right.png`} height={18} />
-      ),
-    },
+    // {
+    //   key: 'top_right',
+    //   label: (
+    //     <img onClick={e => e.preventDefault()}
+    //          src={`${process.env.PUBLIC_URL}/images/top_right.png`} height={18} />
+    //   ),
+    // },
     {
       key: 'top',
       label: (
@@ -56,20 +56,20 @@ function LayoutToolsComponent(props: {session: Session}) {
              src={`${process.env.PUBLIC_URL}/images/left.png`} height={18} />
       ),
     },
-    {
-      key: 'right',
-      label: (
-        <img onClick={e => e.preventDefault()}
-             src={`${process.env.PUBLIC_URL}/images/right.png`} height={18} />
-      ),
-    },
-    {
-      key: 'left_right',
-      label: (
-        <img onClick={e => e.preventDefault()}
-             src={`${process.env.PUBLIC_URL}/images/left_right.png`} height={18} />
-      ),
-    }
+    // {
+    //   key: 'right',
+    //   label: (
+    //     <img onClick={e => e.preventDefault()}
+    //          src={`${process.env.PUBLIC_URL}/images/right.png`} height={18} />
+    //   ),
+    // },
+    // {
+    //   key: 'left_right',
+    //   label: (
+    //     <img onClick={e => e.preventDefault()}
+    //          src={`${process.env.PUBLIC_URL}/images/left_right.png`} height={18} />
+    //   ),
+    // }
   ];
   const menuProps = {
     items,

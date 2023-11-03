@@ -74,6 +74,10 @@ function getTagMap(filteredDocs: DocInfo[], recentDocId: number[], dirtyDocId: n
   return tagMap;
 }
 
+function getPanelMaxHeight(activeCount: number): number {
+  return (window.innerHeight - 63 - 2 - 32 - 4 * 46 - 6) / activeCount;
+}
+
 async function toggleRecursiveCollapse(document: Document, path: Path, collapse: boolean): Promise<any> {
   logger.debug('Toggle state: ' + collapse + ' row = ' + path.row);
   if (!document.cache.get(path.row)) {
@@ -101,8 +105,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   const [curMenu, setCurMenu] = useState(props.session.clientStore.getClientSetting('openFile'));
   const [fileListWidth, setFileListWidth] = useState(250);
   const [showFileList , setShowFileList] = useState(props.session.clientStore.getClientSetting('defaultLayout').includes('left'));
-  const [previewWidth, setPreviewWidth] = useState(300);
-  const [showPreview, setShowPreview] = useState(props.session.clientStore.getClientSetting('defaultLayout').includes('right'));
+  const [activeKey, setActiveKey] = useState(['0', '1']);
+  const [panelMaxHeight, setPanelMaxHeight] = useState(getPanelMaxHeight(2));
   const [openKeys, setOpenKeys] = useState<string[]>(JSON.parse(props.session.clientStore.getClientSetting('openMenus')));
   const [filter, setFilter] = useState('');
   const [filteredDocIds, setFilteredDocIds] = useState<number[]>([]);
@@ -238,7 +242,6 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   useEffect(() => {
     props.session.on('changeLayout', (layout) => {
       setShowFileList(layout.includes('left'));
-      setShowPreview(layout.includes('right'));
     });
     props.session.replaceListener('save-cloud', (info) => {
       props.session.showMessage('保存成功');
@@ -493,23 +496,104 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   return (
     <div style={{height: '100%', flexDirection: 'row', display: 'flex'}}>
       {
-         showFileList &&
-          <div style={{width: `${fileListWidth}px`, overflow: 'auto', flexShrink: 0}}>
-              <Search
-                  placeholder='搜索笔记名称或内容'
-                  allowClear
-                  onSearch={onSearchFileList}
-                  onPressEnter={(e: any) => {onSearchFileList(e.target.value); }}
-                  onFocus={() => {props.session.stopKeyMonitor('search-among-file'); } }
-                  onBlur={() => {props.session.startKeyMonitor(); } }/>
-              <Menu
-                  onClick={onClick}
-                  selectedKeys={[curMenu]}
-                  onOpenChange={onOpenChange}
-                  openKeys={openKeys}
-                  mode='inline'
-                  items={menuItems}
-              />
+        showFileList &&
+          <div style={{width: `${fileListWidth}px`, flexShrink: 0}}>
+            <Search
+                placeholder='搜索笔记名称或内容'
+                allowClear
+                onSearch={onSearchFileList}
+                onPressEnter={(e: any) => {onSearchFileList(e.target.value); }}
+                onFocus={() => {props.session.stopKeyMonitor('search-among-file'); } }
+                onBlur={() => {props.session.startKeyMonitor(); } }/>
+            <Collapse
+                className={'file-list-collapse'}
+                style={{width: `${fileListWidth}px`}}
+                bordered={false} activeKey={activeKey} onChange={(newKeys) => {
+                  const nextActiveKeys = Array.isArray(newKeys) ? newKeys : [newKeys]
+                  setActiveKey(nextActiveKeys);
+                  setPanelMaxHeight(getPanelMaxHeight(nextActiveKeys.length));
+            }}>
+                <Panel showArrow={false} header={'目录'} key='0'>
+                  <Menu
+                      style={{height: panelMaxHeight, overflowY: 'auto'}}
+                      onClick={onClick}
+                      selectedKeys={[curMenu]}
+                      onOpenChange={onOpenChange}
+                      openKeys={openKeys}
+                      mode='inline'
+                      items={menuItems}
+                  />
+                </Panel>
+              {
+                previewSession &&
+                  <Panel showArrow={false} header='大纲' key='1'>
+                      <div style={{height: panelMaxHeight, overflowY: 'auto'}}>
+                        <ViewOnlySessionComponent
+                            iconNoTopLevel='fa-circle-o'
+                            iconDirFold='fa-angle-right'
+                            iconDirUnFold='fa-angle-down'
+                            session={previewSession}
+                            onClick={
+                              async (path: Path) => {
+                                await props.session.zoomInto(path);
+                              }
+                            }
+                            onBulletClick = {
+                              async (path) => {
+                                await previewSession.toggleBlockCollapsed(path.row);
+                                previewSession.save();
+                              }
+                            }/>
+                      </div>
+                  </Panel>
+              }
+              {
+                markSession &&
+                  <Panel showArrow={false}  header='收藏' key='2'>
+                      <div style={{height: panelMaxHeight, overflowY: 'auto'}}>
+                        <ViewOnlySessionComponent
+                            iconTopLevel='fa-bookmark-o'
+                            session={markSession}
+                            onClick={ async (path) => {
+                              const canonicalPath = await props.session.document.canonicalPath(path.row);
+                              await props.session.zoomInto(canonicalPath!);
+                            }}
+                            onBulletClick = {async () => {}}
+                            nothingMessage = '暂无收藏内容'
+                        />
+                      </div>
+                  </Panel>
+              }
+              {
+                tagSession &&
+                  <Panel showArrow={false}  header='标签' key='3'>
+                      <div style={{height: panelMaxHeight, overflowY: 'auto'}}>
+                        <ViewOnlySessionComponent
+                            iconTopLevel='fa-tags'
+                            iconNoTopLevel='fa-circle'
+                            iconDirFold='fa-angle-right'
+                            iconDirUnFold='fa-angle-down'
+                            session={tagSession}
+                            onClick={ async (path) => {
+                              const depth = await tagSession.document.getAncestryPaths(path.row);
+                              if (depth.length === 0) {
+                                await tagSession.toggleBlockCollapsed(path.row);
+                                tagSession.save();
+                              } else {
+                                const canonicalPath = await props.session.document.canonicalPath(path.row);
+                                await props.session.zoomInto(canonicalPath!);
+                              }
+                            }}
+                            onBulletClick = {async (path) => {
+                              await tagSession.toggleBlockCollapsed(path.row);
+                              tagSession.save();
+                            }}
+                            nothingMessage = '暂无标签内容'
+                        />
+                      </div>
+                  </Panel>
+              }
+            </Collapse>
           </div>
       }
       {
@@ -522,7 +606,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
               }}></div>
           </DraggableCore>
       }
-      <div style={{width: window.innerWidth - (showPreview ? previewWidth + 3 : 3) - (showFileList ? fileListWidth + 3 : 3),
+      <div style={{width: window.innerWidth - (showFileList ? fileListWidth + 3 : 3),
                   height: '100%'}}>
         <SessionWithToolbarComponent session={props.session} loading={loading} markPlugin={markPlugin}
                                      curDocId={Number(curDocId)}
@@ -534,86 +618,6 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
                                      tagPlugin={tagPlugin}
         />
       </div>
-      {
-        showPreview &&
-          <DraggableCore key='preview_drag' onDrag={(_, ui) => {
-            setPreviewWidth(Math.min(Math.max(previewWidth - ui.deltaX, 90), 700));
-          }}>
-              <div className='horizontal-drag' style={{
-                ...getStyles(props.session.clientStore, ['theme-bg-secondary'])
-              }}></div>
-          </DraggableCore>
-      }
-      {
-        !loading && showPreview &&
-          <Collapse
-              style={{height: '100%', width: `${previewWidth}px`, flexShrink: 0}}
-              bordered={false} defaultActiveKey={['1']} onChange={() => {}}>
-            {
-              previewSession &&
-                <Panel showArrow={false} header='目录' key='1'>
-                    <ViewOnlySessionComponent
-                        iconNoTopLevel='fa-circle-o'
-                        iconDirFold='fa-angle-right'
-                        iconDirUnFold='fa-angle-down'
-                        session={previewSession}
-                        onClick={
-                          async (path: Path) => {
-                            await props.session.zoomInto(path);
-                          }
-                        }
-                        onBulletClick = {
-                          async (path) => {
-                            await previewSession.toggleBlockCollapsed(path.row);
-                            previewSession.save();
-                          }
-                        }/>
-                </Panel>
-            }
-            {
-              markSession &&
-                <Panel showArrow={false}  header='收藏' key='2'>
-                    <ViewOnlySessionComponent
-                        iconTopLevel='fa-bookmark-o'
-                        session={markSession}
-                        onClick={ async (path) => {
-                          const canonicalPath = await props.session.document.canonicalPath(path.row);
-                          await props.session.zoomInto(canonicalPath!);
-                        }}
-                        onBulletClick = {async () => {}}
-                        nothingMessage = '暂无收藏内容'
-                    />
-                </Panel>
-            }
-            {
-              tagSession &&
-                <Panel showArrow={false}  header='标签' key='3'>
-                    <ViewOnlySessionComponent
-                        iconTopLevel='fa-tags'
-                        iconNoTopLevel='fa-circle'
-                        iconDirFold='fa-angle-right'
-                        iconDirUnFold='fa-angle-down'
-                        session={tagSession}
-                        onClick={ async (path) => {
-                          const depth = await tagSession.document.getAncestryPaths(path.row);
-                          if (depth.length === 0) {
-                            await tagSession.toggleBlockCollapsed(path.row);
-                            tagSession.save();
-                          } else {
-                            const canonicalPath = await props.session.document.canonicalPath(path.row);
-                            await props.session.zoomInto(canonicalPath!);
-                          }
-                        }}
-                        onBulletClick = {async (path) => {
-                          await tagSession.toggleBlockCollapsed(path.row);
-                          tagSession.save();
-                        }}
-                        nothingMessage = '暂无标签内容'
-                    />
-                </Panel>
-            }
-          </Collapse>
-      }
     </div>
   );
 }

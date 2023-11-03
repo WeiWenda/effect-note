@@ -159,7 +159,7 @@ export default class ViewOnlySessionComponent extends React.Component<Props, Sta
 
     // TODO: have an extra breadcrumb indicator when not at viewRoot?
     return (
-      <div>
+      <div className={'view-only-session'}>
         <BlockComponent
           session={session}
           cursorsTree={cursorsTree.getPath(viewRoot)}

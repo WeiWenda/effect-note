@@ -252,6 +252,9 @@ $file-toolbar-height: 36px
     padding: 5px 0
     border-bottom: 2px solid
 
+.file-list-collapse
+    @include calc(height, '100% - 32px')
+
 .session-area
     @include calc(height, '100% - #{$file-toolbar-height}')
     position: relative
@@ -260,6 +263,8 @@ $file-toolbar-height: 36px
     overflow: auto
     padding-top: 10px
     padding-bottom: 8em
+.view-only-session
+    padding: 10px 10px
 .session-content
     flex-grow: 1
     height: fit-content

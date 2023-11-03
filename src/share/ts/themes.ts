@@ -198,7 +198,7 @@ export function appendStyleScript(clientStore: ClientStore) {
                     .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {background-color:${theme['theme-bg-secondary']}}
                     .bullet-folded {background-color:${theme['theme-bg-tertiary']}}
                     .bullet-fa-circle:hover {background-color: ${theme['theme-bg-highlight']}}
-                    .ant-collapse-header {background-color: ${theme['theme-bg-primary']}}
+                    .ant-collapse-item-active > .ant-collapse-header {background-color: ${theme['theme-bg-secondary']}}
                     .node-html table th{background-color: ${theme['theme-bg-secondary']}}
                     .node-html code{background-color: ${theme['theme-bg-tertiary']}}
                     .node-html blockquote{border-left-color: ${theme['theme-bg-cursor']};background-color: ${theme['theme-bg-secondary']}}

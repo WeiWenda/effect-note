@@ -78,9 +78,6 @@ span
     background: unset
     .ant-collapse-content
         color: unset
-    .ant-collapse-item
-        .ant-collapse-header
-            color: unset
 .ant-collapse-content
     color: unset
     background: unset
@@ -127,8 +124,9 @@ span
 
 .ant-collapse
     .ant-collapse-item
-        max-height: 60%
-        overflow-y: auto
+        .ant-collapse-content
+            .ant-collapse-content-box
+                padding: 0px 0px
         .ant-collapse-header
             z-index: 1
             top: 0
