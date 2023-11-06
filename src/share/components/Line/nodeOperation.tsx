@@ -53,8 +53,7 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         await props.session.emitAsync('toggleCheck', props.path.row);
         break;
       case 'insert-md':
-        const newContent = await props.session.document.getLine(props.path.row);
-        props.session.emit('openModal', 'md', {'md': newContent.join('')});
+        props.session.emit('openModal', 'md', {'md': '暂无内容'});
         props.session.mdEditorOnSave = (markdown: string, _html: string) => {
           props.session.emitAsync('setMarkdown', props.path.row, markdown).then(() => {
             props.session.emit('updateAnyway');
@@ -62,29 +61,21 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         };
         break;
       case 'insert-code':
-        const actualContent = await props.session.document.getLine(props.path.row);
-        await props.session.emitAsync('setCode', props.path.row, actualContent.join(''), 'plaintext');
-        await props.session.delChars(props.path.row, 0, actualContent.length);
-        await props.session.cursor.reset();
-        props.session.emit('updateInner');
-        setTimeout(() => {
-          if (props.session.codeRef[props.path.row]) {
-            props.session.codeRef[props.path.row].current?.focus();
-          }
+        props.session.emitAsync('setCode', props.path.row, '', 'plaintext').then(() => {
+          props.session.emit('updateInner');
+          setTimeout(() => {
+            if (props.session.codeRef[props.path.row]) {
+              props.session.codeRef[props.path.row].current?.focus();
+            }
+          });
         });
         break;
       case 'insert-rtf':
-        const lineContent = await props.session.document.getLine(props.path.row);
-        let html = lineContent.join('');
-        if (html.startsWith('<div class=\'node-html\'>')) {
-          html = html.slice('<div class=\'node-html\'>'.length, -6);
-        }
-        props.session.emit('openModal', 'rtf', {html});
+        props.session.emit('openModal', 'rtf', {html: '<span>暂无内容</span>'});
         props.session.wangEditorOnSave = (content: any) => {
-          let wrappedHtml = `<div class='node-html'>${content}</div>`;
-          props.session.changeChars(props.path.row, 0, lineContent.length,
-            (_ ) => wrappedHtml.split('')).then(() => {
-            props.session.emit('updateAnyway');
+          const wrappedHtml = `<div class='node-html'>${content}</div>`;
+          props.session.emitAsync('setRTF', props.path.row, wrappedHtml).then(() => {
+            props.session.emit('updateInner');
           });
         };
         break;

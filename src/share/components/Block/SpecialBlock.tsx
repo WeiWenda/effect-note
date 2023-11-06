@@ -23,20 +23,18 @@ export function SpecialBlock(props: React.PropsWithChildren<{
       props.session.stopAnchor();
     }} onMouseLeave={() => {
       setEditingTitle(false);
+      props.session.startKeyMonitor();
+      if (title !== props.title) {
+        props.session.changeChars(props.path.row, 0, props.title.length, (_o) => title.split('')).then(() => {
+          props.session.emit('updateInner');
+        });
+      }
     }} style={{padding: '5px 10px'}}>
       { editingTitle ?
         <Input style={{width: '30em', height: `${props.session.clientStore.getClientSetting('lineHeight')}px`}}
                value={title}
                onFocus={() => {
                  props.session.stopKeyMonitor('special-block-title');
-               }}
-               onBlur={() => {
-                 props.session.startKeyMonitor();
-                 if (title !== props.title) {
-                   props.session.changeChars(props.path.row, 0, props.title.length, (_o) => title.split('')).then(() => {
-                     props.session.emit('updateInner');
-                   });
-                 }
                }}
                onChange={(newValue) => {
                  setTitle(newValue.target.value);

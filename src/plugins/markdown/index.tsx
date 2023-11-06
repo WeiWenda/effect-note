@@ -16,12 +16,13 @@ registerPlugin(
   },
   function(api) {
     const linksPlugin = api.getPlugin(linksPluginName) as LinksPlugin;
-    api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData}) => {
+    api.registerHook('session', 'renderAfterLine', (elements, {path, line, pluginData}) => {
       if (pluginData.links?.md) {
         const id = `vditor-${path.row}`;
         const vditorDiv = (
           <SpecialBlock key={'special-block'}
                         path={path}
+                        title={line.join('')}
                         collapse={pluginData.links.collapse || false}
                         onCopy={() => {
                           copyToClipboard(pluginData.links.md);

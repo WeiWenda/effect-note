@@ -1,6 +1,6 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {PluginApi, registerPlugin} from '../../ts/plugins';
-import {Document, Mutation, Row, Session} from '../../share';
+import {Document, EmitFn, Mutation, PartialUnfolder, Row, Session, Token, Tokenizer} from '../../share';
 import {Dropdown, Image, Menu, MenuProps, message, Modal, Popover, Space, Tag } from 'antd';
 import {EditOutlined, ExclamationCircleOutlined, PictureOutlined, ZoomInOutlined,
     ZoomOutOutlined, CheckSquareOutlined, BorderOutlined, ArrowRightOutlined, ArrowLeftOutlined} from '@ant-design/icons';
@@ -88,6 +88,9 @@ export class LinksPlugin {
         this.api.registerListener('session', 'setCode', async (row: Row, code: string, language: string, wrap: boolean) => {
             await this.setCode(row, code, language, wrap);
         });
+        this.api.registerListener('session', 'setRTF', async (row: Row, html: string) => {
+            await this.setRTF(row, html);
+        });
         this.api.registerListener('session', 'setMarkdown', async (row: Row, markdown: string) => {
             await this.setMarkdown(row, markdown);
         });
@@ -120,7 +123,7 @@ export class LinksPlugin {
         this.api.registerHook('session', 'renderHoverBullet', function(bullet, {path, rowInfo}) {
               return (
                 <HoverIconDropDownComponent session={that.session} bullet={bullet} path={path} rowInfo={rowInfo}
-                    tagsPlugin={that.tagsPlugin} markPlugin={that.markPlugin} linksPlugin={that} onInsertDrawio={onInsertDrawio} />
+                    tagsPlugin={that.tagsPlugin} markPlugin={that.markPlugin} linksPlugin={that} />
               );
           });
         this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
@@ -134,8 +137,20 @@ export class LinksPlugin {
             const xml = ids_to_xmls[row] || null;
             const md = await this.getMarkdown(row);
             const code = await this.getCode(row);
-            obj.links = { is_order, is_board, is_check, collapse, png, xml, md, code};
+            const rtf = await this.getRTF(row);
+            obj.links = { is_order, is_board, is_check, collapse, png, xml, md, code, rtf};
             return obj;
+        });
+        this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
+            if (pluginData.links?.code || pluginData.links?.xml || pluginData.links?.md || pluginData.links?.rtf) {
+                return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
+                  _token: Token, _emit: EmitFn<React.ReactNode>, _wrapped: Tokenizer
+                ) => {
+                    // do nothing
+                }));
+            } else {
+                return tokenizer;
+            }
         });
         this.api.registerHook('document', 'serializeRow', async (struct, info) => {
             const collapse = await this.getCollapse(info.row);
@@ -166,6 +181,10 @@ export class LinksPlugin {
             if (md != null) {
                 struct.md = md;
             }
+            const rtf = await this.getRTF(info.row);
+            if (rtf != null) {
+                struct.rtf = rtf;
+            }
             const code = await this.getCode(info.row);
             if (code != null) {
                 struct.code = code;
@@ -194,6 +213,9 @@ export class LinksPlugin {
             }
             if (serialized.code) {
                 await this._setCode(path.row, serialized.code.content, serialized.code.language, serialized.code.wrap || true);
+            }
+            if (serialized.rtf) {
+                await this._setRTF(path.row, serialized.rtf);
             }
             if (serialized.png?.src && serialized.png?.json) {
                 await this._setPng(path.row, serialized.png.src, serialized.png.json);
@@ -264,12 +286,13 @@ export class LinksPlugin {
             }
             return lineContents;
         });
-        this.api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData}) => {
+        this.api.registerHook('session', 'renderAfterLine', (elements, {path, line, pluginData}) => {
             if (pluginData.links?.xml != null) {
                 const ref: any = React.createRef();
                 elements.push(
                   <SpecialBlock key={'special-block'}
                                 path={path}
+                                title={line.join('')}
                                 collapse={pluginData.links.collapse || false}
                                 blockType={'Drawio'} session={that.session} tools={
                       <Space>
@@ -369,6 +392,7 @@ export class LinksPlugin {
         await this.api.setData('ids_to_pngs', {});
         await this.api.setData('ids_to_xmls', {});
         await this.api.setData('ids_to_mds', {});
+        await this.api.setData('ids_to_rtfs', {});
         await this.api.setData('ids_to_codes', {});
         await this.api.setData('ids_to_collapses', {});
         await this.api.setData('ids_to_board', {});
@@ -384,7 +408,7 @@ export class LinksPlugin {
         const ids_to_mds = await this.api.getData('ids_to_mds', {});
         if (ids_to_mds[row]) {
             const markdown = await this.api.getData(row + ':md', '');
-            return markdown || null;
+            return markdown;
         } else {
             return null;
         }
@@ -410,12 +434,35 @@ export class LinksPlugin {
         await this.api.updatedDataForRender(row);
     }
 
+    public async getRTF(row: Row): Promise<any> {
+        const ids_to_rtfs = await this.api.getData('ids_to_rtfs', {});
+        if (ids_to_rtfs[row]) {
+            const rtf = await this.api.getData(row + ':rtf', '');
+            return rtf;
+        } else {
+            return null;
+        }
+    }
+
+    public async setRTF(row: Row, content: string): Promise<void> {
+        await this._setRTF(row, content);
+        await this.api.updatedDataForRender(row);
+    }
+
     private async _setCode(row: Row, content: string, language: string, wrap: boolean): Promise<void> {
         await this.api.setData(row + ':code', {content, language, wrap});
         // 不存在的key查询效率较差
         const ids_to_mds = await this.api.getData('ids_to_codes', {});
         ids_to_mds[row] = 1;
         await this.api.setData('ids_to_codes', ids_to_mds);
+    }
+
+    private async _setRTF(row: Row, content: string): Promise<void> {
+        await this.api.setData(row + ':rtf', content);
+        // 不存在的key查询效率较差
+        const ids_to_rtfs = await this.api.getData('ids_to_rtfs', {});
+        ids_to_rtfs[row] = 1;
+        await this.api.setData('ids_to_rtfs', ids_to_rtfs);
     }
 
     private async _setMarkdown(row: Row, md: String): Promise<void> {

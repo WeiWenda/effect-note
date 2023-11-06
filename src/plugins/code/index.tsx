@@ -87,17 +87,6 @@ registerPlugin(
       }
       return elements;
     });
-    api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
-        if (pluginData.links?.code) {
-          return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
-            _token: Token, _emit: EmitFn<React.ReactNode>, _wrapped: Tokenizer
-          ) => {
-            // do nothing
-          }));
-        } else {
-          return tokenizer;
-        }
-    });
   },
   (api => api.deregisterAll()),
 );

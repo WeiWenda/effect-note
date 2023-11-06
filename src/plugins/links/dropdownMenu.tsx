@@ -71,8 +71,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
   path: Path, rowInfo: CachedRowInfo
   tagsPlugin: TagsPlugin,
   markPlugin: MarksPlugin,
-  linksPlugin: LinksPlugin,
-  onInsertDrawio: (row: Row) => void,
+  linksPlugin: LinksPlugin
 }) {
   const [dropDownOpen, setDropDownOpen ] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
@@ -283,7 +282,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         props.session.emit('openModal', 'ocr');
         break;
       case 'insert_md':
-        props.session.emit('openModal', 'md', {'md': props.rowInfo.pluginData.links.md || props.rowInfo.line.join('')});
+        props.session.emit('openModal', 'md', {'md': '暂无内容'});
         props.session.mdEditorOnSave = (markdown: string, _html: string) => {
           props.linksPlugin.setMarkdown(props.path.row, markdown).then(() => {
             props.session.emit('updateAnyway');
@@ -295,18 +294,14 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         };
         break;
       case 'insert_drawio':
-        props.onInsertDrawio(props.path.row);
+        props.session.emit('setDrawio', props.path.row);
         break;
       case 'insert_rtf':
-        let html: string = props.rowInfo.line.join('');
-        if (props.rowInfo.line.join('').startsWith('<div class=\'node-html\'>')) {
-          html = props.rowInfo.line.join('').slice('<div class=\'node-html\'>'.length, -6);
-        }
-        props.session.emit('openModal', 'rtf', {html});
+        props.session.emit('openModal', 'rtf', {html: '<span>暂无内容</span>'});
         props.session.wangEditorOnSave = (content: any) => {
-          let wrappedHtml = `<div class='node-html'>${content}</div>`;
-          props.session.changeChars(props.path.row, 0, props.rowInfo.line.length, (_ ) => wrappedHtml.split('')).then(() => {
-            props.session.emit('updateAnyway');
+          const wrappedHtml = `<div class='node-html'>${content}</div>`;
+          props.session.emitAsync('setRTF', props.path.row, wrappedHtml).then(() => {
+            props.session.emit('updateInner');
           });
         };
         break;
