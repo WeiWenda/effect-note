@@ -10,6 +10,7 @@ import Path from './path';
 import Document, { InMemoryDocument } from './document';
 import Mutation from './mutations';
 import Menu from './menu';
+import {default as FileSearch} from './search';
 import { XMLParser, XMLBuilder, XMLValidator } from 'fast-xml-parser';
 
 import * as Modes from './modes';
@@ -181,6 +182,27 @@ export default class Session extends EventEmitter {
   public stopKeyMonitor(caller: string) {
     console.log('stopKeyMonitor from:', caller);
     this.stopMonitor = true;
+  }
+
+  public applySearch(filterContent: string) {
+    if (filterContent) {
+      if (!this.search) {
+        this.search = new FileSearch(async (query) => {
+          const results = await this.document.search(this.viewRoot, query);
+          console.log(results);
+          return {
+            rows: new Set(results.flatMap(({path}) => {
+              return path.getAncestry();
+            })),
+            accentMap: new Map(results.map(result => [result.path.row, result.matches]))
+          };
+        }, this);
+      }
+      this.search?.update(filterContent);
+    } else {
+      this.search = null;
+    }
+    this.emit('apply_search', this.search);
   }
 
   public setHoverRow(path: Path | null) {

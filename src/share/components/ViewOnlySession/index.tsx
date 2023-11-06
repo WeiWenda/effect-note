@@ -166,6 +166,7 @@ export default class ViewOnlySessionComponent extends React.Component<Props, Sta
           cached={session.document.cache.get(viewRoot.row)}
           path={viewRoot}
           cursorBetween={cursorBetween}
+          filteredRows={session.search ? session.search.results.rows : undefined}
           topLevel={true}
           onCharClick={onCharClick}
           onLineClick={onLineClick}

@@ -19,7 +19,6 @@ import FileToolsComponent from '../fileTools';
 import * as React from 'react';
 import {ReactNode, useEffect, useRef, useState} from 'react';
 import {MarksPlugin} from '../../plugins/marks';
-import {default as FileSearch} from '../../share/ts/search';
 import {TagsPlugin} from '../../plugins/tags';
 import { useForceUpdate } from '../layout';
 import $ from 'jquery';
@@ -56,28 +55,9 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const selectStyle = `opacity(100%) drop-shadow(0 0 0 ${textColor}) brightness(10)`;
   const unselectStyle = `opacity(10%) drop-shadow(0 0 0 ${textColor})`;
   const forceUpdate = useForceUpdate();
-  const applyFilterInner = (filterContent: string) => {
-    if (filterContent) {
-      if (!props.session.search) {
-        props.session.search = new FileSearch(async (query) => {
-          const results = await props.session.document.search(props.session.viewRoot, query);
-          console.log(results);
-          return {
-            rows: new Set(results.flatMap(({path}) => {
-              return path.getAncestry();
-            })),
-            accentMap: new Map(results.map(result => [result.path.row, result.matches]))
-          };
-        }, props.session);
-      }
-      props.session.search?.update(filterContent);
-    } else {
-      props.session.search = null;
-    }
-  };
   const onSearchContent = (searchContent: string) => {
     setFilterInner(searchContent);
-    applyFilterInner(searchContent);
+    props.session.applySearch(searchContent);
   };
   const unfoldMenus: MenuProps['items'] = [
     {
@@ -96,7 +76,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   useEffect(() => {
     if (!props.loading) {
       setFilterInner(props.filterOuter);
-      applyFilterInner(props.filterOuter);
+      props.session.applySearch(props.filterOuter);
     }
   }, [props.filterOuter, props.loading]);
   useEffect(() => {

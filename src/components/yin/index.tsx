@@ -346,6 +346,13 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     await props.session.document.fullLoadTree(Path.rootRow());
     toggleRecursiveCollapse(previewDocument, Path.root(), true).then(() => {
       setPreviewSession(newPreviewSession);
+      props.session.replaceListener('apply_search', (search) => {
+        newPreviewSession.search = search;
+        setPreviewSession(null);
+        setTimeout(() => {
+          setPreviewSession(newPreviewSession);
+        }, 100);
+      });
     });
     refreshMarkSession();
     refreshTagSession();
@@ -524,10 +531,10 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
                       items={menuItems}
                   />
                 </Panel>
-              {
-                previewSession &&
-                  <Panel showArrow={false} header='大纲' key='1'>
-                      <div style={{height: panelMaxHeight, overflowY: 'auto'}}>
+                <Panel showArrow={false} header='大纲' key='1'>
+                    <div style={{height: panelMaxHeight, overflowY: 'auto'}}>
+                      {
+                        previewSession &&
                         <ViewOnlySessionComponent
                             iconNoTopLevel='fa-circle-o'
                             iconDirFold='fa-angle-right'
@@ -544,9 +551,9 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
                                 previewSession.save();
                               }
                             }/>
-                      </div>
-                  </Panel>
-              }
+                      }
+                    </div>
+                </Panel>
               {
                 markSession &&
                   <Panel showArrow={false}  header='收藏' key='2'>
