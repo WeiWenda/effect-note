@@ -29,6 +29,7 @@ import {useParams, useNavigate, useLoaderData, useSearchParams} from 'react-rout
 import {struckThroughHook} from '../../plugins/todo';
 import {htmlHook} from '../../plugins/html';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import {default as FileSearch} from '../../share/ts/search';
 
 const { Search } = Input;
 const { Panel } = Collapse;
@@ -253,26 +254,32 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     props.session.reset_history();
     props.session.reset_jump_history();
     const previewDocument = new Document(docStore, '', true);
-    const newPreviewSession = new Session(props.session.clientStore, previewDocument, {});
-    newPreviewSession.addHook('renderLineTokenHook', struckThroughHook);
-    newPreviewSession.addHook('renderLineTokenHook', htmlHook);
     async function reloadRow(row: number) {
       await previewDocument.getInfo(row, true);
     }
+    async function refreshPreviewSession(document: Document, search?: FileSearch) {
+      const newPreviewSession = new Session(props.session.clientStore, document, {});
+      if (search) {
+        newPreviewSession.search = search;
+      }
+      newPreviewSession.addHook('renderLineTokenHook', struckThroughHook);
+      newPreviewSession.addHook('renderLineTokenHook', htmlHook);
+      setPreviewSession(newPreviewSession);
+    }
     props.session.document.onEvents(['lineSaved', ], ({row}) => {
       reloadRow(row).then(() => {
-        newPreviewSession.emit('updateInner');
+        refreshPreviewSession(previewDocument);
       });
     });
     props.session.document.on('loadRow', (path: Path) => {
       reloadRow(path.parent!.row).then(() => {
-        newPreviewSession.emit('updateInner');
+        refreshPreviewSession(previewDocument);
       });
     });
     props.session.document.on('afterMove', async ({old_parent, new_parent}) => {
       await reloadRow(old_parent);
       await reloadRow(new_parent);
-      newPreviewSession.emit('updateInner');
+      refreshPreviewSession(previewDocument);
     });
     const refreshMarkSession = () => {
       const markDocument = new Document(docStore, '');
@@ -345,13 +352,9 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     setTagSession(null);
     await props.session.document.fullLoadTree(Path.rootRow());
     toggleRecursiveCollapse(previewDocument, Path.root(), true).then(() => {
-      setPreviewSession(newPreviewSession);
+      refreshPreviewSession(previewDocument);
       props.session.replaceListener('apply_search', (search) => {
-        newPreviewSession.search = search;
-        setPreviewSession(null);
-        setTimeout(() => {
-          setPreviewSession(newPreviewSession);
-        }, 100);
+        refreshPreviewSession(previewDocument, search);
       });
     });
     refreshMarkSession();

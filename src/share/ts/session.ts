@@ -198,11 +198,13 @@ export default class Session extends EventEmitter {
           };
         }, this);
       }
-      this.search?.update(filterContent);
+      this.search?.update(filterContent).then(() => {
+        this.emit('apply_search', this.search);
+      });
     } else {
       this.search = null;
+      this.emit('apply_search', this.search);
     }
-    this.emit('apply_search', this.search);
   }
 
   public setHoverRow(path: Path | null) {
