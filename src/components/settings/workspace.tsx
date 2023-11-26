@@ -5,6 +5,7 @@ import {useEffect, useState} from 'react';
 import {Session} from '../../share';
 import {EMPTY_WORKSPACE_INFO, ServerConfig, WorkSpaceInfo} from '../../ts/server_config';
 import {SERVER_CONFIG} from '../../ts/constants';
+import {QRCodeCanvas} from 'qrcode.react';
 import {getServerConfig, reindexWorkSpace, setServerConfig as saveServerConfig, workspaceRebuild} from '../../share/ts/utils/APIUtils';
 
 function WorkspaceSettingsComponent(props: { session: Session}) {
@@ -223,6 +224,21 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                   </Button>
               </Form.Item>
           </Form>
+      }
+      {
+        sycType === 'gitee' &&
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+          <div style={{paddingBottom: '5px'}}>
+            手机客户端请扫描
+          </div>
+          <QRCodeCanvas value={`http://localhost:51223/workspace?gitLocalDir=${
+            curWorkSpace.gitLocalDir.split('/').pop()}&gitRemote=${curWorkSpace.gitRemote}&gitPassword=${
+              encodeURIComponent(curWorkSpace.gitPassword!)
+            }&gitUsername=${curWorkSpace.gitUsername}`} />
+          <div style={{paddingTop: '5px'}} className={'node-html'}>
+            <span className='red-color'>注意：二维码包含密钥信息，请勿随便分享给他人</span>
+          </div>
+        </div>
       }
     </div>
   );
