@@ -10,7 +10,7 @@ import {
 } from '../../share';
 
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import type {MenuProps} from 'antd';
 import {Collapse, Input, Menu, Badge, Tag, Space} from 'antd';
 import logger from '../../ts/logger';
@@ -117,6 +117,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   const [previewSession, setPreviewSession] = useState<Session | null>(null);
   const [markSession, setMarkSession] =  useState<Session | null>(null);
   const [tagSession, setTagSession] =  useState<Session | null>(null);
+  const elementRef = useRef<HTMLDivElement>(null);
   const markPlugin = props.pluginManager.getInfo('Marks').value as MarksPlugin;
   const tagPlugin = props.pluginManager.getInfo('Tags').value as TagsPlugin;
   const linkPlugin = props.pluginManager.getInfo('Links').value as LinksPlugin;
@@ -241,6 +242,17 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     }
   };
   useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      console.log('detect window size change');
+      setPanelMaxHeight(getPanelMaxHeight(activeKey.length));
+      props.session.emit('updateAnyway');
+    });
+    setTimeout(() => {
+      props.session.emit('changeComment');
+      if (elementRef.current) {
+        observer.observe(elementRef.current);
+      }
+    }, 1000);
     props.session.on('changeLayout', (layout) => {
       setShowFileList(layout.includes('left'));
     });
@@ -248,6 +260,10 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       props.session.showMessage('保存成功');
       markDirty(info.docId, false);
     });
+    return () => {
+      // Cleanup the observer by unobserving all elements
+      observer.disconnect();
+    };
   }, []);
   const afterLoadDoc = async () => {
     props.session.getCurrentContent(Path.root(), 'application/json').then(c => {
@@ -513,7 +529,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     });
   };
   return (
-    <div style={{height: '100%', flexDirection: 'row', display: 'flex'}}>
+    <div ref={elementRef} style={{height: '100%', flexDirection: 'row', display: 'flex'}}>
       {
         showFileList &&
           <div style={{width: `${fileListWidth}px`, flexShrink: 0}}>
@@ -528,7 +544,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
                 className={'file-list-collapse'}
                 style={{width: `${fileListWidth}px`}}
                 bordered={false} activeKey={activeKey} onChange={(newKeys) => {
-                  const nextActiveKeys = Array.isArray(newKeys) ? newKeys : [newKeys]
+                  const nextActiveKeys = Array.isArray(newKeys) ? newKeys : [newKeys];
                   setActiveKey(nextActiveKeys);
                   setPanelMaxHeight(getPanelMaxHeight(nextActiveKeys.length));
             }}>
