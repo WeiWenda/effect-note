@@ -1,6 +1,6 @@
 import MonacoEditor, {monaco} from 'react-monaco-editor';
 import * as React from 'react';
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {Path, Session} from '../../share';
 import {Input} from 'antd';
 
@@ -15,6 +15,11 @@ export function MonacoEditorWrapper(props: {
   const [value, setValue] = useState(props.pluginData.links.code.content || '');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   props.session.codeRef[props.path.row] = editorRef;
+  useEffect(() => {
+    if (editorRef.current) {
+      setHeight(editorRef.current.getContentHeight());
+    }
+  }, [props.pluginData.links.code.wrap]);
   return (
     <div
       onMouseEnter={() => {
