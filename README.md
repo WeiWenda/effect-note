@@ -17,7 +17,7 @@ Project Vision：Empower Personal Knowledge Management And Discovery
         Mac客户端下载
       </th>
       <td>
-         <a target="_blank" href="https://apps.apple.com/cn/app/effectnote/id6458540943?mt=12"><image src="./public/images/mas_en.svg"/> </a>
+         <a target="_blank" href="https://apps.apple.com/cn/app/effectnote/id6458540943?mt=12"><image width='150px' src="./public/images/mas_en.svg"/> </a>
       </td>
        <td>
           <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Mac/EffectNote-0.3.2-x64.dmg">直接下载</a>
@@ -39,7 +39,7 @@ Project Vision：Empower Personal Knowledge Management And Discovery
         iPhone客户端下载
       </th>
       <td>
-         <a target="_blank" href="https://apps.apple.com/cn/app/effectnote/id6458540943?mt=12"><image src="./public/images/appstore.png"/> </a>
+         <a target="_blank" href="https://apps.apple.com/cn/app/effectnote/id6458540943?mt=12"><image width='120px' src="./public/images/appstore.png"/> </a>
       </td>
        <td>
           -
