@@ -34,6 +34,28 @@ Project Vision：Empower Personal Knowledge Management And Discovery
           <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Windows/EffectNote-0.3.2%20Setup.exe">直接下载</a>
        </td>
      </tr>
+    <tr>
+      <th>
+        iPhone客户端下载
+      </th>
+      <td>
+         <a target="_blank" href="https://apps.apple.com/cn/app/effectnote/id6458540943?mt=12"><image src="./public/images/appstore.png"/> </a>
+      </td>
+       <td>
+          -
+       </td>
+    </tr>
+   <tr>
+      <th>
+        Android客户端下载
+      </th>
+      <td>
+         -
+      </td>
+       <td>
+          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Android/effectnote-1.0.0.apk">直接下载</a>
+       </td>
+    </tr>
   </table>
 
 
