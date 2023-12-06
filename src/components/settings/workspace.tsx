@@ -1,5 +1,13 @@
 import {Button, Col, Divider, Dropdown, Form, Input, Modal, Radio, Row, Select, Space, Tooltip} from 'antd';
-import {DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined, PlusSquareOutlined, CloudSyncOutlined, ReloadOutlined} from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+  PlusOutlined,
+  FolderViewOutlined,
+  CloudSyncOutlined,
+  ReloadOutlined
+} from '@ant-design/icons';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {Session} from '../../share';
@@ -111,6 +119,13 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                   }
                 });
               }}/>
+            </Tooltip>
+            <Tooltip title='在文件浏览器打开'>
+              <FolderViewOutlined onClick={() => {
+                if (curWorkSpace?.gitLocalDir) {
+                  window.electronAPI.openInFinder(curWorkSpace?.gitLocalDir);
+                }
+              }} />
             </Tooltip>
           </Space>
         </Col>

@@ -17,6 +17,7 @@ declare global {
     interface Window {
         electronAPI: {
             openDirectory: () => Promise<DialogFileData>;
+            openInFinder: (path: string) => any;
         };
     }
 }
