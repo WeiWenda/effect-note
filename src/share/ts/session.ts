@@ -577,7 +577,7 @@ export default class Session extends EventEmitter {
   }
 
   public async newFile(name: string, tags: string[]) {
-      this.showMessage('正在创建...', { time: 0 });
+      this.showMessage('正在创建...');
       const docId = Math.max(...this.userDocs.map(d => d.id!)) + 1;
       const docDetail = await uploadDoc({
         id: docId,
@@ -589,7 +589,7 @@ export default class Session extends EventEmitter {
   }
 
   public async renameFile(share_id: number, docInfo: DocInfo) {
-    this.showMessage('正在重命名...', { time: 0 });
+    this.showMessage('正在重命名...');
     const content = await this.getCurrentContent(Path.root(), 'application/json');
     docInfo.content = content;
     const docDetail = await updateDoc(share_id, docInfo).catch(e => this.showMessage(e, {warning: true}));
@@ -600,12 +600,16 @@ export default class Session extends EventEmitter {
     if (this.saving === false) {
       this.saving = true;
       try {
-        this.showMessage('正在保存...', { time: 0 });
+        this.showMessage('正在保存...');
         const content = await this.getCurrentContent(path, 'application/json');
         const docInfo = { ...this.userDocs.find(doc => doc.id === share_id)!};
         docInfo.content = content;
         const docDetail = await updateDoc(share_id, docInfo).catch(e => this.showMessage(e, {warning: true}));
-        return Number(docDetail.id) || share_id;
+        if (docDetail.id) {
+          return Number(docDetail.id) || share_id;
+        } else {
+          return Promise.reject(docDetail.message);
+        }
       } finally {
         this.saving = false;
       }

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Layout, Menu, Spin, Switch, Drawer, Button, Tabs, Modal} from 'antd';
+import {Layout, Menu, Spin, Drawer, Button, Tabs, Modal, notification} from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
 
 import '@wangeditor/editor/dist/css/style.css';
@@ -185,7 +185,8 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         onLoad={async (path, filename, contents) => {
           const mimetype = mimetypeLookup(filename);
           if (!mimetype) {
-            props.session.showMessage('Invalid filetype!', { time: 0 });
+            notification.error({message: '导入失败', description: '不支持的文件格式', placement: 'bottomRight'});
+            props.session.showMessage('Invalid filetype!', {warning: true, time: 0 });
             return;
           }
           if (await props.session.importContent(contents, mimetype, path)) {

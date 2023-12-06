@@ -153,6 +153,7 @@ router.get('/:docId', async (req, res) => {
         fs,
         http: isoHttp,
         dir: gitHome,
+        author: {name: 'auto saver', email : 'desktop@effectnote.com'},
         onAuth: () => ({ username: gitUsername, password: gitPassword}),
     })
     let commitOid = req.query.version
@@ -204,6 +205,8 @@ router.put('/:docId', async (req, res) => {
             writeFile(dir, actualFilename, content).then(() => {
                 commit().then(() => {
                     res.send({message: 'save success', id: req.params.docId});
+                }).catch((e) => {
+                    res.send({message: e.toLocaleString()})
                 })
             });
         } else {
@@ -214,6 +217,8 @@ router.put('/:docId', async (req, res) => {
                     commit().then(() => {
                         docId2path[docId] = path.join(dir, actualFilename);
                         res.send({message: 'save success', id: req.params.docId});
+                    }).catch((e) => {
+                        res.send({message: e.toLocaleString()})
                     })
                 });
             })

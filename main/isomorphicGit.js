@@ -41,6 +41,32 @@ async function deleteFile(file) {
     return fs.promises.unlink(file)
 }
 
+async function gitReset({dir, ref, branch}) {
+    var re = /^HEAD~([0-9]+)$/
+    var m = ref.match(re);
+    if (m) {
+        var count = +m[1];
+        var commits = await git.log({fs, dir, depth: count + 1});
+        var commit = commits.pop().oid;
+        return new Promise((resolve, reject) => {
+            fs.writeFile(dir + `/.git/refs/heads/${branch}`, commit, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+                // clear the index (if any)
+                fs.unlink(dir + '/.git/index', (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    // checkout the branch into the working tree
+                    git.checkout({ dir, fs, ref: branch, force: true }).then(resolve);
+                });
+            });
+        });
+    }
+    return Promise.reject(`Wrong ref ${ref}`);
+}
+
 async function commit() {
     const gitConfig = getGitConfig()
     try {
@@ -63,15 +89,28 @@ async function commit() {
         )
     )
     await git.commit(
-        {fs, dir: gitConfig.gitHome, author: {name: 'auto saver', email : '994184916@qq.com'},
+        {fs, dir: gitConfig.gitHome, author: {name: 'auto saver', email : 'desktop@effectnote.com'},
             message: Moment().format('yyyy-MM-DD HH:mm:ss')}
     );
     if (gitConfig.gitRemote && gitConfig.gitRemote !== '未配置') {
+        const branch = await git.currentBranch({fs, dir: gitConfig.gitHome})
         await git.push({fs,
             http: isoHttp,
             dir: gitConfig.gitHome,
             remote: 'origin',
             onAuth: () => ({ username: gitConfig.gitUsername, password: gitConfig.gitPassword}),
+        }).catch(e => {
+            if (e.toLocaleString().includes('Push rejected because it was not a simple fast-forward. Use "force: true" to override.')) {
+                console.log('fast-forward failed, revert latest commit')
+                return gitReset({dir: gitConfig.gitHome, ref: 'HEAD~1', branch: branch}).then(() => {
+                    throw e
+                }).catch(e => {
+                    console.log(e)
+                    throw e
+                })
+            } else {
+                throw e
+            }
         });
     }
 }
