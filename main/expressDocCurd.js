@@ -6,6 +6,7 @@ const {listFiles, deleteFile, writeFile, commit, getGitConfig, store} = require(
 const path = require("path");
 const lunr = require("lunr");
 const jieba = require('@node-rs/jieba');
+const isoHttp = require("isomorphic-git/http/node");
 const docId2path = {};
 const IMAGES_FOLDER = 'images'
 jieba.load();
@@ -145,9 +146,15 @@ router.get('/:docId/versions', async (req, res) => {
     }))
 })
 router.get('/:docId', async (req, res) => {
-    const {gitHome} = getGitConfig();
+    const {gitHome, gitUsername, gitPassword}  = getGitConfig();
     const docId = Number(req.params.docId);
     const filepath = docId2path[docId];
+    await git.pull({
+        fs,
+        http: isoHttp,
+        dir: gitHome,
+        onAuth: () => ({ username: gitUsername, password: gitPassword}),
+    })
     let commitOid = req.query.version
     if (commitOid === 'HEAD') {
         commitOid = await git.resolveRef({ fs, dir: gitHome, ref: 'HEAD' });
