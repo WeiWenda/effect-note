@@ -1821,16 +1821,15 @@ export default class Session extends EventEmitter {
         this.selectPopoverOpen = false;
         const options = {includeEnd: false, yank: false};
         await this.deleteBetween(cursor, anchor, options);
-        this.stopAnchor();
-        this.selecting = false;
-        this.emit('updateInner');
       } else {
         console.log('yankDelete multi line');
         // 多行选中
         const [parent, index1, index2] = await this.getVisualLineSelections();
-        await this.delBlocks(parent.row, index1, (index2 - index1) + 1, {addNew: false});
-        this.stopAnchor();
+        await this.delBlocks(parent.row, index1, (index2 - index1) + 1, {addNew: false, noSave: true});
       }
+      this.stopAnchor();
+      this.selecting = false;
+      this.emit('updateInner');
     } else {
       const lineInfo = await this.document.getInfo(this.cursor.row);
       if (this.cursor.col === 0 && lineInfo.pluginData.links?.is_check !== null) {
