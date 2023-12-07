@@ -29,19 +29,25 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
       setServerConfig(res);
       const activeWorkSpace = res.workspaces?.find(i => i.active);
       setCurWorkSpace(activeWorkSpace);
-      setSrcType(activeWorkSpace.sycType || 'never');
-      form.setFieldsValue(activeWorkSpace);
     });
   }, []);
+  useEffect(() => {
+    setSrcType(curWorkSpace?.sycType || 'never');
+    form.setFieldsValue(curWorkSpace);
+  }, [curWorkSpace]);
   const onSelect = (value: String) => {
-    const workspace = serverConfig.workspaces?.find(i => i.gitLocalDir === value);
-    setCurWorkSpace(workspace);
-    form.setFieldsValue(workspace);
-    const updatedWorkSpace = { active: true, ...workspace} as WorkSpaceInfo;
-    const updatedWorkSpaces = [...serverConfig.workspaces!.filter(i => i.gitLocalDir !== value)];
-    updatedWorkSpaces.forEach(w => w.active = false);
-    serverConfig.workspaces = [updatedWorkSpace].concat(updatedWorkSpaces);
-    saveServerConfig(serverConfig);
+    const updatedWorkSpaces = serverConfig.workspaces!.map(i => {
+      if (i.gitLocalDir === value) {
+        return {...i, active: true} as WorkSpaceInfo;
+      } else {
+        return {...i, active: false} as WorkSpaceInfo;
+      }
+    });
+    updatedWorkSpaces.filter(i => i.active).forEach(i => setCurWorkSpace(i));
+    const newServerConfig = {...serverConfig, workspaces: updatedWorkSpaces};
+    saveServerConfig(newServerConfig).then(() => {
+      setServerConfig(newServerConfig);
+    });
   };
   return (
     <div>
@@ -51,7 +57,7 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
           <Space>
             <Select
               value={curWorkSpace?.gitLocalDir}
-              style={{ maxWidth: 600 }}
+              style={{ maxWidth: 600, minWidth: 200 }}
               onChange={onSelect}
               options={
                 serverConfig.workspaces?.map(info => {
@@ -64,9 +70,8 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
             <Tooltip title='增加工作空间'>
               <PlusOutlined onClick={() => {
                 serverConfig.workspaces?.push(EMPTY_WORKSPACE_INFO);
-                setServerConfig(serverConfig);
+                setServerConfig({...serverConfig});
                 setCurWorkSpace(EMPTY_WORKSPACE_INFO);
-                form.setFieldsValue(EMPTY_WORKSPACE_INFO);
               }} />
             </Tooltip>
             <Tooltip title='重建查找索引'>
@@ -92,11 +97,9 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                       serverConfig.workspaces[0].active = true;
                       serverConfig.workspaces = updatedWorkSpaces;
                       saveServerConfig(serverConfig).then(() => {
-                        setServerConfig(serverConfig);
+                        setServerConfig({...serverConfig});
                         // @ts-ignore
                         setCurWorkSpace(serverConfig.workspaces[0]);
-                        // @ts-ignore
-                        form.setFieldsValue(serverConfig.workspaces[0]);
                       });
                     }
                   });
@@ -152,7 +155,7 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                   updatedWorkSpaces.forEach(w => w.active = false);
                   serverConfig.workspaces = [updatedWorkSpace].concat(updatedWorkSpaces);
                   saveServerConfig(serverConfig).then(() => {
-                    setServerConfig(serverConfig);
+                    setServerConfig({...serverConfig});
                     setCurWorkSpace(updatedWorkSpace);
                     props.session.showMessage('应用成功');
                   });
