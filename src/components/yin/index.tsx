@@ -10,7 +10,7 @@ import {
 } from '../../share';
 
 import * as React from 'react';
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import type {MenuProps} from 'antd';
 import {Collapse, Input, Menu, Badge, Tag, Space} from 'antd';
 import logger from '../../ts/logger';
@@ -75,10 +75,6 @@ function getTagMap(filteredDocs: DocInfo[], recentDocId: number[], dirtyDocId: n
   return tagMap;
 }
 
-function getPanelMaxHeight(activeCount: number): number {
-  return (window.innerHeight - 63 - 2 - 32 - 4 * 46 - 6) / activeCount;
-}
-
 async function toggleRecursiveCollapse(document: Document, path: Path, collapse: boolean): Promise<any> {
   logger.debug('Toggle state: ' + collapse + ' row = ' + path.row);
   if (!document.cache.get(path.row)) {
@@ -107,7 +103,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   const [fileListWidth, setFileListWidth] = useState(250);
   const [showFileList , setShowFileList] = useState(props.session.clientStore.getClientSetting('defaultLayout').includes('left'));
   const [activeKey, setActiveKey] = useState(['0', '1']);
-  const [panelMaxHeight, setPanelMaxHeight] = useState(getPanelMaxHeight(2));
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const [openKeys, setOpenKeys] = useState<string[]>(JSON.parse(props.session.clientStore.getClientSetting('openMenus')));
   const [filter, setFilter] = useState('');
   const [filteredDocIds, setFilteredDocIds] = useState<number[]>([]);
@@ -121,6 +117,9 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   const markPlugin = props.pluginManager.getInfo('Marks').value as MarksPlugin;
   const tagPlugin = props.pluginManager.getInfo('Tags').value as TagsPlugin;
   const linkPlugin = props.pluginManager.getInfo('Links').value as LinksPlugin;
+  const getPannelHeight = useCallback(() => {
+    return (windowHeight - 63 - 2 - 32 - 4 * 46 - 6) / Math.max(activeKey.length, 1);
+  }, [windowHeight, activeKey]);
   function getItem(
     label: string,
     key: React.Key,
@@ -244,8 +243,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   useEffect(() => {
     const observer = new ResizeObserver(() => {
       console.log('detect window size change');
-      setPanelMaxHeight(getPanelMaxHeight(activeKey.length));
-      props.session.emit('updateAnyway');
+      setWindowHeight(window.innerHeight);
     });
     setTimeout(() => {
       props.session.emit('changeComment');
@@ -546,11 +544,10 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
                 bordered={false} activeKey={activeKey} onChange={(newKeys) => {
                   const nextActiveKeys = Array.isArray(newKeys) ? newKeys : [newKeys];
                   setActiveKey(nextActiveKeys);
-                  setPanelMaxHeight(getPanelMaxHeight(nextActiveKeys.length));
             }}>
                 <Panel showArrow={false} header={'目录'} key='0'>
                   <Menu
-                      style={{height: panelMaxHeight, overflowY: 'auto'}}
+                      style={{height: getPannelHeight(), overflowY: 'auto'}}
                       onClick={onClick}
                       selectedKeys={[curMenu]}
                       onOpenChange={onOpenChange}
@@ -560,7 +557,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
                   />
                 </Panel>
                 <Panel showArrow={false} header='大纲' key='1'>
-                    <div style={{height: panelMaxHeight, overflowY: 'auto'}}>
+                    <div style={{height: getPannelHeight(), overflowY: 'auto'}}>
                       {
                         previewSession &&
                         <ViewOnlySessionComponent
@@ -585,7 +582,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
               {
                 markSession &&
                   <Panel showArrow={false}  header='收藏' key='2'>
-                      <div style={{height: panelMaxHeight, overflowY: 'auto'}}>
+                      <div style={{height: getPannelHeight(), overflowY: 'auto'}}>
                         <ViewOnlySessionComponent
                             iconTopLevel='fa-bookmark-o'
                             session={markSession}
@@ -602,7 +599,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
               {
                 tagSession &&
                   <Panel showArrow={false}  header='标签' key='3'>
-                      <div style={{height: panelMaxHeight, overflowY: 'auto'}}>
+                      <div style={{height: getPannelHeight(), overflowY: 'auto'}}>
                         <ViewOnlySessionComponent
                             iconTopLevel='fa-tags'
                             iconNoTopLevel='fa-circle'
