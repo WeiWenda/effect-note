@@ -79,8 +79,8 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
     props.session.on('changeLayout', (layout) => {
       setShowHeader(layout.includes('top'));
     });
-    props.session.cursor.on('rowChange', async (_oldPath: Path, newPath: Path) => {
-      props.session.setHoverRow(newPath);
+    props.session.cursor.on('rowChange', (_oldPath: Path, newPath: Path) => {
+        props.session.setHoverRow(newPath, 'cursor');
     });
     props.session.on('updateAnyway', () => {
       logger.debug('updateAnyway');

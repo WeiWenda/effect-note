@@ -151,7 +151,9 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
       <div key='text' className='node-text'
            onClick={this.onClick}
            onMouseEnter={() => {
-             this.props.session.setHoverRow(path);
+             if (!this.props.session.keydown) {
+               this.props.session.setHoverRow(path, 'mouse');
+             }
              if (this.props.session.dragging) {
                this.setState({showDragHint: true});
              }

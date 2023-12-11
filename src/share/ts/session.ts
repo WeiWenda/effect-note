@@ -122,6 +122,7 @@ export default class Session extends EventEmitter {
   public selecting: boolean = false;
   public selectPopoverOpen: boolean = false;
   public dragging: boolean = false;
+  public keydown: boolean = false;
 
   private static swapCase(chars: Chars) {
     return chars.map(function(chr) {
@@ -207,14 +208,14 @@ export default class Session extends EventEmitter {
     }
   }
 
-  public setHoverRow(path: Path | null) {
+  public setHoverRow(path: Path | null, source: string) {
+    logger.debug('set hover row ', path, source);
     if (this.selectPopoverOpen) {
       return;
     }
     if (path && this.hoverRow?.is(path)) {
       return;
     }
-    logger.debug('set hover row ', path);
     this.lastHoverRow = this.hoverRow;
     this.hoverRow = path;
     this.emit('updateInner');

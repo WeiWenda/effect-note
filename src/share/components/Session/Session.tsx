@@ -275,7 +275,7 @@ export default class SessionComponent extends React.Component<Props, State> {
     return (
       <div className='session-content'
            onMouseLeave={() => {
-             this.props.session.setHoverRow(null);
+             this.props.session.setHoverRow(null, 'mouse leave');
            }}
       >
         <BlockComponent

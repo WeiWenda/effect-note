@@ -39,6 +39,9 @@ export function FontStyleToolComponent(
         }
       }).then(() => {
         props.session.stopAnchor();
+        setTimeout(() => {
+          props.session.selectPopoverOpen = false;
+        }, 200);
         props.session.selecting = false;
         props.session.emit('updateInner');
       });
