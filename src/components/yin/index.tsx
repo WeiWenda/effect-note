@@ -482,11 +482,20 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     console.timeEnd(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo.name}`);
   };
   useEffect(() => {
+    const currentViewRoot = searchParams.get('f');
     const shareUrl = searchParams.get('s');
     if (shareUrl) {
       loadShareDoc(shareUrl);
     } else {
-      loadDoc(Number(curDocId));
+      loadDoc(Number(curDocId)).then(() => {
+        if (currentViewRoot) {
+          props.session.document.canonicalPath(Number(currentViewRoot)).then(path => {
+            if (path) {
+              props.session.zoomInto(path);
+            }
+          });
+        }
+      });
     }
   }, [curDocId, searchParams]);
   const onClick: MenuProps['onClick'] = e => {

@@ -21,6 +21,7 @@ export type Char = string;
 export type Chars = Array<Char>;
 export type Line = Chars;
 export type SerializedLine = {
+  id?: number,
   text: string,
   collapsed?: boolean,
   plugins?: any,

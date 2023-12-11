@@ -514,8 +514,8 @@ export default class Session extends EventEmitter {
     return kmNode;
   }
 
-  public async exportContent(mimetype: string) {
-    const jsonContent = await this.document.serialize(this.cursor.row);
+  public async exportContent(mimetype: string, saveID: boolean) {
+    const jsonContent = await this.document.serialize(this.cursor.row, {saveID});
     if (mimetype === 'application/json') {
       return JSON.stringify(jsonContent, undefined, 2);
     } else if (mimetype === 'text/markdown') {
@@ -568,10 +568,10 @@ export default class Session extends EventEmitter {
     }
   }
 
-  public async getCurrentContent(path: Path, mimetype: string) {
+  public async getCurrentContent(path: Path, mimetype: string, saveID: boolean = false) {
     const oldPath = this.cursor.path;
     await this.cursor.setPath(path);
-    const content = await this.exportContent(mimetype);
+    const content = await this.exportContent(mimetype, saveID);
     await this.cursor.setPath(oldPath);
     return content;
   }
@@ -601,7 +601,7 @@ export default class Session extends EventEmitter {
       this.saving = true;
       try {
         this.showMessage('正在保存...');
-        const content = await this.getCurrentContent(path, 'application/json');
+        const content = await this.getCurrentContent(path, 'application/json', true);
         const docInfo = { ...this.userDocs.find(doc => doc.id === share_id)!};
         docInfo.content = content;
         const docDetail = await updateDoc(share_id, docInfo).catch(e => this.showMessage(e, {warning: true}));

@@ -462,4 +462,17 @@ export class DocumentStore {
     ]);
     return id;
   }
+
+  public setMaxRowId(row: number) {
+    let id;
+    if (this.lastId === null || (row + 1) > this.lastId) {
+      id = 1 + row;
+      this._set(this._lastIDKey_(), id);
+    } else {
+      id = this.lastId;
+    }
+    // NOTE: fire and forget
+    this.lastId = id;
+    return id;
+  }
 }

@@ -9,6 +9,7 @@ import $ from 'jquery';
 import {downloadFile} from '../../ts/util';
 import Moment from 'moment/moment';
 import {shareDoc} from '../../share/ts/utils/APIUtils';
+import {copyToClipboard} from '../../components';
 
 export function exportAction(session: Session, path: Path, mimeType: string, filename?: string) {
   session.getCurrentContent(path, mimeType).then(content => {
@@ -195,6 +196,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         {
           label: '导出为text（兼容WorkFlowy）',
           key: 'export_text',
+        },
+        {
+          label: '生成超链接（用于节点引用）',
+          key: 'export_url',
         }
       ],
     }
@@ -326,6 +331,11 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         break;
       case 'export_text':
         exportAction(props.session, props.path, 'text/plain');
+        break;
+      case 'export_url':
+        const url = `http://localhost:51223/note/${props.session.clientStore.getClientSetting('curDocId')}?f=${props.path.row}`;
+        copyToClipboard(url);
+        props.session.showMessage('已复制到粘贴板');
         break;
       case 'delete':
         replaceEmptyBlock();

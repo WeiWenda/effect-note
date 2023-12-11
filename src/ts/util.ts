@@ -38,19 +38,6 @@ htmlTypes.forEach((htmltype) => {
 });
 export const htmlRegex = '(' + htmlRegexParts.map((part) => '(' + part + ')').join('|') + ')';
 
-export async function exportFile(session: Session, type = 'json') {
-    const filename = session.document.name === '' ?
-        `vimflowy.${type}` :
-        `${session.document.name}.${type}`;
-    // Infer mimetype from file extension
-    const mimetype = mimetypeLookup(filename);
-    if (!mimetype) {
-        throw new Error('Invalid export type');
-    }
-    const content = await session.exportContent(mimetype);
-    downloadFile(filename, content, mimetype);
-}
-
 export function onlyUnique(value: string, index: number, self: string[]) {
     return self.indexOf(value) === index;
 }

@@ -223,8 +223,14 @@ export default class Document extends EventEmitter {
   }
 
 
-  public async _newChild(parent: Row, index = -1): Promise<AttachedChildInfo> {
-    const row = await this.store.getNew();
+  public async _newChild(parent: Row, index = -1, serializedRow: number | undefined): Promise<AttachedChildInfo> {
+    let row;
+    if (serializedRow === undefined) {
+      row = await this.store.getNew();
+    } else {
+      row = serializedRow;
+      this.store.setMaxRowId(row);
+    }
 
     // NOTE: order is important for caching.
     // - first emit async so plugins can prepare for what will happen
@@ -738,8 +744,8 @@ export default class Document extends EventEmitter {
     });
   }
 
-  public async newChild(path: Path, index = -1) {
-    const { row } = await this._newChild(path.row, index);
+  public async newChild(path: Path, index = -1, serializedRow: number | undefined) {
+    const { row } = await this._newChild(path.row, index, serializedRow);
     return path.child(row);
   }
 
@@ -827,16 +833,19 @@ export default class Document extends EventEmitter {
 
   public async serialize(
     row = this.root.row,
-    options: {pretty?: boolean} = {},
+    options: {pretty?: boolean, saveID?: boolean} = {},
     serialized: {[row: number]: SerializedBlock} = {}
   ): Promise<SerializedBlock> {
     if (row in serialized) {
-      const clone_struct: any = serialized[row];
-      clone_struct.id = row;
+      // const clone_struct: any = serialized[row];
+      // clone_struct.id = row;
       return { clone: row };
     }
 
     const struct: any = await this.serializeRow(row);
+    if (options.saveID) {
+      struct.id = row;
+    }
     // NOTE: this must be done in order due to cloning
     // const children = await Promise.all((await this._getChildren(row)).map(
     //   async (childrow) => await this.serialize(childrow, options, serialized)
@@ -886,7 +895,7 @@ export default class Document extends EventEmitter {
         ((await this.getLine(children[0].row)).length === 0)) {
       path = children[0];
     } else {
-      path = await this.newChild(parent_path, index);
+      path = await this.newChild(parent_path, index, serialized.id);
     }
 
     if (typeof serialized === 'string') {
