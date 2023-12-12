@@ -1,34 +1,23 @@
 import {Col, Tooltip, InputNumber, Row, Select, Input, Space, Popover, Button, Divider} from 'antd';
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {Session} from '../../share';
 import { ChromePicker } from 'react-color';
 import {appendStyleScript, getStyles, Theme, themes} from '../../share/ts/themes';
-import Config from '../../share/ts/config';
 import {CopyOutlined, RollbackOutlined, DeleteOutlined, EditOutlined} from '@ant-design/icons';
-import {SERVER_CONFIG} from '../../ts/constants';
-import {getServerConfig, setServerConfig as saveServerConfig} from '../../share/ts/utils/APIUtils';
-import {ServerConfig} from '../../ts/server_config';
+import {setServerConfig as saveServerConfig} from '../../share/ts/utils/APIUtils';
 import $ from 'jquery';
+import {ServerConfig} from '../../ts/server_config';
 
-function AppearanceSettingsComponent(props: { session: Session, config: Config, refreshFunc: () => void }) {
-  const [serverConfig, setServerConfig] = useState(SERVER_CONFIG);
+function AppearanceSettingsComponent(props: { session: Session, serverConfig: ServerConfig }) {
   const [editing, setEditing] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<string>(props.session.clientStore.getClientSetting('curTheme'));
-  useEffect(() => {
-    getServerConfig().then((res: ServerConfig) => {
-      if (!res.themes) {
-        res.themes = {...themes};
-      }
-      setServerConfig(res);
-    });
-  }, []);
   const applyTheme = (theme: Theme) => {
     Object.keys(theme).forEach((theme_prop: string) => {
       props.session.clientStore.setClientSetting(theme_prop as keyof Theme, theme[theme_prop as keyof Theme]);
     });
     appendStyleScript(props.session.clientStore);
-    props.refreshFunc();
+    props.session.emit('refreshServerConfig');
   };
   const colorPickerRow = (name: string, theme_property: keyof Theme) => {
     const hex_color = props.session.clientStore.getClientSetting('theme-bg-primary');
@@ -47,11 +36,10 @@ function AppearanceSettingsComponent(props: { session: Session, config: Config, 
             <ChromePicker
               color={ props.session.clientStore.getClientSetting(theme_property) as string }
               onChangeComplete={({ hex: hexColor }: any) => {
-                const theme: Theme = serverConfig.themes![currentTheme];
+                const theme: Theme = props.serverConfig.themes![currentTheme];
                 // @ts-ignore
                 theme[theme_property] = (hexColor as string);
                 applyTheme(theme);
-                saveServerConfig(serverConfig);
               }}
             />
           )} trigger='click'>
@@ -70,14 +58,17 @@ function AppearanceSettingsComponent(props: { session: Session, config: Config, 
   const changeTheme = (theme: string) => {
     props.session.clientStore.setClientSetting('curTheme', theme);
     setCurrentTheme(theme);
-    applyTheme(serverConfig.themes![theme]);
+    applyTheme(props.serverConfig.themes![theme]);
   };
   const changeThemeProperty = (key: string, value: string | number) => {
-    const theme: Theme = serverConfig.themes![currentTheme];
+    const themes = {...props.serverConfig.themes};
+    const theme: Theme = themes[currentTheme];
     // @ts-ignore
     theme[key as keyof Theme] = value;
     applyTheme(theme);
-    saveServerConfig(serverConfig);
+    saveServerConfig({...props.serverConfig, themes: themes}).then(() => {
+      props.session.emit('refreshServerConfig');
+    });
   };
   return (
     <div>
@@ -92,12 +83,13 @@ function AppearanceSettingsComponent(props: { session: Session, config: Config, 
                 <Button onClick={() => {
                   const newThemeName = $('#theme-new-name').val();
                   if (newThemeName) {
-                    const theme = serverConfig.themes![currentTheme];
-                    delete serverConfig.themes![currentTheme];
-                    serverConfig.themes![newThemeName as string] = theme;
-                    setServerConfig(serverConfig);
-                    saveServerConfig(serverConfig);
+                    const newThemes = {...props.serverConfig.themes};
+                    newThemes[newThemeName as string] = newThemes[currentTheme];
+                    delete newThemes[currentTheme];
                     changeTheme(newThemeName as string);
+                    saveServerConfig({...props.serverConfig, themes: newThemes}).then(() => {
+                      props.session.emit('refreshServerConfig');
+                    });
                   }
                   setEditing(false);
                 }} >确定</Button>
@@ -108,7 +100,7 @@ function AppearanceSettingsComponent(props: { session: Session, config: Config, 
               <Select
                 style={{width: '202px'}}
                 value={currentTheme}
-                options={Object.keys(serverConfig.themes || themes).map(k => {
+                options={Object.keys(props.serverConfig.themes || themes).map(k => {
                   return {value: k, label: k};
                 })}
                 onChange={changeTheme}
@@ -116,20 +108,24 @@ function AppearanceSettingsComponent(props: { session: Session, config: Config, 
             }
             <Tooltip title='复制当前主题'>
               <CopyOutlined onClick={() => {
-                serverConfig.themes![currentTheme + '(copy)'] = {...serverConfig.themes![currentTheme]};
+                const newThemes = {...props.serverConfig.themes};
+                newThemes[currentTheme + '(copy)'] = {...newThemes[currentTheme]};
                 setCurrentTheme(currentTheme + '(copy)');
-                setServerConfig(serverConfig);
-                saveServerConfig(serverConfig);
+                saveServerConfig({...props.serverConfig, themes: newThemes}).then(() => {
+                  props.session.emit('refreshServerConfig');
+                });
               }}/>
             </Tooltip>
             {
               !themes.hasOwnProperty(currentTheme) &&
               <Tooltip title='删除当前主题'>
                 <DeleteOutlined onClick={() => {
-                  delete serverConfig.themes![currentTheme];
-                  setServerConfig(serverConfig);
-                  saveServerConfig(serverConfig);
+                  const newThemes = {...props.serverConfig.themes};
+                  delete newThemes[currentTheme];
                   changeTheme('Default');
+                  saveServerConfig({...props.serverConfig, themes: newThemes}).then(() => {
+                    props.session.emit('refreshServerConfig');
+                  });
                 }} />
               </Tooltip>
             }
@@ -145,10 +141,12 @@ function AppearanceSettingsComponent(props: { session: Session, config: Config, 
               themes.hasOwnProperty(currentTheme) &&
               <Tooltip title='恢复默认'>
                 <RollbackOutlined onClick={() => {
-                  serverConfig.themes![currentTheme] = {...themes[currentTheme]};
-                  setServerConfig(serverConfig);
-                  saveServerConfig(serverConfig);
+                  const newThemes = {...props.serverConfig.themes};
+                  newThemes[currentTheme] = {...themes[currentTheme]};
                   changeTheme(currentTheme);
+                  saveServerConfig({...props.serverConfig, themes: newThemes}).then(() => {
+                    props.session.emit('refreshServerConfig');
+                  });
                 }} />
               </Tooltip>
             }

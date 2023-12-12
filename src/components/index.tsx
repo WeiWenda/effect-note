@@ -321,7 +321,7 @@ $(document).ready(async () => {
     session.keydown = true;
     setTimeout(() => {
       session.keydown = false;
-    }, 1000)
+    }, 1000);
     session.emit('updateAnyway');
   });
 

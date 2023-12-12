@@ -1,4 +1,4 @@
-import {Button, Col, Divider, Dropdown, Form, Input, Modal, Radio, Row, Select, Space, Tooltip} from 'antd';
+import {Button, Col, Divider, Form, Input, Modal, Radio, Row, Select, Space, Tooltip} from 'antd';
 import {
   DeleteOutlined,
   EditOutlined,
@@ -12,31 +12,21 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {Session} from '../../share';
 import {EMPTY_WORKSPACE_INFO, ServerConfig, WorkSpaceInfo} from '../../ts/server_config';
-import {SERVER_CONFIG} from '../../ts/constants';
 import {QRCodeCanvas} from 'qrcode.react';
-import {getServerConfig, reindexWorkSpace, setServerConfig as saveServerConfig, workspaceRebuild} from '../../share/ts/utils/APIUtils';
+import {reindexWorkSpace, setServerConfig as saveServerConfig, workspaceRebuild} from '../../share/ts/utils/APIUtils';
 
-function WorkspaceSettingsComponent(props: { session: Session}) {
-  const [serverConfig, setServerConfig] = useState(SERVER_CONFIG);
+function WorkspaceSettingsComponent(props: { session: Session, serverConfig: ServerConfig}) {
   const [form] = Form.useForm();
-  const [curWorkSpace, setCurWorkSpace] = useState<WorkSpaceInfo | undefined>(undefined);
+  const [curWorkSpace, setCurWorkSpace] = useState<WorkSpaceInfo | undefined>(
+    props.serverConfig.workspaces?.find(i => i.active)
+  );
   const [sycType, setSrcType] = useState('');
-  useEffect(() => {
-    getServerConfig().then((res: ServerConfig) => {
-      if (!res.workspaces) {
-        res.workspaces = [];
-      }
-      setServerConfig(res);
-      const activeWorkSpace = res.workspaces?.find(i => i.active);
-      setCurWorkSpace(activeWorkSpace);
-    });
-  }, []);
   useEffect(() => {
     setSrcType(curWorkSpace?.sycType || 'never');
     form.setFieldsValue(curWorkSpace);
   }, [curWorkSpace]);
   const onSelect = (value: String) => {
-    const updatedWorkSpaces = serverConfig.workspaces!.map(i => {
+    const updatedWorkSpaces = props.serverConfig.workspaces!.map(i => {
       if (i.gitLocalDir === value) {
         return {...i, active: true} as WorkSpaceInfo;
       } else {
@@ -44,9 +34,9 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
       }
     });
     updatedWorkSpaces.filter(i => i.active).forEach(i => setCurWorkSpace(i));
-    const newServerConfig = {...serverConfig, workspaces: updatedWorkSpaces};
+    const newServerConfig = {...props.serverConfig, workspaces: updatedWorkSpaces};
     saveServerConfig(newServerConfig).then(() => {
-      setServerConfig(newServerConfig);
+      window.location.reload();
     });
   };
   return (
@@ -60,7 +50,7 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
               style={{ maxWidth: 600, minWidth: 200 }}
               onChange={onSelect}
               options={
-                serverConfig.workspaces?.map(info => {
+                props.serverConfig.workspaces?.map(info => {
                   return {
                     value: info.gitLocalDir,
                     label: info.gitLocalDir
@@ -69,8 +59,6 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
             />
             <Tooltip title='增加工作空间'>
               <PlusOutlined onClick={() => {
-                serverConfig.workspaces?.push(EMPTY_WORKSPACE_INFO);
-                setServerConfig({...serverConfig});
                 setCurWorkSpace(EMPTY_WORKSPACE_INFO);
               }} />
             </Tooltip>
@@ -82,7 +70,7 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
               }} />
             </Tooltip>
             {
-              serverConfig.workspaces?.length && serverConfig.workspaces.length > 1 &&
+              props.serverConfig.workspaces?.length && props.serverConfig.workspaces.length > 1 &&
               <Tooltip title='删除当前工作空间'>
                 <DeleteOutlined onClick={() => {
                   Modal.confirm({
@@ -91,15 +79,13 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
                     okText: '确认',
                     cancelText: '取消',
                     onOk: () => {
-                      const updatedWorkSpaces = [...serverConfig.workspaces!.filter(i => i.gitLocalDir !== curWorkSpace?.gitLocalDir)];
+                      const updatedWorkSpaces = [...props.serverConfig.workspaces!
+                        .filter(i => i.gitLocalDir !== curWorkSpace?.gitLocalDir)];
                       updatedWorkSpaces.forEach(w => w.active = false);
-                      // @ts-ignore
-                      serverConfig.workspaces[0].active = true;
-                      serverConfig.workspaces = updatedWorkSpaces;
-                      saveServerConfig(serverConfig).then(() => {
-                        setServerConfig({...serverConfig});
-                        // @ts-ignore
-                        setCurWorkSpace(serverConfig.workspaces[0]);
+                      updatedWorkSpaces[0].active = true;
+                      setCurWorkSpace(updatedWorkSpaces[0]);
+                      saveServerConfig({...props.serverConfig, workspaces: updatedWorkSpaces}).then(() => {
+                        props.session.emit('refreshServerConfig');
                       });
                     }
                   });
@@ -143,20 +129,19 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
               labelCol={{ span: 6 }}
               wrapperCol={{ span: 18 }}
               style={{ maxWidth: 600 }}
-              onValuesChange={(changedValues, values) => {
+              onValuesChange={(changedValues, _values) => {
                 if (changedValues.hasOwnProperty('sycType')) {
                   setSrcType(changedValues.sycType);
                 }
               }}
               onFinish={(values) => {
                 if (values.gitLocalDir !== '未配置') {
-                  const updatedWorkSpace = { active: true, ...values} as WorkSpaceInfo;
-                  const updatedWorkSpaces = [...serverConfig.workspaces!.filter(i => i.gitLocalDir !== curWorkSpace.gitLocalDir)];
+                  const updatedWorkSpace = {...values, active: true} as WorkSpaceInfo;
+                  const updatedWorkSpaces = [...props.serverConfig.workspaces!.filter(i => i.gitLocalDir !== curWorkSpace.gitLocalDir)];
                   updatedWorkSpaces.forEach(w => w.active = false);
-                  serverConfig.workspaces = [updatedWorkSpace].concat(updatedWorkSpaces);
-                  saveServerConfig(serverConfig).then(() => {
-                    setServerConfig({...serverConfig});
-                    setCurWorkSpace(updatedWorkSpace);
+                  setCurWorkSpace(updatedWorkSpace);
+                  saveServerConfig({...props.serverConfig, workspaces: [updatedWorkSpace].concat(updatedWorkSpaces)}).then(() => {
+                    props.session.emit('refreshServerConfig');
                     props.session.showMessage('应用成功');
                   });
                 } else {
@@ -166,7 +151,7 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
               autoComplete='off'
           >
             {
-              ['darwin', 'win32'].includes(process.env.REACT_APP_BUILD_PLATFORM) &&
+              ['darwin', 'win32'].includes(process.env.REACT_APP_BUILD_PLATFORM || '') &&
               <Form.Item
                   label='本地目录'
                   name='gitLocalDir'
@@ -244,13 +229,13 @@ function WorkspaceSettingsComponent(props: { session: Session}) {
           </Form>
       }
       {
-        sycType === 'gitee' &&
+        sycType === 'gitee' && curWorkSpace &&
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
           <div style={{paddingBottom: '5px'}}>
             手机客户端请扫描
           </div>
           <QRCodeCanvas value={`http://localhost:51223/workspace?gitLocalDir=${
-            curWorkSpace.gitLocalDir.split('/').pop()}&gitRemote=${curWorkSpace.gitRemote}&gitPassword=${
+            curWorkSpace.gitLocalDir!.split('/').pop()}&gitRemote=${curWorkSpace.gitRemote}&gitPassword=${
               encodeURIComponent(curWorkSpace.gitPassword!)
             }&gitUsername=${curWorkSpace.gitUsername}`} />
           <div style={{paddingTop: '5px'}} className={'node-html'}>

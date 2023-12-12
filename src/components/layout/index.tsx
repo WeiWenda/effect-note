@@ -28,6 +28,8 @@ import { DraggableCore } from 'react-draggable';
 import {useLoaderData, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import SubscriptionSettingsComponent from '../settings/subscription';
 import $ from 'jquery';
+import { ImgurComponent } from '../settings/imgur';
+import {SERVER_CONFIG} from '../../ts/constants';
 const { Header, Footer, Sider, Content } = Layout;
 type InsertFnType = (url: string, alt: string, href: string) => void;
 
@@ -53,6 +55,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const [refreshing, setRefreshing] = useState(false);
   const [drawerWidth, setDrawerWidth] = useState(window.innerWidth / 2);
   const [activeSetting, setActiveSetting] = useState('1');
+  const [serverConfig, setServerConfig] = useState(SERVER_CONFIG);
   const [showHeader, setShowHeader] = useState(props.session.clientStore.getClientSetting('defaultLayout').includes('top'));
   const [modalVisible, setModalVisible] = useState<{[key: string]: boolean}>({
     'noteInfo': false,
@@ -70,6 +73,16 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const [xml, setXml] = useState<string | undefined>();
   const [vd, setVd] = React.useState<Vditor>();
   useEffect(() => {
+    getServerConfig().then(res => setServerConfig(res));
+    props.session.on('refreshServerConfig', () => {
+      getServerConfig().then(res => {
+        setServerConfig(res);
+        setRefreshing(true);
+        setTimeout(() => {
+          setRefreshing(false);
+        }, 100);
+      });
+    });
     props.session.on('importFinished', forceUpdate);
     props.session.on('modeChange', () => {
       logger.debug('modeChange');
@@ -332,7 +345,6 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
              footer={null}
              title='编辑流程图'
              open={modalVisible.drawio}
-             onOk={() => {}}
              onCancel={() => {
               setModalVisible({...modalVisible, drawio: false});
               props.session.startKeyMonitor();
@@ -393,25 +405,19 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           {
             curPage === 'note' &&
             <Button onClick={() => {
-                getServerConfig().then(serverConfig => {
-                  const activeWorkSpace = serverConfig.workspaces.filter(w => w.active);
-                  if (activeWorkSpace.length > 0 && activeWorkSpace[0].gitLocalDir === '未配置') {
-                    props.session.showMessage('新建笔记前，请先设置工作空间', {time: 0.5});
-                    setTimeout(() => {
-                      setActiveSetting('2');
-                      setSettingOpen(true);
-                      props.session.stopKeyMonitor('setting');
-                    }, 600);
-                  } else {
-                    setCurDocInfo({});
-                    setModalVisible({...modalVisible, noteInfo: true});
-                    props.session.stopKeyMonitor('create-note');
-                  }
-                }).catch(() => {
-                  setCurDocInfo({});
-                  setModalVisible({...modalVisible, noteInfo: true});
-                  props.session.stopKeyMonitor('create-note');
-                });
+              const activeWorkSpace = serverConfig.workspaces?.filter(w => w.active);
+              if (activeWorkSpace && activeWorkSpace.length > 0 && activeWorkSpace[0].gitLocalDir === '未配置') {
+                props.session.showMessage('新建笔记前，请先设置工作空间', {time: 0.5});
+                setTimeout(() => {
+                  setActiveSetting('2');
+                  setSettingOpen(true);
+                  props.session.stopKeyMonitor('setting');
+                }, 600);
+              } else {
+                setCurDocInfo({});
+                setModalVisible({...modalVisible, noteInfo: true});
+                props.session.stopKeyMonitor('create-note');
+              }
             }}>新建笔记</Button>
           }
           {
@@ -460,18 +466,16 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                   setActiveSetting(newActiveSetting);
                 }}>
             <Tabs.TabPane tab='外观' key='1'>
-              <AppearanceSettingsComponent session={props.session} config={props.config} refreshFunc={() => {
-                setRefreshing(true);
-                setTimeout(() => {
-                  setRefreshing(false);
-                }, 100);
-              }}/>
+              <AppearanceSettingsComponent session={props.session} serverConfig={serverConfig}/>
             </Tabs.TabPane>
             <Tabs.TabPane tab='工作空间' key='2'>
-              <WorkspaceSettingsComponent session={props.session}/>
+              <WorkspaceSettingsComponent session={props.session} serverConfig={serverConfig}/>
             </Tabs.TabPane>
             <Tabs.TabPane tab='订阅源' key='3'>
               <SubscriptionSettingsComponent session={props.session}/>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='图床' key='4'>
+              <ImgurComponent session={props.session} serverConfig={serverConfig}/>
             </Tabs.TabPane>
           </Tabs>
         </div>
