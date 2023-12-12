@@ -73,10 +73,14 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const [xml, setXml] = useState<string | undefined>();
   const [vd, setVd] = React.useState<Vditor>();
   useEffect(() => {
-    getServerConfig().then(res => setServerConfig(res));
+    getServerConfig().then(res => {
+      setServerConfig(res);
+      props.session.serverConfig = res;
+    });
     props.session.on('refreshServerConfig', () => {
       getServerConfig().then(res => {
         setServerConfig(res);
+        props.session.serverConfig = res;
         setRefreshing(true);
         setTimeout(() => {
           setRefreshing(false);
@@ -118,24 +122,18 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       if (modalName === 'md') {
         setTimeout(() => {
           const vditor = new Vditor('vditor', {
+            mode: 'sv',
             upload: {
-              url: API_BASE_URL +  '/upload_image/' + props.session.clientStore.getClientSetting('curDocId'),
-              fieldName: 'wangeditor-uploaded-image',
-              accept: 'image/*',
-              format: (_files, responseText) => {
-                const succMap: any = {};
-                JSON.parse(responseText).data.forEach((file: any) => {
-                  succMap[file.alt] = file.href;
+              handler: (files: File[]) => new Promise<null>(resolve => {
+                uploadImage(files[0],
+                  props.session.clientStore.getClientSetting('curDocId'),
+                  props.session.serverConfig.imgur).then(res => {
+                    res.data.forEach((file: any) => {
+                      vditor.insertValue(`![](${file.url})`);
+                    });
+                    resolve(null);
                 });
-                const res = JSON.stringify({
-                  'msg': '',
-                  'code': 0,
-                  'data': {
-                    succMap
-                  }
-                });
-                return res;
-              }
+              })
             },
             preview: {
               theme : {
@@ -174,7 +172,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
     MENU_CONF: {
       uploadImage: {
         async customUpload(file: File, insertFn: InsertFnType) {  // TS 语法
-          uploadImage(file, props.session.clientStore.getClientSetting('curDocId')).then((res) => {
+          uploadImage(file, props.session.clientStore.getClientSetting('curDocId'), props.session.serverConfig.imgur).then((res) => {
             const {url, alt, href} = res.data[0];
             insertFn(url, alt, href);
           });

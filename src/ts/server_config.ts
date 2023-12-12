@@ -5,7 +5,7 @@ export type ServerConfig = {
   socketserver?: boolean,
   workspaces?: WorkSpaceInfo[],
   themes?: {[key: string]: Theme},
-  imgur?: {type: string, url?: string},
+  imgur?: {type: string, url: string},
 };
 export type WorkSpaceInfo = {
   active?: boolean,

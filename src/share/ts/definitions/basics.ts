@@ -644,9 +644,12 @@ keyDefinitions.registerAction(new Action(
             // We need to represent the image as a file
             let blob = await items[i].getType(items[i].types[0]);
             const uploadRes = await uploadImage(new File([blob], 'clipboard-image'),
-              session.clientStore.getClientSetting('curDocId'));
+              session.clientStore.getClientSetting('curDocId'), session.serverConfig.imgur);
             const uploadUrl = uploadRes.data.pop().url;
-            await session.pasteText(`<div class='node-html'><p><img src="${uploadUrl}" alt="image.png" data-href="${uploadUrl}" style="width: 100%;"/></p></div>`);
+            session.emitAsync('setRTF', session.cursor.row,
+              `<div class='node-html'><p><img src="${uploadUrl}"/></p></div>`).then(() => {
+              session.emit('updateInner');
+            });
           } else {
             const blob = await items[i].getType(items[i].types[0]);
             let text = await blob.text();

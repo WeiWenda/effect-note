@@ -20,6 +20,8 @@ import { updateDoc, uploadDoc} from './utils/APIUtils';
 import React, {MutableRefObject, Ref} from 'react';
 import Search from './search';
 import {monaco} from 'react-monaco-editor';
+import {ServerConfig} from '../../ts/server_config';
+import {SERVER_CONFIG} from '../../ts/constants';
 
 type SessionOptions = {
   initialMode?: ModeId,
@@ -123,6 +125,7 @@ export default class Session extends EventEmitter {
   public selectPopoverOpen: boolean = false;
   public dragging: boolean = false;
   public keydown: boolean = false;
+  public serverConfig: ServerConfig = SERVER_CONFIG;
 
   private static swapCase(chars: Chars) {
     return chars.map(function(chr) {

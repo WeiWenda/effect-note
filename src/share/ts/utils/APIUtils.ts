@@ -65,15 +65,34 @@ export function login(loginRequest: any) {
     });
 }
 
-export function uploadImage(file: File, docId: number) {
-    let formData = new FormData();
-    formData.append('wangeditor-uploaded-image', file);
-    return request({
-        url: API_BASE_URL + '/upload_image/' + docId,
-        method: 'POST',
-        headers: new Headers({}),
-        body: formData
-    });
+export async function uploadImage(file: File, docId: number, imgur: {type: string, url: string} | undefined) {
+    if (imgur === undefined || imgur.type === 'local') {
+        let formData = new FormData();
+        formData.append('wangeditor-uploaded-image', file);
+        return request({
+            url: API_BASE_URL + '/upload_image/' + docId,
+            method: 'POST',
+            headers: new Headers({}),
+            body: formData
+        });
+    } else {
+        await navigator.clipboard.write([
+            new ClipboardItem({[file.type]: file})
+        ]);
+        return request({
+            url: imgur.url,
+            method: 'POST',
+            headers: new Headers({}),
+        }).then(res => {
+            const urls = res.result.map((u: any) => {
+                return {url: u, alt: 'image.png', href: u};
+            });
+            return {
+                errno: 0,
+                data: urls,
+            };
+        });
+    }
 }
 
 export function ocrFile(file: File) {
