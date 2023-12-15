@@ -9,11 +9,11 @@ import {copyToClipboard} from '../../../components/index';
 export function FontStyleToolComponent(
   props: React.PropsWithChildren<{session: Session, path: Path, startCol: Col, endCol: Col,
     textContent: string,
+    allClasses: string[],
     showDelete: boolean,
     link?: string,
     trigger: string | string[],
   }>) {
-  const [allClasses, setAllClasses] = useState<string[]>([]);
   const [link, setLink] = useState<string | undefined>(props.link);
   // const [comment, setComment] = useState<string>('');
   const [open, setOpen] = useState(false);
@@ -21,16 +21,15 @@ export function FontStyleToolComponent(
   // const [showComment, setShowComment] = useState(false);
   const switchClass = (newClass: string) => {
     return () => {
-      let newClasses: string[] = allClasses;
+      let newClasses: string[] = [];
       if (newClass) {
-        if (allClasses.includes(newClass)) {
-          newClasses = allClasses.filter(c => c !== newClass);
+        if (newClasses.includes(newClass)) {
+          newClasses = props.allClasses.filter(c => c !== newClass);
         } else {
           const type = newClass.split('-').pop()!;
-          newClasses = [newClass, ...allClasses.filter(c => !c.endsWith(type))];
+          newClasses = [newClass, ...props.allClasses.filter(c => !c.endsWith(type))];
         }
       }
-      setAllClasses(newClasses);
       props.session.changeChars(props.path!.row, props.startCol, props.endCol - props.startCol, () => {
         if (link) {
           return `<a class='${newClasses.join(' ')}' target="_blank" href="${link}">${props.textContent}</a>`.split('');
@@ -168,7 +167,6 @@ export function FontStyleToolComponent(
             {
               props.showDelete &&
               <DeleteOutlined onClick={() => {
-                setAllClasses([]);
                 props.session.changeChars(props.path!.row, props.startCol, props.endCol - props.startCol, () => {
                   return props.textContent.split('');
                 }).then(() => {

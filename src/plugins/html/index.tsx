@@ -28,6 +28,7 @@ export function htmlHook(tokenizer: any, info: any) {
             <FontStyleToolComponent key={`html-${token.index}`}
                                     session={session} path={info.path}
                                     textContent={textContent[4]}
+                                    allClasses={textContent[3].split(' ')}
                                     showDelete={true}
                                     startCol={token.index} endCol={token.index + token.length}
                                     trigger={['click', 'contextMenu']}>
@@ -42,6 +43,7 @@ export function htmlHook(tokenizer: any, info: any) {
                                     session={session} path={info.path}
                                     textContent={textContent[10]}
                                     link={textContent[9]}
+                                    allClasses={[]}
                                     trigger={'contextMenu'}
                                     showDelete={true}
                                     startCol={token.index} endCol={token.index + token.length}>

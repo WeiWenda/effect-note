@@ -182,6 +182,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
           );
           emit(
             <FontStyleToolComponent key={'font-style-tool'} session={this.props.session} path={this.props.path!}
+                                    allClasses={[]}
                                     startCol={token.index + firstIndexOfHighlight}
                                     endCol={token.index + firstIndexOfHighlight + highlightNumber}
                                     showDelete={false}

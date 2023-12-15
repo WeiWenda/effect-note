@@ -19,7 +19,7 @@ export const htmlTypes: Array<string> = [
 
 const htmlRegexParts: Array<string> = [];
 htmlRegexParts.push(
-  `<span(.|\\n)*?>([^<]*?)</span>`
+  `<span class='([^']*?)'>([^<]*?)</span>`
 );
 htmlRegexParts.push(
   `<span(.|\\n)*/>`
