@@ -184,7 +184,7 @@ export function appendStyleScript(clientStore: ClientStore) {
   $('.node-dynamic-style').remove();
   $('#app').append(`<style class='node-dynamic-style'>
                     .session-content{padding-left: ${50 - clientStore.getClientSetting('blockPaddingLeft')}px}
-                    .node .node-text{line-height: ${clientStore.getClientSetting('lineHeight')}px}
+                    .node .node-text{line-height: ${clientStore.getClientSetting('lineHeight')}px;min-height: ${clientStore.getClientSetting('lineHeight')}px}
                     .block{padding-left: ${clientStore.getClientSetting('blockPaddingLeft')}px}
                     .node{font-family: "${clientStore.getClientSetting('fontFamily')}","${clientStore.getClientSetting('fontFamilyZh')}",system-ui;font-size: ${clientStore.getClientSetting('fontSize')}px}
                     .rtf-toolbox{background-color: ${theme['theme-bg-primary']};color: ${theme['theme-text-primary']}}

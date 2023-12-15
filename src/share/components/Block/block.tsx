@@ -234,6 +234,12 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
     if (nextProps.cached !== this.props.cached) {
       return true;
     }
+    if (nextProps.parentBoardNode !== this.props.parentBoardNode) {
+      return true;
+    }
+    if (nextProps.indexInParent !== this.props.indexInParent) {
+      return true;
+    }
     if (!nextProps.path.is(this.props.path)) {
       // NOTE: this can happen e.g. when you zoom out
       return true;

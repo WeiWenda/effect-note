@@ -640,10 +640,11 @@ keyDefinitions.registerAction(new Action(
         const items = await navigator.clipboard.read();
         // Loop through all items, looking for any kind of image
         for (let i = 0; i < items.length; i++) {
-          if (items[i].types.some(type => type.indexOf('image') !== -1)) {
+          const itemType = items[i].types[0];
+          if (itemType.indexOf('image') !== -1) {
             // We need to represent the image as a file
-            let blob = await items[i].getType(items[i].types[0]);
-            const uploadRes = await uploadImage(new File([blob], 'clipboard-image'),
+            let blob = await items[i].getType(itemType);
+            const uploadRes = await uploadImage(new File([blob], 'clipboard-image', {type: itemType}),
               session.clientStore.getClientSetting('curDocId'), session.serverConfig.imgur);
             const uploadUrl = uploadRes.data.pop().url;
             session.emitAsync('setRTF', session.cursor.row,
