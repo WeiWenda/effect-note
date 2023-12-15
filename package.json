@@ -1,6 +1,6 @@
 {
   "name": "EffectNote",
-  "version": "0.4.2",
+  "version": "0.4.5",
   "private": true,
   "homepage": "/",
   "author": "weiwenda",
@@ -39,7 +39,7 @@
     "rmcache": "rm -rf ./node_modules/.cache",
     "make": "npm run build-drawin && npm run rmcache && PLATFORM=darwin electron-forge make --platform darwin --targets @electron-forge/maker-dmg",
     "makewin": "npm run build-win32 && npm run rmcache && electron-forge make --platform win32",
-    "makemas": "npm run build-mas && npm run rmcache && PLATFORM=mas electron-forge make --platform mas --targets @electron-forge/maker-pkg"
+    "makemas": "PLATFORM=mas electron-forge make --platform mas --targets @electron-forge/maker-pkg"
   },
   "main": "main/electron.js",
   "module": "dist/index.js",
@@ -66,10 +66,10 @@
   },
   "devDependencies": {
     "@ant-design/icons": "^5.2.4",
-    "@electron-forge/cli": "^6.3.0",
-    "@electron-forge/maker-dmg": "^6.3.0",
-    "@electron-forge/maker-pkg": "^6.3.0",
-    "@electron-forge/maker-squirrel": "^6.4.1",
+    "@electron-forge/cli": "^6.4.2",
+    "@electron-forge/maker-dmg": "^6.4.2",
+    "@electron-forge/maker-pkg": "^6.4.2",
+    "@electron-forge/maker-squirrel": "^6.4.2",
     "@rollup/plugin-babel": "^6.0.0",
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-image": "^2.1.1",
