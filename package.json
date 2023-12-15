@@ -39,7 +39,7 @@
     "rmcache": "rm -rf ./node_modules/.cache",
     "make": "npm run build-drawin && npm run rmcache && PLATFORM=darwin electron-forge make --platform darwin --targets @electron-forge/maker-dmg",
     "makewin": "npm run build-win32 && npm run rmcache && electron-forge make --platform win32",
-    "makemas": "PLATFORM=mas electron-forge make --platform mas --targets @electron-forge/maker-pkg"
+    "makemas": "npm run build-mas && npm run rmcache && PLATFORM=mas electron-forge make --platform mas --targets @electron-forge/maker-pkg --arch x64"
   },
   "main": "main/electron.js",
   "module": "dist/index.js",
