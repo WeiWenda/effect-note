@@ -255,6 +255,7 @@ export class DocumentStore {
   public setBackend(backend: DataBackend, docname: string) {
     this.backend = backend;
     this.docname = docname;
+    this.resetSetCounter();
     this.prefix = `${this.docname}save`;
     if (Object.keys(this.cache).length > 500000) {
       this.cache = {};
@@ -307,36 +308,27 @@ export class DocumentStore {
       this.cache[key] = value;
     }
     const encodedValue = encode(value);
-    logger.debug('setting to storage', key, encodedValue);
     // NOTE: fire and forget
     this.backendSetCounter++;
-    this.backend.set(key, JSON.stringify(encodedValue)).then(() => {
+    const backendValue = JSON.stringify(encodedValue);
+    // logger.info('setting to storage', key, encodedValue);
+    // if (backendValue.length > 1000000) {
+    //   logger.info('setting to storage', key, encodedValue);
+    // }
+    this.backend.set(key, backendValue).then(() => {
       this.backendSetFinishMarker++;
-      if (this.backendSetFinishMarker >= this.backendSetCounter) {
-        this.resetSetCounter(true);
-      } else if (this.getProgress() - this.lastProgress > 2) {
-        this.lastProgress = this.getProgress();
-        this.events.emit('loadProgressChange', true, this.lastProgress);
-      }
-      logger.debug(this.backendSetFinishMarker, this.backendSetCounter);
     }).catch((err) => {
       setTimeout(() => { throw err; });
     });
   }
 
-  public resetSetCounter(loaded: boolean) {
+  public resetSetCounter() {
     this.backendSetCounter = 0;
     this.backendSetFinishMarker = 0;
-    this.lastProgress = 0;
-    this.events.emit('loadProgressChange', !loaded, this.lastProgress);
   }
 
   public isBusy() {
-    return this.backendSetCounter !== 0;
-  }
-
-  public getProgress() {
-    return (this.backendSetFinishMarker / this.backendSetCounter) * 100;
+    return this.backendSetCounter > this.backendSetFinishMarker;
   }
 
   private _lastIDKey_() {

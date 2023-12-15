@@ -142,8 +142,7 @@ export class LinksPlugin {
             const collapse = await this.getCollapse(row);
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
             const png = ids_to_pngs[row] || null;
-            const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
-            const xml = ids_to_xmls[row] || null;
+            const xml = await this.getXml(row);
             const md = await this.getMarkdown(row);
             const code = await this.getCode(row);
             const rtf = await this.getRTF(row);
@@ -186,9 +185,9 @@ export class LinksPlugin {
             if (ids_to_pngs[info.row] != null) {
                 struct.png = ids_to_pngs[info.row];
             }
-            const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
-            if (ids_to_xmls[info.row] != null) {
-                struct.drawio = ids_to_xmls[info.row];
+            const xml = await this.getXml(info.row);
+            if (xml !== null) {
+                struct.drawio = xml;
             }
             const md = await this.getMarkdown(info.row);
             if (md != null) {
@@ -492,7 +491,12 @@ export class LinksPlugin {
 
     public async getXml(row: Row): Promise<any> {
         const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
-        return ids_to_xmls[row];
+        if (ids_to_xmls[row]) {
+            const xml = await this.api.getData(row + ':xml', '');
+            return xml;
+        } else {
+            return null;
+        }
     }
 
     public async setXml(row: Row, xml: String): Promise<void> {
@@ -501,8 +505,10 @@ export class LinksPlugin {
     }
 
     private async _setXml(row: Row, xml: String): Promise<void> {
+        await this.api.setData(row + ':xml', xml);
+        // 不存在的key查询效率较差
         const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
-        ids_to_xmls[row] = xml;
+        ids_to_xmls[row] = 1;
         await this.api.setData('ids_to_xmls', ids_to_xmls);
     }
 

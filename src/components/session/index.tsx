@@ -79,13 +79,6 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
     }
   }, [props.filterOuter, props.loading]);
   useEffect(() => {
-    props.session.document.store.events.on('loadProgressChange', (show: boolean, _newProgress: number) => {
-      if (!show) {
-        props.session.clientStore.setDocSetting('loaded', true);
-      }
-      // setShowProgress(show);
-      // setProgress(newProgress);
-    });
     props.session.on('changeJumpHistory', (newStackSize: number, index: number) => {
       setStackSize(newStackSize);
       setCurJumpIndex(index);

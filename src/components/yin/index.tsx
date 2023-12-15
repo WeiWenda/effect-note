@@ -294,11 +294,6 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
         refreshPreviewSession(previewDocument);
       });
     });
-    props.session.document.on('loadRow', (path: Path) => {
-      reloadRow(path.parent!.row).then(() => {
-        refreshPreviewSession(previewDocument);
-      });
-    });
     props.session.document.on('afterMove', async ({old_parent, new_parent}) => {
       await reloadRow(old_parent);
       await reloadRow(new_parent);
@@ -391,8 +386,11 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     props.session.search = null;
     props.session.document.removeAllListeners('lineSaved');
     props.session.document.removeAllListeners('beforeMove');
+    props.session.document.removeAllListeners('afterMove');
     props.session.document.removeAllListeners('beforeAttach');
     props.session.document.removeAllListeners('beforeDetach');
+    props.session.document.removeAllListeners('markChange');
+    props.session.document.removeAllListeners('tagChange');
   };
   const loadShareDoc = async (shareUrl: string) => {
     setLoading(true);
