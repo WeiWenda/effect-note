@@ -141,10 +141,6 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           label: '标签',
           key: 'mark_tag',
         },
-        // {
-        //   label: '时间',
-        //   key: 'mark_task',
-        // },
         {
           label: '任务',
           key: 'mark_check',
@@ -156,6 +152,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         {
           label: '序号',
           key: 'mark_order',
+        },
+        {
+          label: '引用',
+          key: 'mark_callout',
         }
       ]
     },
@@ -262,6 +262,11 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         break;
       case 'mark_order':
         props.session.emitAsync('toggleOrder', props.path.row).then(() => {
+          props.session.emit('updateInner');
+        });
+        break;
+      case 'mark_callout':
+        props.session.emitAsync('toggleCallout', props.path.row).then(() => {
           props.session.emit('updateInner');
         });
         break;

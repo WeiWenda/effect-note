@@ -105,28 +105,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
         }
         if (char_info.cursor) {
           if (cursorBetween) {
-            if (session.mode === 'SEARCH') {
-              setTimeout(() => {
-                if (!session.stopMonitor) {
-                  $('#search-select').focus();
-                }
-              }, 100);
-              emit(<Select
-                id='search-select'
-                key='search-select'
-                showSearch
-                onSelect={(_value, option) => {
-                  this.props.session.addCharsAtCursor(option.label.split('')).then(() => {
-                    this.props.session.setMode('INSERT').then(() => {
-                      this.props.session.emit('updateAnyway');
-                    });
-                  });
-                }}
-                style={{ width: 200 }}
-                filterOption={(input, option) => (option?.label ?? '').includes(input)}
-                options={char_info.selectPrompt}
-              />);
-            } else if (session.mode === 'NODE_OPERATION' && path) {
+            if (session.mode === 'NODE_OPERATION' && path) {
               emit(<NodeOperationComponent key='node-operation' session={session} line={lineData} path={path}/>);
             } else {
               setTimeout(() => {
@@ -144,9 +123,6 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                           this.setState({input: newVal});
                           if (! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal.substring(0, 1))) {
                             this.props.session.addCharsAtCursor(newVal.split('')).then(() => {
-                              if (newVal === '@') {
-                                this.props.session.setMode('SEARCH');
-                              }
                               if (newVal === '/') {
                                 this.props.session.setMode('NODE_OPERATION');
                               }

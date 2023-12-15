@@ -277,12 +277,30 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
     }
 
     if (!parent.isRoot()) {
+      const rowStyle = {};
+      if (this.props.topLevel) {
+        Object.assign(rowStyle, {
+          fontSize: 20,
+          marginBottom: 10
+        });
+      }
+      if (cached.pluginData.links?.is_callout) {
+        Object.assign(rowStyle, {
+          paddingTop: '10px',
+          paddingBottom: '10px',
+          borderBottomRightRadius: '6px',
+          borderTopRightRadius: '6px',
+          borderLeft: 'solid 8px',
+          marginRight: '1em',
+          background: 'linear-gradient(to right, transparent 155px,' +
+            `${session.clientStore.getClientSetting('theme-bg-secondary')} 100px),` +
+            'linear-gradient(to right, transparent 150px,' +
+            `${session.clientStore.getClientSetting('theme-bg-tertiary')} 100px)`
+        });
+      }
       const elLine = (
         <RowComponent key='row'
-          style={{
-            fontSize: this.props.topLevel ? 20 : undefined,
-            marginBottom: this.props.topLevel ? 10 : undefined,
-          }}
+          style={rowStyle}
           cursorsTree={cursorsTree}
           cursorBetween={this.props.cursorBetween}
           session={session} path={parent}

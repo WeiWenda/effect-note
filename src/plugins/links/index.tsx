@@ -102,6 +102,14 @@ export class LinksPlugin {
                 await this.setIsBoard(row, true);
             }
         });
+        this.api.registerListener('session', 'toggleCallout', async (row: Row) => {
+            const isCalloutNow = await this.getIsCallout(row);
+            if (isCalloutNow) {
+                await this.setIsCallout(row, false);
+            } else {
+                await this.setIsCallout(row, true);
+            }
+        });
         this.api.registerListener('session', 'toggleOrder', async (row: Row) => {
             const isOrderNow = await this.getIsOrder(row);
             if (isOrderNow) {
@@ -128,6 +136,7 @@ export class LinksPlugin {
           });
         this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
             const is_board = await this.getIsBoard(row);
+            const is_callout = await this.getIsCallout(row);
             const is_order = await this.getIsOrder(row);
             const is_check = await this.getIsCheck(row);
             const collapse = await this.getCollapse(row);
@@ -138,7 +147,7 @@ export class LinksPlugin {
             const md = await this.getMarkdown(row);
             const code = await this.getCode(row);
             const rtf = await this.getRTF(row);
-            obj.links = { is_order, is_board, is_check, collapse, png, xml, md, code, rtf};
+            obj.links = { is_callout, is_order, is_board, is_check, collapse, png, xml, md, code, rtf};
             return obj;
         });
         this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
@@ -160,6 +169,10 @@ export class LinksPlugin {
             const isBoard = await this.getIsBoard(info.row);
             if (isBoard) {
                 struct.is_board = isBoard;
+            }
+            const isCallout = await this.getIsCallout(info.row);
+            if (isCallout) {
+                struct.is_callout = isCallout;
             }
             const isOrder = await this.getIsOrder(info.row);
             if (isOrder) {
@@ -197,6 +210,9 @@ export class LinksPlugin {
             }
             if (serialized.is_board) {
                 await this._setIsBoard(path.row, true);
+            }
+            if (serialized.is_callout) {
+                await this._setIsCallout(path.row, true);
             }
             if (serialized.is_order) {
                 await this._setIsOrder(path.row, true);
@@ -398,6 +414,7 @@ export class LinksPlugin {
         await this.api.setData('ids_to_board', {});
         await this.api.setData('ids_to_order', {});
         await this.api.setData('ids_to_check', {});
+        await this.api.setData('ids_to_callout', {});
     }
 
     public async getPng(row: Row): Promise<any> {
@@ -551,6 +568,19 @@ export class LinksPlugin {
         const ids_to_board = await this.api.getData('ids_to_board', {});
         ids_to_board[row] = mark;
         await this.api.setData('ids_to_board', ids_to_board);
+    }
+    public async getIsCallout(row: Row): Promise<boolean | null> {
+        const ids_to_callout = await this.api.getData('ids_to_callout', {});
+        return ids_to_callout[row] || null;
+    }
+    public async setIsCallout(row: Row, is_callout: boolean) {
+        await this._setIsCallout(row, is_callout);
+        await this.api.updatedDataForRender(row);
+    }
+    private async _setIsCallout(row: Row, is_callout: boolean) {
+        const ids_to_callout = await this.api.getData('ids_to_callout', {});
+        ids_to_callout[row] = is_callout;
+        await this.api.setData('ids_to_callout', ids_to_callout);
     }
     public async getIsOrder(row: Row): Promise<boolean | null> {
         const ids_to_order = await this.api.getData('ids_to_order', {});

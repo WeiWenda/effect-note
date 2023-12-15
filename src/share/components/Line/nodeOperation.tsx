@@ -16,6 +16,7 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
   const options = [
     {label: LableAndShortCut(client, '任务', '/task'), value: 'mark-task', shortcut: 'task'},
     {label: LableAndShortCut(client, '代码', '/code'), value: 'insert-code', shortcut: 'code'},
+    {label: LableAndShortCut(client, '引用', '/quote'), value: 'mark-quote', shortcut: 'quote'},
     {label: LableAndShortCut(client, 'markdown', '/md'), value: 'insert-md', shortcut: 'md'},
     {label: LableAndShortCut(client, '富文本', '/rtf'), value: 'insert-rtf', shortcut: 'rtf'},
     {label: LableAndShortCut(client, '脑图', '/mindmap'), value: 'insert-mindmap', shortcut: 'mindmap'},
@@ -51,6 +52,9 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         break;
       case 'mark-task':
         await props.session.emitAsync('toggleCheck', props.path.row);
+        break;
+      case 'mark-quote':
+        await props.session.emitAsync('toggleCallout', props.path.row);
         break;
       case 'insert-md':
         props.session.emit('openModal', 'md', {'md': '暂无内容'});
