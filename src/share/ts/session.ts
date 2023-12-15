@@ -519,10 +519,11 @@ export default class Session extends EventEmitter {
   }
 
   public async exportContent(mimetype: string, saveID: boolean) {
-    const jsonContent = await this.document.serialize(this.cursor.row, {saveID});
     if (mimetype === 'application/json') {
+      const jsonContent = await this.document.serialize(this.cursor.row, {saveID});
       return JSON.stringify(jsonContent, undefined, 2);
     } else if (mimetype === 'text/markdown') {
+      const jsonContent = await this.document.serialize(this.cursor.row, {saveID, saveIndex: true});
       const exportLines = function(node: any, curDepth: number) {
         if (typeof(node) === 'string') {
           return [`${node}`];
@@ -556,6 +557,7 @@ export default class Session extends EventEmitter {
       }
       return exportLines(jsonContent, curDepth).join('\n');
     } else if (mimetype === 'text/plain') {
+      const jsonContent = await this.document.serialize(this.cursor.row, {saveID, saveIndex: true});
       // Workflowy compatible plaintext export
       //   Ignores 'collapsed' and viewRoot
       const indent = '  ';
