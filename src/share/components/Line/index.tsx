@@ -78,8 +78,8 @@ export default class LineComponent extends React.Component<LineProps, {input: st
         <div key={`insert-cursor-${i}`}
           className='cursor blink-background'
           style={{
-            display: 'inline-block',
-            height: '1.2em', width: 2, marginLeft: -1, marginRight: -1,
+            display: 'inline-block', width: 2, marginLeft: -1, marginRight: -1,
+            lineHeight: `${session.clientStore.getClientSetting('fontSize') + 2}px`,
             ...this.props.cursorStyle,
           }}>
           {' '}
