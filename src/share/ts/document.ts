@@ -833,7 +833,7 @@ export default class Document extends EventEmitter {
 
   public async serialize(
     row = this.root.row,
-    options: {pretty?: boolean, saveID?: boolean} = {},
+    options: {pretty?: boolean, saveID?: boolean, indexInParent?: number} = {},
     serialized: {[row: number]: SerializedBlock} = {}
   ): Promise<SerializedBlock> {
     if (row in serialized) {
@@ -846,6 +846,10 @@ export default class Document extends EventEmitter {
     if (options.saveID) {
       struct.id = row;
     }
+    if (options.indexInParent) {
+      struct.text = `${options.indexInParent}. ${struct.text}`;
+      delete options.indexInParent;
+    }
     // NOTE: this must be done in order due to cloning
     // const children = await Promise.all((await this._getChildren(row)).map(
     //   async (childrow) => await this.serialize(childrow, options, serialized)
@@ -854,7 +858,7 @@ export default class Document extends EventEmitter {
     let children: Array<any> = [];
     for (let i = 0; i < childRows.length; i++) {
       children.push(
-        await this.serialize(childRows[i], options, serialized)
+        await this.serialize(childRows[i], struct.plugins?.is_order ? {...options, indexInParent: i + 1} : options, serialized)
       );
     }
     if (children.length) {

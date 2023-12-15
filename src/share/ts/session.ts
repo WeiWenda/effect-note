@@ -531,6 +531,14 @@ export default class Session extends EventEmitter {
         const children = node.children || [];
         if (node.plugins?.md) {
           lines.push(node.plugins.md);
+        } else if (node.plugins?.is_callout) {
+          lines.push(`> ${node.text}`);
+        } else if (node.plugins?.is_check !== undefined) {
+          lines.push(`${node.plugins.is_check ? '* [x]' : '* [ ]'} ${node.text}`);
+        } else if (node.plugins?.code) {
+          lines.push('```' + node.plugins.code.language);
+          lines.push(node.plugins.code.content);
+          lines.push('```');
         } else if (children.length > 0 && curDepth <= 6 && curDepth > 0) {
           lines.push(`${'#'.repeat(curDepth)} ${node.text}`);
         } else if (node.text.length > 0) {
