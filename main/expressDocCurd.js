@@ -146,16 +146,18 @@ router.get('/:docId/versions', async (req, res) => {
     }))
 })
 router.get('/:docId', async (req, res) => {
-    const {gitHome, gitUsername, gitPassword}  = getGitConfig();
+    const {gitHome, gitUsername, gitPassword, gitRemote}  = getGitConfig();
     const docId = Number(req.params.docId);
     const filepath = docId2path[docId];
-    await git.pull({
-        fs,
-        http: isoHttp,
-        dir: gitHome,
-        author: {name: 'auto saver', email : 'desktop@effectnote.com'},
-        onAuth: () => ({ username: gitUsername, password: gitPassword}),
-    })
+    if (gitRemote !== '未配置') {
+        await git.pull({
+            fs,
+            http: isoHttp,
+            dir: gitHome,
+            author: {name: 'auto saver', email : 'desktop@effectnote.com'},
+            onAuth: () => ({ username: gitUsername, password: gitPassword}),
+        })
+    }
     let commitOid = req.query.version
     if (commitOid === 'HEAD') {
         commitOid = await git.resolveRef({ fs, dir: gitHome, ref: 'HEAD' });
