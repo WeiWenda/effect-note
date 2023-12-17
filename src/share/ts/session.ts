@@ -1259,6 +1259,7 @@ export default class Session extends EventEmitter {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (i !== 0) {
+        await this.newLineAtCursor();
       }
       await this.addCharsAtCursor(line.split(''));
     }
