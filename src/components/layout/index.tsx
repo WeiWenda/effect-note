@@ -36,6 +36,7 @@ type InsertFnType = (url: string, alt: string, href: string) => void;
 export const HeaderItems = [
   { label: 'Notes', key: 'note'},
   { label: 'Discovery', key: 'discovery' }, // 菜单项务必填写 key
+  { label: 'Test', key: 'test' }
 ];
 // @ts-ignore
 export async function noteLoader({params}) {
@@ -383,6 +384,8 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     props.session.startKeyMonitor();
                     const docId = props.session.clientStore.getClientSetting('curDocId');
                     navigate(`/${e.key}/${docId}`);
+                  } else if (e.key === 'test') {
+                    navigate(`/${e.key}`);
                   } else {
                     // props.session.stopKeyMonitor('header');
                     const lastSearch = props.session.clientStore.getClientSetting('curSearch');

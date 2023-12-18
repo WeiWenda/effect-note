@@ -1,0 +1,4 @@
+.dataloom-multi-tag-cell {
+    display: flex;
+    flex-direction: column;
+}

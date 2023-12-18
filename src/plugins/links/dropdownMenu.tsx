@@ -24,6 +24,17 @@ export function exportAction(session: Session, path: Path, mimeType: string, fil
   });
 }
 
+export function exportDataLoom(session: Session, content: string, row: Row, mimeType: string) {
+  session.exportModalContent = content;
+  session.emit('openModal', 'export');
+  session.document.getText(row).then(blockContent => {
+    session.exportFileFunc = () => {
+      downloadFile(`${blockContent ? blockContent : 'dataloom-export'}`, content, mimeType);
+    };
+    session.emit('updateAnyway');
+  });
+}
+
 export function shareAction(session: Session, path: Path, mimeType: string) {
   session.getCurrentContent(path, mimeType).then(content =>
     shareDoc(content).then(shortLink => {

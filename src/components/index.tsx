@@ -58,6 +58,7 @@ import LayoutComponent, {noteLoader} from './layout';
 import YinComponent from './yin';
 import {YangComponent} from './yang';
 import localforage from 'localforage';
+import {DataLoomComponent} from './obsidian-dataloom';
 
 declare const window: any; // because we attach globals for debugging
 
@@ -234,6 +235,10 @@ $(document).ready(async () => {
         {
           path: 'discovery',
           element: <YangComponent session={session} config={config}/>
+        },
+        {
+          path: 'test',
+          element: <DataLoomComponent session={session} row={Path.rootRow()}/>
         }
       ]
     }
@@ -335,58 +340,9 @@ $(document).ready(async () => {
     session.emit('updateInner');
   });
 
-  // needed for safari
-  // const $pasteHack = $('#paste-hack');
-  // $pasteHack.focus();
-  // $(document).on('click', function(e) {
-  //   if (e.detail === 2 && session.mode === 'NORMAL') {
-  //     session.setMode('INSERT');
-  //   }
-  //   // if settings menu is up, we don't want to blur (the dropdowns need focus)
-  //   if (session.mode === 'SETTINGS') { return; }
-  //   // if user is trying to copy, we don't want to blur
-  //   if (window.getSelection().toString()) { return; }
-  //   // $pasteHack.focus();
-  // });
-  // $(document).on('paste', async (e) => {
-  //   if (session.stopMonitor) { return; }
-  //   const clipboardData = ((e.originalEvent || e) as any).clipboardData;
-  //   if (clipboardData && clipboardData.items) {
-  //     // Get the items from the clipboard
-  //     let items = clipboardData.items;
-  //     // Loop through all items, looking for any kind of image
-  //     for (let i = 0; i < items.length; i++) {
-  //       if (items[i].type.indexOf('image') !== -1) {
-  //         // We need to represent the image as a file
-  //         let blob = items[i].getAsFile();
-  //         const uploadRes = await uploadImage(blob);
-  //         console.log(uploadRes.data.pop().url);
-  //       } else {
-  //         let text: string = clipboardData.getData('text/plain');
-  //         text = text.replace(/(?:\r)/g, '');  // Remove \r (Carriage Return) from each line
-  //         await keyHandler.queue(async () => {
-  //           // TODO: deal with this better when there are multiple lines
-  //           // maybe put in insert mode?
-  //           await session.pasteText(text);
-  //         });
-  //       }
-  //     }
-  //     // If we can't handle clipboard data directly (Firefox), we need to read what was pasted from
-  //     // the contenteditable element
-  //   }
-  //   e.preventDefault();
-  //   session.emit('updateAnyway');
-  // });
-
   $(window).on('unload', () => {
     session.exit(); // fire and forget
   });
-
-  // NOTE: problem is that this is very slow!
-  //   Also, to make it work, needs bluebird
-  // (Promise as any).onPossiblyUnhandledRejection(function(error) {
-  //   throw error;
-  // });
 });
 
 export function copyToClipboard(text: string, richText?: string) {

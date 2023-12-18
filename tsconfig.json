@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES5",
+    "baseUrl": "./",
     "lib": [
       "dom",
       "es2019",

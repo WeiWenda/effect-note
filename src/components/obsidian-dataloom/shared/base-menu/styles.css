@@ -1,0 +1,7 @@
+.dataloom-menu {
+    position: absolute;
+    z-index: var(--layer-menu);
+    background-color: var(--background-primary);
+    font-weight: 400;
+}
+

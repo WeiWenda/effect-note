@@ -1,0 +1,9 @@
+.dataloom-color-item {
+    width: 100%;
+}
+
+.dataloom-color-item__square {
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+}
