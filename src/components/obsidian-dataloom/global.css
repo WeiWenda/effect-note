@@ -561,7 +561,7 @@ body {
     --interactive-accent: var(--color-accent-1);
     --interactive-accent-hover: var(--color-accent-2);
 }
-html[data-theme="light"] {
+body[data-theme="light"] {
     color-scheme: light;
     --highlight-mix-blend-mode: darken;
     --mono-rgb-0: 255, 255, 255;
@@ -620,7 +620,7 @@ html[data-theme="light"] {
     0px 6.3px 24.7px rgba(0, 0, 0, 0.112),
     0px 30px 90px rgba(0, 0, 0, 0.2);
 }
-html[data-theme="dark"] {
+body[data-theme="dark"] {
     color-scheme: dark;
     --highlight-mix-blend-mode: lighten;
     --mono-rgb-0: 0, 0, 0;
@@ -1027,5 +1027,247 @@ input[type="color"]::-webkit-color-swatch {
 input[type="color"]:focus-visible::-webkit-color-swatch,
 input[type="color"]:focus::-webkit-color-swatch {
     box-shadow: var(--swatch-shadow), 0 0 0 3px var(--background-modifier-border-focus);
+}
+.checkbox-container {
+    -webkit-app-region: no-drag;
+    cursor: var(--cursor);
+    background-color: var(--background-modifier-border-hover);
+    border-radius: var(--toggle-radius);
+    display: inline-block;
+    flex-shrink: 0;
+    height: calc(var(--toggle-thumb-height) + var(--toggle-border-width) * 2);
+    position: relative;
+    user-select: none;
+    width: var(--toggle-width);
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.07), inset 0 0 1px rgba(0, 0, 0, 0.21);
+    transition: box-shadow 0.15s ease-in-out, outline 0.15s ease-in-out, border 0.15s ease-in-out, opacity 0.15s ease-in-out;
+    outline: 0 solid var(--background-modifier-border-focus);
+}
+.checkbox-container input[type='checkbox'] {
+    position: absolute;
+    opacity: 0;
+    left: 0;
+}
+.checkbox-container:focus-within {
+    outline: var(--toggle-border-width) solid var(--background-modifier-border-focus);
+}
+@media (hover: hover) {
+    .checkbox-container:hover {
+        box-shadow: inset 0 6px 20px rgba(0, 0, 0, 0.14), inset 0 0 1px rgba(0, 0, 0, 0.28);
+    }
+}
+.checkbox-container.is-enabled {
+    background-color: var(--interactive-accent);
+}
+.checkbox-container.is-enabled:after {
+    transform: translate3d(calc(var(--toggle-width) - var(--toggle-thumb-width) - var(--toggle-border-width)), 0, 0);
+}
+.checkbox-container.is-enabled:active:after {
+    left: -4px;
+}
+.checkbox-container:before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    opacity: 0;
+}
+.checkbox-container:after {
+    pointer-events: none;
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: var(--toggle-thumb-color);
+    width: var(--toggle-thumb-width);
+    height: var(--toggle-thumb-height);
+    margin: var(--toggle-border-width) 0 0 0;
+    border-radius: var(--toggle-thumb-radius);
+    transition: transform 0.15s ease-in-out, width 0.1s ease-in-out, left 0.1s ease-in-out;
+    left: 0;
+    transform: translate3d(var(--toggle-border-width), 0, 0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.checkbox-container:active:after {
+    width: calc(var(--toggle-thumb-width) + var(--toggle-border-width));
+}
+.checkbox-container.mod-small {
+    width: var(--toggle-s-width);
+    height: calc(var(--toggle-s-thumb-height) + var(--toggle-s-border-width) * 2);
+}
+.checkbox-container.mod-small:focus-within {
+    outline: var(--toggle-s-border-width) solid var(--background-modifier-border-focus);
+}
+.checkbox-container.mod-small:after {
+    width: var(--toggle-s-thumb-width);
+    height: var(--toggle-s-thumb-height);
+    margin: var(--toggle-s-border-width) 0 0 0;
+    transform: translate3d(var(--toggle-s-border-width), 0, 0);
+}
+.checkbox-container.mod-small.is-enabled:after {
+    transform: translate3d(calc(var(--toggle-s-width) - var(--toggle-s-thumb-width) - var(--toggle-s-border-width)), 0, 0);
+}
+.checkbox-container.mod-small:active:after {
+    width: calc(var(--toggle-s-thumb-width) + var(--toggle-s-border-width));
+}
+/* Add this attribute to the element that needs a tooltip */
+.tooltip {
+    animation: pop-down 200ms forwards ease-in-out;
+    box-shadow: 0 2px 8px var(--background-modifier-box-shadow);
+    background-color: var(--background-modifier-message);
+    border-radius: var(--radius-s);
+    color: #FAFAFA;
+    font-size: var(--font-ui-smaller);
+    font-weight: var(--font-medium);
+    left: 50%;
+    line-height: var(--line-height-tight);
+    max-width: 300px;
+    padding: 4px 8px;
+    position: fixed;
+    text-align: center;
+    transform: translateX(-50%);
+    z-index: var(--layer-tooltip);
+    pointer-events: none;
+    white-space: pre-wrap;
+    word-break: normal;
+    overflow-wrap: anywhere;
+}
+.tooltip.mod-right {
+    animation: pop-right 200ms forwards ease-in-out;
+    transform: translateY(-50%);
+}
+.tooltip.mod-left {
+    animation: pop-right 200ms forwards ease-in-out;
+    transform: translateY(-50%);
+}
+.tooltip.mod-error {
+    width: 200px;
+    background-color: var(--background-modifier-error);
+    color: var(--text-on-accent);
+}
+.tooltip.mod-wide {
+    max-width: 450px;
+    width: 400px;
+}
+/* Triangle hack to make tooltip look like a speech bubble */
+.tooltip .tooltip-arrow {
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    width: 0;
+    margin-left: -5px;
+    border-bottom: 5px solid var(--background-modifier-message);
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+    content: " ";
+    font-size: 0;
+    line-height: 0;
+}
+.tooltip.mod-right .tooltip-arrow {
+    top: calc(50% - 5px);
+    left: -5px;
+    border-right: 5px solid var(--background-modifier-message);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+.tooltip.mod-left .tooltip-arrow {
+    top: calc(50% - 5px);
+    left: calc(100% + 5px);
+    border-left: 5px solid var(--background-modifier-message);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+.tooltip.mod-top .tooltip-arrow {
+    top: calc(100%);
+    border-top: 5px solid var(--background-modifier-message);
+    border-bottom: 5px solid transparent;
+}
+.tooltip.mod-error .tooltip-arrow {
+    border-bottom-color: var(--background-modifier-error);
+}
+.tooltip.mod-error.mod-right .tooltip-arrow {
+    border-right-color: var(--background-modifier-error);
+    border-bottom: 5px solid transparent;
+}
+.tooltip.mod-error.mod-left .tooltip-arrow {
+    border-left-color: var(--background-modifier-error);
+    border-bottom: 5px solid transparent;
+}
+[aria-label] .svg-icon {
+    pointer-events: none;
+}
+@keyframes pop-down {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(1);
+    }
+    20% {
+        opacity: 0.7;
+        transform: translateX(-50%) scale(1.02);
+    }
+    40% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+@keyframes pop-right {
+    0% {
+        opacity: 0;
+        transform: translateY(-50%) scale(1);
+    }
+    20% {
+        opacity: 0.7;
+        transform: translateY(-50%) scale(1.02);
+    }
+    40% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+    }
+}
+* {
+    box-sizing: border-box;
+}
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+body {
+    text-rendering: optimizeLegibility;
+    line-height: var(--line-height-tight);
+    font-size: var(--font-ui-medium);
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+body.is-translucent {
+    background-color: transparent;
+}
+body {
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+}
+body [contenteditable="true"],
+body [contenteditable=""] {
+    user-select: text;
+    -webkit-user-select: text;
+}
+body.is-grabbing iframe:not(.is-controlled),
+body.is-grabbing webview {
+    pointer-events: none;
 }
 

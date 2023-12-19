@@ -2,7 +2,6 @@ import MonacoEditor, {monaco} from 'react-monaco-editor';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
 import {Path, Session} from '../../share';
-import {Input} from 'antd';
 
 export function MonacoEditorWrapper(props: {
   session: Session,

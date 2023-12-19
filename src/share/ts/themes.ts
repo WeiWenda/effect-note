@@ -181,6 +181,8 @@ export function appendStyleScript(clientStore: ClientStore) {
   });
   document.documentElement.setAttribute('data-theme',
     clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light');
+  document.body.setAttribute('data-theme',
+    clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light');
   $('.node-dynamic-style').remove();
   $('#app').append(`<style class='node-dynamic-style'>
                     .session-content{padding-left: ${50 - clientStore.getClientSetting('blockPaddingLeft')}px}

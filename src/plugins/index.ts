@@ -15,6 +15,7 @@ import './links';
 import './markdown';
 import './code';
 import './comment';
+import './dataloom';
 
 // for developers: uncomment the following lines
 /*

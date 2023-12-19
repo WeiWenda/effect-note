@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import { VirtuosoHandle } from 'react-virtuoso';
 
@@ -37,13 +37,11 @@ import { useMenuEvents } from './hooks/use-menu-events';
 export default function App() {
   const logger = useLogger();
   const { reactAppId, isMarkdownView } = useAppMount();
-
-  const { loomState, resizingColumnId, searchText, onRedo, onUndo } =
-    useLoomState();
-
+  const [height, setHeight] = useState(window.innerHeight / 2);
   const tableRef = React.useRef<VirtuosoHandle | null>(null);
   const appRef = React.useRef<HTMLDivElement | null>(null);
-
+  const { loomState, resizingColumnId, searchText, onRedo, onUndo } =
+    useLoomState();
   useExportEvents(loomState);
   useRowEvents();
   useColumnEvents();
@@ -128,6 +126,7 @@ export default function App() {
   }
   return (
     <div
+      style={{height: height}}
       ref={appRef}
       tabIndex={0}
       id={reactAppId}

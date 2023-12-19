@@ -3,7 +3,8 @@ import React from 'react';
 import BaseMenu from '../base-menu';
 
 import { LoomMenuOpenDirection, LoomMenuPosition } from './types';
-
+import {useShiftMenu} from '../base-menu/utils';
+import $ from 'jquery';
 interface Props {
   id: string;
   isOpen: boolean;
@@ -24,15 +25,24 @@ export default function Menu({
   id,
   isOpen,
   hideBorder = false,
+  openDirection,
   position,
   minWidth = 0,
   width = 0,
   height = 0,
+  leftOffset = 0,
+  topOffset = 0,
   maxHeight = 0,
   maxWidth = 0,
   children,
 }: Props) {
   const ref = React.useRef<HTMLDivElement>(null);
+
+  useShiftMenu(false, $('body').get(0)!, ref, position, isOpen, {
+    openDirection,
+    leftOffset,
+    topOffset,
+  });
 
   return (
     <BaseMenu

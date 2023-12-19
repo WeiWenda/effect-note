@@ -88,6 +88,9 @@ export class LinksPlugin {
         this.api.registerListener('session', 'setCode', async (row: Row, code: string, language: string, wrap: boolean) => {
             await this.setCode(row, code, language, wrap);
         });
+        this.api.registerListener('session', 'setDataLoom', async (row: Row, state: string, setting: string) => {
+            await this.setDataLoom(row, state, setting);
+        });
         this.api.registerListener('session', 'setRTF', async (row: Row, html: string) => {
             await this.setRTF(row, html);
         });
@@ -145,8 +148,9 @@ export class LinksPlugin {
             const xml = await this.getXml(row);
             const md = await this.getMarkdown(row);
             const code = await this.getCode(row);
+            const dataloom = await this.getDataLoom(row);
             const rtf = await this.getRTF(row);
-            obj.links = { is_callout, is_order, is_board, is_check, collapse, png, xml, md, code, rtf};
+            obj.links = { is_callout, is_order, is_board, is_check, collapse, png, xml, md, code, rtf, dataloom};
             return obj;
         });
         this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
@@ -201,6 +205,10 @@ export class LinksPlugin {
             if (code != null) {
                 struct.code = code;
             }
+            const dataloom = await this.getDataLoom(info.row);
+            if (dataloom != null) {
+                struct.dataloom = dataloom;
+            }
             return struct;
         });
         this.api.registerListener('document', 'loadRow', async (path, serialized) => {
@@ -228,6 +236,9 @@ export class LinksPlugin {
             }
             if (serialized.code) {
                 await this._setCode(path.row, serialized.code.content, serialized.code.language, serialized.code.wrap || true);
+            }
+            if (serialized.dataloom) {
+                await this._setDataLoom(path.row, serialized.dataloom.content, serialized.dataloom.setting);
             }
             if (serialized.rtf) {
                 await this._setRTF(path.row, serialized.rtf);
@@ -414,6 +425,7 @@ export class LinksPlugin {
         await this.api.setData('ids_to_order', {});
         await this.api.setData('ids_to_check', {});
         await this.api.setData('ids_to_callout', {});
+        await this.api.setData('ids_to_datalooms', {});
     }
 
     public async getPng(row: Row): Promise<any> {
@@ -445,8 +457,23 @@ export class LinksPlugin {
         }
     }
 
+    public async getDataLoom(row: Row): Promise<any> {
+        const ids_to_datalooms = await this.api.getData('ids_to_datalooms', {});
+        if (ids_to_datalooms[row]) {
+            const dataloom = await this.api.getData(row + ':dataloom', {});
+            return dataloom;
+        } else {
+            return null;
+        }
+    }
+
     public async setCode(row: Row, content: string, language: string, wrap: boolean): Promise<void> {
         await this._setCode(row, content, language, wrap);
+        await this.api.updatedDataForRender(row);
+    }
+
+    public async setDataLoom(row: Row, content: string, setting: string): Promise<void> {
+        await this._setDataLoom(row, content, setting);
         await this.api.updatedDataForRender(row);
     }
 
@@ -471,6 +498,14 @@ export class LinksPlugin {
         const ids_to_mds = await this.api.getData('ids_to_codes', {});
         ids_to_mds[row] = 1;
         await this.api.setData('ids_to_codes', ids_to_mds);
+    }
+
+    private async _setDataLoom(row: Row, content: string, setting: string): Promise<void> {
+        await this.api.setData(row + ':dataloom', {content, setting});
+        // 不存在的key查询效率较差
+        const ids_to_datalooms = await this.api.getData('ids_to_datalooms', {});
+        ids_to_datalooms[row] = 1;
+        await this.api.setData('ids_to_datalooms', ids_to_datalooms);
     }
 
     private async _setRTF(row: Row, content: string): Promise<void> {

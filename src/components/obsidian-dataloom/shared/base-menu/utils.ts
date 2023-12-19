@@ -2,7 +2,6 @@ import React from 'react';
 
 import { numToPx } from 'src/components/obsidian-dataloom/shared/conversion';
 import { LoomMenuOpenDirection, LoomMenuPosition } from '../menu/types';
-import { isOnMobile } from 'src/components/obsidian-dataloom/shared/render-utils';
 
 export const useShiftMenu = (
   isModalMenu: boolean,
@@ -86,7 +85,7 @@ const getViewportPosition = (viewportEl: HTMLElement, isModalMenu: boolean) => {
   let height = rectRelativeToDocument.height;
   if (!isModalMenu) {
     const MOBILE_BAR_HEIGHT = 48;
-    if (isOnMobile()) height -= MOBILE_BAR_HEIGHT;
+    // if (isOnMobile()) height -= MOBILE_BAR_HEIGHT;
   }
 
   return {
@@ -150,12 +149,12 @@ const shiftElementIntoContainer = (
       MENU_SHIFT_PADDING;
   }
 
-  //Shift down if the element is above
+  // Shift down if the element is above
   if (element.top < container.top) {
     newTop = container.top + MENU_SHIFT_PADDING;
   }
 
-  //Shift right if the element is to the left
+  // Shift right if the element is to the left
   if (element.left < container.left) {
     newLeft = container.left + MENU_SHIFT_PADDING;
   }

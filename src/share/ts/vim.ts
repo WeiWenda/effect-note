@@ -1,6 +1,4 @@
 import * as _ from 'lodash';
-
-import { SerializedBlock } from './types';
 import * as default_data from './hello.json';
 import KeyMappings, { HotkeyMapping } from './keyMappings';
 import { motionKey } from './keyDefinitions';

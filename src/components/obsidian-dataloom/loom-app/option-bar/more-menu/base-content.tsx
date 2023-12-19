@@ -26,13 +26,13 @@ export default function BaseContent({
   const isSmallScreen = isSmallScreenSize();
   return (
     <Padding p='sm'>
-      {isSmallScreen && (
-        <MenuItem
-          lucideId='Filter'
-          name='Sources'
-          onClick={onSourcesClick}
-        />
-      )}
+      {/*{isSmallScreen && (*/}
+      {/*  <MenuItem*/}
+      {/*    lucideId='Filter'*/}
+      {/*    name='Sources'*/}
+      {/*    onClick={onSourcesClick}*/}
+      {/*  />*/}
+      {/*)}*/}
       {isSmallScreen && (
         <MenuItem
           lucideId='Filter'

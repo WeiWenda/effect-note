@@ -170,17 +170,17 @@ export default function OptionBar({
                 width: '100%',
               })}
             >
-              {isSmallScreen === false && (
-                <MenuButton
-                  isFocused={sourcesMenu.isTriggerFocused}
-                  menuId={sourcesMenu.id}
-                  ref={sourcesMenu.triggerRef}
-                  level={LoomMenuLevel.ONE}
-                  onOpen={handleSourceMenuOpen}
-                >
-                  Sources
-                </MenuButton>
-              )}
+              {/*{isSmallScreen === false && (*/}
+              {/*  <MenuButton*/}
+              {/*    isFocused={sourcesMenu.isTriggerFocused}*/}
+              {/*    menuId={sourcesMenu.id}*/}
+              {/*    ref={sourcesMenu.triggerRef}*/}
+              {/*    level={LoomMenuLevel.ONE}*/}
+              {/*    onOpen={handleSourceMenuOpen}*/}
+              {/*  >*/}
+              {/*    Sources*/}
+              {/*  </MenuButton>*/}
+              {/*)}*/}
               {isSmallScreen === false && (
                 <MenuButton
                   isFocused={filterMenu.isTriggerFocused}

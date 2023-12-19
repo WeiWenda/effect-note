@@ -58,7 +58,6 @@ import LayoutComponent, {noteLoader} from './layout';
 import YinComponent from './yin';
 import {YangComponent} from './yang';
 import localforage from 'localforage';
-import {DataLoomComponent} from './obsidian-dataloom';
 
 declare const window: any; // because we attach globals for debugging
 
@@ -190,7 +189,7 @@ $(document).ready(async () => {
   // load plugins
 
   const pluginManager = new PluginsManager(session, config, keyBindings);
-  let enabledPlugins = ['Marks', 'Tags', 'Links', 'HTML', 'Todo', 'Markdown', 'CodeSnippet', 'LaTeX', 'Comment'];
+  let enabledPlugins = ['Marks', 'Tags', 'Links', 'HTML', 'Todo', 'Markdown', 'CodeSnippet', 'LaTeX', 'Comment', 'DataLoom'];
   if (typeof enabledPlugins.slice === 'undefined') { // for backwards compatibility
     enabledPlugins = Object.keys(enabledPlugins);
   }
@@ -235,11 +234,11 @@ $(document).ready(async () => {
         {
           path: 'discovery',
           element: <YangComponent session={session} config={config}/>
-        },
-        {
-          path: 'test',
-          element: <DataLoomComponent session={session} row={Path.rootRow()}/>
         }
+        // {
+        //   path: 'test',
+        //   element: <DataLoomComponent session={session} row={Path.rootRow()}/>
+        // }
       ]
     }
   ]);

@@ -134,6 +134,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           label: '插入流程图（Drawio）',
           key: 'insert_drawio',
         },
+        {
+          label: '插入表格（DataLoom）',
+          key: 'insert_dataloom',
+        },
         // {
         //   label: '插入文本识别',
         //   key: 'ocr',
@@ -316,6 +320,9 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         break;
       case 'insert_drawio':
         props.session.emit('setDrawio', props.path.row);
+        break;
+      case 'insert_dataloom':
+        props.session.emit('setDataLoom', props.path.row, '', '');
         break;
       case 'insert_rtf':
         props.session.emit('openModal', 'rtf', {html: '<span>暂无内容</span>'});
