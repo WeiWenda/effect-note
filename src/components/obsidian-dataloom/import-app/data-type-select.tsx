@@ -1,4 +1,4 @@
-import { DataType } from 'src/react/import-app/types';
+import { DataType } from './types';
 import Stack from 'src/components/obsidian-dataloom/shared/stack';
 
 interface Props {

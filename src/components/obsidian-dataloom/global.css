@@ -269,9 +269,9 @@ body {
     --layer-slides: 45;
     --layer-modal: 50;
     --layer-notice: 60;
-    --layer-menu: 65;
-    --layer-tooltip: 70;
-    --layer-dragged-item: 80;
+    --layer-menu: 1065;
+    --layer-tooltip: 1070;
+    --layer-dragged-item: 1080;
     /* Line heights */
     --line-height-normal: 1.5;
     --line-height-tight: 1.3;

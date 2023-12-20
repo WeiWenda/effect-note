@@ -62,8 +62,8 @@ export default function HeaderCell({
               }
               lucideId={
                 matchId !== null
-                  ? 'shield-check'
-                  : 'shield-question'
+                  ? 'ShieldCheck'
+                  : 'ShieldQuestion'
               }
               size='xl'
             />

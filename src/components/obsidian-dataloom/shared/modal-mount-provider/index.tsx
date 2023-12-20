@@ -1,9 +1,6 @@
-import { App } from 'obsidian';
-
 import React from 'react';
 
 interface ContextProps {
-  obsidianApp: App;
   modalEl: HTMLElement;
 }
 
@@ -25,12 +22,11 @@ interface Props extends ContextProps {
 }
 
 export default function ModalMountProvider({
-  obsidianApp,
   modalEl,
   children,
 }: Props) {
   return (
-    <MountContext.Provider value={{ obsidianApp, modalEl }}>
+    <MountContext.Provider value={{modalEl }}>
       {children}
     </MountContext.Provider>
   );

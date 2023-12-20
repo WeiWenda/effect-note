@@ -5,27 +5,24 @@ import ExportTypeSelect from './export-type-select';
 import ContentTextArea from './content-textarea';
 
 import { LoomState } from 'src/components/obsidian-dataloom/shared/loom-state/types/loom-state';
-import { ExportType } from '../../shared/export/types';
+import { ExportType } from '../shared/export/types';
 import { exportToMarkdown } from 'src/components/obsidian-dataloom/shared/export/export-to-markdown';
-import { App, Notice } from 'obsidian';
-import {
-  downloadFile,
-  getBlobTypeForExportType,
-  getExportFileName,
-} from '../../shared/export/download-utils';
+
 import { exportToCSV } from 'src/components/obsidian-dataloom/shared/export/export-to-csv';
 import { useAppSelector } from 'src/components/obsidian-dataloom/redux/hooks';
 
 import './styles.css';
 import Switch from '../shared/switch';
+import {downloadFile} from '../../../ts/util';
+import {useAppMount} from '../loom-app/app-mount-provider';
+import {getBlobTypeForExportType} from '../shared/export/download-utils';
 
 interface Props {
-  app: App;
   loomState: LoomState;
-  loomFilePath: string;
 }
 
-export function ExportApp({ app, loomState, loomFilePath }: Props) {
+export function ExportApp({ loomState }: Props) {
+  const {session, reactAppId} = useAppMount();
   const [exportType, setExportType] = React.useState<ExportType>(
     ExportType.UNSELECTED
   );
@@ -38,13 +35,14 @@ export function ExportApp({ app, loomState, loomFilePath }: Props) {
 
   async function handleCopyClick(value: string) {
     await navigator.clipboard.writeText(value);
-    new Notice('Copied to clipboard');
+    session.showMessage('操作成功');
   }
 
   function handleDownloadClick() {
-    const fileName = getExportFileName(loomFilePath);
-    const blobType = getBlobTypeForExportType(exportType);
-    downloadFile(fileName, blobType, content);
+    console.log('handleDownloadClick');
+    session.document.getText(Number(reactAppId)).then(blockContent => {
+      downloadFile(`${blockContent ? blockContent : 'effect-note-export'}`, content, getBlobTypeForExportType(exportType));
+    });
   }
 
   let content = '';

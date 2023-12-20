@@ -43,25 +43,25 @@ interface Props {
 export default function ImportApp({ state, onStateChange }: Props) {
   const menuOperations = useMenuOperations();
 
-  //Step 1
+  // Step 1
   const [dataSource, setDataSource] = React.useState(DataSource.UNSELECTED);
 
-  //Step 2
+  // Step 2
   const [dataType, setDataType] = React.useState(DataType.UNSELECTED);
 
-  //Step 3
+  // Step 3
   const [fileName, setFileName] = React.useState<string | null>(null);
-  const [rawData, setRawData] = React.useState("");
+  const [rawData, setRawData] = React.useState('');
   const [data, setData] = React.useState<ImportData>([]);
   const [errorText, setErrorText] = React.useState<string | null>(null);
   const [hasHeadersRow, setHeadersRow] = React.useState(true);
 
-  //Step 4
+  // Step 4
   const [enabledColumnIndices, setEnabledColumnIndices] = React.useState<
     number[]
   >([]);
 
-  //Step 5
+  // Step 5
   const [dateFormat, setDateFormat] = React.useState<DateFormat | null>(null);
   const [dateFormatSeparator, setDateFormatSeparator] =
     React.useState<DateFormatSeparator | null>(null);
@@ -135,7 +135,7 @@ export default function ImportApp({ state, onStateChange }: Props) {
       setDataSource(DataSource.UNSELECTED);
     }
     if (currentType !== StepType.UPLOAD_DATA) {
-      setRawData("");
+      setRawData('');
       setErrorText(null);
       setFileName(null);
       setData([]);
@@ -190,13 +190,13 @@ export default function ImportApp({ state, onStateChange }: Props) {
           onHeadersRowToggle={handleHeadersRowToggle}
         />
       ),
-      canContinue: rawData !== "",
+      canContinue: rawData !== '',
       onContinue: () => {
         let parsedArr: string[][] = [];
 
         if (dataType === DataType.CSV) {
-          //Trim trailing whitespace
-          //There is a bug in Papa.parse where it will parse an empty string as a single empty row
+          // Trim trailing whitespace
+          // There is a bug in Papa.parse where it will parse an empty string as a single empty row
           const rawDataTrimmed = rawData.trim();
           const { data, errors } = Papa.parse(rawDataTrimmed, {
             skipEmptyLines: true,

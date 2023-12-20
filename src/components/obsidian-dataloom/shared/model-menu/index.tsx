@@ -3,7 +3,7 @@ import React from 'react';
 import { LoomMenuOpenDirection, LoomMenuPosition } from '../menu/types';
 import { useShiftMenu } from '../base-menu/utils';
 
-import { useModalMount } from '../modal-mount-provider';
+import $ from 'jquery';
 import BaseMenu from '../base-menu';
 
 interface Props {
@@ -32,9 +32,8 @@ export default function ModalMenu({
   children,
 }: Props) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const { modalEl } = useModalMount();
 
-  useShiftMenu(true, modalEl, ref, position, isOpen, {
+  useShiftMenu(true, $('body').get(0)!, ref, position, isOpen, {
     openDirection,
   });
 

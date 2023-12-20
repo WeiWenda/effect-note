@@ -1,5 +1,5 @@
 import Stack from 'src/components/obsidian-dataloom/shared/stack';
-import { ExportType } from '../../shared/export/types';
+import { ExportType } from '../shared/export/types';
 
 interface Props {
   value: ExportType;
