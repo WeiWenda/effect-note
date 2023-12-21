@@ -56,13 +56,13 @@ export default function RowOptions({
   }
 
   function handleMouseDown(e: React.MouseEvent) {
-    //On mouse down we create a synthetic drag event
-    //We do this because we have prevent the ability for the user to drag the row
-    //Otherwise the user would be able to drag the row from any cell in the table
+    // On mouse down we create a synthetic drag event
+    // We do this because we have prevent the ability for the user to drag the row
+    // Otherwise the user would be able to drag the row from any cell in the table
     const el = e.target as HTMLElement;
     const row = el.closest('.dataloom-row');
     if (row) {
-      row.setAttr('draggable', true);
+      row.setAttribute('draggable', 'true');
       const dragStartEvent = new DragEvent('dragstart');
       Object.defineProperty(dragStartEvent, 'target', {
         value: row,
@@ -74,8 +74,8 @@ export default function RowOptions({
   function handleTouchStart(e: React.TouchEvent) {
     e.stopPropagation();
 
-    //The target will be the td element
-    //The current target will be the parent tr element
+    // The target will be the td element
+    // The current target will be the parent tr element
     const targetEl = e.currentTarget as HTMLElement;
     const rowEl = targetEl.closest('.dataloom-row') as HTMLElement | null;
     if (!rowEl) throw new Error('Row not found');
@@ -96,7 +96,7 @@ export default function RowOptions({
 
     const { clientX, clientY } = e.touches[0];
 
-    // Get the element underneath the dragging element at the current position
+    //  Get the element underneath the dragging element at the current position
     const elementUnderneath = document.elementFromPoint(clientX, clientY);
 
     if (!elementUnderneath) return;
@@ -109,7 +109,7 @@ export default function RowOptions({
     const targetId = getRowId(rowEl);
     if (!targetId) return;
 
-    //If we're dragging over the same row, then return
+    // If we're dragging over the same row, then return
     if (targetId === dragData.id) return;
 
     const { top, left, bottom, right } = rowEl.getBoundingClientRect();
@@ -135,7 +135,7 @@ export default function RowOptions({
       const touchX = e.changedTouches[0].clientX;
       const touchY = e.changedTouches[0].clientY;
 
-      //Check if the touch is inside the drop zone
+      // Check if the touch is inside the drop zone
       const isInsideDropZone =
         touchX >= touchDropZone.left &&
         touchX <= touchDropZone.right &&
@@ -145,7 +145,7 @@ export default function RowOptions({
       if (isInsideDropZone) {
         if (dragData === null) throw Error('No drag data found');
 
-        //If we're dragging a column type, then return
+        // If we're dragging a column type, then return
         if (dragData.type !== 'row') return;
 
         if (!confirmSortOrderChange(loomState)) return;
@@ -163,7 +163,7 @@ export default function RowOptions({
   }
 
   function addDragHover(rowEl: HTMLElement) {
-    //Add dragging over class to all the children
+    // Add dragging over class to all the children
     const children = rowEl.querySelectorAll('.dataloom-cell');
 
     for (let i = 0; i < children.length; i++) {
@@ -172,7 +172,7 @@ export default function RowOptions({
   }
 
   function removeDragHover() {
-    //Add dragging over class to all the children
+    // Add dragging over class to all the children
     const children = document.querySelectorAll('.dataloom-tr--drag-over');
 
     for (let i = 0; i < children.length; i++) {

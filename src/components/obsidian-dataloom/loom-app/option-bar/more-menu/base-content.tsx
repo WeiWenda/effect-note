@@ -59,6 +59,7 @@ export default function BaseContent({
         onClick={() => {
           onClose();
           Modal.confirm({
+            width: 800,
             icon: (
               <ImportOutlined style={{color: session.clientStore.getClientSetting('theme-text-primary')}}/>
             ),
@@ -66,19 +67,19 @@ export default function BaseContent({
             title: 'DataLoom导入',
             footer: null,
             content: (
-              <Provider store={store}>
-                <MenuProvider>
-                  <ImportApp state={loomState} onStateChange={(state) => {
-                    setLoomState({
-                      state,
-                      shouldSaveToDisk: false,
-                      shouldSaveFrontmatter: true,
-                      time: Date.now(),
-                    });
-                    Modal.destroyAll();
-                  }}/>
-                </MenuProvider>
-              </Provider>
+                <Provider store={store}>
+                  <MenuProvider>
+                    <ImportApp state={loomState} onStateChange={(state) => {
+                      setLoomState({
+                        state,
+                        shouldSaveToDisk: false,
+                        shouldSaveFrontmatter: true,
+                        time: Date.now(),
+                      });
+                      Modal.destroyAll();
+                    }}/>
+                  </MenuProvider>
+                </Provider>
             )
           });
           // new ImportModal(app, loomFile, loomState).open();
@@ -90,6 +91,7 @@ export default function BaseContent({
         onClick={() => {
           onClose();
           Modal.confirm({
+            width: 500,
             icon: (
               <DownloadOutlined style={{color: session.clientStore.getClientSetting('theme-text-primary')}}/>
             ),

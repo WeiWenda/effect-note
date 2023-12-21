@@ -686,7 +686,7 @@ body[data-theme="dark"] {
     0px 6.3px 24.7px rgba(0, 0, 0, 0.112),
     0px 30px 90px rgba(0, 0, 0, 0.2);
 }
-button {
+button.dataloom-button {
     -webkit-app-region: no-drag;
     display: inline-flex;
     align-items: center;
@@ -704,12 +704,12 @@ button {
     user-select: none;
     white-space: nowrap;
 }
-button:not(.clickable-icon) {
+button.dataloom-button:not(.clickable-icon) {
     background-color: var(--interactive-normal);
     box-shadow: var(--input-shadow);
 }
 @media (hover: hover) {
-    button:hover {
+    button.dataloom-button:hover {
         background-color: var(--interactive-hover);
         box-shadow: var(--input-shadow-hover);
     }
@@ -717,10 +717,10 @@ button:not(.clickable-icon) {
 button[aria-disabled='true'] {
     background-color: var(--interactive-normal);
 }
-button:focus-visible {
+button.dataloom-button:focus-visible {
     box-shadow: 0 0 0 3px var(--background-modifier-border-focus);
 }
-button[disabled="true"] {
+button.dataloom-button[disabled="true"] {
     cursor: not-allowed;
 }
 button.mod-cta {
@@ -900,7 +900,7 @@ input[type='password']::placeholder,
 input[type='number']::placeholder {
     color: var(--text-faint);
 }
-input[type='text'],
+input[type='text']:not(.ant-input),
 input[type='search'],
 input[type='email'],
 input[type='password'],
