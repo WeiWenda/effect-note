@@ -28,14 +28,19 @@ export default function EmbedCell({
     isExternal,
   });
   return (
-    <div className='dataloom-embed-cell'>
-      <Embed
-        isExternalLink={isExternal}
-        content={content}
-        aspectRatio={aspectRatio}
-        horizontalPadding={horizontalPadding}
-        verticalPadding={verticalPadding}
+    <div className={'node-html'}>
+      <span
+        dangerouslySetInnerHTML={{__html: content}}
       />
     </div>
+    // <div className='dataloom-embed-cell'>
+    //   <Embed
+    //     isExternalLink={isExternal}
+    //     content={content}
+    //     aspectRatio={aspectRatio}
+    //     horizontalPadding={horizontalPadding}
+    //     verticalPadding={verticalPadding}
+    //   />
+    // </div>
   );
 }

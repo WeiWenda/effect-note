@@ -32,7 +32,7 @@ export const getEmbedCellContent = (
     ) {
       return `![](${pathOrUrl})`;
     }
-    return `<a href='${pathOrUrl}'>${pathOrUrl}</a>`;
+    return `<a target="_blank" href='${pathOrUrl}'>${pathOrUrl}</a>`;
     // return `![](${pathOrUrl})`;
     // return `<iframe src='${pathOrUrl}'></iframe>`;
   }

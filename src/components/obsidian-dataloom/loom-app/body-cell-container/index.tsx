@@ -693,7 +693,7 @@ export default function BodyCellContainer(props: Props) {
 
       contentNode = (
         <EmbedCell
-          isExternal={isExternal}
+          isExternal={true}
           pathOrUrl={pathOrUrl}
           verticalPadding={verticalPadding}
           horizontalPadding={horizontalPadding}
@@ -702,7 +702,7 @@ export default function BodyCellContainer(props: Props) {
       );
       menuNode = (
         <EmbedCellEdit
-          isExternalLink={isExternal}
+          isExternalLink={true}
           closeRequest={menu.closeRequest}
           value={pathOrUrl}
           onChange={handleEmbedChange}
