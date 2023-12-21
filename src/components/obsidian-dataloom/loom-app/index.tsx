@@ -1,19 +1,21 @@
-import { Provider } from 'react-redux';
-import { Store } from '@reduxjs/toolkit';
+import {Provider} from 'react-redux';
+import {Store} from '@reduxjs/toolkit';
 
 import LoomStateProvider from './loom-state-provider';
 import AppMountProvider from './app-mount-provider';
 import App from './app';
 
 import DragProvider from '../shared/dragging/drag-context';
-import { LoomState } from '../shared/loom-state/types/loom-state';
+import {LoomState} from '../shared/loom-state/types/loom-state';
 import MenuProvider from '../shared/menu-provider';
 import ErrorBoundary from '../shared/error-boundary';
-import {Session} from '../../../share';
+import {Path, Session} from '../../../share';
 
 interface Props {
+  path: Path;
+  title: string;
+  collapse: boolean;
   session: Session;
-  reactAppId: string;
   isMarkdownView: boolean;
   store: Store;
   loomState: LoomState;
@@ -25,8 +27,10 @@ interface Props {
 }
 
 export default function LoomApp({
+  path,
+  title,
+  collapse,
   session,
-  reactAppId,
   isMarkdownView,
   store,
   loomState,
@@ -35,8 +39,11 @@ export default function LoomApp({
   return (
     <ErrorBoundary>
       <AppMountProvider
+        title={title}
+        collapse={collapse}
         session={session}
-        reactAppId={reactAppId}
+        path={path}
+        reactAppId={path.row.toString()}
         isMarkdownView={isMarkdownView}
       >
         <Provider store={store}>
@@ -46,7 +53,7 @@ export default function LoomApp({
           >
             <DragProvider>
               <MenuProvider>
-                <App />
+                <App  />
               </MenuProvider>
             </DragProvider>
           </LoomStateProvider>

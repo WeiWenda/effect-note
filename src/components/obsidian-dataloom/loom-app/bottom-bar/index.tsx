@@ -12,16 +12,26 @@ import Icon from 'src/components/obsidian-dataloom/shared/icon';
 import { numToPx } from 'src/components/obsidian-dataloom/shared/conversion';
 
 import './styles.css';
+import SortBubbleList from '../option-bar/sort-bubble-list';
+import ActiveFilterBubble from '../option-bar/active-filter-bubble';
+import {Column, Filter, SortDir} from '../../shared/loom-state/types/loom-state';
+import {ColumnChangeHandler} from '../app/hooks/use-column/types';
 
 interface Props {
+  columns: Column[];
+  filters: Filter[];
   onScrollToTopClick: () => void;
   onScrollToBottomClick: () => void;
   onUndoClick: () => void;
   onRedoClick: () => void;
   onRowAddClick: () => void;
+  onColumnChange: ColumnChangeHandler;
 }
 
 export default function BottomBar({
+  columns,
+  filters,
+  onColumnChange,
   onRowAddClick,
   onScrollToTopClick,
   onScrollToBottomClick,
@@ -80,6 +90,20 @@ export default function BottomBar({
   if (isMobile) {
     className += ' dataloom-bottom-bar--mobile';
   }
+  function handleRemoveClick(columnId: string) {
+    onColumnChange(
+      columnId,
+      { sortDir: SortDir.NONE },
+      {
+        shouldSortRows: true,
+      }
+    );
+  }
+  const activeFilters = filters.filter((filter) => filter.isEnabled);
+
+  const sortedColumns = columns.filter(
+    (column) => column.sortDir !== SortDir.NONE
+  );
 
   return (
     <div ref={ref} className={className}>
@@ -93,6 +117,13 @@ export default function BottomBar({
             <Flex justify='space-between'>
               <NewRowButton onClick={onRowAddClick} />
               <Stack isHorizontal spacing='sm'>
+                <SortBubbleList
+                  sortedColumns={sortedColumns}
+                  onRemoveClick={handleRemoveClick}
+                />
+                <ActiveFilterBubble
+                  numActive={activeFilters.length}
+                />
                 <Button
                   ariaLabel='Scroll to top'
                   icon={<Icon lucideId='ChevronUp' />}

@@ -29,16 +29,11 @@ registerPlugin(
           });
         }
         elements.push(
-          <SpecialBlock key={'dataloom-block'}
-                        path={path}
-                        title={line.join('')}
-                        collapse={pluginData.links.collapse || false}
-                        blockType={'DataLoom'}
-                        session={api.session}
-          >
             <LoomApp
               session={api.session}
-              reactAppId={path.row.toString()}
+              path={path}
+              title={line.join('')}
+              collapse={pluginData.links.collapse || false}
               isMarkdownView={false}
               store={store}
               loomState={loomState}
@@ -50,7 +45,6 @@ registerPlugin(
                 api.session.emit('setDataLoom', path.row, serializeState(state), '');
               }}
             />
-          </SpecialBlock>
         );
       }
       return elements;

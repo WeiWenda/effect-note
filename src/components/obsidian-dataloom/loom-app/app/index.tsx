@@ -33,20 +33,21 @@ import '../../global.css';
 import './styles.css';
 import { useAppEvents } from './hooks/use-app-events';
 import { useMenuEvents } from './hooks/use-menu-events';
+import {SpecialBlock} from '../../../../share/components/Block/SpecialBlock';
 
 export default function App() {
   const logger = useLogger();
-  const { reactAppId, isMarkdownView } = useAppMount();
+  const { path, session, collapse, title, reactAppId, isMarkdownView } = useAppMount();
   const tableRef = React.useRef<VirtuosoHandle | null>(null);
   const appRef = React.useRef<HTMLDivElement | null>(null);
   const { loomState, resizingColumnId, searchText, onRedo, onUndo } =
     useLoomState();
   const [height, setHeight] = useState(
     Math.min(window.innerHeight - 200,
-      56.5 + 40.5 + 72 + loomState.model.rows.length * 40.5));
+      40.5 + 72 + loomState.model.rows.length * 40.5));
   useEffect(() => {
     setHeight(Math.min(window.innerHeight - 200,
-      56.5 + 40.5 + 72 + loomState.model.rows.length * 40.5));
+      40.5 + 72 + loomState.model.rows.length * 40.5));
   }, [loomState]);
   useExportEvents(loomState);
   useRowEvents();
@@ -131,62 +132,75 @@ export default function App() {
     className += ' dataloom-app--markdown-view';
   }
   return (
-    <div
-      style={{height: height}}
-      ref={appRef}
-      tabIndex={0}
-      id={reactAppId}
-      className={className}
-      onKeyDown={handleKeyDown}
-      onClick={onClick}
+    <SpecialBlock key={'dataloom-block'}
+                  path={path}
+                  title={title}
+                  tools={
+                    <OptionBar
+                      columns={columns}
+                      sources={sources}
+                      filters={filters}
+                      showCalculationRow={showCalculationRow}
+                      onColumnChange={onColumnChange}
+                      onFilterAddClick={onFilterAdd}
+                      onFilterDeleteClick={onFilterDelete}
+                      onFilterUpdate={onFilterUpdate}
+                      onCalculationRowToggle={onCalculationRowToggle}
+                      onSourceAdd={onSourceAdd}
+                      onSourceDelete={onSourceDelete}
+                      onSourceUpdate={onSourceUpdate}
+                    />
+                  }
+                  collapse={collapse}
+                  blockType={'DataLoom'}
+                  session={session}
     >
-      <OptionBar
-        columns={columns}
-        sources={sources}
-        filters={filters}
-        showCalculationRow={showCalculationRow}
-        onColumnChange={onColumnChange}
-        onFilterAddClick={onFilterAdd}
-        onFilterDeleteClick={onFilterDelete}
-        onFilterUpdate={onFilterUpdate}
-        onCalculationRowToggle={onCalculationRowToggle}
-        onSourceAdd={onSourceAdd}
-        onSourceDelete={onSourceDelete}
-        onSourceUpdate={onSourceUpdate}
-      />
-      <Table
-        ref={tableRef}
-        sources={sources}
-        rows={filteredRows}
-        columns={columns}
-        numFrozenColumns={numFrozenColumns}
-        resizingColumnId={resizingColumnId}
-        showCalculationRow={showCalculationRow}
-        onColumnDeleteClick={onColumnDeleteClick}
-        onColumnAddClick={onColumnAddClick}
-        onColumnTypeChange={onColumnTypeChange}
-        onFrozenColumnsChange={onFrozenColumnsChange}
-        onColumnReorder={onColumnReorder}
-        onRowDeleteClick={onRowDeleteClick}
-        onRowInsertAboveClick={onRowInsertAboveClick}
-        onRowInsertBelowClick={onRowInsertBelowClick}
-        onColumnChange={onColumnChange}
-        onCellChange={onCellChange}
-        onTagAdd={onTagAdd}
-        onTagCellAdd={onTagCellAdd}
-        onTagCellRemove={onTagCellRemove}
-        onTagCellMultipleRemove={onTagCellMultipleRemove}
-        onTagChange={onTagChange}
-        onTagDeleteClick={onTagDeleteClick}
-        onRowReorder={onRowReorder}
-      />
-      <BottomBar
-        onRowAddClick={onRowAddClick}
-        onScrollToTopClick={handleScrollToTopClick}
-        onScrollToBottomClick={handleScrollToBottomClick}
-        onUndoClick={onUndo}
-        onRedoClick={onRedo}
-      />
-    </div>
+      <div
+        style={{height: height}}
+        ref={appRef}
+        tabIndex={0}
+        id={reactAppId}
+        className={className}
+        onKeyDown={handleKeyDown}
+        onClick={onClick}
+      >
+        <Table
+          ref={tableRef}
+          sources={sources}
+          rows={filteredRows}
+          columns={columns}
+          numFrozenColumns={numFrozenColumns}
+          resizingColumnId={resizingColumnId}
+          showCalculationRow={showCalculationRow}
+          onColumnDeleteClick={onColumnDeleteClick}
+          onColumnAddClick={onColumnAddClick}
+          onColumnTypeChange={onColumnTypeChange}
+          onFrozenColumnsChange={onFrozenColumnsChange}
+          onColumnReorder={onColumnReorder}
+          onRowDeleteClick={onRowDeleteClick}
+          onRowInsertAboveClick={onRowInsertAboveClick}
+          onRowInsertBelowClick={onRowInsertBelowClick}
+          onColumnChange={onColumnChange}
+          onCellChange={onCellChange}
+          onTagAdd={onTagAdd}
+          onTagCellAdd={onTagCellAdd}
+          onTagCellRemove={onTagCellRemove}
+          onTagCellMultipleRemove={onTagCellMultipleRemove}
+          onTagChange={onTagChange}
+          onTagDeleteClick={onTagDeleteClick}
+          onRowReorder={onRowReorder}
+        />
+        <BottomBar
+          filters={filters}
+          columns={columns}
+          onColumnChange={onColumnChange}
+          onRowAddClick={onRowAddClick}
+          onScrollToTopClick={handleScrollToTopClick}
+          onScrollToBottomClick={handleScrollToBottomClick}
+          onUndoClick={onUndo}
+          onRedoClick={onRedo}
+        />
+      </div>
+    </SpecialBlock>
   );
 }

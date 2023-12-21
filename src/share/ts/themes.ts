@@ -185,6 +185,7 @@ export function appendStyleScript(clientStore: ClientStore) {
     clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light');
   $('.node-dynamic-style').remove();
   $('#app').append(`<style class='node-dynamic-style'>
+                     button.dataloom-button{height: ${clientStore.getClientSetting('lineHeight')}px}
                     .session-content{padding-left: ${50 - clientStore.getClientSetting('blockPaddingLeft')}px}
                     .node .node-text{line-height: ${clientStore.getClientSetting('lineHeight')}px;min-height: ${clientStore.getClientSetting('lineHeight')}px}
                     .block{padding-left: ${clientStore.getClientSetting('blockPaddingLeft')}px}

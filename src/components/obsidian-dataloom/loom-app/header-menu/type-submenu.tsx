@@ -21,6 +21,7 @@ export default function TypeSubmenu({
       {Object.values(CellType)
         .filter(
           (type) =>
+            type !== CellType.FILE &&
             type !== CellType.SOURCE &&
             type !== CellType.SOURCE_FILE
         )

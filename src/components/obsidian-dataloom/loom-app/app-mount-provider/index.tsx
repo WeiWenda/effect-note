@@ -1,8 +1,11 @@
 import React from 'react';
-import {Session} from '../../../../share';
+import {Path, Session} from '../../../../share';
 
 interface ContextProps {
   session: Session;
+  title: string;
+  path: Path;
+  collapse: boolean;
   reactAppId: string;
   isMarkdownView: boolean;
 }
@@ -25,6 +28,9 @@ interface Props extends ContextProps {
 }
 
 export default function AppMountProvider({
+  title,
+  collapse,
+  path,
   session,
   reactAppId,
   isMarkdownView,
@@ -32,7 +38,7 @@ export default function AppMountProvider({
 }: Props) {
   return (
     <MountContext.Provider
-      value={{session, reactAppId, isMarkdownView }}
+      value={{title, collapse, path, session, reactAppId, isMarkdownView }}
     >
       {children}
     </MountContext.Provider>

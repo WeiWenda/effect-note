@@ -23,6 +23,7 @@ import { LoomMenuLevel } from 'src/components/obsidian-dataloom/shared/menu-prov
 import { useMenu } from 'src/components/obsidian-dataloom/shared/menu-provider/hooks';
 
 import './styles.css';
+import { Space } from 'antd';
 
 interface Props {
   columns: Column[];
@@ -65,29 +66,19 @@ export default function OptionBar({
   const moreMenu = useMenu(COMPONENT_ID, { name: MORE_MENU_ID });
   const filterMenu = useMenu(COMPONENT_ID, { name: FILTER_MENU_ID });
 
-  // TODO re-enable
-  // const previousLength = usePrevious(filterRules.length);
-  // React.useEffect(() => {
-  //   if (previousLength !== undefined) {
-  //     if (previousLength < filterRules.length) {
-  //       if (filterMenuRef.current) {
-  //         //Scroll to the bottom if we're adding a new filter
-  //         filterMenuRef.current.scrollTop =
-  //           filterMenuRef.current.scrollHeight;
-  //       }
-  //     }
-  //   }
-  // }, [previousLength, filterRules.length, filterMenuRef]);
-
-  function handleRemoveClick(columnId: string) {
-    onColumnChange(
-      columnId,
-      { sortDir: SortDir.NONE },
-      {
-        shouldSortRows: true,
-      }
-    );
-  }
+  //  TODO re-enable
+  //  const previousLength = usePrevious(filterRules.length);
+  //  React.useEffect(() => {
+  //    if (previousLength !== undefined) {
+  //      if (previousLength < filterRules.length) {
+  //        if (filterMenuRef.current) {
+  //          // Scroll to the bottom if we're adding a new filter
+  //          filterMenuRef.current.scrollTop =
+  //            filterMenuRef.current.scrollHeight;
+  //        }
+  //      }
+  //    }
+  //  }, [previousLength, filterRules.length, filterMenuRef]);
 
   function handleColumnToggle(columnId: string, isVisible: boolean) {
     onColumnChange(columnId, { isVisible });
@@ -122,88 +113,37 @@ export default function OptionBar({
   function handleFilterDelete(id: string) {
     onFilterDeleteClick(id);
 
-    //Close the menu when the last filter is deleted
+    // Close the menu when the last filter is deleted
     if (filters.length === 1) {
       filterMenu.onClose();
     }
   }
 
-  const activeFilters = filters.filter((filter) => filter.isEnabled);
-
-  const sortedColumns = columns.filter(
-    (column) => column.sortDir !== SortDir.NONE
-  );
-
   const isSmallScreen = isSmallScreenSize();
   return (
     <>
       <div className='dataloom-option-bar'>
-        <Padding py='lg'>
-          <Stack
-            isHorizontal={!isSmallScreen}
-            spacing='sm'
-            {...(!isSmallScreen && { justify: 'space-between' })}
-          >
-            <Stack
-              isHorizontal
-              spacing='md'
-              overflow='auto'
-              {...(isSmallScreen && {
-                width: '100%',
-                justify: 'flex-end',
-              })}
-            >
-              <SortBubbleList
-                sortedColumns={sortedColumns}
-                onRemoveClick={handleRemoveClick}
-              />
-              <ActiveFilterBubble
-                numActive={activeFilters.length}
-              />
-            </Stack>
-            <Stack
-              isHorizontal
-              spacing='sm'
-              justify='flex-end'
-              {...(isSmallScreen && {
-                height: '40px',
-                width: '100%',
-              })}
-            >
-              {/*{isSmallScreen === false && (*/}
-              {/*  <MenuButton*/}
-              {/*    isFocused={sourcesMenu.isTriggerFocused}*/}
-              {/*    menuId={sourcesMenu.id}*/}
-              {/*    ref={sourcesMenu.triggerRef}*/}
-              {/*    level={LoomMenuLevel.ONE}*/}
-              {/*    onOpen={handleSourceMenuOpen}*/}
-              {/*  >*/}
-              {/*    Sources*/}
-              {/*  </MenuButton>*/}
-              {/*)}*/}
-              {isSmallScreen === false && (
-                <MenuButton
-                  isFocused={filterMenu.isTriggerFocused}
-                  menuId={filterMenu.id}
-                  ref={filterMenu.triggerRef}
-                  level={LoomMenuLevel.ONE}
-                  onOpen={handleFilterMenuOpen}
-                >
-                  Filter
-                </MenuButton>
-              )}
-              <SearchBar />
-              <MenuButton
-                isFocused={moreMenu.isTriggerFocused}
-                menuId={moreMenu.id}
-                ref={moreMenu.triggerRef}
-                level={LoomMenuLevel.ONE}
-                icon={<Icon lucideId='MoreVertical' />}
-                onOpen={handleMoreMenuOpen}
-              />
-            </Stack>
-          </Stack>
-        </Padding>
+        <Space direction={'horizontal'} size={0}>
+          {isSmallScreen === false && (
+            <MenuButton
+              isFocused={filterMenu.isTriggerFocused}
+              menuId={filterMenu.id}
+              ref={filterMenu.triggerRef}
+              level={LoomMenuLevel.ONE}
+              icon={<Icon lucideId='Filter' />}
+              onOpen={handleFilterMenuOpen}
+            />
+          )}
+          <SearchBar />
+          <MenuButton
+            isFocused={moreMenu.isTriggerFocused}
+            menuId={moreMenu.id}
+            ref={moreMenu.triggerRef}
+            level={LoomMenuLevel.ONE}
+            icon={<Icon lucideId='MoreVertical' />}
+            onOpen={handleMoreMenuOpen}
+          />
+        </Space>
       </div>
       <SourcesMenu
         id={sourcesMenu.id}
