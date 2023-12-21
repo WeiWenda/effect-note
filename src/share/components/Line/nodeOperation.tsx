@@ -14,16 +14,18 @@ const LableAndShortCut = (_client: ClientStore, label: string, shortcut: string)
 export function NodeOperationComponent(props: {session: Session, line: Line, path: Path}) {
   const client = props.session.clientStore;
   const options = [
-    {label: LableAndShortCut(client, '任务', '/task'), value: 'mark-task', shortcut: 'task'},
-    {label: LableAndShortCut(client, '代码', '/code'), value: 'insert-code', shortcut: 'code'},
-    {label: LableAndShortCut(client, '引用', '/quote'), value: 'mark-quote', shortcut: 'quote'},
-    {label: LableAndShortCut(client, 'markdown', '/md'), value: 'insert-md', shortcut: 'md'},
-    {label: LableAndShortCut(client, '富文本', '/rtf'), value: 'insert-rtf', shortcut: 'rtf'},
-    {label: LableAndShortCut(client, '脑图', '/mindmap'), value: 'insert-mindmap', shortcut: 'mindmap'},
-    {label: LableAndShortCut(client, '流程图', '/draw'), value: 'insert-drawio', shortcut: 'draw'},
+    {label: LableAndShortCut(client, '标记「任务」', '/todo'), value: 'mark-task', shortcut: 'todo'},
+    {label: LableAndShortCut(client, '标记「自动编号」', '/number'), value: 'mark-number', shortcut: 'number'},
+    {label: LableAndShortCut(client, '标记「标签」', '/tag'), value: 'mark-tag', shortcut: 'tag'},
+    {label: LableAndShortCut(client, '标记「引用」', '/quote'), value: 'mark-quote', shortcut: 'quote'},
+    {label: LableAndShortCut(client, '标记「看板」', '/board'), value: 'mark-board', shortcut: 'board'},
+    {label: LableAndShortCut(client, '插入「代码」', '/code'), value: 'insert-code', shortcut: 'code'},
+    {label: LableAndShortCut(client, '插入「流程图」', '/draw'), value: 'insert-drawio', shortcut: 'draw'},
+    {label: LableAndShortCut(client, '插入「表格」', '/dataloom'), value: 'insert-dataloom', shortcut: 'dataloom'},
+    // {label: LableAndShortCut(client, 'markdown', '/md'), value: 'insert-md', shortcut: 'md'},
+    // {label: LableAndShortCut(client, '富文本', '/rtf'), value: 'insert-rtf', shortcut: 'rtf'},
+    // {label: LableAndShortCut(client, '脑图', '/mindmap'), value: 'insert-mindmap', shortcut: 'mindmap'},
     // {label: LableAndShortCut(client, '收藏', '/mark'), value: 'mark-mark', shortcut: 'mark'},
-    // {label: LableAndShortCut(client, '标签', '/tag'), value: 'mark-tag', shortcut: 'tag'},
-    // {label: LableAndShortCut(client, '看板', '/board'), value: 'mark-board', shortcut: 'board'},
     // {label: LableAndShortCut(client, '展开 -> 一级子节点', '/o1'), value: 'unfold-node-1', shortcut: 'o1'},
     // {label: LableAndShortCut(client, '展开 -> 二级子节点', '/o2'), value: 'unfold-node-2', shortcut: 'o2'},
     // {label: LableAndShortCut(client, '展开 -> 三级子节点', '/o3'), value: 'unfold-node-3', shortcut: 'o3'},
@@ -56,6 +58,9 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
       case 'mark-quote':
         await props.session.emitAsync('toggleCallout', props.path.row);
         break;
+      case 'mark-number':
+        await props.session.emitAsync('toggleOrder', props.path.row);
+        break;
       case 'insert-md':
         props.session.emit('openModal', 'md', {'md': '暂无内容'});
         props.session.mdEditorOnSave = (markdown: string, _html: string) => {
@@ -85,6 +90,9 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         break;
       case 'insert-drawio':
         props.session.emit('setDrawio', props.path.row);
+        break;
+      case 'insert-dataloom':
+        await props.session.emitAsync('setDataLoom', props.path.row, '', '');
         break;
       case 'insert-mindmap':
         props.session.emit('openModal', 'png');

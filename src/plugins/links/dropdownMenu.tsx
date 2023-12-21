@@ -127,6 +127,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           key: 'insert_rtf',
         },
         {
+          label: '插入代码块（MonacoEditor）',
+          key: 'insert_code',
+        },
+        {
           label: '插入思维导图（百度脑图）',
           key: 'add_png',
         },
@@ -149,29 +153,29 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       key: 'mark',
       children: [
         {
-          label: '收藏',
-          key: 'mark_mark',
+          label: '任务',
+          key: 'mark_check',
+        },
+        {
+          label: '自动编号',
+          key: 'mark_order',
         },
         {
           label: '标签',
           key: 'mark_tag',
         },
         {
-          label: '任务',
-          key: 'mark_check',
+          label: '引用',
+          key: 'mark_callout',
         },
         {
           label: '看板',
           key: 'mark_board',
         },
         {
-          label: '序号',
-          key: 'mark_order',
+          label: '收藏',
+          key: 'mark_mark',
         },
-        {
-          label: '引用',
-          key: 'mark_callout',
-        }
       ]
     },
     {
@@ -317,6 +321,16 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
             // });
           });
         };
+        break;
+      case 'insert_code':
+        props.session.emitAsync('setCode', props.path.row, '', 'plaintext').then(() => {
+          props.session.emit('updateInner');
+          setTimeout(() => {
+            if (props.session.codeRef[props.path.row]) {
+              props.session.codeRef[props.path.row].current?.focus();
+            }
+          });
+        });
         break;
       case 'insert_drawio':
         props.session.emit('setDrawio', props.path.row);

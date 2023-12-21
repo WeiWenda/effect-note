@@ -255,7 +255,6 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       setShowFileList(layout.includes('left'));
     });
     props.session.replaceListener('save-cloud', (info) => {
-      props.session.showMessage('保存成功');
       markDirty(info.docId, false);
     });
     return () => {

@@ -7,7 +7,9 @@ keyDefinitions.registerAction(new Action(
   async function({ session }) {
     session.reUploadFile(Path.root(), session.clientStore.getClientSetting('curDocId')).then(docId => {
       if (docId !== undefined) {
-        session.emit('save-cloud', {docId: docId});
+        session.emitAsync('save-cloud', {docId: docId}).then(() => {
+          session.showMessage('保存成功');
+        });
       } else {
         session.showMessage('正在保存，请勿重复保存');
       }

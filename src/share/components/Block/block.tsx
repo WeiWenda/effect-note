@@ -296,7 +296,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
           paddingBottom: '10px',
           borderBottomRightRadius: '6px',
           borderTopRightRadius: '6px',
-          borderLeft: 'solid 8px',
+          borderLeft: `solid 8px ${session.clientStore.getClientSetting('theme-bg-primary')}`,
           marginRight: '1em',
           background: 'linear-gradient(to right, transparent 155px,' +
             `${session.clientStore.getClientSetting('theme-bg-secondary')} 100px),` +

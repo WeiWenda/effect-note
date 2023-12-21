@@ -24,7 +24,9 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
     switch (key) {
       case 'reload':
         props.session.clientStore.setDocSetting('loaded', false);
-        window.location.reload();
+        props.session.emitAsync('save-cloud', {docId: props.curDocId}).then(() => {
+          window.location.reload();
+        });
         break;
       case 'open-in-browser':
         window.open(`/note/${props.curDocId}`, '_blank');
