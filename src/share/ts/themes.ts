@@ -106,7 +106,7 @@ export const themes: {[key: string]: Theme} = {
     lineHeight: 27,
     blockPaddingLeft: 36,
     fontFamily: 'Arial',
-    fontFamilyZh: 'PingFang SC',
+    fontFamilyZh: '苹方-简',
   },
   'Dark': {
     'theme-bg-primary': '#000000',
@@ -127,7 +127,7 @@ export const themes: {[key: string]: Theme} = {
     lineHeight: 27,
     blockPaddingLeft: 36,
     fontFamily: 'Arial',
-    fontFamilyZh: 'PingFang SC',
+    fontFamilyZh: '苹方-简',
   },
   'Solarized Light': {
     'theme-bg-primary': colors.solarized.base3,
@@ -148,7 +148,7 @@ export const themes: {[key: string]: Theme} = {
     lineHeight: 27,
     blockPaddingLeft: 36,
     fontFamily: 'Arial',
-    fontFamilyZh: 'PingFang SC',
+    fontFamilyZh: '苹方-简',
   },
   'Solarized Dark': {
     'theme-bg-primary': colors.solarized.base02,
@@ -169,7 +169,7 @@ export const themes: {[key: string]: Theme} = {
     lineHeight: 27,
     blockPaddingLeft: 36,
     fontFamily: 'Arial',
-    fontFamilyZh: 'PingFang SC',
+    fontFamilyZh: '苹方-简',
   },
 };
 

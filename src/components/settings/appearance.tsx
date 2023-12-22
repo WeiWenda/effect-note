@@ -143,9 +143,8 @@ function AppearanceSettingsComponent(props: { session: Session, serverConfig: Se
                 <RollbackOutlined onClick={() => {
                   const newThemes = {...props.serverConfig.themes};
                   newThemes[currentTheme] = {...themes[currentTheme]};
-                  changeTheme(currentTheme);
                   saveServerConfig({...props.serverConfig, themes: newThemes}).then(() => {
-                    props.session.emit('refreshServerConfig');
+                    applyTheme(themes[currentTheme]);
                   });
                 }} />
               </Tooltip>
@@ -247,33 +246,33 @@ function AppearanceSettingsComponent(props: { session: Session, serverConfig: Se
               options={[
                 {
                   label: (
-                    <span style={{fontFamily: 'Simsun'}}>宋体</span>
+                    <span style={{fontFamily: '简宋'}}>宋体</span>
                   ),
-                  value: 'Simsun'
+                  value: '简宋'
                 },
                 {
                   label: (
-                    <span style={{fontFamily: 'Simhei'}}>黑体</span>
+                    <span style={{fontFamily: '黑体-简'}}>黑体</span>
                   ),
-                  value: 'Simhei'
+                  value: '黑体-简'
                 },
                 {
                   label: (
-                    <span style={{fontFamily: 'Kaiti'}}>楷体</span>
+                    <span style={{fontFamily: '楷体-简'}}>楷体</span>
                   ),
-                  value: 'Kaiti'
+                  value: '楷体-简'
                 },
                 {
                   label: (
-                    <span style={{fontFamily: 'PingFang SC'}}>苹方-简（Mac系统字体）</span>
+                    <span style={{fontFamily: '苹方-简'}}>苹方-简（Mac系统字体）</span>
                   ),
-                  value: 'PingFang SC'
+                  value: '苹方-简'
                 },
                 {
                   label: (
-                    <span style={{fontFamily: 'Microsoft Yahei'}}>微软雅黑（Window系统字体）</span>
+                    <span style={{fontFamily: '微软雅黑'}}>微软雅黑（Window系统字体）</span>
                   ),
-                  value: 'Microsoft Yahei'
+                  value: '微软雅黑'
                 }
               ]}
             ></Select>

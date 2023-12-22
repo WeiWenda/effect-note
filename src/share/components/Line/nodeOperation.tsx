@@ -127,9 +127,16 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         });
       }}
       onSearch={(value) => {
+        if (value === ' ') {
+          return;
+        }
         const matchItem = options.filter(o => o.shortcut.startsWith(value));
         if (matchItem.length === 1) {
-          onSelect(matchItem[0].value);
+          onSelect(matchItem[0].value).then(() => {
+            setTimeout(() => {
+              props.session.setMode('INSERT');
+            }, 100);
+          });
         }
         if (matchItem.length === 0) {
           props.session.mode = 'INSERT';

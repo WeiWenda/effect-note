@@ -445,6 +445,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     await props.session.changeViewRoot(Path.loadFromAncestry(await props.session.clientStore.getLastViewRoot()));
     if (!props.session.clientStore.getDocSetting('loaded')) {
       initialLoad = true;
+      props.session.clientStore.setDocSetting('loaded', true);
       // props.session.showMessage('初始加载中...');
     }
     document.title = curDocInfo.name!;

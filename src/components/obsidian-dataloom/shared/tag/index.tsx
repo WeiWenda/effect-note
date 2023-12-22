@@ -7,6 +7,7 @@ import { findColorClassName } from '../color';
 import { useAppSelector } from '../../redux/hooks';
 
 import './styles.css';
+import Icon from '../icon';
 
 interface Props {
   id?: string;
@@ -56,6 +57,7 @@ export default function Tag({
           <Padding width='max-content'>
             <Button
               size='sm'
+              icon={<Icon lucideId='X' />}
               onClick={() => {
                 if (id && onRemoveClick) {
                   onRemoveClick(id);
