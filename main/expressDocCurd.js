@@ -229,4 +229,4 @@ router.put('/:docId', async (req, res) => {
 });
 
 // this is required
-module.exports = {router, punctuationSplit, searchSplitFunction, IMAGES_FOLDER};
+module.exports = {refreshIndex, router, punctuationSplit, searchSplitFunction, IMAGES_FOLDER};
