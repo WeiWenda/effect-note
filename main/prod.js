@@ -115,7 +115,11 @@ async function startExpress(args) {
   app.post('/api/config', async (req, res) => {
     const activeWorkSpace = req.body.workspaces.find(i => i.active)
     if (activeWorkSpace) {
+      const {gitHome} = getGitConfig();
       store.set('gitHome', activeWorkSpace.gitLocalDir);
+      if (gitHome !== activeWorkSpace.gitLocalDir) {
+        await refreshIndex();
+      }
       if (activeWorkSpace.sycType === 'never') {
         store.delete('gitRemote')
       }
