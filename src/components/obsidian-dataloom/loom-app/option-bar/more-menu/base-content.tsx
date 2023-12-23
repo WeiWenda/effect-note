@@ -58,7 +58,11 @@ export default function BaseContent({
         name='Import'
         onClick={() => {
           onClose();
+          session.stopKeyMonitor('dataloom-import');
           Modal.confirm({
+            afterClose: () => {
+              session.startKeyMonitor();
+            },
             width: 800,
             icon: (
               <ImportOutlined style={{color: session.clientStore.getClientSetting('theme-text-primary')}}/>
@@ -90,7 +94,11 @@ export default function BaseContent({
         name='Export'
         onClick={() => {
           onClose();
+          session.stopKeyMonitor('dataloom-export');
           Modal.confirm({
+            afterClose: () => {
+              session.startKeyMonitor();
+            },
             width: 500,
             icon: (
               <DownloadOutlined style={{color: session.clientStore.getClientSetting('theme-text-primary')}}/>

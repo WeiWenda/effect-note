@@ -19,6 +19,7 @@ import { useRowEvents } from './hooks/use-row-events';
 import { useColumnEvents } from './hooks/use-column-events';
 import { useTableSettings } from './hooks/use-table-settings';
 import useFocus from './hooks/use-focus';
+import $ from 'jquery';
 
 import {
   isMacRedoDown,
@@ -39,15 +40,15 @@ export default function App() {
   const logger = useLogger();
   const { path, session, collapse, title, reactAppId, isMarkdownView } = useAppMount();
   const tableRef = React.useRef<VirtuosoHandle | null>(null);
-  const appRef = React.useRef<HTMLDivElement | null>(null);
   const { loomState, resizingColumnId, searchText, onRedo, onUndo } =
     useLoomState();
-  const [height, setHeight] = useState(
-    Math.min(window.innerHeight - 200,
-      40.5 + 72 + loomState.model.rows.length * 40.5));
+  const [height, setHeight] = useState(window.innerHeight);
   useEffect(() => {
-    setHeight(Math.min(window.innerHeight - 200,
-      40.5 + 72 + loomState.model.rows.length * 40.5));
+    setTimeout(() => {
+      const loomTable = $(`#${reactAppId} .dataloom-table`).get(0);
+      const loomBottomBar = $(`#${reactAppId} .dataloom-bottom-bar`).get(0);
+      setHeight(Math.min(loomTable.offsetHeight + loomBottomBar?.offsetHeight, window.innerHeight * 0.8));
+    }, 100);
   }, [loomState]);
   useExportEvents(loomState);
   useRowEvents();
@@ -136,20 +137,30 @@ export default function App() {
                   path={path}
                   title={title}
                   tools={
-                    <OptionBar
-                      columns={columns}
-                      sources={sources}
-                      filters={filters}
-                      showCalculationRow={showCalculationRow}
-                      onColumnChange={onColumnChange}
-                      onFilterAddClick={onFilterAdd}
-                      onFilterDeleteClick={onFilterDelete}
-                      onFilterUpdate={onFilterUpdate}
-                      onCalculationRowToggle={onCalculationRowToggle}
-                      onSourceAdd={onSourceAdd}
-                      onSourceDelete={onSourceDelete}
-                      onSourceUpdate={onSourceUpdate}
-                    />
+                    <div
+                      onMouseEnter={() => {
+                        session.stopAnchor();
+                        session.stopKeyMonitor('dataloom-option-bar');
+                      }}
+                      onMouseLeave={() => {
+                        session.startKeyMonitor();
+                      }}
+                    >
+                      <OptionBar
+                        columns={columns}
+                        sources={sources}
+                        filters={filters}
+                        showCalculationRow={showCalculationRow}
+                        onColumnChange={onColumnChange}
+                        onFilterAddClick={onFilterAdd}
+                        onFilterDeleteClick={onFilterDelete}
+                        onFilterUpdate={onFilterUpdate}
+                        onCalculationRowToggle={onCalculationRowToggle}
+                        onSourceAdd={onSourceAdd}
+                        onSourceDelete={onSourceDelete}
+                        onSourceUpdate={onSourceUpdate}
+                      />
+                    </div>
                   }
                   collapse={collapse}
                   blockType={'DataLoom'}
@@ -157,7 +168,6 @@ export default function App() {
     >
       <div
         style={{height: height}}
-        ref={appRef}
         tabIndex={0}
         id={reactAppId}
         className={className}

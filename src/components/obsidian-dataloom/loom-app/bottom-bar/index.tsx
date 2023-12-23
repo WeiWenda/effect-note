@@ -41,50 +41,50 @@ export default function BottomBar({
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [bottomBarOffset, setBottomBarOffset] = React.useState(0);
   const isMobile = false;
-
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const appEl = el.closest('.dataloom-app');
-    if (!appEl) return;
-
-    const tableEl = appEl.querySelector(
-      '.dataloom-table'
-    ) as HTMLElement | null;
-    if (!tableEl) return;
-
-    const tableContainerEl = tableEl.parentElement;
-    if (!tableContainerEl) return;
-
-    function updateBottomBar(
-      tableEl: HTMLElement,
-      tableContainerEl: HTMLElement
-    ) {
-      const tableRect = tableEl.getBoundingClientRect();
-      const tableContainerRect = tableContainerEl.getBoundingClientRect();
-
-      let diff = tableContainerRect.height - tableRect.height;
-      if (diff < 0) diff = 0;
-      setBottomBarOffset(diff);
-    }
-
-    const THROTTLE_TIME_MILLIS = 50;
-    const throttleUpdate = _.throttle(
-      updateBottomBar,
-      THROTTLE_TIME_MILLIS
-    );
-
-    const observer = new ResizeObserver(() => {
-      throttleUpdate(tableEl, tableContainerEl);
-    });
-
-    observer.observe(tableEl);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
+  //
+  // React.useEffect(() => {
+  //   const el = ref.current;
+  //   if (!el) return;
+  //
+  //   const appEl = el.closest('.dataloom-app');
+  //   if (!appEl) return;
+  //
+  //   const tableEl = appEl.querySelector(
+  //     '.dataloom-table'
+  //   ) as HTMLElement | null;
+  //   if (!tableEl) return;
+  //
+  //   const tableContainerEl = tableEl.parentElement;
+  //   if (!tableContainerEl) return;
+  //
+  //   function updateBottomBar(
+  //     tableEl: HTMLElement,
+  //     tableContainerEl: HTMLElement
+  //   ) {
+  //     const tableRect = tableEl.getBoundingClientRect();
+  //     const tableContainerRect = tableContainerEl.getBoundingClientRect();
+  //
+  //     let diff = tableContainerRect.height - tableRect.height;
+  //     if (diff < 0) diff = 0;
+  //     setBottomBarOffset(diff);
+  //   }
+  //
+  //   const THROTTLE_TIME_MILLIS = 50;
+  //   const throttleUpdate = _.throttle(
+  //     updateBottomBar,
+  //     THROTTLE_TIME_MILLIS
+  //   );
+  //
+  //   const observer = new ResizeObserver(() => {
+  //     throttleUpdate(tableEl, tableContainerEl);
+  //   });
+  //
+  //   observer.observe(tableEl);
+  //
+  //   return () => {
+  //     observer.disconnect();
+  //   };
+  // }, []);
 
   let className = 'dataloom-bottom-bar';
   if (isMobile) {
