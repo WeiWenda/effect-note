@@ -1,6 +1,6 @@
 import {Col, Tooltip, InputNumber, Row, Select, Input, Space, Popover, Button, Divider} from 'antd';
 import * as React from 'react';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Session} from '../../share';
 import { ChromePicker } from 'react-color';
 import {appendStyleScript, getStyles, Theme, themes} from '../../share/ts/themes';
@@ -9,9 +9,67 @@ import {setServerConfig as saveServerConfig} from '../../share/ts/utils/APIUtils
 import $ from 'jquery';
 import {ServerConfig} from '../../ts/server_config';
 
+async function listFontFamilies() {
+  const fontCheck = new Set([
+    {
+      fontFamily: 'PingFang SC',
+      label: '苹方-简'
+    },
+    {
+      fontFamily: 'Heiti SC',
+      label: '黑体'
+    },
+    {
+      fontFamily: 'Songti SC',
+      label: '宋体'
+    },
+    {
+      fontFamily: 'Kaiti SC',
+      label: '楷体'
+    },
+    {
+      fontFamily: 'Microsoft YaHei',
+      label: '微软雅黑'
+    },
+    {
+      fontFamily: 'SimHei',
+      label: '黑体'
+    },
+    {
+      fontFamily: 'SimSun',
+      label: '宋体'
+    },
+    {
+      fontFamily: 'KaiTi',
+      label: '楷体'
+    }
+  ]);
+    await document.fonts.ready;
+
+    const fontAvailable = [];
+
+    for (const font of fontCheck.values()) {
+        if (document.fonts.check(`12px "${font.fontFamily}"`)) {
+          fontAvailable.push({
+                label: (
+                 <span style={{fontFamily: font.fontFamily}}>{font.label}</span>
+                ),
+                value: font.fontFamily
+            });
+        }
+    }
+    return fontAvailable;
+}
+
 function AppearanceSettingsComponent(props: { session: Session, serverConfig: ServerConfig }) {
   const [editing, setEditing] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<string>(props.session.clientStore.getClientSetting('curTheme'));
+  const [fontOptions, setFontOptions] = useState([]);
+  useEffect(() => {
+    listFontFamilies().then(fonts => {
+        setFontOptions(fonts);
+    });
+  }, []);
   const applyTheme = (theme: Theme) => {
     Object.keys(theme).forEach((theme_prop: string) => {
       props.session.clientStore.setClientSetting(theme_prop as keyof Theme, theme[theme_prop as keyof Theme]);
@@ -243,38 +301,7 @@ function AppearanceSettingsComponent(props: { session: Session, serverConfig: Se
               style={{width: '250px'}}
               value={props.session.clientStore.getClientSetting('fontFamilyZh')}
               onChange={(v: string) => changeThemeProperty('fontFamilyZh', v)}
-              options={[
-                {
-                  label: (
-                    <span style={{fontFamily: '简宋'}}>宋体</span>
-                  ),
-                  value: '简宋'
-                },
-                {
-                  label: (
-                    <span style={{fontFamily: '黑体-简'}}>黑体</span>
-                  ),
-                  value: '黑体-简'
-                },
-                {
-                  label: (
-                    <span style={{fontFamily: '楷体-简'}}>楷体</span>
-                  ),
-                  value: '楷体-简'
-                },
-                {
-                  label: (
-                    <span style={{fontFamily: '苹方-简'}}>苹方-简（Mac系统字体）</span>
-                  ),
-                  value: '苹方-简'
-                },
-                {
-                  label: (
-                    <span style={{fontFamily: '微软雅黑'}}>微软雅黑（Window系统字体）</span>
-                  ),
-                  value: '微软雅黑'
-                }
-              ]}
+              options={fontOptions}
             ></Select>
           </td>
         </tr>
