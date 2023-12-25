@@ -116,7 +116,6 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   const elementRef = useRef<HTMLDivElement>(null);
   const markPlugin = props.pluginManager.getInfo('Marks').value as MarksPlugin;
   const tagPlugin = props.pluginManager.getInfo('Tags').value as TagsPlugin;
-  const linkPlugin = props.pluginManager.getInfo('Links').value as LinksPlugin;
   const getPannelHeight = useCallback(() => {
     return (windowHeight - 63 - 2 - 32 - 4 * 46 - 6) / Math.max(activeKey.length, 1);
   }, [windowHeight, activeKey]);
@@ -414,10 +413,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     console.time(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo.name}`);
     if (initialLoad) {
       let docContent = await api_utils.getShareDocContent(shareUrl);
-      await markPlugin.clearMarks();
       await props.session.changeViewRoot(Path.root());
-      await tagPlugin.clearTags();
-      await linkPlugin.clearLinks();
+      await props.session.emitAsync('clearPluginStatus');
       await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo.filename!)).then(() => {
         props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'],
           () => markDirty(docID, true));
@@ -461,10 +458,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
         const docRes = await api_utils.getDocContent(docID);
         docContent = docRes.content;
       }
-      await markPlugin.clearMarks();
       await props.session.changeViewRoot(Path.root());
-      await tagPlugin.clearTags();
-      await linkPlugin.clearLinks();
+      await props.session.emitAsync('clearPluginStatus');
       await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo.filename!)).then(() => {
         props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'],
           () => markDirty(docID, true));

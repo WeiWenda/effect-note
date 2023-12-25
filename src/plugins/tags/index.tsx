@@ -163,6 +163,9 @@ export class TagsPlugin {
         path: path
       };
     });
+    this.api.registerListener('session', 'clearPluginStatus', async () => {
+      await this.clearTags();
+    });
     this.api.registerListener('session', 'markTask', async (path: Path) => {
       const tags = await this.getTags(path.row);
       if (tags === null ||  tags.every((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t))) {

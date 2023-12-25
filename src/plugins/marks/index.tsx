@@ -121,6 +121,9 @@ export class MarksPlugin {
     this.api.registerListener('session', 'setMark', async (row: Row, line: string) => {
       await this.setMark(row, line);
     });
+    this.api.registerListener('session', 'clearPluginStatus', async () => {
+      await this.clearMarks();
+    });
     this.api.registerHook('document', 'serializeRow', async (struct, info) => {
       const mark = await this.getMark(info.row);
       if (mark) {

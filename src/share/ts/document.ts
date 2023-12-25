@@ -223,7 +223,7 @@ export default class Document extends EventEmitter {
   }
 
 
-  public async _newChild(parent: Row, index = -1, serializedRow: number | undefined): Promise<AttachedChildInfo> {
+  public async _newChild(parent: Row, index = -1, serializedRow: number | undefined = undefined): Promise<AttachedChildInfo> {
     let row;
     if (serializedRow === undefined) {
       row = await this.store.getNew();
@@ -264,6 +264,7 @@ export default class Document extends EventEmitter {
         return cached;
       }
     }
+    console.log('cache miss');
 
     const [
       line, collapsed, children, parents, pluginData
@@ -787,7 +788,7 @@ export default class Document extends EventEmitter {
       const rowInfo = await this.getInfo(path.row);
       const text = rowInfo.line.join('');
       const line = canonicalize(text);
-      const {md, code} = rowInfo.pluginData.links;
+      const {md, code} = rowInfo.pluginData.links || {};
       const extendContent = canonicalize((md || '') + (code?.content || ''));
       const matches: Array<number> = [];
       if (_.every(query_words.map((word) => {
@@ -942,6 +943,13 @@ export default class Document extends EventEmitter {
 
   public async reload(serialized_rows: Array<SerializedBlock>) {
     this.cache.clear();
+    this.cache.loadRow(0, {
+      line: ''.split(''),
+      collapsed: false,
+      parentRows: [],
+      childRows: [],
+      pluginData: {}
+    });
     await this.store.setLine(0, ''.split(''));
     await this.store.setChildren(0, []);
     await this.store.setCollapsed(0, false);

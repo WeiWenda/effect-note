@@ -79,6 +79,9 @@ export class LinksPlugin {
         this.api.registerListener('session', 'setBlockCollapse', async (row: Row, collapse: boolean) => {
            await this.setBlockCollapse(row, collapse);
         });
+        this.api.registerListener('session', 'clearPluginStatus', async () => {
+            await this.clearLinks();
+        });
         this.api.registerListener('session', 'setMindmap', async (row: Row, img_src: string, img_json: string) => {
             await this.setPng(row, img_src, img_json);
         });
