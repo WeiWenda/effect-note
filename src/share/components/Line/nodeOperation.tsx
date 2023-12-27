@@ -50,7 +50,6 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         break;
       case 'mark-tag':
         props.session.emit('startTag', props.path);
-        await props.session.document.updateCachedPluginData(props.path.row);
         break;
       case 'mark-task':
         await props.session.emitAsync('toggleCheck', props.path.row);

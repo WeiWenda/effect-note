@@ -35,10 +35,6 @@ type Rows = Row[];
 type TagsToRows = {[key: string]: Rows};
 type RowsToTags = {[key: number]: Tags};
 
-const tagSearchStyle = {
-  padding: '0px 8px',
-  marginRight: 8,
-};
 const colorMap: Record<string, string> = {
   'Delay': 'error',
   'Done': 'success',
@@ -157,11 +153,12 @@ export class TagsPlugin {
     }
     this.UnsetTag = UnsetTag;
 
-    this.api.registerListener('session', 'startTag', (path: Path) => {
+    this.api.registerListener('session', 'startTag', async (path: Path) => {
       this.tagstate = {
         session: new InMemorySession(),
         path: path
       };
+      await this.session.document.updateCachedPluginData(path.row);
     });
     this.api.registerListener('session', 'clearPluginStatus', async () => {
       await this.clearTags();
@@ -193,224 +190,6 @@ export class TagsPlugin {
 
     this.tagstate = null;
 
-    this.api.registerMode({
-      name: 'TAG',
-      cursorBetween: true,
-      within_row: true,
-      enter: async (session /*, newMode?: ModeId */) => {
-        // initialize tags stuff
-        this.tagstate = {
-          session: new InMemorySession(),
-          path: session.cursor.path,
-        };
-        await this.tagstate.session.setMode('INSERT');
-      },
-      exit: async (/*session, newMode?: ModeId */) => {
-        // do this, now that tagstate is cleared
-        if (!this.tagstate) {
-          throw new Error('Tag state null during exit');
-        }
-        const taggedRow = this.tagstate.path.row;
-        this.tagstate = null;
-        await this.api.updatedDataForRender(taggedRow);
-      },
-      every: async (/*session*/) => {
-        if (!this.tagstate) {
-          throw new Error('Tag state null during every');
-        }
-        await this.api.updatedDataForRender(this.tagstate.path.row);
-      },
-      key_transforms: [
-        async (key, context) => {
-          if (key === 'space') { key = ' '; };
-          if (key.length === 1) {
-            if (this.tagstate === null) {
-              throw new Error('Tag state null during key transform');
-            }
-            await this.tagstate.session.addCharsAtCursor([key]);
-            await this.api.updatedDataForRender(this.tagstate.path.row);
-            return [null, context];
-          }
-          return [key, context];
-        },
-      ],
-    });
-
-    this.api.registerAction(
-      'begin-tag',
-      'Tag a line',
-      async function({ session }) {
-        that.tagstate = {
-          session: new InMemorySession(),
-          path: session.cursor.path,
-        };
-        await that.api.updatedDataForRender(session.cursor.path.row);
-      }
-    );
-
-    this.api.registerAction(
-      'finish-tag',
-      'Finish typing tag',
-      async function({ session, keyStream }) {
-        if (that.tagstate === null) {
-          throw new Error('Tag state null in tag mode');
-        }
-        const tag = await that.tagstate.session.curText();
-        const taggedRow = that.tagstate.path.row;
-        const err = await that.addTag(taggedRow, tag);
-        if (err) { session.showMessage(err, {text_class: 'error'}); }
-        await session.setMode('NORMAL');
-        keyStream.save();
-      }
-    );
-
-    this.api.registerAction(
-      'delete-tag',
-      'Delete tag at cursor',
-      async function({ session, keyStream }) {
-        let err = null;
-        const rowsToTags = await that._getRowsToTags();
-        const taggedRow = session.cursor.row;
-        if (rowsToTags[taggedRow] == null || rowsToTags[taggedRow].length === 0) {
-          err = 'Row is not tagged';
-        } else {
-          let key: Char;
-          if (rowsToTags[taggedRow].length === 1) {
-            key = '1';
-          } else {
-            key = await keyStream.dequeue();
-          }
-          if (key >= '1' && key <= '9') {
-            const idx = parseInt(key, 10) - 1;
-            if (idx >= rowsToTags[taggedRow].length) {
-              err = 'Index out of range';
-            } else {
-              err = await that.removeTag(session.cursor.row, rowsToTags[taggedRow][idx]);
-            }
-          } else {
-            err = 'Key not a number from 1-9';
-          }
-        }
-        if (err) { session.showMessage(err, {text_class: 'error'}); }
-        await session.setMode('NORMAL');
-        keyStream.save();
-      },
-    );
-
-    this.api.registerAction(
-      'move-cursor-tag',
-      'Move the cursor within the tag being edited (according to the specified motion)',
-      async function({ motion }) {
-        if (motion == null) {
-          throw new Error('Expected a motion!');
-        }
-        if (that.tagstate === null) {
-          throw new Error('Tag state null in tag mode');
-        }
-        await motion(that.tagstate.session.cursor, {pastEnd: true});
-      },
-      { acceptsMotion: true },
-    );
-
-    this.api.registerAction(
-      'tag-delete-char-before',
-      'Delete last character (i.e. backspace key)',
-      async function() {
-        if (that.tagstate === null) {
-          throw new Error('Tag state null in tag mode');
-        }
-        await that.tagstate.session.deleteAtCursor();
-      },
-    );
-
-    this.api.registerAction(
-      'tag-delete-char-after',
-      'Delete character at the cursor (i.e. del key)',
-      async function() {
-        if (that.tagstate === null) {
-          throw new Error('Tag state null in tag mode');
-        }
-        await that.tagstate.session.delCharsAfterCursor(1);
-      },
-    );
-
-    this.api.registerAction(
-      'search-tags',
-      'List tagged rows',
-      async function({ session }) {
-        await session.setMode('SEARCH');
-        const tags = await that.listTags();
-        session.menu = new Menu(async (text) => {
-          // find tags that start with the prefix
-          const findTags = async (_document: Document, prefix: string, nresults = 10) => {
-            const results: Array<{
-              path: Path, tag: Tag,
-            }> = []; // list of paths
-            for (const tag in tags) {
-              if (tag.indexOf(prefix) === 0) {
-                const paths = tags[tag];
-                for (const path of paths) {
-                  results.push({ path, tag });
-                  if (nresults > 0 && results.length === nresults) {
-                    break;
-                  }
-                }
-              }
-            }
-            return results;
-          };
-
-          return await Promise.all(
-            (await findTags(session.document, text)).map(
-              async ({ path, tag }) => {
-                const line = await session.document.getLine(path.row);
-                return {
-                  contents: line,
-                  renderHook(lineDiv: React.ReactElement<any>) {
-                    return (
-                      <span key={`tag_${tag}`}>
-                        <span
-                          style={{
-                            ...getStyles(session.clientStore, ['theme-bg-tertiary', 'theme-trim']),
-                            ...tagSearchStyle
-                          }}
-                        >
-                          {tag}
-                        </span>
-                        {lineDiv}
-                      </span>
-                    );
-                  },
-                  fn: async () => await session.zoomInto(path),
-                };
-              }
-            )
-          );
-        });
-      }
-    );
-
-    this.api.registerDefaultMappings(
-      'TAG',
-      Object.assign({
-        'toggle-help': [['ctrl+?']],
-        'move-cursor-tag': [[motionKey]],
-        'finish-tag': [['enter']],
-        'tag-delete-char-after': [['delete']],
-        'tag-delete-char-before': [['backspace'], ['shift+backspace']],
-        'exit-mode': [['esc'], ['ctrl+c']],
-      }, _.pick(INSERT_MOTION_MAPPINGS, SINGLE_LINE_MOTIONS))
-    );
-
-    this.api.registerDefaultMappings(
-      'INSERT',
-      {
-        'begin-tag': [['ctrl+3'], ['meta+3']],
-        // 'delete-tag': [['d', '#']],
-        // 'search-tags': [['-']],
-      },
-    );
-
     this.api.registerHook('document', 'pluginRowContents', async (obj, { row }) => {
       const tags = await this.getTags(row);
       const tagging = this.tagstate && (this.tagstate.path.row === row);
@@ -424,40 +203,16 @@ export class TagsPlugin {
       return obj;
     });
 
-    // this.api.registerHook('session', 'renderLineOptions', (options, info) => {
-    //   if (info.pluginData.tags && info.pluginData.tags.tagging) {
-    //     options.cursors = {};
-    //   }
-    //   return options;
-    // });
+    this.api.registerHook('session', 'renderLineOptions', (options, info) => {
+      if (info.pluginData.tags && info.pluginData.tags.tagging) {
+        options.cursors = {};
+      }
+      return options;
+    });
 
     this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
       const { path, pluginData } = info;
       let tags: string[] = pluginData.tags?.tags || [];
-      // const taskStatus = tags.find(t => ['Delay', 'Done', 'Todo', 'Doing'].includes(t));
-      // if (taskStatus) {
-      //   lineContents.push(
-      //     <Popover key={'status'}
-      //              trigger='click'
-      //              onOpenChange={(open) => {
-      //                if (open) {
-      //                  this.session.cursor.reset();
-      //                  this.session.stopKeyMonitor('tag-task');
-      //                } else {
-      //                  this.session.startKeyMonitor();
-      //                }
-      //              }}
-      //              content={(
-      //                 <TaskMenuComponent tags={tags} setTags={(newTags: string[]) => {
-      //                   this.setTags(path.row, newTags).then(() => {
-      //                     this.session.emit('updateAnyway');
-      //                   });
-      //                 }}/>
-      //               )}>
-      //       <Tag style={{marginLeft: '10px'}} color={colorMap[taskStatus]}>{taskStatus}</Tag>
-      //     </Popover>
-      //   );
-      // }
       const taskTags = tags
         .filter((t: string) => new RegExp('((create|start|end|due):.*)').test(t) || ['Todo', 'Done'].includes(t));
       tags = tags
@@ -474,14 +229,24 @@ export class TagsPlugin {
         };
         lineContents.push(
           <Select
+                  defaultOpen={pluginData.tags?.tagging}
                   key='tags'
                   mode='tags'
                   value={tags}
                   suffixIcon={<div/>}
                   tagRender={tagRender}
                   options={options}
+                  autoFocus={pluginData.tags?.tagging}
                   onFocus={() => this.session.stopKeyMonitor('tag-normal')}
-                  onBlur={() => this.session.startKeyMonitor()}
+                  onDropdownVisibleChange={(open) => {
+                    if (!open) {
+                      this.session.startKeyMonitor();
+                      this.tagstate = null;
+                      this.api.updatedDataForRender(path.row).then(() => {
+                        this.session.emit('updateInner');
+                      });
+                    }
+                  }}
                   onClick={(e) => {
                    e.preventDefault();
                    e.stopPropagation();
@@ -494,47 +259,6 @@ export class TagsPlugin {
       return lineContents;
     });
   }
-          // for (let tag of tags) {
-          //     const key = 'tag-' + tag;
-          //     lineContents.push(
-          //       <span key={key}
-          //         style={{
-          //           ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary']),
-          //           ...tagStyle
-          //         }}
-          //       >
-          //         {tag}
-          //       </span>
-          //     );
-          // }
-  //       }
-  //       if (pluginData.tags.tagging) {
-  //         lineContents.push(
-  //           <span key='editingTag'
-  //             style={{
-  //               ...getStyles(this.api.session.clientStore, ['theme-bg-tertiary', 'theme-trim-accent']),
-  //               ...tagStyle
-  //             }}
-  //           >
-  //             <LineComponent
-  //               lineData={pluginData.tags.tagText}
-  //               cursors={{
-  //                 [pluginData.tags.tagCol]: true,
-  //               }}
-  //               cursorStyle={getStyles(this.api.session.clientStore, ['theme-cursor'])}
-  //               highlightStyle={getStyles(this.api.session.clientStore, ['theme-bg-highlight'])}
-  //               linksStyle={getStyles(this.api.session.clientStore, ['theme-link'])}
-  //               accentStyle={getStyles(this.api.session.clientStore, ['theme-text-accent'])}
-  //               cursorBetween={true}
-  //               session={this.session}
-  //             />
-  //           </span>
-  //         );
-  //       }
-  //     }
-  //     return lineContents;
-  //   });
-  // }
 
   // maintain global tags data structures
   //   a map: row -> tags
