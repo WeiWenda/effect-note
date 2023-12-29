@@ -1,6 +1,6 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {PluginApi, registerPlugin} from '../../ts/plugins';
-import {Document, EmitFn, Mutation, PartialUnfolder, Row, Session, Token, Tokenizer} from '../../share';
+import {Document, EmitFn, KityMinderNode, Mutation, PartialUnfolder, Row, SerializedBlock, Session, Token, Tokenizer} from '../../share';
 import {Dropdown, Image, Menu, MenuProps, message, Modal, Popover, Space, Tag } from 'antd';
 import {EditOutlined, ExclamationCircleOutlined, PictureOutlined, ZoomInOutlined,
     ZoomOutOutlined, CheckSquareOutlined, BorderOutlined, ArrowRightOutlined, ArrowLeftOutlined} from '@ant-design/icons';
@@ -354,6 +354,18 @@ export class LinksPlugin {
                                 }
                             });
                             break;
+                        case 'parse_png':
+                            const kityNode = pluginData.links.png.json as KityMinderNode;
+                            const serializedBlock = that.session.fromKityMinderNode(kityNode);
+                            that.session.document.setLine(path.row, serializedBlock.text.split(''));
+                            that.session.document.getInfo(path.row).then(rowInfo => {
+                                that.session.delBlocks(path.row, 0, rowInfo.childRows.length).then(() => {
+                                   that.session.addBlocks(path, 0, serializedBlock.children).then(() => {
+                                       that.session.emit('updateInner');
+                                   });
+                                });
+                            });
+                            break;
                         case 'edit_png':
                             that.session.emit('openModal', 'png');
                             that.session.pngOnSave = (img_src: any, json: any) => {
@@ -375,9 +387,13 @@ export class LinksPlugin {
                   onClick={pngOnClick}
                   items={[{
                         key: 'edit_png',
-                        label: '修改思维导图',
-                    },
-                    {
+                        label: '修改思维导图'
+                      },
+                      {
+                        key: 'parse_png',
+                        label: '更新大纲内容',
+                      },
+                      {
                         key: 'del_png',
                         label: '删除思维导图',
                     }]}

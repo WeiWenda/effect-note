@@ -481,6 +481,17 @@ export default class Session extends EventEmitter {
     return true;
   }
 
+  public fromKityMinderNode(kityNode: KityMinderNode): SerializedBlock {
+    let currentBlock = {
+      text: kityNode.data.text,
+      collapsed: kityNode.data.expandState === 'collapse',
+      children: Array()
+    };
+    kityNode.children?.forEach(childNode => {
+      currentBlock.children.push(this.fromKityMinderNode(childNode));
+    });
+    return currentBlock;
+  }
 
   private tranformToKityMinderNode(jsonContent: SerializedBlock): KityMinderNode {
     if (typeof jsonContent === 'object' && 'text' in jsonContent) {
