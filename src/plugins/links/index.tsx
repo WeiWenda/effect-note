@@ -446,6 +446,8 @@ export class LinksPlugin {
         await this.api.setData('ids_to_check', {});
         await this.api.setData('ids_to_callout', {});
         await this.api.setData('ids_to_datalooms', {});
+        await this.api.setData('ids_to_clozes', {});
+        await this.api.setData('ids_to_comments', {});
     }
 
     public async getPng(row: Row): Promise<any> {

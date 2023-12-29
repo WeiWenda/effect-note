@@ -189,7 +189,7 @@ $(document).ready(async () => {
   // load plugins
 
   const pluginManager = new PluginsManager(session, config, keyBindings);
-  let enabledPlugins = ['Marks', 'Tags', 'Links', 'HTML', 'Todo', 'Markdown', 'CodeSnippet', 'LaTeX', 'Comment', 'DataLoom'];
+  let enabledPlugins = ['Marks', 'Tags', 'Links', 'HTML', 'Todo', 'Markdown', 'CodeSnippet', 'LaTeX', 'Comment', 'DataLoom', 'Cloze'];
   if (typeof enabledPlugins.slice === 'undefined') { // for backwards compatibility
     enabledPlugins = Object.keys(enabledPlugins);
   }

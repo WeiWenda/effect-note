@@ -16,6 +16,7 @@ import './markdown';
 import './code';
 import './comment';
 import './dataloom';
+import './cloze';
 
 // for developers: uncomment the following lines
 /*

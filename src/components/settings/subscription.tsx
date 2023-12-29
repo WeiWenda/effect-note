@@ -1,4 +1,4 @@
-import {Button, Checkbox, Space, Table} from 'antd';
+import {Button, Checkbox, Space, Table, Tooltip} from 'antd';
 import {CloudDownloadOutlined, DeleteOutlined} from '@ant-design/icons';
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
@@ -59,15 +59,19 @@ function SubscriptionSettingsComponent(props: { session: Session}) {
       key: 'action',
       render: (_, record) => (
         <Space size='middle'>
-          <DeleteOutlined onClick={() => {
-            const filtered = subscriptions.filter(sub => sub.name !== record.name);
-            setSubscriptions([...filtered]);
-          }}/>
-          <CloudDownloadOutlined onClick={() => {
-            addSubscription({name: record.name, gitPull: true}).then(() => {
-               props.session.showMessage('更新成功！');
-            });
-          }}/>
+          <Tooltip title='取消订阅（不可撤销）'>
+            <DeleteOutlined onClick={() => {
+              const filtered = subscriptions.filter(sub => sub.name !== record.name);
+              setSubscriptions([...filtered]);
+            }}/>
+          </Tooltip>
+          <Tooltip title='获取最新内容'>
+            <CloudDownloadOutlined onClick={() => {
+              addSubscription({name: record.name, gitPull: true}).then(() => {
+                 props.session.showMessage('更新成功！');
+              });
+            }}/>
+          </Tooltip>
         </Space>
       ),
     },

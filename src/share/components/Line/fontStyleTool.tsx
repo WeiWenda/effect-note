@@ -1,7 +1,7 @@
 import {Col, DocInfo, Path, Session} from '../../ts';
 import {BoldOutlined, FontColorsOutlined,
   HighlightOutlined, ItalicOutlined, DeleteOutlined, LinkOutlined, CheckOutlined, CopyOutlined, MessageOutlined} from '@ant-design/icons';
-import {Space, Popover, Input, Button} from 'antd';
+import {Space, Popover, Input, Tooltip} from 'antd';
 import * as React from 'react';
 import {useState} from 'react';
 import {copyToClipboard} from '../../../components/index';
@@ -66,6 +66,22 @@ export function FontStyleToolComponent(
           <Space>
             <BoldOutlined onClick={switchClass('bold')}/>
             <ItalicOutlined onClick={switchClass('italic')}/>
+            <Tooltip title='隐藏选中内容'>
+              <img style={{position: 'relative', top: '4px'}}
+                   onClick={e => {
+                     props.session.delChars(props.path!.row, props.startCol, props.endCol - props.startCol).then(() => {
+                       props.session.emitAsync('addCloze', props.path!.row, props.startCol, props.textContent).then(() => {
+                         props.session.stopAnchor();
+                         setTimeout(() => {
+                           props.session.selectPopoverOpen = false;
+                         }, 200);
+                         props.session.selecting = false;
+                         props.session.emit('updateInner');
+                       });
+                     });
+                   }}
+                   src={`${process.env.PUBLIC_URL}/images/cloze.png`} height={24} />
+            </Tooltip>
             <Popover open={showLink}
                      trigger={'click'}
                      onOpenChange={e => {
@@ -91,7 +107,9 @@ export function FontStyleToolComponent(
                 }}/>
               }/>
             }>
-              <LinkOutlined />
+              <Tooltip title='添加超链接'>
+                <LinkOutlined />
+              </Tooltip>
             </Popover>
             {/*<Popover open={showComment}*/}
             {/*         trigger={'click'}*/}
@@ -121,13 +139,15 @@ export function FontStyleToolComponent(
             {/*           }/>*/}
             {/*         }>*/}
             {/*</Popover>*/}
-            <MessageOutlined onClick={() => {
-              props.session.emitAsync('addComment', props.path.row, props.startCol, props.endCol, '').then(() => {
-                props.session.stopAnchor();
-                props.session.selecting = false;
-                props.session.emit('updateInner');
-              });
-            }}/>
+            <Tooltip title='添加批注'>
+              <MessageOutlined onClick={() => {
+                props.session.emitAsync('addComment', props.path.row, props.startCol, props.endCol, '').then(() => {
+                  props.session.stopAnchor();
+                  props.session.selecting = false;
+                  props.session.emit('updateInner');
+                });
+              }}/>
+            </Tooltip>
             <Popover
               trigger={'hover'}
               content={
@@ -160,10 +180,12 @@ export function FontStyleToolComponent(
                    onClick={e => e.preventDefault()}
                    src={`${process.env.PUBLIC_URL}/images/font_background.png`} height={24} />
             </Popover>
-            <CopyOutlined onClick={() => {
-               copyToClipboard(props.textContent);
-               props.session.showMessage('复制成功');
-            }}/>
+            <Tooltip title='复制选中内容'>
+              <CopyOutlined onClick={() => {
+                 copyToClipboard(props.textContent);
+                 props.session.showMessage('复制成功');
+              }}/>
+            </Tooltip>
             {
               props.showDelete &&
               <DeleteOutlined onClick={() => {

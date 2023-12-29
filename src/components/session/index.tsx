@@ -1,5 +1,5 @@
 import {DocVersion, Modes, Path, Session, SessionComponent, SpinnerComponent} from '../../share';
-import {Button, Dropdown, Input, MenuProps, Popover, Progress, Radio, Space} from 'antd';
+import {Button, Dropdown, Input, MenuProps, Popover, Tooltip, Radio, Space} from 'antd';
 import {
   HistoryOutlined,
   LeftOutlined,
@@ -191,19 +191,23 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
             </Dropdown>
             {
               props.session.lockEdit && props.showLockIcon &&
-              <LockOutlined onClick={() => {
-                props.session.lockEdit = false;
-                props.session.showMessage('进入编辑模式');
-                forceUpdate();
-              }}/>
+                <Tooltip title='点击后解除锁定编辑'>
+                  <LockOutlined onClick={() => {
+                    props.session.lockEdit = false;
+                    props.session.showMessage('进入编辑模式');
+                    forceUpdate();
+                  }}/>
+                </Tooltip>
             }
             {
               !props.session.lockEdit && props.showLockIcon &&
-              <UnlockOutlined onClick={() => {
-                props.session.lockEdit = true;
-                props.session.showMessage('进入锁定模式');
-                forceUpdate();
-              }} />
+                <Tooltip title='点击后锁定编辑'>
+                  <UnlockOutlined onClick={() => {
+                    props.session.lockEdit = true;
+                    props.session.showMessage('进入锁定模式');
+                    forceUpdate();
+                  }} />
+                </Tooltip>
             }
             {
               isMarked && !isRoot && props.markPlugin &&
@@ -262,7 +266,9 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                              });
                            }
                          }}>
-                  <HistoryOutlined />
+                    <Tooltip title='查看历史版本'>
+                      <HistoryOutlined />
+                    </Tooltip>
                 </Popover>
             }
             <FileToolsComponent session={props.session} curDocId={props.curDocId}
