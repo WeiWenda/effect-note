@@ -328,6 +328,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
         const childRows: number[] = [];
         const loadTagPromises = Object.entries(tags)
           .filter((t) => !new RegExp('(start|end|due|create):.*').test(t[0]))
+          .filter((t) => !['Done'].includes(t[0]))
           .reduce((p: Promise<void>, tag) =>
             p.then(() =>
                 // 修改标签block
@@ -563,9 +564,9 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
                       {
                         previewSession &&
                         <ViewOnlySessionComponent
-                            iconNoTopLevel='fa-circle-o'
-                            iconDirFold='fa-angle-right'
-                            iconDirUnFold='fa-angle-down'
+                            iconNoTopLevel='fa-circle'
+                            iconDirFold='fa-caret-right'
+                            iconDirUnFold='fa-caret-down'
                             session={previewSession}
                             onClick={
                               async (path: Path) => {
@@ -605,8 +606,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
                         <ViewOnlySessionComponent
                             iconTopLevel='fa-tags'
                             iconNoTopLevel='fa-circle'
-                            iconDirFold='fa-angle-right'
-                            iconDirUnFold='fa-angle-down'
+                            iconDirFold='fa-caret-right'
+                            iconDirUnFold='fa-caret-down'
                             session={tagSession}
                             onClick={ async (path) => {
                               const depth = await tagSession.document.getAncestryPaths(path.row);
