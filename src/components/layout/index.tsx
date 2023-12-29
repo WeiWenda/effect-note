@@ -141,6 +141,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                 current: props.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'light',
                 path: 'content-theme'
               }},
+            cdn: 'http://localhost:51223/vditor',
             theme: props.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'dark' : 'classic',
             height: window.innerHeight - 360,
             toolbar: ['quote', '|', 'headings', 'bold', 'italic', 'strike', 'inline-code', '|',

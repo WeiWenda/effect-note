@@ -147,6 +147,6 @@
     "tslint": "^4.5.1",
     "tui-image-editor": "^3.15.3",
     "typescript": "^5.1.6",
-    "vditor": "^3.8.18"
+    "vditor": "^3.9.8"
   }
 }
