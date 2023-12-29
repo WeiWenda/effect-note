@@ -156,6 +156,8 @@ router.get('/:docId', async (req, res) => {
             dir: gitHome,
             author: {name: 'auto saver', email : 'desktop@effectnote.com'},
             onAuth: () => ({ username: gitUsername, password: gitPassword}),
+        }).catch(e => {
+          console.log('git pull failed！')
         })
     }
     let commitOid = req.query.version
