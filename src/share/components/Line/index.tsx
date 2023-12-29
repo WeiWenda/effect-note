@@ -17,10 +17,10 @@ import {
 } from '../../ts/utils/token_unfolder';
 import Session from '../../ts/session';
 import Path from '../../ts/path';
-import ContentEditable from 'react-contenteditable';
 import $ from 'jquery';
 import {FontStyleToolComponent} from './fontStyleTool';
 import {NodeOperationComponent} from './nodeOperation';
+import {ContentEditableWrapper} from './ContentEditableWrapper';
 
 export type LineProps = {
   lineData: Line;
@@ -112,37 +112,8 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                 if (!session.stopMonitor && path && session.hoverRow && path.is(session.hoverRow)) {
                   $('#input-hack').focus();
                 }
-              }, 100);
-              emit(<ContentEditable id='input-hack'
-                        className='input-hack'
-                        key='input-hack'
-                        html={this.state.input}
-                        onChange={(e) => {
-                          const newVal = e.target.value.replace(/&lt;/g, '<')
-                            .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-                          this.setState({input: newVal});
-                          if (! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal.substring(0, 1))) {
-                            this.props.session.addCharsAtCursor(newVal.split('')).then(() => {
-                              if (newVal === '/') {
-                                this.props.session.setMode('NODE_OPERATION');
-                              }
-                              this.props.session.emit('updateAnyway');
-                              this.setState({input: ''});
-                            });
-                          }
-                        }}
-                        onCompositionEnd={(e) => {
-                          const newVal = e.data.replace(/&lt;/g, '<')
-                            .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-                          e.preventDefault();
-                          e.stopPropagation();
-                          // simply insert the key
-                          this.props.session.addCharsAtCursor(newVal.split('')).then(() => {
-                            this.props.session.emit('updateAnyway');
-                            this.setState({input: ''});
-                          });
-                        }}></ContentEditable>);
-              emit(cursorBetweenDiv(token.index + i));
+              }, 50);
+              emit(<ContentEditableWrapper key={token.index + i} session={this.props.session} cursorStyle={this.props.cursorStyle}/>);
             }
           } else {
             classes.push('cursor');

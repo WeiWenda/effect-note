@@ -3,6 +3,9 @@ import {Logger} from '../../ts/logger';
 import {Col, Document, EmitFn, PartialUnfolder, Row, Session, SplitToken, Token, Tokenizer} from '../../share';
 import React from 'react';
 import {ClozeBox} from './ClozeBox';
+import {ContentEditableWrapper} from '../../share/components/Line/ContentEditableWrapper';
+import {getStyles} from '../../share/ts/themes';
+import $ from 'jquery';
 
 export class ClozePlugin {
   private api: PluginApi;
@@ -20,17 +23,11 @@ export class ClozePlugin {
   }
 
   public async enable() {
-    const that = this;
     this.api.registerListener('session', 'addCloze', async (row: Row, startCol: Col, answer: string) => {
       await this.setCloze(row, startCol, answer);
     });
-    this.api.registerListener('session', 'removeComment', async (row: Row, startCol: Col, endCol: Col) => {
-      await this.removeComments(row, startCol, endCol);
-      that.session.emit('changeComment');
-    });
-    this.api.registerListener('session', 'resolveComment', async (row: Row, startCol: Col, endCol: Col) => {
-      await this.resolveComments(row, startCol, endCol);
-      that.session.emit('changeComment');
+    this.api.registerListener('session', 'removeCloze', async (row: Row, startCol: Col) => {
+      await this.removeCloze(row, startCol);
     });
     this.api.registerHook('document', 'serializeRow', async (struct, info) => {
       const clozes = await this.getClozes(info.row);
@@ -54,19 +51,44 @@ export class ClozePlugin {
       }
       return obj;
     });
+    this.api.registerHook('session', 'renderLineContents', (lineContents, info) => {
+      if (info.pluginData.clozes && !this.session.cursor.path.is(info.path) && info.line.length === 0) {
+        lineContents.unshift(<ClozeBox key={`height-anchor-0`}
+                                            session={this.session}
+                                            row={info.path.row}
+                                            startCol={0}
+                                            cloze={info.pluginData.clozes[0]}/>);
+       }
+      return lineContents;
+    });
     this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, info) => {
       if (info.pluginData.clozes) {
         return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
           token: Token, emit: EmitFn<React.ReactNode>, wrapped: Tokenizer
         ) => {
-          const clozes = Object.keys(info.pluginData.clozes).sort((n1, n2) => n1 - n2);
+          const clozes = Object.keys(info.pluginData.clozes).map(x => Number(x)).sort((n1, n2) => n1 - n2);
           let endCol = 0;
           while (clozes.length > 0) {
-            const startCol = Number(clozes.shift()!);
+            const startCol = clozes.shift()!;
             let filler_token;
-            [filler_token, token] = SplitToken(token, startCol - endCol);
+            if (startCol > 0) {
+              [filler_token, token] = SplitToken(token, startCol - endCol);
+              emit(...wrapped.unfold(filler_token));
+            }
             endCol = startCol;
-            emit(...wrapped.unfold(filler_token));
+            if (token.info.length > 0 && token.info[0].cursor) {
+              setTimeout(() => {
+                if (!this.session.stopMonitor && this.session.hoverRow && info.path.is(session.hoverRow)) {
+                  $('#input-hack').focus();
+                }
+              }, 50);
+              emit(
+                <ContentEditableWrapper key={token.index + endCol}
+                                        session={this.session}
+                                        cursorStyle={getStyles(this.session.clientStore, ['theme-cursor'])}/>
+              );
+              token.info[0].cursor = false;
+            }
             emit(<ClozeBox key={`height-anchor-${startCol}`}
                                session={this.session}
                                row={info.path.row}
@@ -86,31 +108,16 @@ export class ClozePlugin {
     await this.api.updatedDataForRender(row);
   }
 
-  public async removeComments(row: Row, startCol: Col, endCol: Col): Promise<void> {
-    const ids_to_comments = await this.api.getData('ids_to_comments', {});
-    const before: number[] = JSON.parse(ids_to_comments[row] || '[]') as number[];
-    const after: number[] = [];
-    while (before.length > 0) {
-      const startCol1 = before.shift()!;
-      const endCol1 = before.shift()!;
-      if ((startCol1 >= startCol && startCol1 <= endCol) || (endCol1 >= startCol && endCol1 <= endCol)) {
-        continue;
-      } else {
-        after.push(startCol1, endCol1);
-      }
-    }
+  public async removeCloze(row: Row, startCol: Col): Promise<void> {
+    const ids_to_clozes = await this.api.getData('ids_to_clozes', {});
+    const before: number[] = JSON.parse(ids_to_clozes[row] || '[]') as number[];
+    const after: number[] = before.filter(x => x !== startCol);
     if (after.length > 0) {
-      ids_to_comments[row] = JSON.stringify(after);
+      ids_to_clozes[row] = JSON.stringify(after);
     } else {
-      delete ids_to_comments[row];
+      delete ids_to_clozes[row];
     }
-    await this.api.setData('ids_to_comments', ids_to_comments);
-    await this.api.updatedDataForRender(row);
-  }
-
-  public async resolveComments(row: Row, startCol: Col, endCol: Col): Promise<void> {
-    const oldComment = await this.api.getData(`${row}:${startCol}-${endCol}:comment`, {});
-    await this._setComments(row, startCol, endCol, {...oldComment, resolve: true});
+    await this.api.setData('ids_to_clozes', ids_to_clozes);
     await this.api.updatedDataForRender(row);
   }
 
