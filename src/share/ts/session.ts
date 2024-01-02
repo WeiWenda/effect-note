@@ -122,6 +122,7 @@ export default class Session extends EventEmitter {
   //    注意onLineClick在true的情况下不做任何行为
   //       onCharClick在true的情况下不会触发，down和up不是同一个char
   public selecting: boolean = false;
+  public selectMousePressing: boolean = false;
   public selectPopoverOpen: boolean = false;
   public dragging: boolean = false;
   public keydown: boolean = false;

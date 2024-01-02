@@ -52,7 +52,6 @@ export default class LineComponent extends React.Component<LineProps, {input: st
   }
 
   public render() {
-    let mouseDown: boolean = false;
     const cursorBetween: boolean = this.props.cursorBetween || false;
     const lineData = _.cloneDeep(this.props.lineData);
     const cursors = this.props.cursors || {};
@@ -138,7 +137,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
           }
         }
         let divType = char_info.renderOptions.divType || 'span';
-        if (i === firstIndexOfHighlight && !this.props.session.lockEdit) {
+        if (i === firstIndexOfHighlight && !this.props.session.lockEdit && !session.selectMousePressing) {
           const element = React.createElement(
             divType,
             {
@@ -173,25 +172,34 @@ export default class LineComponent extends React.Component<LineProps, {input: st
               onClick: onClick,
               onMouseDown: (e) => {
                 if (path && e.detail === 1) {
-                  mouseDown = true;
-                  setTimeout(() => {
-                    mouseDown = false;
-                  }, 200);
                   session.selecting = false;
                   session.setAnchor(path, column);
                   e.stopPropagation();
                 }
               },
+              onMouseMove: (e) => {
+                if (path && e.buttons === 1 && session.getAnchor()) {
+                  console.log(`onColMouseMove set selectInlinePath ${path}`);
+                  session.selecting = true;
+                  session.selectMousePressing = true;
+                  session.selectInlinePath = path;
+                  session.cursor.setPosition(path, column).then(() => {
+                    session.emit('updateInner');
+                  });
+                }
+                e.stopPropagation();
+              },
               onMouseUp: (e) => {
                 if (path && e.detail === 1) {
-                  if (!mouseDown && !session.selecting && session.getAnchor()) {
+                  if (session.selectMousePressing && session.getAnchor()) {
                     console.log(`onColMouseUp set selectInlinePath ${path}`);
                     session.selecting = true;
+                    session.selectMousePressing = false;
                     session.selectInlinePath = path;
                     session.cursor.setPosition(path, column).then(() => {
                       session.emit('updateInner');
                     });
-                  } else if (mouseDown && session.anchor.col === column) {
+                  } else if (session.anchor.col === column) {
                     console.log('onCharClick');
                     if (e.shiftKey) {
                       session.setAnchor(session.cursor.path, session.cursor.col);

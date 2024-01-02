@@ -169,11 +169,23 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
             session.setAnchor(path, -1);
           }
         }}
+        onMouseMove={(e) => {
+          if (path && e.buttons === 1 && session.getAnchor()) {
+            console.log(`onLineMouseMove set selectInlinePath ${path}`);
+            session.selecting = true;
+            session.selectMousePressing = true;
+            session.selectInlinePath = path;
+            session.cursor.setPosition(path, -1).then(() => {
+              session.emit('updateInner');
+            });
+          }
+        }}
         onMouseUp={(e) => {
           if (e.detail === 1 && session.selecting === false && session.getAnchor() !== null &&
             (!session.anchor.path.is(path) || session.anchor.col !== -1)) {
             console.log(`onLineMouseUp set selectInlinePath ${path}`);
             session.selecting = true;
+            session.selectMousePressing = false;
             session.selectInlinePath = path;
             session.cursor.setPosition(path, -1).then(() => {
               session.emit('updateInner');
