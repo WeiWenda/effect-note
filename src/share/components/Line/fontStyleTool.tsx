@@ -66,22 +66,22 @@ export function FontStyleToolComponent(
           <Space>
             <BoldOutlined onClick={switchClass('bold')}/>
             <ItalicOutlined onClick={switchClass('italic')}/>
-            <Tooltip title='隐藏选中内容'>
-              <img style={{position: 'relative', top: '4px'}}
-                   onClick={e => {
-                     props.session.delChars(props.path!.row, props.startCol, props.endCol - props.startCol).then(() => {
-                       props.session.emitAsync('addCloze', props.path!.row, props.startCol, props.textContent).then(() => {
-                         props.session.stopAnchor();
-                         setTimeout(() => {
-                           props.session.selectPopoverOpen = false;
-                         }, 200);
-                         props.session.selecting = false;
-                         props.session.emit('updateInner');
-                       });
-                     });
-                   }}
-                   src={`${process.env.PUBLIC_URL}/images/cloze.png`} height={24} />
-            </Tooltip>
+            {/*<Tooltip title='隐藏选中内容'>*/}
+            {/*  <img style={{position: 'relative', top: '4px'}}*/}
+            {/*       onClick={e => {*/}
+            {/*         props.session.delChars(props.path!.row, props.startCol, props.endCol - props.startCol).then(() => {*/}
+            {/*           props.session.emitAsync('addCloze', props.path!.row, props.startCol, props.textContent).then(() => {*/}
+            {/*             props.session.stopAnchor();*/}
+            {/*             setTimeout(() => {*/}
+            {/*               props.session.selectPopoverOpen = false;*/}
+            {/*             }, 200);*/}
+            {/*             props.session.selecting = false;*/}
+            {/*             props.session.emit('updateInner');*/}
+            {/*           });*/}
+            {/*         });*/}
+            {/*       }}*/}
+            {/*       src={`${process.env.PUBLIC_URL}/images/cloze.png`} height={24} />*/}
+            {/*</Tooltip>*/}
             <Popover open={showLink}
                      trigger={'click'}
                      onOpenChange={e => {
