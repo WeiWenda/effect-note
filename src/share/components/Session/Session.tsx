@@ -172,7 +172,7 @@ export default class SessionComponent extends React.Component<Props, State> {
               cols.push(j);
             }
             cursorNode.markCols(cols);
-          } else {
+          } else if (!cursor.path.isRoot()) {
             const [parent, index1, index2] = await session.getVisualLineSelections();
             // 多行选中
             const children = await session.document.getChildRange(parent, index1, index2);

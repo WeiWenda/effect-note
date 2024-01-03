@@ -199,7 +199,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                     session.cursor.setPosition(path, column).then(() => {
                       session.emit('updateInner');
                     });
-                  } else if (session.anchor.col === column) {
+                  } else if (session.getAnchor()?.path.is(path) && session.getAnchor()?.col === column) {
                     console.log('onCharClick');
                     if (e.shiftKey) {
                       session.setAnchor(session.cursor.path, session.cursor.col);
