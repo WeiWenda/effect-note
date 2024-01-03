@@ -170,7 +170,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
           }
         }}
         onMouseMove={(e) => {
-          if (path && e.buttons === 1 && session.getAnchor()) {
+          if (path && !session.dragging && e.buttons === 1 && session.getAnchor()) {
             console.log(`onLineMouseMove set selectInlinePath ${path}`);
             session.selecting = true;
             session.selectMousePressing = true;
