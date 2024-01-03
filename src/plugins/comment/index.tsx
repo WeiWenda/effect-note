@@ -61,8 +61,8 @@ export class CommentPlugin {
       return obj;
     });
     this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, info) => {
-      const comments = [...info.pluginData.comments as number[]];
-      if (comments.length > 0) {
+      if (info.pluginData.comments && info.pluginData.comments.length > 0) {
+        const comments = [...info.pluginData.comments];
         return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
           token: Token, emit: EmitFn<React.ReactNode>, wrapped: Tokenizer
         ) => {
