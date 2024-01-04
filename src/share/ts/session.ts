@@ -1088,6 +1088,9 @@ export default class Session extends EventEmitter {
   }
 
   public async addCharsAtCursor(chars: Chars) {
+    if (this.selecting && this._anchor !== null && this.cursor.path.is(this._anchor.path) && this.selectInlinePath !== null) {
+      await this.yankDelete();
+    }
     await this.addChars(this.cursor.row, this.cursor.col, chars);
   }
 
@@ -1295,7 +1298,9 @@ export default class Session extends EventEmitter {
       const mutation = new mutations.DelChars(this.cursor.row, 0, this.cursor.col);
       await this.do(mutation);
       const path = this.cursor.path;
-
+      // 避免块被误选中
+      this.selecting = false;
+      this.stopAnchor();
       await this.newLineAbove();
       // cursor now is at inserted path, add the characters
       await this.addCharsAfterCursor(mutation.deletedChars);
@@ -1847,7 +1852,7 @@ export default class Session extends EventEmitter {
     const anchor = this._anchor;
     if (anchor !== null) {
       if (cursor.path.is(anchor.path) && this.selectInlinePath !== null) {
-        console.log('yankDelete whole line');
+        console.log('yankDelete words in line');
         // 单行选中
         this.selectPopoverOpen = false;
         const options = {includeEnd: false, yank: false};
