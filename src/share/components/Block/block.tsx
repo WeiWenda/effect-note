@@ -180,18 +180,6 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
             });
           }
         }}
-        onMouseUp={(e) => {
-          if (e.detail === 1 && session.selecting === false && session.getAnchor() !== null &&
-            (!session.anchor.path.is(path) || session.anchor.col !== -1)) {
-            console.log(`onLineMouseUp set selectInlinePath ${path}`);
-            session.selecting = true;
-            session.selectMousePressing = false;
-            session.selectInlinePath = path;
-            session.cursor.setPosition(path, -1).then(() => {
-              session.emit('updateInner');
-            });
-          }
-        }}
         style={this.props.style}
       >
         {results}

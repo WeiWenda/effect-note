@@ -190,16 +190,9 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                 e.stopPropagation();
               },
               onMouseUp: (e) => {
-                if (path && e.detail === 1) {
-                  if (session.selectMousePressing && session.getAnchor()) {
-                    console.log(`onColMouseUp set selectInlinePath ${path}`);
-                    session.selecting = true;
-                    session.selectMousePressing = false;
-                    session.selectInlinePath = path;
-                    session.cursor.setPosition(path, column).then(() => {
-                      session.emit('updateInner');
-                    });
-                  } else if (session.getAnchor()?.path.is(path) && session.getAnchor()?.col === column) {
+                session.selectMousePressing = false;
+                if (path && e.detail === 1 &&
+                  !session.selectMousePressing && session.getAnchor()?.path.is(path) && session.getAnchor()?.col === column) {
                     console.log('onCharClick');
                     if (e.shiftKey) {
                       session.setAnchor(session.cursor.path, session.cursor.col);
@@ -210,7 +203,6 @@ export default class LineComponent extends React.Component<LineProps, {input: st
                     session.cursor.setPosition(path, column).then(() => {
                       session.emit('updateInner');
                     });
-                  }
                 }
                 e.stopPropagation();
               },

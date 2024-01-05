@@ -93,6 +93,7 @@ export default class SessionComponent extends React.Component<Props, State> {
     this.onLineClick = async (path) => {
       const session = this.props.session;
       console.log('onLineClick');
+      session.selectMousePressing = false;
       // 防止select不上
       if (!session.selecting) {
         // if clicking outside of text, but on the row,
