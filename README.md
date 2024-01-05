@@ -31,7 +31,7 @@ Project Vision：Empower Personal Knowledge Management And Discovery
          -
       </td>
        <td>
-          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Windows/EffectNote-0.4.3%20Setup.exe">直接下载</a>
+          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Windows/EffectNote-0.4.4%20Setup.exe">直接下载</a>
        </td>
      </tr>
     <tr>
