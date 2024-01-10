@@ -305,10 +305,11 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
           borderTopRightRadius: '6px',
           borderLeft: `solid 8px ${session.clientStore.getClientSetting('theme-bg-primary')}`,
           marginRight: '1em',
-          background: 'linear-gradient(to right, transparent 155px,' +
-            `${session.clientStore.getClientSetting('theme-bg-secondary')} 100px),` +
-            'linear-gradient(to right, transparent 150px,' +
-            `${session.clientStore.getClientSetting('theme-bg-tertiary')} 100px)`
+          background: ` linear-gradient(to right,
+            ${session.clientStore.getClientSetting('theme-bg-primary')} 150px, transparent 100px)
+            ,linear-gradient(to right, 
+            ${session.clientStore.getClientSetting('theme-bg-callout')} 155px,
+            ${session.clientStore.getClientSetting('theme-bg-callout')}50 100px)`
         });
       }
       const elLine = (

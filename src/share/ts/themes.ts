@@ -7,6 +7,7 @@ export type Theme = {
   'theme-bg-primary': string,
   'theme-bg-secondary': string,
   'theme-bg-tertiary': string,
+  'theme-bg-callout': string,
   'theme-bg-highlight': string,
 
   'theme-text-primary': string,
@@ -91,6 +92,7 @@ export const themes: {[key: string]: Theme} = {
     'theme-bg-primary': colors.white,
     'theme-bg-secondary': '#F0F0F0',
     'theme-bg-tertiary': '#e0e0e0',
+    'theme-bg-callout': '#e0e0e0',
     'theme-bg-highlight': '#ccc', // '#ffa' for yellowish
 
     'theme-text-primary': colors.black,
@@ -112,6 +114,7 @@ export const themes: {[key: string]: Theme} = {
     'theme-bg-primary': '#000000',
     'theme-bg-secondary': '#333333',
     'theme-bg-tertiary': '#404040',
+    'theme-bg-callout': '#404040',
     'theme-bg-highlight': '#555', // '#770' for yellowish
 
     'theme-text-primary': '#eeeeee',
@@ -133,6 +136,7 @@ export const themes: {[key: string]: Theme} = {
     'theme-bg-primary': colors.solarized.base3,
     'theme-bg-secondary': colors.solarized.base2,
     'theme-bg-tertiary': '#e6dede',
+    'theme-bg-callout': '#e6dede',
     'theme-bg-highlight': '#e2ebf3',
 
     'theme-text-primary': colors.solarized.base00,
@@ -154,6 +158,7 @@ export const themes: {[key: string]: Theme} = {
     'theme-bg-primary': colors.solarized.base02,
     'theme-bg-secondary': colors.solarized.base03,
     'theme-bg-tertiary': '#3C4446',
+    'theme-bg-callout': '#3C4446',
     'theme-bg-highlight': '#384e55',
 
     'theme-text-primary': colors.solarized.base1,

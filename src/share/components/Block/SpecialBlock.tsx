@@ -66,7 +66,8 @@ export function SpecialBlock(props: React.PropsWithChildren<{
                }
              }}
              style={{
-               height: `${props.session.clientStore.getClientSetting('lineHeight')}px`
+               height: `${props.session.clientStore.getClientSetting('lineHeight')}px`,
+               ...getStyles(props.session.clientStore, ['theme-bg-secondary'])
              }}>
           {titleElement}
           <Space style={{opacity: 1}}>

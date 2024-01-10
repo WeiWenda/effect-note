@@ -44,21 +44,21 @@ async function listFontFamilies() {
       label: '楷体'
     }
   ]);
-    await document.fonts.ready;
+  await document.fonts.ready;
 
-    const fontAvailable = [];
+  const fontAvailable = [];
 
-    for (const font of fontCheck.values()) {
-        if (document.fonts.check(`12px "${font.fontFamily}"`)) {
-          fontAvailable.push({
-                label: (
-                 <span style={{fontFamily: font.fontFamily}}>{font.label}</span>
-                ),
-                value: font.fontFamily
-            });
-        }
-    }
-    return fontAvailable;
+  for (const font of fontCheck.values()) {
+      if (document.fonts.check(`12px "${font.fontFamily}"`)) {
+        fontAvailable.push({
+              label: (
+               <span style={{fontFamily: font.fontFamily}}>{font.label}</span>
+              ),
+              value: font.fontFamily
+          });
+      }
+  }
+  return fontAvailable;
 }
 
 function AppearanceSettingsComponent(props: { session: Session, serverConfig: ServerConfig }) {
@@ -97,7 +97,9 @@ function AppearanceSettingsComponent(props: { session: Session, serverConfig: Se
                 const theme: Theme = props.serverConfig.themes![currentTheme];
                 // @ts-ignore
                 theme[theme_property] = (hexColor as string);
-                applyTheme(theme);
+                saveServerConfig({...props.serverConfig}).then(() => {
+                  applyTheme(theme);
+                });
               }}
             />
           )} trigger='click'>
@@ -236,8 +238,8 @@ function AppearanceSettingsComponent(props: { session: Session, serverConfig: Se
         {/*  </td>*/}
         {/*</tr>*/}
         {colorPickerRow('背景色', 'theme-bg-primary')}
-        {colorPickerRow('背景色（菜单选中）', 'theme-bg-secondary')}
-        {/*{colorPickerRow('Tertiary background color', 'theme-bg-tertiary')}*/}
+        {colorPickerRow('背景色（标题菜单）', 'theme-bg-secondary')}
+        {colorPickerRow('背景色（引用内容）', 'theme-bg-callout')}
         {colorPickerRow('背景色（文本选中）', 'theme-bg-highlight')}
         {colorPickerRow('文字颜色', 'theme-text-primary')}
         {colorPickerRow('文字颜色（搜索匹配）', 'theme-text-accent')}

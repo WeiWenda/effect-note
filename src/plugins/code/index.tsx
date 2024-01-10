@@ -6,6 +6,7 @@ import {copyToClipboard} from '../../components';
 import {Input, Select, Space, Tooltip} from 'antd';
 import {MonacoEditorWrapper} from './MonacoEditorWrapper';
 import {EmitFn, PartialUnfolder, Token, Tokenizer} from '../../share';
+import {getStyles} from '../../share/ts/themes';
 
 const languages = ['plaintext', 'c', 'java', 'scala', 'shell', 'python', 'json', 'sql',
   'xml', 'yaml', 'go', 'php', 'typescript', 'javascript'];
@@ -21,6 +22,8 @@ registerPlugin(
     api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData, line}) => {
       if (pluginData.links?.code) {
         const wrap = pluginData.links?.code.wrap;
+        const textColor = api.session.clientStore.getClientSetting('theme-text-primary');
+        const selectStyle = `${api.session.clientStore.getClientSetting('curTheme').includes('Dark') ? 'invert(1)' : 'opacity(50%)'} drop-shadow(0 0 0 ${textColor}) saturate(1000%)`;
         elements.push(
           <SpecialBlock key={'code-block'}
                         specialClass={'effect-code-block'}
@@ -29,7 +32,8 @@ registerPlugin(
                         collapse={pluginData.links.collapse || false}
                         blockType={
                           <Select
-                            style={{width: 100}}
+                            suffixIcon={null}
+                            style={{width: 100, textAlign: 'right', ...getStyles(api.session.clientStore, ['theme-text-primary'])}}
                             bordered={false}
                             onFocus={() => {
                               api.session.stopAnchor();
@@ -38,7 +42,7 @@ registerPlugin(
                             onBlur={() => {
                               api.session.selectPopoverOpen = false;
                             }}
-                            value={pluginData.links.code.language}
+                            value={ pluginData.links.code.language.charAt(0).toUpperCase() + pluginData.links.code.language.slice(1) }
                             onChange={(value: string) => {
                               api.session.selectPopoverOpen = false;
                               linksPlugin.getCode(path.row).then((code) => {
@@ -55,7 +59,7 @@ registerPlugin(
                         tools={
                           <Space>
                             <Tooltip title={wrap ? '当前展示方式：自动换行' : '当前展示方式：内容溢出'}>
-                              <img style={{position: 'relative', top: '2px'}}
+                              <img style={{position: 'relative', top: '3px', filter: selectStyle}}
                                    onClick={() => {
                                      linksPlugin.getCode(path.row).then((code) => {
                                        linksPlugin.setCode(path.row, code.content, code.language, !code.wrap).then(() => {
