@@ -18,7 +18,7 @@ type RowProps = {
   path: Path;
   cached: CachedRowInfo;
   onCharClick: ((path: Path, column: Col, e: MouseEvent) => void) | undefined;
-  onClick: ((path: Path) => void) | undefined;
+  onClick: ((path: Path, e: MouseEvent) => void) | undefined;
   style: React.CSSProperties;
   cursorsTree: CursorsInfoTree;
   cursorBetween: boolean;
@@ -27,7 +27,7 @@ type RowProps = {
   indexInParent?: number;
 };
 class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
-  private onClick: (() => void) | undefined = undefined;
+  private onClick: ((e: MouseEvent) => void) | undefined = undefined;
   private onCharClick: ((column: Col, e: MouseEvent) => void) | undefined = undefined;
 
   constructor(props: RowProps) {
@@ -40,7 +40,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
 
   private init(props: RowProps) {
     if (props.onClick) {
-      this.onClick = () => {
+      this.onClick = (e: MouseEvent) => {
         if (!props.onClick) {
           throw new Error('onClick disappeared');
         }
@@ -49,7 +49,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
           props.cached.line.join('').startsWith('<div class=\'node-html\'>')) {
           return;
         } else {
-          props.onClick(props.path);
+          props.onClick(props.path, e);
         }
       };
     }
@@ -149,7 +149,9 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
 
     return (
       <div key='text' className='node-text'
-           onClick={this.onClick}
+           onClick={(e) => {
+             if (this.onClick) {this.onClick(e); }
+           }}
            onMouseEnter={() => {
              if (!this.props.session.keydown) {
                this.props.session.setHoverRow(path, 'mouse');
@@ -180,6 +182,11 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
             });
           }
         }}
+        onMouseUp={(e) => {
+          session.selectMousePressing = false;
+          session.emit('updateInner');
+          e.stopPropagation();
+        }}
         style={this.props.style}
       >
         {results}
@@ -201,7 +208,7 @@ type BlockProps = {
   cursorsTree: CursorsInfoTree;
   cursorBetween: boolean;
   onCharClick: ((path: Path, column: Col, e: MouseEvent) => void) | undefined;
-  onLineClick: ((path: Path) => void) | undefined;
+  onLineClick: ((path: Path, e: MouseEvent) => void) | undefined;
   onBulletClick: ((path: Path) => void) | undefined;
   onFoldClick: ((path: Path) => void) | undefined;
   topLevel: boolean;

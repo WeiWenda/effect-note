@@ -31,7 +31,7 @@ export default class SessionComponent extends React.Component<Props, State> {
   private profileRender: boolean; // for debugging
   private getProfiler: (profileRender: boolean) => Profiler;
   private onCharClick: (path: Path, column: number, e: MouseEvent) => void;
-  private onLineClick: (path: Path) => Promise<void>;
+  private onLineClick: (path: Path, e: MouseEvent) => Promise<void>;
   private onBulletClick: (path: Path) => Promise<void>;
   private onCrumbClick: (path: Path) => Promise<void>;
 
@@ -56,6 +56,19 @@ export default class SessionComponent extends React.Component<Props, State> {
       const session = this.props.session;
       switch (e.detail) {
         case 1:
+          if (path) {
+            console.log('onCharClick');
+            if (e.shiftKey) {
+              session.selecting = true;
+              session.setAnchor(session.cursor.path, session.cursor.col);
+            } else {
+              session.selecting = false;
+              session.stopAnchor();
+            }
+            session.cursor.setPosition(path, column).then(() => {
+              this.update();
+            });
+          }
           e.stopPropagation();
           break;
         case 2: {
@@ -68,7 +81,7 @@ export default class SessionComponent extends React.Component<Props, State> {
                 session.setAnchor(session.cursor.path, session.cursor.col);
                 session.cursor.endWord({cursor: {pastEndWord: true}}).then(() => {
                   session.selectInlinePath = session.cursor.path;
-                  session.emit('updateInner');
+                  this.update();
                 });
               });
             } else {
@@ -77,7 +90,7 @@ export default class SessionComponent extends React.Component<Props, State> {
                 session.setAnchor(session.cursor.path, session.cursor.col);
                 session.cursor.end({pastEnd: true}).then(() => {
                   session.selectInlinePath = null;
-                  session.emit('updateInner');
+                  this.update();
                 });
               });
             }
@@ -90,16 +103,18 @@ export default class SessionComponent extends React.Component<Props, State> {
       return;
     };
 
-    this.onLineClick = async (path) => {
+    this.onLineClick = async (path, e ) => {
       const session = this.props.session;
       console.log('onLineClick');
-      session.selectMousePressing = false;
       // 防止select不上
       if (!session.selecting) {
         // if clicking outside of text, but on the row,
         // move cursor to the end of the row
         let col = this.cursorBetween() ? -1 : -2;
-        if (session.mode === 'INSERT') {
+        if (e.shiftKey) {
+          session.selecting = true;
+          session.setAnchor(session.cursor.path, session.cursor.col);
+        } else {
           session.stopAnchor();
         }
         await session.cursor.setPosition(path, col);
@@ -255,7 +270,7 @@ export default class SessionComponent extends React.Component<Props, State> {
 
     const cursorBetween = this.cursorBetween();
 
-    let onLineClick: ((path: Path) => void) | undefined = undefined;
+    let onLineClick: ((path: Path, e: MouseEvent) => void) | undefined = undefined;
     let onCharClick: ((path: Path, column: number, e: MouseEvent) => void) | undefined = undefined;
     if (mode === 'NORMAL' ||
       mode === 'INSERT' ||

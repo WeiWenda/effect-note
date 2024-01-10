@@ -686,6 +686,7 @@ keyDefinitions.registerAction(new Action(
   'split-line',
   'Split line at cursor',
   async function({ session }) {
+    session.selecting = false;
     await session.newLineAtCursor();
   },
 ));

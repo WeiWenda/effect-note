@@ -179,30 +179,13 @@ export default class LineComponent extends React.Component<LineProps, {input: st
               },
               onMouseMove: (e) => {
                 if (path && !session.dragging && e.buttons === 1 && session.getAnchor()) {
-                  console.log(`onColMouseMove set selectInlinePath ${path}`);
+                  console.log(`onColMouseMove set selectInlinePath ${path.row}`);
                   session.selecting = true;
                   session.selectMousePressing = true;
                   session.selectInlinePath = path;
                   session.cursor.setPosition(path, column).then(() => {
                     session.emit('updateInner');
                   });
-                }
-                e.stopPropagation();
-              },
-              onMouseUp: (e) => {
-                session.selectMousePressing = false;
-                if (path && e.detail === 1 &&
-                  !session.selectMousePressing && session.getAnchor()?.path.is(path) && session.getAnchor()?.col === column) {
-                    console.log('onCharClick');
-                    if (e.shiftKey) {
-                      session.setAnchor(session.cursor.path, session.cursor.col);
-                      session.selecting = true;
-                    } else {
-                      session.stopAnchor();
-                    }
-                    session.cursor.setPosition(path, column).then(() => {
-                      session.emit('updateInner');
-                    });
                 }
                 e.stopPropagation();
               },
