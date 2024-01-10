@@ -67,8 +67,8 @@ export class LinksPlugin {
             return this.tagsPlugin.setTags(row, filteredTags);
         };
         const onInsertDrawio = (row: Row) => {
-            that.getXml(row).then(xml => {
-                that.session.emit('openModal', 'drawio', {xml: xml});
+            that.getXml(row).then(drawio => {
+                that.session.emit('openModal', 'drawio', {xml: drawio ? drawio.xml : undefined});
             });
             that.session.drawioOnSave = (xml: string) => {
                 that.setXml(row, xml).then(() => {
@@ -153,7 +153,7 @@ export class LinksPlugin {
             const code = await this.getCode(row);
             const dataloom = await this.getDataLoom(row);
             const rtf = await this.getRTF(row);
-            obj.links = { is_callout, is_order, is_board, is_check, collapse, png, xml, md, code, rtf, dataloom};
+            obj.links = { is_callout, is_order, is_board, is_check, collapse, png, drawio: xml, md, code, rtf, dataloom};
             return obj;
         });
         this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
@@ -251,7 +251,13 @@ export class LinksPlugin {
                 await this._setPng(path.row, serialized.png.src, serialized.png.json);
             }
             if (serialized.drawio) {
-                await this._setXml(path.row, serialized.drawio);
+                if (serialized.drawio.zoom) {
+                    await this._setXml(path.row, serialized.drawio);
+                    await this._setXmlZoom(path.row, serialized.drawio.zoom);
+                } else {
+                    // 兼容老数据
+                    await this._setXml(path.row, serialized.drawio);
+                }
             }
             if (serialized.md) {
                 await this._setMarkdown(path.row, serialized.md);
@@ -317,8 +323,7 @@ export class LinksPlugin {
             return lineContents;
         });
         this.api.registerHook('session', 'renderAfterLine', (elements, {path, line, pluginData}) => {
-            if (pluginData.links?.xml != null) {
-                const ref: any = React.createRef();
+            if (pluginData.links?.drawio != null) {
                 elements.push(
                   <SpecialBlock key={'special-block'}
                                 path={path}
@@ -326,14 +331,24 @@ export class LinksPlugin {
                                 collapse={pluginData.links.collapse || false}
                                 blockType={'Drawio'} session={that.session} tools={
                       <Space>
-                          <ZoomInOutlined onClick={() => {ref.current!.zoomIn(); }}/>
-                          <ZoomOutOutlined onClick={() => {ref.current!.zoomOut(); }}/>
+                          <ZoomInOutlined onClick={() => {
+                              that.setXmlZoom(path.row, pluginData.links.drawio.zoom + 0.2).then(() => {
+                                  that.session.emit('updateInner');
+                              });
+                          }}/>
+                          <ZoomOutOutlined onClick={() => {
+                              that.setXmlZoom(path.row, pluginData.links.drawio.zoom - 0.2).then(() => {
+                                  that.session.emit('updateInner');
+                              });
+                          }}/>
                           <EditOutlined onClick={() => {
                               onInsertDrawio(path.row);
                           }}/>
                       </Space>
                   }>
-                      <DrawioViewer ref={ref} key={'drawio'} session={that.session} row={path.row} content={pluginData.links.xml}
+                      <DrawioViewer key={'drawio'} session={that.session} row={path.row}
+                                    content={pluginData.links.drawio.xml}
+                                    zoom={pluginData.links.drawio.zoom}
                                     onClickFunc={onInsertDrawio}/>
                   </SpecialBlock>
                 );
@@ -550,10 +565,15 @@ export class LinksPlugin {
         const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
         if (ids_to_xmls[row]) {
             const xml = await this.api.getData(row + ':xml', '');
-            return xml;
+            return {xml, zoom: ids_to_xmls[row]};
         } else {
             return null;
         }
+    }
+
+    public async setXmlZoom(row: Row, zoom: number): Promise<void> {
+        await this._setXmlZoom(row, zoom);
+        await this.api.updatedDataForRender(row);
     }
 
     public async setXml(row: Row, xml: String): Promise<void> {
@@ -565,7 +585,16 @@ export class LinksPlugin {
         await this.api.setData(row + ':xml', xml);
         // 不存在的key查询效率较差
         const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
-        ids_to_xmls[row] = 1;
+        if (!ids_to_xmls[row]) {
+            ids_to_xmls[row] = 1;
+        }
+        await this.api.setData('ids_to_xmls', ids_to_xmls);
+    }
+
+    private async _setXmlZoom(row: Row, zoom: number): Promise<void> {
+        // 不存在的key查询效率较差
+        const ids_to_xmls = await this.api.getData('ids_to_xmls', {});
+        ids_to_xmls[row] = zoom;
         await this.api.setData('ids_to_xmls', ids_to_xmls);
     }
 
