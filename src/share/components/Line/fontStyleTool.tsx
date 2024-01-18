@@ -163,23 +163,26 @@ export function FontStyleToolComponent(
             >
               <FontColorsOutlined/>
             </Popover>
-            <Popover
-               trigger={'hover'}
-               content={
-                 <Space className={'rtf-toolbox node-html'}>
-                  <HighlightOutlined onClick={switchClass('red-background')} className={'red-background'}/>
-                  <HighlightOutlined onClick={switchClass('yellow-background')} className={'yellow-background'}/>
-                  <HighlightOutlined onClick={switchClass('green-background')} className={'green-background'}/>
-                  <HighlightOutlined onClick={switchClass('cyan-background')} className={'cyan-background'}/>
-                  <HighlightOutlined onClick={switchClass('blue-background')} className={'blue-background'}/>
-                  <HighlightOutlined onClick={switchClass('purple-background')} className={'purple-background'}/>
-                 </Space>
-               }
-            >
-              <img style={{position: 'relative', top: '4px'}}
-                   onClick={e => e.preventDefault()}
-                   src={`${process.env.PUBLIC_URL}/images/font_background.png`} height={24} />
-            </Popover>
+            {
+              !props.session.clientStore.getClientSetting('curTheme').includes('Dark') &&
+              <Popover
+                 trigger={'hover'}
+                 content={
+                   <Space className={'rtf-toolbox node-html'}>
+                    <HighlightOutlined onClick={switchClass('red-background')} className={'red-background'}/>
+                    <HighlightOutlined onClick={switchClass('yellow-background')} className={'yellow-background'}/>
+                    <HighlightOutlined onClick={switchClass('green-background')} className={'green-background'}/>
+                    <HighlightOutlined onClick={switchClass('cyan-background')} className={'cyan-background'}/>
+                    <HighlightOutlined onClick={switchClass('blue-background')} className={'blue-background'}/>
+                    <HighlightOutlined onClick={switchClass('purple-background')} className={'purple-background'}/>
+                   </Space>
+                 }
+              >
+                <img style={{position: 'relative', top: '4px'}}
+                     onClick={e => e.preventDefault()}
+                     src={`${process.env.PUBLIC_URL}/images/font_background.png`} height={24} />
+              </Popover>
+            }
             <Tooltip title='复制选中内容'>
               <CopyOutlined onClick={() => {
                  copyToClipboard(props.textContent);

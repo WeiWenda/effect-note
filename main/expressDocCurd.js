@@ -34,6 +34,13 @@ const punctuationSplit = function (builder) {
 }
 
 let subscriptionIndex = null;
+async function refreshDocIdMap() {
+    const files = await listFiles();
+    files.forEach((filepath, index) => {
+        const docId = filepath.split('/').pop().split('#').shift()
+        docId2path[docId] = filepath;
+    });
+}
 async function refreshIndex() {
     const files = await listFiles();
     subscriptionIndex = lunr(function() {
@@ -148,7 +155,6 @@ router.get('/:docId/versions', async (req, res) => {
 router.get('/:docId', async (req, res) => {
     const {gitHome, gitUsername, gitPassword, gitRemote}  = getGitConfig();
     const docId = Number(req.params.docId);
-    const filepath = docId2path[docId];
     if (gitRemote !== '未配置') {
         await git.pull({
             fs,
@@ -159,6 +165,15 @@ router.get('/:docId', async (req, res) => {
         }).catch(e => {
           console.log('git pull failed！')
         })
+    }
+    let filepath = docId2path[docId];
+    if (!filepath) {
+        //重新加载有可能拉取到新文件
+        await refreshDocIdMap();
+        filepath = docId2path[docId];
+        if (!filepath) {
+            res.send({message: '未找到文件！'});
+        }
     }
     let commitOid = req.query.version
     if (commitOid === 'HEAD') {
