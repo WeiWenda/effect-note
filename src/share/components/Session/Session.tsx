@@ -9,6 +9,7 @@ import Spinner from '../Spinner';
 import Session from '../../ts/session';
 import { Col } from '../../ts/types';
 import Path from '../../ts/path';
+import $ from 'jquery';
 import { CursorsInfoTree } from '../../ts/cursor';
 
 // TODO: move mode-specific logic into mode render functions
@@ -60,14 +61,18 @@ export default class SessionComponent extends React.Component<Props, State> {
             console.log('onCharClick');
             if (e.shiftKey) {
               session.selecting = true;
-              session.setAnchor(session.cursor.path, session.cursor.col);
+              session.setAnchor(session.cursor.path, session.cursor.col).then(() => {
+                session.cursor.setPosition(path, column).then(() => {
+                  this.update();
+                });
+              });
             } else {
               session.selecting = false;
               session.stopAnchor();
+              session.cursor.setPosition(path, column).then(() => {
+                this.update();
+              });
             }
-            session.cursor.setPosition(path, column).then(() => {
-              this.update();
-            });
           }
           e.stopPropagation();
           break;
@@ -78,19 +83,21 @@ export default class SessionComponent extends React.Component<Props, State> {
             if (session.selectInlinePath === null || !session.selectInlinePath.is(session.cursor.path)) {
               console.log(`selectWord selectInlinePath ${session.selectInlinePath} currentPath ${session.cursor.path}`);
               session.cursor.beginningWord().then(() => {
-                session.setAnchor(session.cursor.path, session.cursor.col);
-                session.cursor.endWord({cursor: {pastEndWord: true}}).then(() => {
-                  session.selectInlinePath = session.cursor.path;
-                  this.update();
+                session.setAnchor(session.cursor.path, session.cursor.col).then(() => {
+                  session.cursor.endWord({cursor: {pastEndWord: true}}).then(() => {
+                    session.selectInlinePath = session.cursor.path;
+                    this.update();
+                  });
                 });
               });
             } else {
               console.log(`selectLine selectInlinePath ${session.selectInlinePath}`);
               session.cursor.home().then(() => {
-                session.setAnchor(session.cursor.path, session.cursor.col);
-                session.cursor.end({pastEnd: true}).then(() => {
-                  session.selectInlinePath = null;
-                  this.update();
+                session.setAnchor(session.cursor.path, session.cursor.col).then(() => {
+                  session.cursor.end({pastEnd: true}).then(() => {
+                    session.selectInlinePath = null;
+                    this.update();
+                  });
                 });
               });
             }
@@ -113,7 +120,7 @@ export default class SessionComponent extends React.Component<Props, State> {
         let col = this.cursorBetween() ? -1 : -2;
         if (e.shiftKey) {
           session.selecting = true;
-          session.setAnchor(session.cursor.path, session.cursor.col);
+          await session.setAnchor(session.cursor.path, session.cursor.col);
         } else {
           session.stopAnchor();
         }
@@ -244,6 +251,13 @@ export default class SessionComponent extends React.Component<Props, State> {
 
   public componentDidMount() {
     this.update();
+  }
+
+  public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
+    if (!this.props.session.stopMonitor
+      && this.props.session.hoverRow && this.props.session.cursor.path.is(this.props.session.hoverRow)) {
+      $('#input-hack').focus();
+    }
   }
 
   private cursorBetween() {

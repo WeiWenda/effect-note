@@ -8,7 +8,6 @@ import {createLoomState} from '../../components/obsidian-dataloom/shared/loom-st
 import LoomApp from '../../components/obsidian-dataloom/loom-app';
 import {store} from '../../components/obsidian-dataloom/redux/store';
 
-export const dataloomPluginVersion = '8.15.10';
 registerPlugin(
   {
     name: 'DataLoom',
@@ -19,6 +18,7 @@ registerPlugin(
   function(api) {
     api.registerHook('session', 'renderAfterLine', (elements, {path, pluginData, line}) => {
       if (pluginData.links?.dataloom) {
+        const dataloomPluginVersion = '8.15.10';
         let loomState: LoomState;
         if (pluginData.links.dataloom.content) {
           loomState = deserializeState(pluginData.links.dataloom.content, dataloomPluginVersion);

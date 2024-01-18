@@ -445,8 +445,9 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                     session.selectInlinePath = null;
                     session.dragging = true;
                     session.cursor.setPosition(path, 0).then(() => {
-                      session.setAnchor(path, 0);
-                      session.emit('updateInner');
+                      session.setAnchor(path, 0).then(() => {
+                        session.emit('updateInner');
+                      });
                     });
                   }
                 }}

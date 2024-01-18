@@ -546,7 +546,7 @@ export default class Session extends EventEmitter {
         const lines: Array<string> = [];
         const children = node.children || [];
         if (node.plugins?.dataloom) {
-          const loomState = deserializeState(node.plugins.dataloom.content, dataloomPluginVersion);
+          const loomState = deserializeState(node.plugins.dataloom.content, '8.15.10');
           lines.push(exportToMarkdown(loomState, false));
         } else if (node.plugins?.md) {
           lines.push(node.plugins.md);
@@ -1709,9 +1709,10 @@ export default class Session extends EventEmitter {
     this._anchor = null;
   }
 
-  public setAnchor(path: Path, col: number) {
+  public async setAnchor(path: Path, col: number) {
     // console.log(`anchor : ${col}`);
-    this._anchor = new Cursor(this, path, col);
+    this._anchor = new Cursor(this, path);
+    await this._anchor.setCol(col);
   }
 
   public getAnchor() {
