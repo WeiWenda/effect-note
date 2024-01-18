@@ -22,6 +22,9 @@ import Search from './search';
 import {monaco} from 'react-monaco-editor';
 import {ServerConfig} from '../../ts/server_config';
 import {SERVER_CONFIG} from '../../ts/constants';
+import {deserializeState} from '../../components/obsidian-dataloom/data/serialize-state';
+import {dataloomPluginVersion} from '../../plugins/dataloom';
+import {exportToMarkdown} from '../../components/obsidian-dataloom/shared/export/export-to-markdown';
 
 type SessionOptions = {
   initialMode?: ModeId,
@@ -542,7 +545,10 @@ export default class Session extends EventEmitter {
         }
         const lines: Array<string> = [];
         const children = node.children || [];
-        if (node.plugins?.md) {
+        if (node.plugins?.dataloom) {
+          const loomState = deserializeState(node.plugins.dataloom.content, dataloomPluginVersion);
+          lines.push(exportToMarkdown(loomState, false));
+        } else if (node.plugins?.md) {
           lines.push(node.plugins.md);
         } else if (node.plugins?.is_callout) {
           lines.push(`> ${node.text}`);
