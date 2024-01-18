@@ -157,7 +157,7 @@ export class LinksPlugin {
             return obj;
         });
         this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
-            if (pluginData.links?.code || pluginData.links?.xml ||
+            if (pluginData.links?.code || pluginData.links?.drawio ||
               pluginData.links?.md || pluginData.links?.rtf || pluginData.links?.dataloom) {
                 return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
                   _token: Token, _emit: EmitFn<React.ReactNode>, _wrapped: Tokenizer
