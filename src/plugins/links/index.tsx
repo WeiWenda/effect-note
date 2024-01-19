@@ -250,13 +250,14 @@ export class LinksPlugin {
             if (serialized.png?.src && serialized.png?.json) {
                 await this._setPng(path.row, serialized.png.src, serialized.png.json);
             }
-            // 兼容老数据
-            if (serialized.xml) {
-                await this._setXml(path.row, serialized.xml);
-            }
             if (serialized.drawio) {
-                await this._setXml(path.row, serialized.drawio.xml);
-                await this._setXmlZoom(path.row, serialized.drawio.zoom);
+                if (serialized.drawio.xml) {
+                    await this._setXml(path.row, serialized.drawio.xml);
+                    await this._setXmlZoom(path.row, serialized.drawio.zoom);
+                } else {
+                    // 兼容老数据
+                    await this._setXml(path.row, serialized.drawio);
+                }
             }
             if (serialized.md) {
                 await this._setMarkdown(path.row, serialized.md);
