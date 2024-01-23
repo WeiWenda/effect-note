@@ -11,6 +11,7 @@ import { Col } from '../../ts/types';
 import { PartialUnfolder, Token } from '../../ts/utils/token_unfolder';
 import { getStyles } from '../../ts/themes';
 import {htmlRegex} from '../../../ts/util';
+import $ from 'jquery';
 import Draggable, {DraggableCore} from 'react-draggable';
 
 type RowProps = {
@@ -306,10 +307,10 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
           borderLeft: `solid 8px ${session.clientStore.getClientSetting('theme-bg-primary')}`,
           marginRight: '1em',
           background: ` linear-gradient(to right,
-            ${session.clientStore.getClientSetting('theme-bg-primary')} 150px, transparent 100px)
+            ${session.clientStore.getClientSetting('theme-bg-primary')} 40px, transparent 10px)
             ,linear-gradient(to right, 
-            ${session.clientStore.getClientSetting('theme-bg-callout')} 155px,
-            ${session.clientStore.getClientSetting('theme-bg-callout')}50 100px)`
+            ${session.clientStore.getClientSetting('theme-bg-callout')} 45px,
+            ${session.clientStore.getClientSetting('theme-bg-callout')}50 10px)`
         });
       }
       const elLine = (
@@ -349,162 +350,191 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
       );
     } else if (children.length && ((!collapsed) || this.props.topLevel)) {
       let childrenLoaded = true;
-      let childrenDivs = cached.children.map((cachedChild, index) => {
+      let childrenDivs = cached.children.flatMap((cachedChild, index) => {
         if (!this.props.filteredRows ||
           this.props.session.search?.results.accentMap.has(parent.row) ||
           this.props.filteredRows.has(cachedChild?.row!)) {
-        if (cachedChild === null) {
-         childrenLoaded = false;
-         return null;
-        }
+          if (cachedChild === null) {
+           childrenLoaded = false;
+           return null;
+          }
 
-        const row = cachedChild.row;
-        const rowInfo = cachedChild.info;
-        const path = parent.child(row);
+          const row = cachedChild.row;
+          const rowInfo = cachedChild.info;
+          const path = parent.child(row);
 
-        // let cloneIcon: React.ReactNode | null = null;
-        let hoverIcon: React.ReactNode | null = null;
-        const hoverStyle: React.CSSProperties = {};
-        let foldIcon: React.ReactNode | null = null;
-        if (!this.props.viewOnly && this.props.session.hoverRow?.row === row && cachedChild.childRows.length) {
-          hoverStyle.marginLeft = -50;
-          if (cachedChild.collapsed) {
-            foldIcon = <i key='collapse'
-                          onClick={() => this.props.onFoldClick!(path)}
-                          className='fa fa-caret-right bullet fold-icon' />;
+          // let cloneIcon: React.ReactNode | null = null;
+          let hoverIcon: React.ReactNode | null = null;
+          const hoverStyle: React.CSSProperties = {};
+          let foldIcon: React.ReactNode | null = null;
+          if (!this.props.viewOnly && this.props.session.hoverRow?.row === row && cachedChild.childRows.length) {
+            hoverStyle.marginLeft = -50;
+            if (cachedChild.collapsed) {
+              foldIcon = <i key='collapse'
+                            onClick={() => this.props.onFoldClick!(path)}
+                            className='fa fa-caret-right bullet fold-icon' />;
+            } else {
+              foldIcon = <i key='collapse'
+                            onClick={() => this.props.onFoldClick!(path)}
+                            className='fa fa-caret-down bullet fold-icon' />;
+            }
           } else {
-            foldIcon = <i key='collapse'
-                          onClick={() => this.props.onFoldClick!(path)}
-                          className='fa fa-caret-down bullet fold-icon' />;
+            hoverStyle.marginLeft = -50 + 25 / 2;
           }
-        } else {
-          hoverStyle.marginLeft = -50 + 25 / 2;
-        }
-        if (!this.props.viewOnly && this.props.session.hoverRow?.row === row) {
-          hoverIcon = (
-            <i key='hover' style={hoverStyle} className='fa fa-bars bullet hover-icon' title='Cloned'/>
-          );
-          hoverIcon = session.applyHook('renderHoverBullet', hoverIcon, { path, rowInfo });
-        }
-
-        // const parents = cachedChild.parentRows;
-        // NOTE: this is not actually correct!
-        // should use isClone, which is different since a parent may be detached
-        // if (parents.length > 1 && !this.props.viewOnly) {
-        //   cloneIcon = (
-        //     <i key='clone' className='fa fa-clone bullet clone-icon' title='Cloned'/>
-        //   );
-        // }
-
-        const style: React.CSSProperties = {};
-        const finalIcon = (this.props.topLevel && this.props.iconTopLevel) ?
-              this.props.iconTopLevel :
-              (cachedChild.childRows.length ?
-                  (cachedChild.collapsed ? this.props.iconDirFold : this.props.iconDirUnFold)
-                  : this.props.iconNoTopLevel);
-
-        const onBulletClick = () => {
-          console.log('onBulletClick');
-          if (!this.props.session.dragging) {
-            this.props.onBulletClick?.(path);
+          if (!this.props.viewOnly && this.props.session.hoverRow?.row === row) {
+            hoverIcon = (
+              <i key='hover' style={hoverStyle} className='fa fa-bars bullet hover-icon' title='Cloned'/>
+            );
+            hoverIcon = session.applyHook('renderHoverBullet', hoverIcon, { path, rowInfo });
           }
-        };
-        if (finalIcon === 'fa-circle-o') {
-          style.transform = 'scale(0.4)';
-        }
-        let bullet = (
-          <i
-            className={`fa ${finalIcon} bullet`} key='bullet'
-            style={style} onClick={onBulletClick}
-            data-ancestry={JSON.stringify(path.getAncestry())}
-          >
-          </i>
-        );
-        if (finalIcon === 'fa-circle') {
-          Object.assign(style, getStyles(session.clientStore, ['theme-text-primary']));
-          style.width = '18px';
-          style.height = '18px';
-          style.borderRadius = '9px';
-          bullet = (
-            <a className={`bullet bullet-fa-circle ${(cachedChild.childRows.length && cachedChild.collapsed) ? 'bullet-folded' : '' }`}
-               style={style} key='bullet' onClick={onBulletClick}>
-              <svg viewBox='0 0 18 18' fill={'currentColor'}>
-                <circle cx='9' cy='9' r='3.5'></circle>
-              </svg>
-            </a>
+
+          // const parents = cachedChild.parentRows;
+          // NOTE: this is not actually correct!
+          // should use isClone, which is different since a parent may be detached
+          // if (parents.length > 1 && !this.props.viewOnly) {
+          //   cloneIcon = (
+          //     <i key='clone' className='fa fa-clone bullet clone-icon' title='Cloned'/>
+          //   );
+          // }
+
+          const style: React.CSSProperties = {};
+          const finalIcon = (this.props.topLevel && this.props.iconTopLevel) ?
+                this.props.iconTopLevel :
+                (cachedChild.childRows.length ?
+                    (cachedChild.collapsed ? this.props.iconDirFold : this.props.iconDirUnFold)
+                    : this.props.iconNoTopLevel);
+
+          const onBulletClick = () => {
+            console.log('onBulletClick');
+            if (!this.props.session.dragging) {
+              this.props.onBulletClick?.(path);
+            }
+          };
+          if (finalIcon === 'fa-circle-o') {
+            style.transform = 'scale(0.4)';
+          }
+          let bullet = (
+            <i
+              className={`fa ${finalIcon} bullet`} key='bullet'
+              style={style} onClick={onBulletClick}
+              data-ancestry={JSON.stringify(path.getAncestry())}
+            >
+            </i>
           );
-        }
-        if (!this.props.viewOnly) {
-          bullet = (
-              <Draggable
-                position={{x: 0, y: 0}}
-                positionOffset={session.dragging && session.cursor.path.is(path) ? {x: 0, y: 20} : {x: 0, y: 0}}
-                onDrag={(_ , ui) => {
-                  if (Math.abs(ui.deltaX) + Math.abs(ui.deltaY) > 0 && !session.dragging) {
-                    session.selecting = true;
-                    session.selectInlinePath = null;
-                    session.dragging = true;
-                    session.cursor.setPosition(path, 0).then(() => {
-                      session.setAnchor(path, 0).then(() => {
-                        session.emit('updateInner');
-                      });
-                    });
-                  }
-                }}
-                onStop={() => {
-                  if (session.dragging) {
-                    if (session.hoverRow) {
-                      const target = session.hoverRow;
-                      session.yankCopy().then(() => {
-                        session.yankDelete().then(() => {
-                          session.selecting = false;
-                          session.dragging = false;
-                          session.cursor.setPosition(target, 0).then(() => {
-                            session.pasteAfter().then(() => {
-                              session.emit('updateInner');
-                            });
-                          });
+          if (finalIcon === 'fa-circle') {
+            Object.assign(style, getStyles(session.clientStore, ['theme-text-primary']));
+            style.width = '18px';
+            style.height = '18px';
+            style.borderRadius = '9px';
+            bullet = (
+              <a className={`bullet bullet-fa-circle ${(cachedChild.childRows.length && cachedChild.collapsed) ? 'bullet-folded' : '' }`}
+                 style={style} key='bullet' onClick={onBulletClick}>
+                <svg viewBox='0 0 18 18' fill={'currentColor'}>
+                  <circle cx='9' cy='9' r='3.5'></circle>
+                </svg>
+              </a>
+            );
+          }
+          if (!this.props.viewOnly) {
+            bullet = (
+                <Draggable
+                  position={{x: 0, y: 0}}
+                  positionOffset={session.dragging && session.cursor.path.is(path) ? {x: 0, y: 20} : {x: 0, y: 0}}
+                  onDrag={(_ , ui) => {
+                    if (Math.abs(ui.deltaX) + Math.abs(ui.deltaY) > 0 && !session.dragging) {
+                      session.selecting = true;
+                      session.selectInlinePath = null;
+                      session.dragging = true;
+                      session.cursor.setPosition(path, 0).then(() => {
+                        session.setAnchor(path, 0).then(() => {
+                          session.emit('updateInner');
                         });
                       });
                     }
-                  }
-                }}
-              >
-                {bullet}
-              </Draggable>
-            );
-        }
-        bullet = session.applyHook('renderBullet', bullet, { path, rowInfo });
-        return (
-          <div key={path.row} className={'block-with-icon'}>
-            {hoverIcon}
-            {foldIcon}
-            {/*{cloneIcon}*/}
-            {bullet}
-            <BlockComponent key='block'
-                            filteredRows={this.props.filteredRows}
-                            iconTopLevel={this.props.iconTopLevel}
-                            iconDirFold={this.props.iconDirFold}
-                            iconDirUnFold={this.props.iconDirUnFold}
-                            iconNoTopLevel={this.props.iconNoTopLevel}
-                            cached={cachedChild}
-                            topLevel={false}
-                            cursorsTree={cursorsTree.getChild(path.row)}
-                            onCharClick={this.props.onCharClick}
-                            onLineClick={this.props.onLineClick}
-                            onBulletClick={this.props.onBulletClick}
-                            onFoldClick={this.props.onFoldClick}
-                            session={session} path={path}
-                            cursorBetween={this.props.cursorBetween}
-                            fetchData={this.props.fetchData}
-                            viewOnly={this.props.viewOnly}
-                            parentBoardNode={cached.pluginData.links?.is_board || false}
-                            indexInParent={cached.pluginData.links?.is_order ? index + 1 : undefined}
-           />
-          </div>
-        );
+                  }}
+                  onStop={() => {
+                    if (session.dragging) {
+                      if (session.hoverRow) {
+                        const target = session.hoverRow;
+                        session.yankCopy().then(() => {
+                          session.yankDelete().then(() => {
+                            session.selecting = false;
+                            session.dragging = false;
+                            session.cursor.setPosition(target, 0).then(() => {
+                              session.pasteAfter().then(() => {
+                                session.emit('updateInner');
+                              });
+                            });
+                          });
+                        });
+                      }
+                    }
+                  }}
+                >
+                  {bullet}
+                </Draggable>
+              );
+          }
+          bullet = session.applyHook('renderBullet', bullet, { path, rowInfo });
+          const childStyle: React.CSSProperties = {};
+          if (cached.pluginData.links?.is_board) {
+            const wrapperWidth = $('.session-content').width();
+            if (wrapperWidth) {
+              childStyle.flexGrow = 1;
+              childStyle.flexShrink = 0;
+              if (cachedChild.pluginData.links?.width) {
+                childStyle.width = wrapperWidth * cachedChild.pluginData.links?.width;
+              } else {
+                childStyle.width = wrapperWidth / (children.length + 1);
+              }
+            }
+          }
+          const elements = [(
+            <div key={path.row} className={'block-with-icon'} style={childStyle}>
+              {hoverIcon}
+              {foldIcon}
+              {/*{cloneIcon}*/}
+              {bullet}
+              <BlockComponent key='block'
+                              filteredRows={this.props.filteredRows}
+                              iconTopLevel={this.props.iconTopLevel}
+                              iconDirFold={this.props.iconDirFold}
+                              iconDirUnFold={this.props.iconDirUnFold}
+                              iconNoTopLevel={this.props.iconNoTopLevel}
+                              cached={cachedChild}
+                              topLevel={false}
+                              cursorsTree={cursorsTree.getChild(path.row)}
+                              onCharClick={this.props.onCharClick}
+                              onLineClick={this.props.onLineClick}
+                              onBulletClick={this.props.onBulletClick}
+                              onFoldClick={this.props.onFoldClick}
+                              session={session} path={path}
+                              cursorBetween={this.props.cursorBetween}
+                              fetchData={this.props.fetchData}
+                              viewOnly={this.props.viewOnly}
+                              parentBoardNode={cached.pluginData.links?.is_board || false}
+                              indexInParent={cached.pluginData.links?.is_order ? index + 1 : undefined}
+              />
+            </div>
+          )];
+          if (cached.pluginData.links?.is_board && index !== children.length - 1) {
+            elements.push(
+              <DraggableCore key={`board_drag-${index}`} onDrag={(event, ui) => {
+                const targetWidth = (childStyle.width + ui.deltaX) / $('.session-content').width();
+                session.emitAsync('setBoardWidth', path.row, targetWidth).then(() => {
+                  session.emit('updateInner');
+                });
+              }}>
+                <div className='horizontal-drag' style={{
+                  marginLeft: '25px',
+                  marginRight: '25px',
+                  ...getStyles(session.clientStore, ['theme-bg-secondary'])
+                }}></div>
+              </DraggableCore>);
+          }
+          return elements;
         } else {
-          return null;
+          return [];
         }
       });
 

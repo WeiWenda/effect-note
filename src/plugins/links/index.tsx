@@ -82,6 +82,9 @@ export class LinksPlugin {
         this.api.registerListener('session', 'clearPluginStatus', async () => {
             await this.clearLinks();
         });
+        this.api.registerListener('session', 'setBoardWidth', async (row: Row, width: number) => {
+            await this.setWidth(row, width);
+        });
         this.api.registerListener('session', 'setMindmap', async (row: Row, img_src: string, img_json: string) => {
             await this.setPng(row, img_src, img_json);
         });
@@ -153,7 +156,8 @@ export class LinksPlugin {
             const code = await this.getCode(row);
             const dataloom = await this.getDataLoom(row);
             const rtf = await this.getRTF(row);
-            obj.links = { is_callout, is_order, is_board, is_check, collapse, png, drawio: xml, md, code, rtf, dataloom};
+            const width = await this.getWidth(row);
+            obj.links = { is_callout, is_order, is_board, is_check, collapse, png, drawio: xml, md, code, rtf, dataloom, width};
             return obj;
         });
         this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
@@ -213,6 +217,10 @@ export class LinksPlugin {
             if (dataloom != null) {
                 struct.dataloom = dataloom;
             }
+            const width = await this.getWidth(info.row);
+            if (width != null) {
+                struct.width = width;
+            }
             return struct;
         });
         this.api.registerListener('document', 'loadRow', async (path, serialized) => {
@@ -221,6 +229,9 @@ export class LinksPlugin {
             }
             if (serialized.is_board) {
                 await this._setIsBoard(path.row, true);
+            }
+            if (serialized.width) {
+                await this._setWidth(path.row, serialized.width);
             }
             if (serialized.is_callout) {
                 await this._setIsCallout(path.row, true);
@@ -625,6 +636,22 @@ export class LinksPlugin {
         const ids_to_collapses = await this.api.getData('ids_to_collapses', {});
         ids_to_collapses[row] = mark;
         await this.api.setData('ids_to_collapses', ids_to_collapses);
+    }
+
+    public async getWidth(row: Row): Promise<number | null> {
+        const ids_to_width = await this.api.getData('ids_to_width', {});
+        return ids_to_width[row] !== undefined ? ids_to_width[row] : null;
+    }
+
+    public async setWidth(row: Row, width: number): Promise<null> {
+        await this._setWidth(row, width);
+        await this.api.updatedDataForRender(row);
+    }
+
+    private async _setWidth(row: Row, width: number) {
+        const ids_to_width = await this.api.getData('ids_to_width', {});
+        ids_to_width[row] = width;
+        await this.api.setData('ids_to_width', ids_to_width);
     }
 
     public async getIsCheck(row: Row): Promise<boolean | null> {
