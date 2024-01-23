@@ -478,15 +478,12 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
           bullet = session.applyHook('renderBullet', bullet, { path, rowInfo });
           const childStyle: React.CSSProperties = {};
           if (cached.pluginData.links?.is_board) {
-            const wrapperWidth = $('.session-content').width();
-            if (wrapperWidth) {
-              childStyle.flexGrow = 1;
-              childStyle.flexShrink = 0;
-              if (cachedChild.pluginData.links?.width) {
-                childStyle.width = wrapperWidth * cachedChild.pluginData.links?.width;
-              } else {
-                childStyle.width = wrapperWidth / (children.length + 1);
-              }
+            childStyle.flexShrink = 0;
+            childStyle.flexGrow = 0;
+            if (cachedChild.pluginData.links?.width) {
+              childStyle.width = window.innerWidth * cachedChild.pluginData.links?.width;
+            } else {
+              childStyle.width = (window.innerWidth - 250) / (children.length + 1);
             }
           }
           const elements = [(
@@ -517,19 +514,15 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
               />
             </div>
           )];
-          if (cached.pluginData.links?.is_board && index !== children.length - 1) {
+          if (cached.pluginData.links?.is_board) {
             elements.push(
               <DraggableCore key={`board_drag-${index}`} onDrag={(event, ui) => {
-                const targetWidth = (childStyle.width + ui.deltaX) / $('.session-content').width();
+                const targetWidth = Math.max((childStyle.width + ui.deltaX) / window.innerWidth, 0.1);
                 session.emitAsync('setBoardWidth', path.row, targetWidth).then(() => {
                   session.emit('updateInner');
                 });
               }}>
-                <div className='horizontal-drag' style={{
-                  marginLeft: '25px',
-                  marginRight: '25px',
-                  ...getStyles(session.clientStore, ['theme-bg-secondary'])
-                }}></div>
+                <div className='horizontal-drag-board'/>
               </DraggableCore>);
           }
           return elements;

@@ -200,6 +200,7 @@ export function appendStyleScript(clientStore: ClientStore) {
                   `);
   $('.span-selection-background').remove();
   $('#app').append(`<style class='span-selection-background'>
+                    .horizontal-drag-board:hover{background-color: ${theme['theme-bg-secondary']}}
                     .ant-modal .ant-modal-content{background-color: ${theme['theme-bg-secondary']}}
                     .ant-modal .ant-modal-header{background-color: ${theme['theme-bg-secondary']}}
                     .ant-collapse-borderless > .ant-collapse-item{border-bottom: 2px solid ${theme['theme-bg-secondary']};}
