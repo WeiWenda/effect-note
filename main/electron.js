@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron');
 const {startExpress} = require('./prod');
+const {startGitServer} = require('./nodeGitServer');
 const { role } = require('../role.json');
 const path = require('path')
 const Store = require('electron-store');
@@ -57,9 +58,11 @@ function createWindow() {
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   app.whenReady().then(() => {
-    startExpress({port}).then(() => {
-      createWindow();
-    })
+    startGitServer().then(() => {
+      startExpress({port}).then(() => {
+        createWindow();
+      })
+    });
   });
   if (role === 'mas') {
     app.commandLine.appendSwitch('js-flags', '--lite-mode')

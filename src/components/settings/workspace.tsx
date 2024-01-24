@@ -133,6 +133,9 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
                 if (changedValues.hasOwnProperty('sycType')) {
                   setSrcType(changedValues.sycType);
                 }
+                if (changedValues.hasOwnProperty('sycProject')) {
+                  form.setFieldValue('gitRemote', 'http://localhost:30124/' + changedValues.sycProject);
+                }
               }}
               onFinish={(values) => {
                 if (values.gitLocalDir !== '未配置') {
@@ -187,9 +190,45 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
                   <Radio.Group>
                       <Radio value={'never'}>不同步</Radio>
                       <Radio value={'gitee'}>同步至Git远程仓库</Radio>
+                      <Radio value={'webdav'}>同步至云盘</Radio>
                       {/*<Radio value={'github'}>同步至GitHub</Radio>*/}
                   </Radio.Group>
               </Form.Item>
+            {
+              sycType === 'webdav' &&
+                <div>
+                    <Form.Item
+                        label='同步文件夹'
+                        name='sycDirectory'
+                    >
+                        <Input
+                            disabled={true}
+                            addonAfter={<EditOutlined onClick={() => {
+                              if (window.electronAPI) {
+                                window.electronAPI.openDirectory().then((files) => {
+                                  if (!files.cancelled) {
+                                    form.setFieldValue('sycDirectory', files.filePaths.pop());
+                                  }
+                                });
+                              } else {
+                                props.session.showMessage('修改工作空间必须在桌面窗口中进行', {warning: true});
+                              }
+                            }}/>}/>
+                    </Form.Item>
+                    <Form.Item
+                        label='项目名称'
+                        name='sycProject'
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label='仓库地址'
+                        name='gitRemote'
+                    >
+                        <Input disabled />
+                    </Form.Item>
+                </div>
+            }
             {
               sycType === 'gitee' &&
                 <div>
@@ -227,6 +266,14 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
                   </Button>
               </Form.Item>
           </Form>
+      }
+      {
+        sycType === 'webdav' && curWorkSpace &&
+          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+              <div style={{paddingTop: '5px'}} className={'node-html'}>
+                  <span className='red-color'>注意：修改同步文件夹后需要重启客户端</span>
+              </div>
+          </div>
       }
       {
         sycType === 'gitee' && curWorkSpace &&

@@ -39,7 +39,6 @@ async function startExpress(args) {
     });
     return;
   }
-
   const buildDir = path.resolve(__dirname + '/../build');
   let port = args.port || 3000;
   let host = args.host || 'localhost';
@@ -100,6 +99,14 @@ async function startExpress(args) {
     if (fs.existsSync(gitHome)) {
       await fs.rmdirSync(gitHome, {recursive: true, force: true})
     }
+    if (gitRemote.includes('http://localhost:30124')) {
+      const sycDirectory = store.get('sycDirectory', '未配置');
+      const sycProject = store.get('sycProject', '未配置');
+      const finalDirectory = path.join(sycDirectory, sycProject);
+      if (!fs.existsSync(finalDirectory)) {
+        await git.init({fs, bare: true, dir: finalDirectory})
+      }
+    }
     await git.clone({
       fs,
       http: isoHttp,
@@ -122,6 +129,14 @@ async function startExpress(args) {
       }
       if (activeWorkSpace.sycType === 'never') {
         store.delete('gitRemote')
+      }
+      if (activeWorkSpace.sycType === 'webdav') {
+        store.set('gitRemote', activeWorkSpace.gitRemote);
+        store.set('sycDirectory', activeWorkSpace.sycDirectory);
+        store.set('sycProject', activeWorkSpace.sycProject);
+      } else {
+        store.delete('sycDirectory');
+        store.delete('sycProject');
       }
       if (activeWorkSpace.sycType === 'gitee') {
         store.set('gitRemote', activeWorkSpace.gitRemote);

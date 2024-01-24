@@ -14,7 +14,9 @@ export type WorkSpaceInfo = {
   gitUsername?: string,
   gitDepth?: number,
   gitPassword?: string,
-  sycType?: string
+  sycType?: string,
+  sycDirectory?: string,
+  sycProject?: string
 };
 
 export const EMPTY_WORKSPACE_INFO: WorkSpaceInfo = {

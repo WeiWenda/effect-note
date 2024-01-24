@@ -16,7 +16,8 @@
     "lunr": "^2.3.9",
     "lunr-languages": "^1.10.0",
     "moment": "^2.29.4",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "node-git-server": "^1.0.0"
   },
   "scripts": {
     "rollup": "rollup -c",
