@@ -191,7 +191,7 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
                       <Radio value={'never'}>不同步</Radio>
                       <Radio value={'gitee'}>同步至Git远程仓库</Radio>
                       {
-                        process.env.REACT_APP_BUILD_PLATFORM !== 'mas' &&
+                        ['darwin', 'win32'].includes(process.env.REACT_APP_BUILD_PLATFORM || '') &&
                         <Radio value={'webdav'}>同步至云盘</Radio>
                       }
                       {/*<Radio value={'github'}>同步至GitHub</Radio>*/}
