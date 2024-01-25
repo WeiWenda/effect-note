@@ -80,3 +80,4 @@ Project Vision：Empower Personal Knowledge Management And Discovery
 - [pdf-to-markdown](https://github.com/jzillmann/pdf-to-markdown)
 - [node-git-server](https://github.com/gabrielcsapo/node-git-server)
 - [obsidian-dataloom](https://github.com/trey-wallis/obsidian-dataloom)
+- [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor)
