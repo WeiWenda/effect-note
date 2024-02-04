@@ -20,7 +20,7 @@ Project Vision：Empower Personal Knowledge Management And Discovery
          <a target="_blank" href="https://apps.apple.com/cn/app/effectnote/id6458540943?mt=12"><image width='150px' src="./public/images/mas_en.svg"/> </a>
       </td>
        <td>
-          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Mac/EffectNote-0.4.5-x64.dmg">直接下载</a>
+          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Mac/EffectNote-0.5.0-x64.dmg">直接下载</a>
        </td>
     </tr>
     <tr>
@@ -31,7 +31,7 @@ Project Vision：Empower Personal Knowledge Management And Discovery
          -
       </td>
        <td>
-          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Windows/EffectNote-0.4.5%20Setup.exe">直接下载</a>
+          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Windows/EffectNote-0.5.0%20Setup.exe">直接下载</a>
        </td>
      </tr>
     <tr>
