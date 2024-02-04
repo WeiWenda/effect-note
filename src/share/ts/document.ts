@@ -789,7 +789,8 @@ export default class Document extends EventEmitter {
       const text = rowInfo.line.join('');
       const line = canonicalize(text);
       const {md, code} = rowInfo.pluginData.links || {};
-      const extendContent = canonicalize((md || '') + (code?.content || ''));
+      const tags = JSON.stringify(rowInfo.pluginData.tags?.tags || []);
+      const extendContent = canonicalize((md || '') + (code?.content || '') + tags);
       const matches: Array<number> = [];
       if (_.every(query_words.map((word) => {
         const index = line.indexOf(word);

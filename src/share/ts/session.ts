@@ -23,7 +23,6 @@ import {monaco} from 'react-monaco-editor';
 import {ServerConfig} from '../../ts/server_config';
 import {SERVER_CONFIG} from '../../ts/constants';
 import {deserializeState} from '../../components/obsidian-dataloom/data/serialize-state';
-import {dataloomPluginVersion} from '../../plugins/dataloom';
 import {exportToMarkdown} from '../../components/obsidian-dataloom/shared/export/export-to-markdown';
 
 type SessionOptions = {

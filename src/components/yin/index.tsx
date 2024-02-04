@@ -372,6 +372,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       refreshPreviewSession(previewDocument);
       props.session.replaceListener('apply_search', (search) => {
         refreshPreviewSession(previewDocument, search);
+        refreshTagSession();
       });
     });
     refreshMarkSession();

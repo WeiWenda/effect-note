@@ -14,7 +14,7 @@ type SearchFn = (query: Query) => Promise<{rows: Set<Row>, accentMap: Map<number
 export default class Search {
   private searchFn: SearchFn;
   public results: {rows: Set<Row>, accentMap: Map<number, number[]>};
-  private lastQuery: Query | null = null;
+  public lastQuery: Query | null = null;
   public session: Session;
   constructor(searchFn: SearchFn, session: Session) {
     this.searchFn = searchFn;

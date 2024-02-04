@@ -13,12 +13,11 @@ import {
   Mutation,
   Path,
   Row,
-  Session,
-  SINGLE_LINE_MOTIONS
+  Session
 } from '../../share';
 import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Logger} from '../../ts/logger';
-import {getStyles} from '../../share/ts/themes';
+import Search from '../../share/ts/search';
 import {Popover, Select, Tag} from 'antd';
 import type { CustomTagProps } from 'rc-select/lib/BaseSelect';
 import Moment from 'moment';
@@ -383,7 +382,9 @@ export class TagsPlugin {
 
     const all_tags: {[tag: string]: Path[]} = {};
     await Promise.all(
-      Object.keys(tags_to_rows).map(async (tag) => {
+      Object.keys(tags_to_rows).filter(tag => {
+        return tag.toLowerCase().includes(this.session.search?.lastQuery || '');
+      }).map(async (tag) => {
         const rows = tags_to_rows[tag];
         all_tags[tag] = [];
         await Promise.all(
