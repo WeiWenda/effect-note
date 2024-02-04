@@ -600,10 +600,10 @@ export default class Session extends EventEmitter {
   }
 
   public async getCurrentContent(path: Path, mimetype: string, saveID: boolean = false) {
-    const oldPath = this.cursor.path;
+    const oldCursor = this.cursor.clone();
     await this.cursor.setPath(path);
     const content = await this.exportContent(mimetype, saveID);
-    await this.cursor.setPath(oldPath);
+    await this.cursor.from(oldCursor);
     return content;
   }
 
