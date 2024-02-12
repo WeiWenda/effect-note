@@ -158,7 +158,7 @@ export const INSERT_MODE_MAPPINGS: HotkeyMapping = Object.assign({
   'delete-to-word-beginning': [['ctrl+w'], ['ctrl+backspace']],
   // NOTE: paste-after doesn't make much sense for insert mode
   'paste-before': [['ctrl+v'], ['meta+v']],
-  'yank-copy': [['ctrl+c', 'meta+c']],
+  'yank-copy': [['ctrl+c'], ['meta+c']],
   'yank-delete': [['backspace']],
   'yank-cut': [['meta+x']],
   'split-line': [['enter']],
