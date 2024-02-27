@@ -47,6 +47,13 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const [compareContent, setCompareContent] = useState('');
   const [unsavedContent, setUnsavedContent] = useState<string | null>(null);
   const [comments, setComments] = useState(new Array<ReactNode>);
+  useEffect(() => {
+    props.session.on('start-diff', (version, remoteContent, localContent) => {
+      setCompareVersion(version);
+      setCompareContent(remoteContent);
+      setUnsavedContent(localContent);
+    });
+  }, []);
   // const [showProgress, setShowProgress] = useState(false);
   // const [progress, setProgress] = useState(0);
   const onCrumbClick = async (path: Path) => {
@@ -281,7 +288,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
               !props.loading && compareVersion !== '' && unsavedContent && compareContent &&
                 <Tooltip open={true} title='请在此处选择版本'>
                   <Space>
-                    <Tooltip title='载入历史版本' placement={'bottom'}>
+                    <Tooltip title='载入云端版本' placement={'bottom'}>
                       <RotateLeftOutlined
                         onClick={() => {
                           props.beforeLoadDoc!().then(() => {
@@ -294,7 +301,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                           });
                       }} />
                     </Tooltip>
-                    <Tooltip title='载入当前版本' placement={'bottom'}>
+                    <Tooltip title='载入本地版本' placement={'bottom'}>
                       <RotateRightOutlined onClick={() => {
                         props.beforeLoadDoc!().then(() => {
                           props.session.reloadContent(unsavedContent).then(() => {
@@ -346,6 +353,9 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                 language='json'
                 original={compareContent}
                 value={unsavedContent}
+                onChange={(newValue: string) => {
+                  setUnsavedContent(newValue);
+                }}
                 options={{renderSideBySide: true, hideUnchangedRegions: {
                     enabled: true,
                     minimumLineCount: 50,

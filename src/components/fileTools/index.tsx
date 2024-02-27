@@ -8,6 +8,7 @@ import {downloadFile, encodeHtml} from '../../ts/util';
 import {exportAction, shareAction} from '../../plugins/links/dropdownMenu';
 import {TagsPlugin} from '../../plugins/tags';
 import {useNavigate} from 'react-router-dom';
+import {getDocContent} from '../../share/ts/utils/APIUtils';
 
 function FileToolsComponent(props:  React.PropsWithChildren<{
   session: Session, curDocId: number,
@@ -23,9 +24,17 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
     domEvent.stopPropagation();
     switch (key) {
       case 'reload':
-        props.session.clientStore.setDocSetting('loaded', false);
-        props.session.emitAsync('save-cloud', {docId: props.curDocId}).then(() => {
-          window.location.reload();
+        props.session.showMessage('重新加载中...');
+        props.session.getCurrentContent(Path.root(), 'application/json', true).then(localContent => {
+          getDocContent(props.curDocId).then(async (res) => {
+            const remoteContent = res.content;
+            if (localContent !== remoteContent) {
+              props.session.showMessage('发现未保存内容，请人工进行合并！');
+              props.session.emit('start-diff', 'HEAD', remoteContent, localContent);
+            } else {
+              props.session.emit('save-cloud', {docId: props.curDocId});
+            }
+          });
         });
         break;
       case 'open-in-browser':
@@ -54,24 +63,7 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
         }
         break;
       case 'save':
-        props.session.reUploadFile(Path.root(), props.curDocId).then((docId) => {
-          if (docId !== undefined) {
-            props.session.emit('save-cloud', {docId: docId});
-          } else {
-            props.session.showMessage('正在保存，请勿重复保存');
-          }
-        }).catch(e => {
-          if (e.toString().includes('Push rejected because it was not a simple fast-forward. Use "force: true" to override.')) {
-            notification.error({message: '保存失败', description: (
-              <>
-                内容冲突，请重新加载当前文档！为避免数据丢失，请牢记以下注意事项：<br/>
-                1）多端编辑后，请主动进行重新加载，从而避免内容冲突 <br/>
-                2）若已发生内容冲突，最好将未保存节点导出后，再点重新加载
-              </>), placement: 'bottomRight'});
-          } else {
-            notification.error({message: '保存失败', description: e.toString(), placement: 'bottomRight'});
-          }
-        });
+        props.session.keyHandler?.queueKey('meta+s');
         break;
       case 'export_url':
         shareAction(props.session, Path.root(), 'application/json');

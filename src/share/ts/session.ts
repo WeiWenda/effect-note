@@ -24,6 +24,7 @@ import {ServerConfig} from '../../ts/server_config';
 import {SERVER_CONFIG} from '../../ts/constants';
 import {deserializeState} from '../../components/obsidian-dataloom/data/serialize-state';
 import {exportToMarkdown} from '../../components/obsidian-dataloom/shared/export/export-to-markdown';
+import KeyHandler from './keyHandler';
 
 type SessionOptions = {
   initialMode?: ModeId,
@@ -86,6 +87,7 @@ export default class Session extends EventEmitter {
   public commentRef: {[key: string]: MutableRefObject<null | HTMLDivElement>} = {};
   public codeRef: {[key: Row]: MutableRefObject<undefined | monaco.editor.IStandaloneCodeEditor>} = {};
   private historyIndex: number = 0;
+  public keyHandler: KeyHandler | null = null;
   public jumpHistory: Array<JumpLogEntry> = [];
   public jumpIndex: number = 0;
   public currentUser: UserInfo | null = null;
