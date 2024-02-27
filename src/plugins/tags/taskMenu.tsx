@@ -26,7 +26,7 @@ export function TaskMenuComponent(props: {tags: string[], setTags: (newTags: str
         <DatePicker showTime={true}
                     value={getDateString('create: ')}
                     placeholder='创建时间' onChange={(_, dateString) => {
-          setTags('create: ', dateString);
+          setTags('create: ', dateString as string);
         }}></DatePicker>
       </div>
       <div>
@@ -34,7 +34,7 @@ export function TaskMenuComponent(props: {tags: string[], setTags: (newTags: str
         <DatePicker showTime={true}
                     value={getDateString('due: ')}
                     placeholder='截止时间' onChange={(_, dateString) => {
-          setTags('due: ', dateString);
+          setTags('due: ', dateString as string);
         }}></DatePicker>
       </div>
       <div>
@@ -42,7 +42,7 @@ export function TaskMenuComponent(props: {tags: string[], setTags: (newTags: str
         <DatePicker showTime={true}
                     value={getDateString('start: ')}
                     placeholder='开始时间' onChange={(_, dateString) => {
-          setTags('start: ', dateString);
+          setTags('start: ', dateString as string);
         }}></DatePicker>
       </div>
       <div>
@@ -50,7 +50,7 @@ export function TaskMenuComponent(props: {tags: string[], setTags: (newTags: str
         <DatePicker showTime={true}
                     value={getDateString('end: ')}
                     placeholder='完成时间' onChange={(_, dateString) => {
-          setTags('end: ', dateString);
+          setTags('end: ', dateString as string);
         }}></DatePicker>
       </div>
     </Space>

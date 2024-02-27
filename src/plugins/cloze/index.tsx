@@ -78,7 +78,7 @@ export class ClozePlugin {
             endCol = startCol;
             if (token.info.length > 0 && token.info[0].cursor) {
               setTimeout(() => {
-                if (!this.session.stopMonitor && this.session.hoverRow && info.path.is(session.hoverRow)) {
+                if (!this.session.stopMonitor && this.session.hoverRow && info.path.is(this.session.hoverRow)) {
                   $('#input-hack').focus();
                 }
               }, 50);

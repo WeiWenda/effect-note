@@ -1499,11 +1499,11 @@ export default class Session extends EventEmitter {
   public async indentBlocks(path: Path, numblocks = 1) {
     if (this.lockEdit) {
       this.showMessage('当前处于锁定模式');
-      return;
+      return null;
     }
     if (path.is(this.viewRoot)) {
       this.showMessage('Cannot indent view root', {text_class: 'error'});
-      return;
+      return null;
     }
     const newparent = await this.document.getSiblingBefore(path);
     if (newparent === null) {
@@ -1526,7 +1526,7 @@ export default class Session extends EventEmitter {
   public async unindentBlocks(path: Path, numblocks = 1) {
     if (this.lockEdit) {
       this.showMessage('当前处于锁定模式');
-      return;
+      return null;
     }
     if (path.row === this.viewRoot.row) {
       this.showMessage('Cannot unindent view root', {text_class: 'error'});
@@ -1538,7 +1538,7 @@ export default class Session extends EventEmitter {
     const parent = path.parent;
     if (parent.parent == null) {
       this.showMessage('Cannot unindent past root', {text_class: 'error'});
-      return;
+      return null;
     }
 
     const siblings = await this.document.getSiblingRange(path, 0, numblocks - 1);
@@ -1618,7 +1618,7 @@ export default class Session extends EventEmitter {
 
   public async swapDown(path: Path = this.cursor.path) {
     const next = await this.nextVisible(await this.lastVisible(path));
-    if (next === null) { return; }
+    if (next === null) { return true; }
     if (next.parent == null) {
       throw new Error('Next visible should never return root');
     }

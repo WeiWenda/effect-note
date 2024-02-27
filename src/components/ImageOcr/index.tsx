@@ -50,7 +50,7 @@ export const ImageOcr = (props: {session: Session, onFinish: () => void}) => {
         {name: 'text', value: form.getFieldValue('text').value ?? '' + res.content.replace(/[ \t\r\f\v]/g, '')}
       ]);
       // message.destroy(loadingKey);
-      item.uploadFile = {...file, status: 'success'};
+      item.uploadFile = {...file, status: 'done'};
     } catch (e) {
       // message.destroy(loadingKey);
       item.uploadFile = {...file, status: 'error'};
@@ -67,7 +67,7 @@ export const ImageOcr = (props: {session: Session, onFinish: () => void}) => {
       uploadFile: {
         uid: file.uid,
         name: 'paste.png',
-        status: 'success',
+        status: 'done',
         originFileObj: file,
       }
     };

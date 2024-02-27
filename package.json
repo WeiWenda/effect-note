@@ -28,7 +28,7 @@
     "start": "electron-forge start",
     "startdev": "export REACT_APP_BUILD_PROFILE=cloud && react-app-rewired start",
     "startdemo": "export REACT_APP_BUILD_PROFILE=demo && react-app-rewired start",
-    "build": "react-app-rewired build",
+    "build": "CI=false react-app-rewired build",
     "builddemo": "export REACT_APP_BUILD_PROFILE=demo && react-app-rewired build",
     "watchtest": "npm test -- --reporter dot --watch",
     "profiletest": "npm test -- --prof",
@@ -77,7 +77,6 @@
     "@rollup/plugin-image": "^2.1.1",
     "@rollup/plugin-node-resolve": "^14.1.0",
     "@rollup/plugin-replace": "^4.0.0",
-    "@rollup/plugin-typescript": "^8.5.0",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.16.0",
     "@types/file-saver": "^2.0.1",
@@ -139,15 +138,18 @@
     "react-to-print": "^2.14.10",
     "react-virtuoso": "^4.6.2",
     "rollup": "^2.79.1",
-    "rollup-plugin-dts": "^4.2.2",
     "rollup-plugin-sass": "^1.12.16",
     "runtypes": "^6.7.0",
     "sass": "^1.70.0",
     "sass-loader": "^13.2.0",
-    "ts-node": "^3.3.0",
     "tslint": "^4.5.1",
     "tui-image-editor": "^3.15.3",
     "typescript": "^5.1.6",
     "vditor": "^3.9.8"
+  },
+  "overrides": {
+    "react-scripts": {
+      "typescript": "^5"
+    }
   }
 }

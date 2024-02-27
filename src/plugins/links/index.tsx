@@ -382,11 +382,17 @@ export class LinksPlugin {
                             break;
                         case 'parse_png':
                             const kityNode = pluginData.links.png.json as KityMinderNode;
-                            const serializedBlock = that.session.fromKityMinderNode(kityNode);
+                            const serializedBlock = that.session.fromKityMinderNode(kityNode) as {
+                                text: string,
+                                collapsed?: boolean,
+                                id?: Row,
+                                plugins?: any,
+                                children?: Array<SerializedBlock>
+                            };
                             that.session.document.setLine(path.row, serializedBlock.text.split(''));
                             that.session.document.getInfo(path.row).then(rowInfo => {
                                 that.session.delBlocks(path.row, 0, rowInfo.childRows.length).then(() => {
-                                   that.session.addBlocks(path, 0, serializedBlock.children).then(() => {
+                                   that.session.addBlocks(path, 0, serializedBlock.children || []).then(() => {
                                        that.session.emit('updateInner');
                                    });
                                 });
@@ -643,7 +649,7 @@ export class LinksPlugin {
         return ids_to_width[row] !== undefined ? ids_to_width[row] : null;
     }
 
-    public async setWidth(row: Row, width: number): Promise<null> {
+    public async setWidth(row: Row, width: number): Promise<void> {
         await this._setWidth(row, width);
         await this.api.updatedDataForRender(row);
     }

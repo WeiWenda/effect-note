@@ -449,7 +449,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     }
     document.title = curDocInfo.name!;
     props.session.document.store.setBackend(new IndexedDBBackend(newDocName), newDocName);
-    props.session.document.store.resetSetCounter(!initialLoad);
+    props.session.document.store.resetSetCounter();
     await beforeLoadDoc();
     console.time(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo.name}`);
     if (initialLoad) {

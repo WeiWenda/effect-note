@@ -3,7 +3,7 @@ import * as React from 'react';
 import {Session} from '../../ts';
 import {useState} from 'react';
 
-export function ContentEditableWrapper(props: {index: number, session: Session, cursorStyle: React.CSSProperties}) {
+export function ContentEditableWrapper(props: {session: Session, cursorStyle: React.CSSProperties}) {
   const [input, setInput] = useState('');
   return (
     <span>
@@ -38,8 +38,7 @@ export function ContentEditableWrapper(props: {index: number, session: Session, 
                            setInput('');
                          });
                        }}></ContentEditable>
-      <div key={`insert-cursor-${props.index}`}
-           className='cursor blink-background'
+      <div className='cursor blink-background'
            style={{
              display: 'inline-block', width: 2, marginLeft: -1, marginRight: -1,
              lineHeight: `${props.session.clientStore.getClientSetting('fontSize') + 2}px`,

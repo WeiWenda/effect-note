@@ -28,7 +28,7 @@ type RowProps = {
   indexInParent?: number;
 };
 class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
-  private onClick: ((e: MouseEvent) => void) | undefined = undefined;
+  private onClick: ((e: React.MouseEvent) => void) | undefined = undefined;
   private onCharClick: ((column: Col, e: MouseEvent) => void) | undefined = undefined;
 
   constructor(props: RowProps) {
@@ -41,7 +41,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
 
   private init(props: RowProps) {
     if (props.onClick) {
-      this.onClick = (e: MouseEvent) => {
+      this.onClick = (e: React.MouseEvent) => {
         if (!props.onClick) {
           throw new Error('onClick disappeared');
         }
@@ -50,7 +50,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
           props.cached.line.join('').startsWith('<div class=\'node-html\'>')) {
           return;
         } else {
-          props.onClick(props.path, e);
+          props.onClick(props.path, e.nativeEvent);
         }
       };
     }
@@ -204,7 +204,6 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
 type BlockProps = {
   session: Session;
   path: Path;
-
   cached: CachedRowInfo | null;
   cursorsTree: CursorsInfoTree;
   cursorBetween: boolean;
@@ -222,7 +221,7 @@ type BlockProps = {
   iconDirUnFold?: string;
   iconNoTopLevel?: string;
   fetchData: () => void;
-  filteredRows?: Set<number>;
+  filteredRows: Set<number> | undefined;
 };
 export default class BlockComponent extends React.Component<BlockProps, {}> {
   // constructor(props: BlockProps) {
@@ -517,7 +516,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
           if (cached.pluginData.links?.is_board) {
             elements.push(
               <DraggableCore key={`board_drag-${index}`} onDrag={(event, ui) => {
-                const targetWidth = Math.max((childStyle.width + ui.deltaX) / window.innerWidth, 0.1);
+                const targetWidth = Math.max(((childStyle.width as number) + ui.deltaX) / window.innerWidth, 0.1);
                 session.emitAsync('setBoardWidth', path.row, targetWidth).then(() => {
                   session.emit('updateInner');
                 });

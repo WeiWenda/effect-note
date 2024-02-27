@@ -37,7 +37,7 @@ export default class ViewOnlySessionComponent extends React.Component<Props, Sta
 
   private profileRender: boolean; // for debugging
   private getProfiler: (profileRender: boolean) => Profiler;
-  private onCharClick: (path: Path, column: number, e: Event) => void;
+  private onCharClick: (path: Path, column: number, e: MouseEvent) => void;
   private onLineClick: (path: Path) => Promise<void>;
   private onBulletClick: (path: Path) => Promise<void>;
   private onCrumbClick: (path: Path) => Promise<void>;
@@ -147,7 +147,7 @@ export default class ViewOnlySessionComponent extends React.Component<Props, Sta
     const cursorBetween = this.cursorBetween();
 
     let onLineClick: ((path: Path) => void) | undefined = undefined;
-    let onCharClick: ((path: Path, column: number, e: Event) => void) | undefined = undefined;
+    let onCharClick: ((path: Path, column: number, e: MouseEvent) => void) | undefined = undefined;
     if (mode === 'NORMAL' ||
         mode === 'INSERT' ||
         mode === 'VISUAL' ||

@@ -24,7 +24,7 @@ registerPlugin(
           loomState = deserializeState(pluginData.links.dataloom.content, dataloomPluginVersion);
         } else {
           loomState = createLoomState(1, 1, {
-            dataloomPluginVersion,
+            pluginVersion: dataloomPluginVersion,
             frozenColumnCount: 1,
           });
         }

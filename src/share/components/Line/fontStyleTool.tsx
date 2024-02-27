@@ -5,6 +5,7 @@ import {Space, Popover, Input, Tooltip} from 'antd';
 import * as React from 'react';
 import {useState} from 'react';
 import {copyToClipboard} from '../../../components/index';
+import type { ActionType } from '@rc-component/trigger/lib/interface';
 
 export function FontStyleToolComponent(
   props: React.PropsWithChildren<{session: Session, path: Path, startCol: Col, endCol: Col,
@@ -12,7 +13,7 @@ export function FontStyleToolComponent(
     allClasses: string[],
     showDelete: boolean,
     link?: string,
-    trigger: string | string[],
+    trigger: ActionType | ActionType[],
   }>) {
   const [link, setLink] = useState<string | undefined>(props.link);
   // const [comment, setComment] = useState<string>('');
