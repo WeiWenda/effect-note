@@ -132,7 +132,7 @@
     "react-dom": "^18.0.21",
     "react-draggable": "^4.4.5",
     "react-highlight": "^0.15.0",
-    "react-monaco-editor": "^0.51.0",
+    "react-monaco-editor": "^0.55.0",
     "react-redux": "^9.0.4",
     "react-router-dom": "^6.4.1",
     "react-scripts": "^5.0.1",

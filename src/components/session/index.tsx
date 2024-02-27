@@ -9,7 +9,9 @@ import {
   RightOutlined,
   StarFilled,
   StarOutlined,
-  UnlockOutlined
+  UnlockOutlined,
+  RotateLeftOutlined,
+  RotateRightOutlined
 } from '@ant-design/icons';
 import BreadcrumbsComponent from '../breadcrumbs';
 import LayoutToolsComponent from '../layoutTools';
@@ -22,6 +24,7 @@ import {MarksPlugin} from '../../plugins/marks';
 import {TagsPlugin} from '../../plugins/tags';
 import { useForceUpdate } from '../layout';
 import $ from 'jquery';
+import {MonacoDiffEditor} from 'react-monaco-editor';
 
 const {Search} = Input;
 
@@ -40,7 +43,9 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
   const [isRoot, setIsRoot] = useState(props.session.viewRoot.isRoot());
   const [filterInner, setFilterInner] = useState('');
   const [versions, setVersions] = useState(new Array<DocVersion>());
-  const [currentVersion, setCurrentVersion] = useState('');
+  const [compareVersion, setCompareVersion] = useState('');
+  const [compareContent, setCompareContent] = useState('');
+  const [unsavedContent, setUnsavedContent] = useState<string | null>(null);
   const [comments, setComments] = useState(new Array<ReactNode>);
   // const [showProgress, setShowProgress] = useState(false);
   // const [progress, setProgress] = useState(0);
@@ -157,93 +162,94 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                 {'-- ' +  Modes.getMode(props.session.mode).name + ' --'}
               </span>
             }
-            <Search
-              size='small'
-              placeholder='搜索内容'
-              allowClear
-              value={filterInner}
-              onChange={(e) => onSearchContent(e.target.value)}
-              onPressEnter={(e: any) => {onSearchContent(e.target.value); }}
-              onFocus={() => {props.session.stopKeyMonitor('search-in-file'); } }
-              onBlur={() => {props.session.startKeyMonitor(); } }/>
+            {
+              compareVersion === '' &&
+              <Space>
+                <Search
+                  size='small'
+                  placeholder='搜索内容'
+                  allowClear
+                  value={filterInner}
+                  onChange={(e) => onSearchContent(e.target.value)}
+                  onPressEnter={(e: any) => {onSearchContent(e.target.value); }}
+                  onFocus={() => {props.session.stopKeyMonitor('search-in-file'); } }
+                  onBlur={() => {props.session.startKeyMonitor(); } }/>
+                <Dropdown menu={{
+                  items: unfoldMenus,
+                  onClick: ({ key }) => {
+                    const expandLevel = Number(key.substring(1));
+                    setUnfoldLevel(expandLevel);
+                    props.session.foldBlock(props.session.viewRoot, expandLevel, false).then(() => {
+                      props.session.emit('updateInner');
+                    });
+                  },
+                }}>
+                    <Button>
+                        <MenuUnfoldOutlined />
+                        { unfoldLevel !== 100 && 'H' + unfoldLevel }
+                    </Button>
+                </Dropdown>
+              </Space>
+            }
             {
               props.showLayoutIcon &&
               <LayoutToolsComponent session={props.session} />
             }
-            {/*{*/}
-            {/*  showProgress &&*/}
-            {/*    <Progress type='circle' percent={progress} size={20} />*/}
-            {/*}*/}
-            <Dropdown menu={{
-              items: unfoldMenus,
-              onClick: ({ key }) => {
-                const expandLevel = Number(key.substring(1));
-                setUnfoldLevel(expandLevel);
-                props.session.foldBlock(props.session.viewRoot, expandLevel, false).then(() => {
-                  props.session.emit('updateInner');
-                });
-              },
-            }}>
-                <Button>
-                    <MenuUnfoldOutlined />
-                    { unfoldLevel !== 100 && 'H' + unfoldLevel }
-                </Button>
-            </Dropdown>
             {
-              props.session.lockEdit && props.showLockIcon &&
+              compareVersion === '' && props.session.lockEdit && props.showLockIcon &&
                 <Tooltip title='点击后解除锁定编辑'>
-                  <LockOutlined onClick={() => {
-                    props.session.lockEdit = false;
-                    props.session.showMessage('进入编辑模式');
-                    forceUpdate();
-                  }}/>
+                    <LockOutlined onClick={() => {
+                      props.session.lockEdit = false;
+                      props.session.showMessage('进入编辑模式');
+                      forceUpdate();
+                    }}/>
                 </Tooltip>
             }
             {
-              !props.session.lockEdit && props.showLockIcon &&
+              compareVersion === '' && !props.session.lockEdit && props.showLockIcon &&
                 <Tooltip title='点击后锁定编辑'>
-                  <UnlockOutlined onClick={() => {
-                    props.session.lockEdit = true;
-                    props.session.showMessage('进入锁定模式');
-                    forceUpdate();
-                  }} />
+                    <UnlockOutlined onClick={() => {
+                      props.session.lockEdit = true;
+                      props.session.showMessage('进入锁定模式');
+                      forceUpdate();
+                    }} />
                 </Tooltip>
             }
             {
-              isMarked && !isRoot && props.markPlugin &&
-              <StarFilled onClick={() => {
-                props.markPlugin!.setMark(props.session.viewRoot.row, '').then(() => {
-                  setMarked(false);
-                });
-              }} />
+              compareVersion === '' && isMarked && !isRoot && props.markPlugin &&
+                <StarFilled onClick={() => {
+                  props.markPlugin!.setMark(props.session.viewRoot.row, '').then(() => {
+                    setMarked(false);
+                  });
+                }} />
             }
             {
-              !isMarked && !isRoot && props.markPlugin &&
-              <StarOutlined onClick={() => {
-                props.session.document.getText(props.session.viewRoot.row).then(text => {
-                  props.markPlugin!.setMark(props.session.viewRoot.row, text).then(() => {
-                    setMarked(true);
+              compareVersion === '' && !isMarked && !isRoot && props.markPlugin &&
+                <StarOutlined onClick={() => {
+                  props.session.document.getText(props.session.viewRoot.row).then(text => {
+                    props.markPlugin!.setMark(props.session.viewRoot.row, text).then(() => {
+                      setMarked(true);
+                    });
                   });
-                });
-              }}/>
+                }}/>
             }
             {
               props.curDocId !== -1 && props.beforeLoadDoc && props.afterLoadDoc &&
                 <Popover placement='bottom' content={
                   <div style={{width: '200px', maxHeight: '100px', overflowY: 'auto'}}>
-                    <Radio.Group onChange={(v) => {
-                      setCurrentVersion(v.target.value);
-                      getDocContent(props.curDocId, v.target.value).then((res) => {
-                        props.session.showMessage('版本回溯中...');
-                        props.beforeLoadDoc!().then(() => {
-                          props.session.reloadContent(res.content).then(() => {
-                            props.afterLoadDoc!().then(() => {
-                              props.session.showMessage('版本回溯完成');
-                            });
-                          });
-                        });
+                    <Radio.Group
+                      onChange={(v) => {
+                      props.session.emit('openModal', 'loading');
+                      setCompareVersion(v.target.value);
+                      getDocContent(props.curDocId, v.target.value).then(async (res) => {
+                        setCompareContent(res.content);
+                        if (unsavedContent === null) {
+                          const currentContent = await props.session.getCurrentContent(Path.root(), 'application/json', true);
+                          setUnsavedContent(currentContent);
+                        }
+                        props.session.emit('closeModal', 'loading');
                       });
-                    }} value={currentVersion}>
+                    }} value={compareVersion}>
                       <Space direction='vertical'>
                         {
                           versions.map(version => {
@@ -271,6 +277,38 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                     </Tooltip>
                 </Popover>
             }
+            {
+              !props.loading && compareVersion !== '' && unsavedContent && compareContent &&
+                <Tooltip open={true} title='请在此处选择版本'>
+                  <Space>
+                    <Tooltip title='载入历史版本' placement={'bottom'}>
+                      <RotateLeftOutlined
+                        onClick={() => {
+                          props.beforeLoadDoc!().then(() => {
+                            props.session.reloadContent(compareContent).then(() => {
+                              props.afterLoadDoc!().then(() => {
+                                setCompareVersion('');
+                                props.session.showMessage('版本回溯完成');
+                              });
+                            });
+                          });
+                      }} />
+                    </Tooltip>
+                    <Tooltip title='载入当前版本' placement={'bottom'}>
+                      <RotateRightOutlined onClick={() => {
+                        props.beforeLoadDoc!().then(() => {
+                          props.session.reloadContent(unsavedContent).then(() => {
+                            props.afterLoadDoc!().then(() => {
+                              setCompareVersion('');
+                              props.session.showMessage('载入当前版本完成');
+                            });
+                          });
+                        });
+                      }} />
+                    </Tooltip>
+                  </Space>
+                </Tooltip>
+            }
             <FileToolsComponent session={props.session} curDocId={props.curDocId}
                                 tagPlugin={props.tagPlugin!}>
                 <MoreOutlined style={{float: 'right', paddingRight: '10px'}} onClick={e => e.preventDefault()}/>
@@ -279,7 +317,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
         </div>
       }
       {
-        !props.loading &&
+        !props.loading && compareVersion === '' &&
           <div className={`session-area ${comments.length ? 'session-area-with-comment' : ''}`}>
             <SessionComponent ref={props.session.sessionRef} session={props.session} />
             {
@@ -289,6 +327,32 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
               </div>
             }
             </div>
+      }
+      {
+        !props.loading && compareVersion !== '' && unsavedContent && compareContent &&
+        <div
+            className={`session-area session-diff-area`}
+            onMouseEnter={() => {
+              props.session.stopAnchor();
+              props.session.stopKeyMonitor('diff');
+            }}
+            onMouseLeave={() => {
+              props.session.startKeyMonitor();
+            }}
+        >
+            <MonacoDiffEditor
+                width='100%'
+                height='100%'
+                language='json'
+                original={compareContent}
+                value={unsavedContent}
+                options={{renderSideBySide: true, hideUnchangedRegions: {
+                    enabled: true,
+                    minimumLineCount: 50,
+                }
+                }}
+            />
+        </div>
       }
     </div>
   );
