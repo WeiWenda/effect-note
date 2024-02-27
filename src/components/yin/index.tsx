@@ -447,11 +447,11 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       props.session.clientStore.setDocSetting('loaded', true);
       // props.session.showMessage('初始加载中...');
     }
-    document.title = curDocInfo.name!;
+    document.title = curDocInfo!.name!;
     props.session.document.store.setBackend(new IndexedDBBackend(newDocName), newDocName);
     props.session.document.store.resetSetCounter();
     await beforeLoadDoc();
-    console.time(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo.name}`);
+    console.time(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo!.name}`);
     if (initialLoad) {
       let docContent: any;
       if (docID === -1) {
@@ -462,7 +462,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       }
       await props.session.changeViewRoot(Path.root());
       await props.session.emitAsync('clearPluginStatus');
-      await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo.filename!)).then(() => {
+      await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo!.filename!)).then(() => {
         props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'],
           () => markDirty(docID, true));
         return afterLoadDoc();
@@ -474,7 +474,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       await afterLoadDoc();
       setLoading(false);
     }
-    console.timeEnd(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo.name}`);
+    console.timeEnd(`${initialLoad ? 'initial load' : 'reload'}: ${curDocInfo?.name}`);
   };
   useEffect(() => {
     const currentViewRoot = searchParams.get('f');

@@ -46,7 +46,7 @@ export default function App() {
     setTimeout(() => {
       const loomTable = $(`#${reactAppId} .dataloom-table`).get(0);
       const loomBottomBar = $(`#${reactAppId} .dataloom-bottom-bar`).get(0);
-      setHeight(Math.min(loomTable.offsetHeight + loomBottomBar?.offsetHeight, window.innerHeight * 0.8));
+      setHeight(Math.min(loomTable!.offsetHeight + loomBottomBar!.offsetHeight || window.innerHeight * 0.8, window.innerHeight * 0.8));
     }, 100);
   }, [loomState]);
   useExportEvents(loomState);

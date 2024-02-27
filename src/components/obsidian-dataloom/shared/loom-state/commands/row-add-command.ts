@@ -6,8 +6,6 @@ import LoomStateCommand from './loom-state-command';
 import { Row, LoomState } from '../types/loom-state';
 
 export default class RowAddCommand extends LoomStateCommand {
-  private addedRow: Row;
-
   constructor() {
     super(true);
   }
@@ -19,13 +17,13 @@ export default class RowAddCommand extends LoomStateCommand {
       const { id, type } = column;
       return createCellForType(id, type);
     });
-    this.addedRow = createRow(rows.length, { cells });
+    const addedRow = createRow(rows.length, { cells });
 
     const nextState = {
       ...prevState,
       model: {
         ...prevState.model,
-        rows: [...rows, this.addedRow],
+        rows: [...rows, addedRow],
       },
     };
     this.finishExecute(prevState, nextState);

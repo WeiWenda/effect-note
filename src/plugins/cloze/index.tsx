@@ -138,7 +138,7 @@ export class ClozePlugin {
       const clozes: { [key: number]: any; } = {};
       while (cols.length > 0) {
         const startCol = cols.shift();
-        clozes[startCol] =  await this.api.getData(`${row}:${startCol}:cloze`, {});
+        clozes[startCol!] =  await this.api.getData(`${row}:${startCol}:cloze`, {});
       }
       return clozes;
     } else {

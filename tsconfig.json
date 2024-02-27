@@ -11,7 +11,7 @@
     "types": ["jest"],
     "moduleResolution": "node",
     "allowJs": true,
-    "strict": false,
+    "strict": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "noUnusedParameters": false,

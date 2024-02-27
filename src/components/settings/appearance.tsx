@@ -64,7 +64,7 @@ async function listFontFamilies() {
 function AppearanceSettingsComponent(props: { session: Session, serverConfig: ServerConfig }) {
   const [editing, setEditing] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<string>(props.session.clientStore.getClientSetting('curTheme'));
-  const [fontOptions, setFontOptions] = useState([]);
+  const [fontOptions, setFontOptions] = useState<Array<any>>([]);
   useEffect(() => {
     listFontFamilies().then(fonts => {
         setFontOptions(fonts);
