@@ -28,7 +28,6 @@ import {
   isWindowsUndoDown,
 } from '../../shared/keyboard-event';
 import { useLogger } from '../../shared/logger';
-import { useSource } from './hooks/use-source';
 
 import '../../global.css';
 import './styles.css';
@@ -55,9 +54,6 @@ export default function App() {
   useColumnEvents();
   useMenuEvents();
   const { onClick } = useAppEvents();
-
-  const { onSourceAdd, onSourceDelete, onSourceUpdate } = useSource();
-
   const { onFocusKeyDown } = useFocus();
   const { onFrozenColumnsChange, onCalculationRowToggle } =
     useTableSettings();
@@ -156,9 +152,6 @@ export default function App() {
                         onFilterDeleteClick={onFilterDelete}
                         onFilterUpdate={onFilterUpdate}
                         onCalculationRowToggle={onCalculationRowToggle}
-                        onSourceAdd={onSourceAdd}
-                        onSourceDelete={onSourceDelete}
-                        onSourceUpdate={onSourceUpdate}
                       />
                     </div>
                   }

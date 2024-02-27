@@ -29,7 +29,7 @@ export default function BaseContent({
   onSourcesClick,
   onClose,
 }: Props) {
-  const {session, reactAppId, isMarkdownView} = useAppMount();
+  const {session, reactAppId, isMarkdownView, title, path, collapse} = useAppMount();
   const { loomState, setLoomState } = useLoomState();
   const isSmallScreen = isSmallScreenSize();
   return (
@@ -107,7 +107,10 @@ export default function BaseContent({
             title: 'DataLoom导出',
             footer: null,
             content: (
-              <AppMountProvider session={session} reactAppId={reactAppId} isMarkdownView={isMarkdownView}>
+              <AppMountProvider title={title}
+                                path={path}
+                                collapse={collapse}
+                                session={session} reactAppId={reactAppId} isMarkdownView={isMarkdownView}>
                 <Provider store={store}>
                  <ExportApp loomState={loomState}/>
                 </Provider>

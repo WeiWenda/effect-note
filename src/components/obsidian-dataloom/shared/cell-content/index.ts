@@ -21,7 +21,6 @@ import { getNumberCellContent } from './number-cell-content';
 import { getTextCellContent } from './text-cell-content';
 import { getTimeCellContent } from './time-content';
 import { getSourceCellContent } from './source-cell-content';
-import { getSourceFileContent } from './source-file-content';
 import TagNotFoundError from '../error/tag-not-found-error';
 
 const getTagCellContent = (column: Column, cell: TagCell) => {
@@ -124,10 +123,6 @@ export const getCellContent = (
     }
     case CellType.SOURCE: {
       return getSourceCellContent(source);
-    }
-    case CellType.SOURCE_FILE: {
-      const { path } = cell as SourceFileCell;
-      return getSourceFileContent(path, shouldRemoveMarkdown);
     }
     default:
       throw new Error('Unsupported cell type');

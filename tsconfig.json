@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES5",
+    "target": "ES6",
     "baseUrl": "./",
     "lib": [
       "dom",
       "es2019",
       "esnext.asynciterable"
     ],
-    "downlevelIteration": true,
     "jsx": "react-jsx",
     "types": ["jest"],
     "moduleResolution": "node",
@@ -17,7 +16,7 @@
     "esModuleInterop": true,
     "noUnusedParameters": false,
     "noUnusedLocals": false,
-    "noImplicitReturns": true,
+    "noImplicitReturns": false,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -29,5 +28,8 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "**/*.spec.ts"
   ]
 }

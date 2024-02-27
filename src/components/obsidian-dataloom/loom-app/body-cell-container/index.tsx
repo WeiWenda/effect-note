@@ -62,8 +62,6 @@ import { useOverflow } from 'src/components/obsidian-dataloom/shared/spacing/hoo
 import { getNumberCellContent } from 'src/components/obsidian-dataloom/shared/cell-content/number-cell-content';
 import { getTimeCellContent } from 'src/components/obsidian-dataloom/shared/cell-content/time-content';
 import { getSourceCellContent } from 'src/components/obsidian-dataloom/shared/cell-content/source-cell-content';
-import { getSourceFileContent } from 'src/components/obsidian-dataloom/shared/cell-content/source-file-content';
-import { getFileCellContent } from 'src/components/obsidian-dataloom/shared/cell-content/file-cell-content';
 import { getDateCellContent } from 'src/components/obsidian-dataloom/shared/cell-content/date-cell-content';
 import DisabledCell from '../disabled-cell';
 
@@ -449,30 +447,30 @@ export default function BodyCellContainer(props: Props) {
         copyTextToClipboard(content);
       };
 
-      function handleTagAdd(markdown: string, color: Color) {
+      const handleTagAdd = (markdown: string, color: Color) => {
         if (markdown === "") return;
         onTagAdd(id, columnId, markdown.trim(), color);
-      }
+      };
 
-      function handleRemoveTagClick(tagId: string) {
+      const handleRemoveTagClick = (tagId: string) => {
         onTagCellRemove(id, tagId);
-      }
+      };
 
-      function handleTagColorChange(tagId: string, value: Color) {
+      const handleTagColorChange = (tagId: string, value: Color) => {
         onTagChange(columnId, tagId, { color: value });
-      }
+      };
 
-      function handleTagDeleteClick(tagId: string) {
+      const handleTagDeleteClick = (tagId: string) => {
         onTagDeleteClick(columnId, tagId);
-      }
+      };
 
-      function handleTagContentChange(tagId: string, value: string) {
+      const handleTagContentChange = (tagId: string, value: string) => {
         onTagChange(columnId, tagId, { content: value });
-      }
+      };
 
-      function handleTagClick(tagId: string) {
+      const handleTagClick = (tagId: string) => {
         onTagCellAdd(id, tagId);
-      }
+      };
 
       if (type === CellType.TAG) {
         if (cellTags.length > 0) {
@@ -523,39 +521,39 @@ export default function BodyCellContainer(props: Props) {
         copyTextToClipboard(content);
       };
 
-      function handleDateFormatChange(value: DateFormat) {
+      const handleDateFormatChange = (value: DateFormat) => {
         onColumnChange(
           columnId,
           { dateFormat: value },
           { shouldSortRows: true }
         );
-      }
+      };
 
-      function handleDateFormatSeparatorChange(
+      const handleDateFormatSeparatorChange = (
         value: DateFormatSeparator
-      ) {
+      ) => {
         onColumnChange(
           columnId,
           { dateFormatSeparator: value },
           { shouldSortRows: true }
         );
-      }
+      };
 
-      function handleTimeFormatChange(value: boolean) {
+      const handleTimeFormatChange = (value: boolean) => {
         onColumnChange(
           columnId,
           { hour12: value },
           { shouldSortRows: true }
         );
-      }
+      };
 
-      async function handleIncludeTimeToggle(value: boolean) {
+      const handleIncludeTimeToggle = (value: boolean) => {
         onColumnChange(
           columnId,
           { includeTime: value, frontmatterKey },
           { shouldSortRows: true }
         );
-      }
+      };
       contentNode = <DateCell content={content} />;
 
       menuNode = (
@@ -607,9 +605,9 @@ export default function BodyCellContainer(props: Props) {
         }
       });
 
-      function handleCheckboxChange(value: boolean) {
+      const handleCheckboxChange = (value: boolean) => {
         onCellChange(id, { value });
-      }
+      };
 
       contentNode = <CheckboxCell value={value} />;
       break;
@@ -665,17 +663,17 @@ export default function BodyCellContainer(props: Props) {
       );
       break;
     }
-    case CellType.SOURCE_FILE: {
-      const { path } = props as SourceFileCellProps;
-      const content = getSourceFileContent(path);
-
-      handleCellContextClick = () => {
-        copyTextToClipboard(content);
-      };
-
-      contentNode = <SourceFileCell content={content} />;
-      break;
-    }
+    // case CellType.SOURCE_FILE: {
+    //   const { path } = props as SourceFileCellProps;
+    //   const content = getSourceFileContent(path);
+    //
+    //   handleCellContextClick = () => {
+    //     copyTextToClipboard(content);
+    //   };
+    //
+    //   contentNode = <SourceFileCell content={content} />;
+    //   break;
+    // }
     case CellType.EMBED: {
       const { pathOrUrl, isExternal } = props as EmbedCellProps;
 
@@ -687,9 +685,9 @@ export default function BodyCellContainer(props: Props) {
         onCellChange(id, { pathOrUrl: "", alias: null });
       };
 
-      function handleExternalLinkToggle(value: boolean) {
+      const handleExternalLinkToggle = (value: boolean) => {
         onCellChange(id, { isExternal: value });
-      }
+      };
 
       contentNode = (
         <EmbedCell

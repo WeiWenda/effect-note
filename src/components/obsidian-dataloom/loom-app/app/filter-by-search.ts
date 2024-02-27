@@ -24,7 +24,6 @@ import { getDateCellContent } from 'src/components/obsidian-dataloom/shared/cell
 import { getNumberCellContent } from 'src/components/obsidian-dataloom/shared/cell-content/number-cell-content';
 import ColumnNotFoundError from 'src/components/obsidian-dataloom/shared/error/column-not-found-error';
 import { getSourceCellContent } from 'src/components/obsidian-dataloom/shared/cell-content/source-cell-content';
-import { getSourceFileContent } from 'src/components/obsidian-dataloom/shared/cell-content/source-file-content';
 import { getCheckboxCellContent } from 'src/components/obsidian-dataloom/shared/cell-content/checkbox-cell-content';
 import TagNotFoundError from 'src/components/obsidian-dataloom/shared/error/tag-not-found-error';
 import { getFileName } from 'src/components/obsidian-dataloom/shared/link-and-path/file-path-utils';
@@ -164,11 +163,11 @@ const doesCellMatch = (
     case CellType.SOURCE: {
       return matchSourceCell(sources, sourceId, searchText);
     }
-    case CellType.SOURCE_FILE: {
-      const { path } = cell as SourceFileCell;
-      const fileName = getFileName(path);
-      return matchSourceFileCell(fileName, searchText);
-    }
+    // case CellType.SOURCE_FILE: {
+    //   const { path } = cell as SourceFileCell;
+    //   const fileName = getFileName(path);
+    //   return matchSourceFileCell(fileName, searchText);
+    // }
     default:
       throw new Error('Unsupported cell type');
   }
@@ -272,11 +271,6 @@ const matchLastEditedTimeCell = (
     dateFormatSeparator,
     hour12
   );
-  return content.toLowerCase().includes(searchText);
-};
-
-const matchSourceFileCell = (originalContent: string, searchText: string) => {
-  const content = getSourceFileContent(originalContent, true);
   return content.toLowerCase().includes(searchText);
 };
 

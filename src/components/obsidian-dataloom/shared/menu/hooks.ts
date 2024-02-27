@@ -24,7 +24,9 @@ const useBasePosition = (
   const ref = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return () => {};
+    }
     const positionEl = ref.current;
 
     const THROTTLE_TIME_MILLIS = 50;

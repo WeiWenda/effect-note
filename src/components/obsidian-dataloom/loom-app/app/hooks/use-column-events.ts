@@ -8,7 +8,7 @@ import { useAppMount } from '../../app-mount-provider';
 import EventManager from 'src/components/obsidian-dataloom/shared/event/event-manager';
 
 export const useColumnEvents = () => {
-  const { reactAppId, app } = useAppMount();
+  const { reactAppId } = useAppMount();
   const { doCommand } = useLoomState();
   const logger = useLogger();
 
@@ -36,5 +36,5 @@ export const useColumnEvents = () => {
         handleColumnDeleteEvent
       );
     };
-  }, [doCommand, logger, reactAppId, app]);
+  }, [doCommand, logger, reactAppId]);
 };

@@ -1,7 +1,7 @@
 import Tag from '../../shared/tag';
 import Wrap from 'src/components/obsidian-dataloom/shared/wrap';
 
-import { Tag as TagType } from '../../../shared/loom-state/types/loom-state';
+import { Tag as TagType } from 'src/components/obsidian-dataloom/shared/loom-state/types/loom-state';
 
 import './styles.css';
 

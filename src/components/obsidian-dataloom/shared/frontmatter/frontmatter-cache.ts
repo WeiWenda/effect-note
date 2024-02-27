@@ -1,6 +1,4 @@
-import { App } from 'obsidian';
 import { ObsidianPropertyType } from './types';
-import { getAllObsidianProperties } from './obsidian-utils';
 
 export default class FrontmatterCache {
   static instance: FrontmatterCache;
@@ -9,20 +7,6 @@ export default class FrontmatterCache {
     string,
     ObsidianPropertyType
   >();
-
-  loadProperties(app: App) {
-    // console.log('Loading frontmatter properties...');
-    this.cache.clear();
-
-    const properties = getAllObsidianProperties(app);
-    Object.values(properties).forEach((value) => {
-      const { name, type } = value as {
-        name: string;
-        type: ObsidianPropertyType;
-      };
-      this.cache.set(name, type ?? ObsidianPropertyType.TEXT);
-    });
-  }
 
   getPropertyNames(type: ObsidianPropertyType) {
     const keys = [];

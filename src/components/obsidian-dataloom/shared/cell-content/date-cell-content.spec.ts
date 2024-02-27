@@ -6,7 +6,7 @@ import { getDateCellContent } from './date-cell-content';
 
 describe('getDateCellContent', () => {
   // Normal cases
-  it('returns formatted date string with MM_DD_YYYY format and '-' separator', () => {
+  it('returns formatted date string with MM_DD_YYYY format and \'-\' separator', () => {
     const result = getDateCellContent(
       '2020-01-01T23:00:00Z',
       DateFormat.MM_DD_YYYY,

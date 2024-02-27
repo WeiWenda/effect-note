@@ -7,7 +7,6 @@ import MenuButton from 'src/components/obsidian-dataloom/shared/menu-button';
 import MoreMenu from './more-menu';
 import FilterMenu from './filter-menu';
 import SortBubbleList from './sort-bubble-list';
-import SourcesMenu from './sources-menu';
 
 import {
   SortDir,
@@ -18,7 +17,6 @@ import {
 } from 'src/components/obsidian-dataloom/shared/loom-state/types/loom-state';
 import { isSmallScreenSize } from 'src/components/obsidian-dataloom/shared/render/utils';
 import { ColumnChangeHandler } from '../app/hooks/use-column/types';
-import { SourceAddHandler } from '../app/hooks/use-source/types';
 import { LoomMenuLevel } from 'src/components/obsidian-dataloom/shared/menu-provider/types';
 import { useMenu } from 'src/components/obsidian-dataloom/shared/menu-provider/hooks';
 
@@ -38,10 +36,7 @@ interface Props {
   onFilterDeleteClick: (filterId: string) => void;
   onFilterAddClick: () => void;
   onCalculationRowToggle: (value: boolean) => void;
-  onSourceAdd: SourceAddHandler;
-  onSourceDelete: (id: string) => void;
   onColumnChange: ColumnChangeHandler;
-  onSourceUpdate: (id: string, data: Partial<Source>) => void;
 }
 export default function OptionBar({
   columns,
@@ -52,10 +47,7 @@ export default function OptionBar({
   onFilterDeleteClick,
   onFilterAddClick,
   onCalculationRowToggle,
-  onSourceAdd,
-  onSourceDelete,
   onColumnChange,
-  onSourceUpdate,
 }: Props) {
   const COMPONENT_ID = 'option-bar';
   const SOURCE_MENU_ID = 'sources-menu';
@@ -82,17 +74,6 @@ export default function OptionBar({
 
   function handleColumnToggle(columnId: string, isVisible: boolean) {
     onColumnChange(columnId, { isVisible });
-  }
-
-  function handleSourceFilterConditionChange(
-    sourceId: string,
-    value: FilterCondition
-  ) {
-    onSourceUpdate(sourceId, { filterCondition: value });
-  }
-
-  function handleSourceFilterTextChange(sourceId: string, value: string) {
-    onSourceUpdate(sourceId, { filterText: value });
   }
 
   function handleSourceMenuOpen() {
@@ -145,20 +126,20 @@ export default function OptionBar({
           />
         </Space>
       </div>
-      <SourcesMenu
-        id={sourcesMenu.id}
-        isOpen={sourcesMenu.isOpen}
-        position={sourcesMenu.position}
-        sources={sources}
-        columns={columns}
-        onSourceAdd={onSourceAdd}
-        onSourceDelete={onSourceDelete}
-        onSourceFilterConditionChange={
-          handleSourceFilterConditionChange
-        }
-        onSourceFilterTextChange={handleSourceFilterTextChange}
-        onClose={sourcesMenu.onClose}
-      />
+      {/*<SourcesMenu*/}
+      {/*  id={sourcesMenu.id}*/}
+      {/*  isOpen={sourcesMenu.isOpen}*/}
+      {/*  position={sourcesMenu.position}*/}
+      {/*  sources={sources}*/}
+      {/*  columns={columns}*/}
+      {/*  onSourceAdd={onSourceAdd}*/}
+      {/*  onSourceDelete={onSourceDelete}*/}
+      {/*  onSourceFilterConditionChange={*/}
+      {/*    handleSourceFilterConditionChange*/}
+      {/*  }*/}
+      {/*  onSourceFilterTextChange={handleSourceFilterTextChange}*/}
+      {/*  onClose={sourcesMenu.onClose}*/}
+      {/*/>*/}
       <MoreMenu
         id={moreMenu.id}
         isOpen={moreMenu.isOpen}

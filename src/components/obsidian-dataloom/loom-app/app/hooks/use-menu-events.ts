@@ -69,7 +69,7 @@ const useCloseOnMarkdownViewScroll = () => {
 
       //Since it takes a noticable amount of time for React to update the DOM, we set
       //the display to none and then wait for React to clean up the DOM
-      for (const menu of openMenus) {
+      for (const menu of openMenus as any) {
         (menu as HTMLElement).style.display = 'none';
       }
 

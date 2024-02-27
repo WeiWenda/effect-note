@@ -112,7 +112,7 @@ export default class PluginsTableComponent extends React.Component<Props, {}> {
                   statusText = 'Unregistered';
                 }
 
-                const plugin = getPlugin(name) || {};
+                const plugin: {[key: string]: any} = getPlugin(name) || {};
                 const tdStyle = { padding: 5};
                 return (
                   <tr key={name}

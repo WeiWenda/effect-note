@@ -64,7 +64,6 @@ import { Color } from 'src/components/obsidian-dataloom/shared/loom-state/types/
 import { generateUuid } from '../uuid';
 import { getCurrentDateTime } from '../date/utils';
 import { ObsidianPropertyType } from '../frontmatter/types';
-import { getFilterConditionsForPropertyType } from 'src/components/obsidian-dataloom/loom-app/option-bar/sources-menu/add-source-submenu/utils';
 
 export const createFolderSource = (
   path: string,
@@ -75,31 +74,6 @@ export const createFolderSource = (
     type: SourceType.FOLDER,
     path,
     includeSubfolders,
-  };
-};
-
-export const createFrontmatterSource = (
-  propertyType: ObsidianPropertyType,
-  propertyKey: string,
-  options?: {
-    filterCondition?: FilterCondition;
-    filterText?: string;
-  }
-): Source => {
-  const { filterCondition: originalFilterCondition, filterText = "" } =
-    options || {};
-
-  let filterCondition = originalFilterCondition;
-  if (!filterCondition) {
-    filterCondition = getFilterConditionsForPropertyType(propertyType)[0];
-  }
-  return {
-    id: generateUuid(),
-    type: SourceType.FRONTMATTER,
-    propertyType,
-    propertyKey,
-    filterCondition,
-    filterText,
   };
 };
 

@@ -7,7 +7,7 @@ import { useAppMount } from '../../app-mount-provider';
 import EventManager from 'src/components/obsidian-dataloom/shared/event/event-manager';
 
 export const useRowEvents = () => {
-  const { reactAppId, app } = useAppMount();
+  const { reactAppId } = useAppMount();
   const { doCommand } = useLoomState();
 
   React.useEffect(() => {
@@ -27,5 +27,5 @@ export const useRowEvents = () => {
       EventManager.getInstance().off('add-row', handleRowAddEvent);
       EventManager.getInstance().off('delete-row', handleRowDeleteEvent);
     };
-  }, [doCommand, app, reactAppId]);
+  }, [doCommand, reactAppId]);
 };

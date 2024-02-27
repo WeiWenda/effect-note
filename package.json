@@ -108,6 +108,7 @@
     "ical-generator": "^3.6.1",
     "ignore-styles": "^5.0.1",
     "immutability-helper": "^3.1.1",
+    "jest-date-mock": "^1.0.8",
     "jquery": "^3.5.1",
     "jsondiffpatch": "^0.5.0",
     "katex": "^0.12.0",
