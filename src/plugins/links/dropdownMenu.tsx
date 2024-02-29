@@ -224,10 +224,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           key: 'export_url',
         }
       ].concat(props.session.serverConfig.imgur?.type === 'picgo' ? [
-        // {
-        //   label: '生成分享链接',
-        //   key: 'export_picgo',
-        // }
+        {
+          label: '生成分享链接',
+          key: 'export_picgo',
+        }
       ] : []),
     }
   ];

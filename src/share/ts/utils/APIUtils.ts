@@ -345,10 +345,16 @@ export function getCurrentUser() {
     });
 }
 
-export function getShareDocContent(shareUrl: string) {
-    return request({
-        url: shareUrl,
-        method: 'GET',
+export function getShareDocContent(filename: string) {
+    return new Promise(function (resolve, reject) {
+        fetch(filename, {}).then(response =>
+          response.text().then(json => {
+              if (!response.ok) {
+                  reject(json);
+              }
+              resolve(json);
+          })
+        );
     });
 }
 
