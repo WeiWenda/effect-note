@@ -385,7 +385,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
               jsonContent,
               props.session.clientStore.getClientSetting('curDocId'),
               props.session.serverConfig.imgur).then(shareUrl => {
-              const url = `http://demo.effecnote.com${location.pathname}?s=${shareUrl}`;
+              const url = `http://demo.effectnote.com/note/-1?s=${shareUrl}`;
               copyToClipboard(url);
               props.session.showMessage('已复制到粘贴板');
             }).catch(e => {

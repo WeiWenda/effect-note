@@ -412,11 +412,6 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     props.session.clientStore.setClientSetting('curDocId', docID);
     props.session.clientStore.setDocname(docID);
     await props.session.changeViewRoot(Path.loadFromAncestry(await props.session.clientStore.getLastViewRoot()));
-    if (!props.session.clientStore.getDocSetting('loaded')) {
-      initialLoad = true;
-      // props.session.showMessage('初始加载中...');
-      props.session.clientStore.setDocSetting('loaded', true);
-    }
     document.title = curDocInfo.name!;
     props.session.document.store.setBackend(new IndexedDBBackend(newDocName), newDocName);
     await beforeLoadDoc();
