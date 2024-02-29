@@ -65,6 +65,27 @@ export function login(loginRequest: any) {
     });
 }
 
+export async function uploadJson(jsonContent: string, docId: number, imgur: {type: string, url: string}) {
+    const file = new File([jsonContent], 'share-doc', {type: 'application/json'});
+    let formData = new FormData();
+    formData.append('uploaded-json', file);
+    return request({
+        url: API_BASE_URL + '/upload_json/' + docId,
+        method: 'POST',
+        headers: new Headers({}),
+        body: formData
+    }).then(res => {
+        return request({
+            url: imgur.url,
+            method: 'POST',
+            body: JSON.stringify({list: [res.data]}),
+            headers: new Headers({}),
+        }).then(res => {
+            return res.result[0] as string;
+        });
+    });
+}
+
 export async function uploadImage(file: File, docId: number, imgur: {type: string, url: string} | undefined) {
     if (imgur === undefined || imgur.type === 'local') {
         let formData = new FormData();
@@ -324,33 +345,10 @@ export function getCurrentUser() {
     });
 }
 
-export function getShareDocContent(filename: string) {
-    const Bucket = 'fileserver-1314328063';
-    const Region = 'ap-beijing';
-    const cos = new COS({
-        EnableTracker: false,
-        SecretId: 'xxx',
-        SecretKey: 'xxx',
-    });
-    return new Promise(function (resolve, reject) {
-      cos.getObjectUrl({
-          Bucket,
-          Region,
-          Key: filename
-      }, (err: any , data: any) => {
-          if (err) {
-              reject(err);
-          } else {
-              fetch(data.Url, {}).then(response =>
-                  response.text().then(json => {
-                      if (!response.ok) {
-                          reject(json);
-                      }
-                      resolve(json);
-                  })
-              );
-          }
-      });
+export function getShareDocContent(shareUrl: string) {
+    return request({
+        url: shareUrl,
+        method: 'GET',
     });
 }
 

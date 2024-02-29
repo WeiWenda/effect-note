@@ -8,8 +8,9 @@ import {MarksPlugin} from '../marks';
 import $ from 'jquery';
 import {downloadFile} from '../../ts/util';
 import Moment from 'moment/moment';
-import {shareDoc} from '../../share/ts/utils/APIUtils';
+import {shareDoc, uploadJson} from '../../share/ts/utils/APIUtils';
 import {copyToClipboard} from '../../components';
+import {useLocation, useSearchParams} from 'react-router-dom';
 
 export function exportAction(session: Session, path: Path, mimeType: string, filename?: string) {
   session.getCurrentContent(path, mimeType).then(content => {
@@ -85,6 +86,8 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
   markPlugin: MarksPlugin,
   linksPlugin: LinksPlugin
 }) {
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [dropDownOpen, setDropDownOpen ] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const items: MenuProps['items'] = [
@@ -217,12 +220,18 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           key: 'export_text',
         },
         {
-          label: '生成超链接（用于节点引用）',
+          label: '生成引用链接',
           key: 'export_url',
         }
-      ],
+      ].concat(props.session.serverConfig.imgur?.type === 'picgo' ? [
+        // {
+        //   label: '生成分享链接',
+        //   key: 'export_picgo',
+        // }
+      ] : []),
     }
   ];
+
   const replaceEmptyBlock = async () => {
     const parent = props.path.parent!;
     const index = await props.session.document.indexInParent(props.path);
@@ -369,8 +378,28 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       case 'export_text':
         exportAction(props.session, props.path, 'text/plain');
         break;
+      case 'export_picgo':
+        props.session.getCurrentContent(props.path, 'application/json', true).then(jsonContent => {
+          if (props.session.serverConfig.imgur && props.session.serverConfig.imgur.type === 'picgo') {
+            uploadJson(
+              jsonContent,
+              props.session.clientStore.getClientSetting('curDocId'),
+              props.session.serverConfig.imgur).then(shareUrl => {
+              const url = `http://demo.effecnote.com${location.pathname}?s=${shareUrl}`;
+              copyToClipboard(url);
+              props.session.showMessage('已复制到粘贴板');
+            }).catch(e => {
+              console.error(e);
+              props.session.showMessage(`分享失败，报错信息: ${e.message}`);
+            });
+          } else {
+            props.session.showMessage('PicGo未配置');
+          }
+        });
+        break;
       case 'export_url':
-        const url = `http://localhost:51223/note/${props.session.clientStore.getClientSetting('curDocId')}?f=${props.path.row}`;
+        const url = `${window.location.origin}`
+          + `${location.pathname}?f=${props.path.row}${searchParams.get('s') ? ('&' + searchParams.get('s')) : ''}`;
         copyToClipboard(url);
         props.session.showMessage('已复制到粘贴板');
         break;

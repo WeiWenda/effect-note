@@ -12,7 +12,7 @@ import {
 import * as React from 'react';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import type {MenuProps} from 'antd';
-import {Collapse, Input, Menu, Badge, Tag, Space} from 'antd';
+import {Collapse, Input, Menu, Badge, Tag, Space, Tooltip} from 'antd';
 import logger from '../../ts/logger';
 import {PluginsManager} from '../../ts/plugins';
 import {MarksPlugin} from '../../plugins/marks';
@@ -138,6 +138,12 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       plainLabel = plainLabel.split(' @ ').shift()!;
     }
     let realLabel: React.ReactNode = plainLabel;
+    let dirtyTooltip = '';
+    if (['darwin', 'mas'].includes(process.env.REACT_APP_BUILD_PLATFORM || '')) {
+      dirtyTooltip = '本地有未保存内容，此标记将在保存（command+s）后自动消除';
+    } else {
+      dirtyTooltip = '本地有未保存内容，此标记将在保存（ctrl+s）后自动消除';
+    }
     if (!children) {
       realLabel = (
         <FileToolsComponent session={props.session} curDocId={docId!}
@@ -155,7 +161,9 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
             </Space>
             {
               isModified &&
-                <ExclamationCircleOutlined style={{color: '#fc9403'}} />
+                <Tooltip title={dirtyTooltip}>
+                  <ExclamationCircleOutlined style={{color: '#fc9403'}} />
+                </Tooltip>
             }
           </div>
         </FileToolsComponent>
@@ -481,7 +489,15 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     const currentViewRoot = searchParams.get('f');
     const shareUrl = searchParams.get('s');
     if (shareUrl) {
-      loadShareDoc(shareUrl);
+      loadShareDoc(shareUrl).then(() => {
+        if (currentViewRoot) {
+          props.session.document.canonicalPath(Number(currentViewRoot)).then(path => {
+            if (path) {
+              props.session.zoomInto(path);
+            }
+          });
+        }
+      });
     } else {
       loadDoc(Number(curDocId)).then(() => {
         if (currentViewRoot) {

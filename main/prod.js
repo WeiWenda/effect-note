@@ -10,7 +10,7 @@ const cors = require('cors');
 const express = require('express');
 const git = require('isomorphic-git');
 const {store, getGitConfig} = require("./isomorphicGit");
-const {IMAGES_FOLDER, refreshIndex} = require("./expressDocCurd");
+const {IMAGES_FOLDER, SHARES_FOLDER, refreshIndex} = require("./expressDocCurd");
 const isWindows = os.type().toLowerCase().indexOf('windows') >= 0
 
 async function startExpress(args) {
@@ -65,6 +65,12 @@ async function startExpress(args) {
     const storePath = path.resolve(gitHome, IMAGES_FOLDER, req.params.docId)
     const data = await saveFiles(req.files, storePath, req.params.docId)
     res.send(data)
+  })
+  app.post('/api/upload_json/:docId', multer().array('uploaded-json'), async function (req, res) {
+    const {gitHome} = getGitConfig();
+    const storePath = path.resolve(gitHome, SHARES_FOLDER, req.params.docId)
+    const data = await saveFiles(req.files, storePath, req.params.docId)
+    res.send({data: storePath + '/' + data.data[0].alt})
   })
   app.post('/api/download_image', async function (req, res) {
     const picUrl = req.body.url

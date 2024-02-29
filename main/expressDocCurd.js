@@ -9,6 +9,7 @@ const jieba = require('@node-rs/jieba');
 const isoHttp = require("isomorphic-git/http/node");
 const docId2path = {};
 const IMAGES_FOLDER = 'images'
+const SHARES_FOLDER = 'shares'
 jieba.load();
 require("lunr-languages/lunr.stemmer.support")(lunr)
 require('lunr-languages/lunr.multi')(lunr)
@@ -246,4 +247,4 @@ router.put('/:docId', async (req, res) => {
 });
 
 // this is required
-module.exports = {refreshIndex, router, punctuationSplit, searchSplitFunction, IMAGES_FOLDER};
+module.exports = {refreshIndex, router, punctuationSplit, searchSplitFunction, IMAGES_FOLDER, SHARES_FOLDER};
