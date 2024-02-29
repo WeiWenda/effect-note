@@ -149,6 +149,9 @@ export class ClientStore {
   private _lastViewrootKey_(): string {
     return `${this.prefix}:lastviewroot2`;
   }
+  private _lockEdit_(): string {
+    return `${this.prefix}:lockedit`;
+  }
   private _macrosKey_(): string {
     return `${this.prefix}:macros`;
   }
@@ -186,6 +189,13 @@ export class ClientStore {
   }
   public getLastViewRoot(): SerializedPath {
     return this._get(this._lastViewrootKey_(), []);
+  }
+
+  public setLockEdit(lockEdit: boolean) {
+    this._set(this._lockEdit_(), lockEdit);
+  }
+  public getLockEdit(): boolean {
+    return this._get(this._lockEdit_(), false);
   }
 }
 

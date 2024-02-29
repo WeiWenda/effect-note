@@ -207,6 +207,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                 <Tooltip title='点击后解除锁定编辑'>
                     <LockOutlined onClick={() => {
                       props.session.lockEdit = false;
+                      props.session.clientStore.setLockEdit(false);
                       props.session.showMessage('进入编辑模式');
                       forceUpdate();
                     }}/>
@@ -217,6 +218,7 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                 <Tooltip title='点击后锁定编辑'>
                     <UnlockOutlined onClick={() => {
                       props.session.lockEdit = true;
+                      props.session.clientStore.setLockEdit(true);
                       props.session.showMessage('进入锁定模式');
                       forceUpdate();
                     }} />

@@ -441,7 +441,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     const newDocName = docID.toString();
     props.session.clientStore.setClientSetting('curDocId', docID);
     props.session.clientStore.setDocname(docID);
-    await props.session.changeViewRoot(Path.loadFromAncestry(await props.session.clientStore.getLastViewRoot()));
+    await props.session.changeViewRoot(Path.loadFromAncestry(props.session.clientStore.getLastViewRoot()));
+    props.session.lockEdit = props.session.clientStore.getLockEdit();
     if (!props.session.clientStore.getDocSetting('loaded')) {
       initialLoad = true;
       props.session.clientStore.setDocSetting('loaded', true);

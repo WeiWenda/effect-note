@@ -89,7 +89,10 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
         break;
       case 'export_pdf':
         $('.session-content').css('overflow', 'unset');
+        const lockHistoryState = props.session.lockEdit;
+        props.session.lockEdit = true;
         handlePrint();
+        props.session.lockEdit = lockHistoryState;
         $('.session-content').css('overflow', 'auto');
         break;
       default:
