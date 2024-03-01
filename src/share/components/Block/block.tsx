@@ -186,7 +186,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
         onMouseUp={(e) => {
           session.selectMousePressing = false;
           session.emit('updateInner');
-          e.stopPropagation();
+          // e.stopPropagation();
         }}
         style={this.props.style}
       >
