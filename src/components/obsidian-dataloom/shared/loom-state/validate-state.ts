@@ -123,7 +123,18 @@ const ColorUnion = Union(
   Literal(Color.BLUE),
   Literal(Color.PURPLE),
   Literal(Color.PINK),
-  Literal(Color.RED)
+  Literal(Color.RED),
+  Literal(Color.ANTD_MAGENTA),
+  Literal(Color.ANTD_RED),
+  Literal(Color.ANTD_VOLCANO),
+  Literal(Color.ANTD_ORANGE),
+  Literal(Color.ANTD_GOLD),
+  Literal(Color.ANTD_LIME),
+  Literal(Color.ANTD_GREEN),
+  Literal(Color.ANTD_CYAN),
+  Literal(Color.ANTD_BLUE),
+  Literal(Color.ANTD_GEEKBLUE),
+  Literal(Color.ANTD_PURPLE)
 );
 
 const SortDirUnion = Union(

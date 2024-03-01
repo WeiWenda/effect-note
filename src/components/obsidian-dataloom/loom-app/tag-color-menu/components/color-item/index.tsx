@@ -9,6 +9,7 @@ import { Color } from '../../../../shared/loom-state/types/loom-state';
 import { uppercaseFirst } from '../../../../shared/string-utils';
 
 import './styles.css';
+import {Tag} from 'antd';
 
 interface Props {
   isDarkMode: boolean;
@@ -50,10 +51,19 @@ export default function ColorItem({
       }}
     >
       <Padding px='lg' py='sm'>
-        <Stack isHorizontal spacing='lg'>
-          <div className={squareClass}></div>
-          <Text value={uppercaseFirst(color)} size='sm' />
-        </Stack>
+          {
+            color.startsWith('antd') &&
+              <Stack isHorizontal spacing='lg'>
+                  <Tag color={color.substring(5)}>{color}</Tag>
+              </Stack>
+          }
+          {
+            !color.startsWith('antd') &&
+            <Stack isHorizontal spacing='lg'>
+              <div className={squareClass}></div>
+              <Text value={uppercaseFirst(color)} size='sm' />
+            </Stack>
+          }
       </Padding>
     </div>
   );

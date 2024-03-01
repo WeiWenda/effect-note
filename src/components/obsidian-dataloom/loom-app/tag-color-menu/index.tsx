@@ -77,7 +77,7 @@ export default function TagColorMenu({
             <Text value='Colors' />
           </Padding>
           <div className='dataloom-tag-color-menu__color-container'>
-            {Object.values(Color).map((color) => (
+            {Object.values(Color).filter(c => c.startsWith('antd')).map((color) => (
               <ColorItem
                 isDarkMode={isDarkMode}
                 key={color}

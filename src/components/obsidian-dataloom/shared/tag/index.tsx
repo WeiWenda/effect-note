@@ -5,6 +5,7 @@ import Padding from '../padding';
 import { Color } from '../loom-state/types/loom-state';
 import { findColorClassName } from '../color';
 import { useAppSelector } from '../../redux/hooks';
+import {Tag as AntdTag } from 'antd';
 
 import './styles.css';
 import Icon from '../icon';
@@ -45,14 +46,23 @@ export default function Tag({
   return (
     <div className={tagClassName}>
       <Stack spacing='sm' justify='center' isHorizontal>
-        <div
-          className={contentClassName}
-          style={{
-            maxWidth,
-          }}
-        >
-          {content}
-        </div>
+        {
+          color.startsWith('antd') &&
+            <AntdTag color={color.substring(5)}>
+              {content}
+            </AntdTag>
+        }
+        {
+          !color.startsWith('antd') &&
+          <div
+            className={contentClassName}
+            style={{
+              maxWidth,
+            }}
+          >
+            {content}
+          </div>
+        }
         {showRemoveButton && (
           <Padding width='max-content'>
             <Button

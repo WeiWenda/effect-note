@@ -147,6 +147,17 @@ export interface Tag {
 }
 
 export enum Color {
+  ANTD_MAGENTA = 'antd_magenta',
+  ANTD_RED = 'antd_red',
+  ANTD_VOLCANO = 'antd_volcano',
+  ANTD_ORANGE = 'antd_orange',
+  ANTD_GOLD = 'antd_gold',
+  ANTD_LIME = 'antd_lime',
+  ANTD_GREEN = 'antd_green',
+  ANTD_CYAN = 'antd_cyan',
+  ANTD_BLUE = 'antd_blue',
+  ANTD_GEEKBLUE = 'antd_geekblue',
+  ANTD_PURPLE = 'antd_purple',
   LIGHT_GRAY = 'light gray',
   GRAY = 'gray',
   BROWN = 'brown',
