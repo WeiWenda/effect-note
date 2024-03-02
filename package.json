@@ -1,6 +1,6 @@
 {
   "name": "EffectNote",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "homepage": "/",
   "author": "weiwenda",
@@ -116,7 +116,7 @@
     "localforage": "^1.9.0",
     "lodash": "^4.17.20",
     "lucide-react": "^0.298.0",
-    "markdown-it": "^14.0.0",
+    "markdown-it": "^13.0.2",
     "markdown-table": "^3.0.3",
     "minimist": "^1.2.2",
     "monaco-editor-webpack-plugin": "^7.0.1",

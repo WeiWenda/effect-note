@@ -35,7 +35,7 @@ function getColorMap(loomState: LoomState | undefined): {[key: string]: string} 
   });
   loomStateOrDefault.model.rows.forEach(row => {
     const tagName = (row.cells[1] as TextCell).content;
-    const tagColor = tagId2Color[(row.cells[2] as TagCell).tagId];
+    const tagColor = tagId2Color[(row.cells[2] as TagCell).tagId!];
     colorMap[tagName] = tagColor;
   });
   return colorMap;

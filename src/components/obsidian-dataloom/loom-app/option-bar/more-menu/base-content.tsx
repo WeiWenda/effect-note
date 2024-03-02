@@ -110,6 +110,7 @@ export default function BaseContent({
               <AppMountProvider title={title}
                                 path={path}
                                 collapse={collapse}
+                                forSetting={false}
                                 session={session} reactAppId={reactAppId} isMarkdownView={isMarkdownView}>
                 <Provider store={store}>
                  <ExportApp loomState={loomState}/>
