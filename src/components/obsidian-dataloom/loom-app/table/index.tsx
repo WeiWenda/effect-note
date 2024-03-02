@@ -594,6 +594,7 @@ const Components: TableComponents = {
   },
   //Don't apply styles because we want to apply sticky positioning
   //to the cells, not the header container
+  // @ts-ignore
   TableHead: React.forwardRef(({ ...props }, ref) => {
     return (
       <div
@@ -608,9 +609,11 @@ const Components: TableComponents = {
       />
     );
   }),
+  // @ts-ignore
   TableBody: React.forwardRef(({ style, ...props }, ref) => (
     <div className='dataloom-body' {...props} style={style} ref={ref} />
   )),
+  // @ts-ignore
   TableFoot: React.forwardRef(({ ...props }, ref) => (
     <div
       className='dataloom-footer'
