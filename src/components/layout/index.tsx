@@ -15,7 +15,7 @@ import {Mindmap} from '../mindmap';
 import { Editor, Toolbar } from '@wangeditor/editor-for-react';
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
 import {DrawioEditor} from '../drawioEditor';
-import {API_BASE_URL, getServerConfig, uploadImage} from '../../share/ts/utils/APIUtils';
+import {API_BASE_URL, getServerConfig, setServerConfig as saveServerConfig, uploadImage} from '../../share/ts/utils/APIUtils';
 import Vditor from 'vditor';
 import {mimetypeLookup} from '../../ts/util';
 import logger from '../../ts/logger';
@@ -30,6 +30,10 @@ import SubscriptionSettingsComponent from '../settings/subscription';
 import $ from 'jquery';
 import { ImgurComponent } from '../settings/imgur';
 import {SERVER_CONFIG} from '../../ts/constants';
+import LoomApp from '../obsidian-dataloom/loom-app';
+import {store} from '../obsidian-dataloom/redux/store';
+import {defaultTagConfig} from '../../ts/server_config';
+import {LoomState} from '../obsidian-dataloom/shared/loom-state/types';
 const { Header, Footer, Sider, Content } = Layout;
 type InsertFnType = (url: string, alt: string, href: string) => void;
 
@@ -478,6 +482,27 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
             </Tabs.TabPane>
             <Tabs.TabPane tab='图床' key='4'>
               <ImgurComponent session={props.session} serverConfig={serverConfig}/>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='全局标签' key='5'>
+              <LoomApp
+                session={props.session}
+                path={Path.root()}
+                title={' '}
+                collapse={false}
+                isMarkdownView={false}
+                store={store}
+                forSetting={true}
+                loomState={serverConfig.tagConfig || defaultTagConfig}
+                onSaveState={async (
+                  appId: string,
+                  state: LoomState,
+                  shouldSaveFrontmatter: boolean) => {
+                  console.log('saveLoomState', appId, state, shouldSaveFrontmatter);
+                  saveServerConfig({...serverConfig, tagConfig: state}).then(() => {
+                    props.session.serverConfig.tagConfig = state;
+                  });
+                }}
+              />
             </Tabs.TabPane>
           </Tabs>
         </div>

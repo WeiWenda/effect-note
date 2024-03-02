@@ -10,6 +10,7 @@ export function SpecialBlock(props: React.PropsWithChildren<{
   title: string,
   tools?: any, path: Path, collapse: boolean,
   specialClass?: string,
+  forSetting?: boolean,
   onCopy?: () => void}>) {
   const [fold, setFold] = useState(props.collapse);
   const [headerVision, setHeaderVision] = useState(props.collapse);
@@ -30,7 +31,7 @@ export function SpecialBlock(props: React.PropsWithChildren<{
         });
       }
     }} style={{padding: '0px 10px'}}>
-      { editingTitle ?
+      { (editingTitle && !props.forSetting) ?
         <Input style={{width: '30em', height: `${props.session.clientStore.getClientSetting('lineHeight')}px`}}
                value={title}
                autoFocus
@@ -56,7 +57,7 @@ export function SpecialBlock(props: React.PropsWithChildren<{
       borderColor: props.session.clientStore.getClientSetting('theme-bg-secondary')
     }}>
       {
-        (headerVision || fold) &&
+        (headerVision || fold || props.forSetting) &&
         <div className={'effect-block-placehoder'}
              onDoubleClick={() => {
                if (fold) {
@@ -69,21 +70,23 @@ export function SpecialBlock(props: React.PropsWithChildren<{
                height: `${props.session.clientStore.getClientSetting('lineHeight')}px`,
                ...getStyles(props.session.clientStore, ['theme-bg-secondary'])
              }}>
-          {titleElement}
+          {
+            titleElement
+          }
           <Space style={{opacity: 1}}>
             {
-              // !props.session.lockEdit &&
+              !props.forSetting &&
               props.blockType
             }
             {
-              fold &&
+              fold && !props.forSetting &&
                 <FolderOutlined onClick={() => {
                   setFold(false);
                   props.session.emit('setBlockCollapse', props.path.row, false);
                 }} />
             }
             {
-              !fold &&
+              !fold && !props.forSetting &&
                 <FolderOpenOutlined onClick={() => {
                   setFold(true);
                   props.session.emit('setBlockCollapse', props.path.row, true);
@@ -93,27 +96,32 @@ export function SpecialBlock(props: React.PropsWithChildren<{
               !props.session.lockEdit &&
               props.tools
             }
-            <EnterOutlined onClick={() => {
-              props.session.cursor.setPosition(props.session.hoverRow!, 0).then(() => {
-                props.session.newLineBelow().then(() => {
-                  props.session.stopAnchor();
-                  props.session.emit('updateInner');
-                });
-              });
-            }} />
-            <CopyOutlined onClick={() => {
-              props.session.yankBlocks(props.path, 1).then(() => {
-                if (props.onCopy) {
-                  props.onCopy();
-                }
-                props.session.showMessage('复制成功');
-              });
-            }}/>
+            {
+              !props.forSetting &&
+              <Space>
+                <EnterOutlined onClick={() => {
+                  props.session.cursor.setPosition(props.session.hoverRow!, 0).then(() => {
+                    props.session.newLineBelow().then(() => {
+                      props.session.stopAnchor();
+                      props.session.emit('updateInner');
+                    });
+                  });
+                }} />
+                <CopyOutlined onClick={() => {
+                  props.session.yankBlocks(props.path, 1).then(() => {
+                    if (props.onCopy) {
+                      props.onCopy();
+                    }
+                    props.session.showMessage('复制成功');
+                  });
+                }}/>
+              </Space>
+            }
           </Space>
         </div>
       }
       {
-        !fold && !headerVision && titleElement
+        !fold && !headerVision && !props.forSetting && titleElement
       }
       {
         !fold &&

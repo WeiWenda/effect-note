@@ -32,6 +32,7 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
               props.session.showMessage('发现未保存内容，请人工进行合并！');
               props.session.emit('start-diff', 'HEAD', remoteContent, localContent);
             } else {
+              props.session.showMessage('重新加载完成！');
               props.session.emit('save-cloud', {docId: props.curDocId});
             }
           });

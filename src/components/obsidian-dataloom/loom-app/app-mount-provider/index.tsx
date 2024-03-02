@@ -8,6 +8,7 @@ interface ContextProps {
   collapse: boolean;
   reactAppId: string;
   isMarkdownView: boolean;
+  forSetting: boolean;
 }
 
 const MountContext = React.createContext<ContextProps | null>(null);
@@ -34,11 +35,12 @@ export default function AppMountProvider({
   session,
   reactAppId,
   isMarkdownView,
+  forSetting,
   children,
 }: Props) {
   return (
     <MountContext.Provider
-      value={{title, collapse, path, session, reactAppId, isMarkdownView }}
+      value={{title, collapse, path, session, reactAppId, isMarkdownView, forSetting }}
     >
       {children}
     </MountContext.Provider>

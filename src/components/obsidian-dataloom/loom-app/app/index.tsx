@@ -37,7 +37,7 @@ import {SpecialBlock} from '../../../../share/components/Block/SpecialBlock';
 
 export default function App() {
   const logger = useLogger();
-  const { path, session, collapse, title, reactAppId, isMarkdownView } = useAppMount();
+  const { path, session, collapse, title, reactAppId, isMarkdownView, forSetting} = useAppMount();
   const tableRef = React.useRef<VirtuosoHandle | null>(null);
   const { loomState, resizingColumnId, searchText, onRedo, onUndo } =
     useLoomState();
@@ -132,6 +132,7 @@ export default function App() {
     <SpecialBlock key={'dataloom-block'}
                   path={path}
                   title={title}
+                  forSetting={forSetting}
                   tools={
                     <div
                       onMouseEnter={() => {

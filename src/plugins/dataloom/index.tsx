@@ -36,6 +36,7 @@ registerPlugin(
               collapse={pluginData.links.collapse || false}
               isMarkdownView={false}
               store={store}
+              forSetting={false}
               loomState={loomState}
               onSaveState={async (
                 appId: string,

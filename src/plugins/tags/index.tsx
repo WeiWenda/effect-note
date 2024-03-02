@@ -1,28 +1,16 @@
-import * as _ from 'lodash';
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import ical from 'ical-generator';
-import {
-  Char,
-  Document,
-  errors,
-  InMemorySession,
-  INSERT_MOTION_MAPPINGS,
-  LineComponent,
-  Menu,
-  motionKey,
-  Mutation,
-  Path,
-  Row,
-  Session
-} from '../../share';
+import {Document, errors, InMemorySession, Mutation, Path, Row, Session} from '../../share';
 import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {Logger} from '../../ts/logger';
-import Search from '../../share/ts/search';
-import {Popover, Select, Tag} from 'antd';
-import type { CustomTagProps } from 'rc-select/lib/BaseSelect';
+import {Select, Tag} from 'antd';
+import type {CustomTagProps} from 'rc-select/lib/BaseSelect';
 import Moment from 'moment';
 import {onlyUnique} from '../../ts/util';
-import {TaskMenuComponent} from './taskMenu';
+import {LoomState} from '../../components/obsidian-dataloom/shared/loom-state/types';
+import {TagCell, TextCell} from '../../components/obsidian-dataloom/shared/loom-state/types/loom-state';
+import {defaultTagConfig} from '../../ts/server_config';
+
 const { Option } = Select;
 
 // TODO: do this elsewhere
@@ -34,25 +22,24 @@ type Rows = Row[];
 type TagsToRows = {[key: string]: Rows};
 type RowsToTags = {[key: number]: Tags};
 
-const colorMap: Record<string, string> = {
-  'Delay': 'error',
-  'Done': 'success',
-  'Todo': 'warning',
-  'Doing': 'processing',
-  '关键': 'error',
-  '重要': 'warning',
-  '注意': 'processing'
-};
-const tagRender = (props: CustomTagProps) => {
-  const { label, value, closable, onClose } = props;
-  return (
-    <Tag
-      color={colorMap[label as string] || 'default'}
-    >
-      {label}
-    </Tag>
-  );
-};
+function getColorMap(loomState: LoomState | undefined): {[key: string]: string}  {
+  const tagId2Color: {[key: string]: string} = {};
+  const colorMap: {[key: string]: string} = {};
+  const loomStateOrDefault = loomState || defaultTagConfig;
+  loomStateOrDefault.model.columns.forEach(column => {
+    if (column.content === '标签颜色') {
+      column.tags.forEach(tag => {
+        tagId2Color[tag.id] = tag.color.substring(5);
+      });
+    }
+  });
+  loomStateOrDefault.model.rows.forEach(row => {
+    const tagName = (row.cells[1] as TextCell).content;
+    const tagColor = tagId2Color[(row.cells[2] as TagCell).tagId];
+    colorMap[tagName] = tagColor;
+  });
+  return colorMap;
+}
 
 /*
  * ALGORITHMIC NOTE: maintaining the set of tags
@@ -220,11 +207,21 @@ export class TagsPlugin {
       if (tags.length > 0 || pluginData.tags?.tagging) {
         const options: any[] = this.tags
           .filter((t: string) => !new RegExp('(create|start|end|due):.*').test(t))
-          .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t))
-          .concat(['重要', '关键', '注意']).filter( onlyUnique )
+          .concat(Object.keys(getColorMap(this.session.serverConfig.tagConfig)) as Tag[])
+          .filter((t: string) => !['Delay', 'Done', 'Todo', 'Doing'].includes(t)).filter( onlyUnique )
           .map(tag => { return {label: tag, value: tag}; });
         const handleChange = (newTags: string[]) => {
           this.setTags(path.row, newTags.concat(taskTags));
+        };
+        const tagRender = (props: CustomTagProps) => {
+          const { label, value, closable, onClose } = props;
+          return (
+            <Tag
+              color={getColorMap(this.session.serverConfig.tagConfig)[label as string] || 'default'}
+            >
+              {label}
+            </Tag>
+          );
         };
         lineContents.push(
           <Select

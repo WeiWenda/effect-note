@@ -18,6 +18,7 @@ interface Props {
   session: Session;
   isMarkdownView: boolean;
   store: Store;
+  forSetting: boolean;
   loomState: LoomState;
   onSaveState: (
     appId: string,
@@ -33,6 +34,7 @@ export default function LoomApp({
   session,
   isMarkdownView,
   store,
+  forSetting,
   loomState,
   onSaveState,
 }: Props) {
@@ -45,6 +47,7 @@ export default function LoomApp({
         path={path}
         reactAppId={path.row.toString()}
         isMarkdownView={isMarkdownView}
+        forSetting={forSetting}
       >
         <Provider store={store}>
           <LoomStateProvider
