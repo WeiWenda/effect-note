@@ -60,10 +60,10 @@ export function mimetypeLookupByContent(content: string): string | undefined {
     const trimed = content.trim();
     if (trimed.startsWith('<')) {
         return undefined;
-    } else if (trimed.startsWith('-')) {
-        return 'text/plain';
     } else if (trimed.startsWith('{')) {
         return 'application/json';
+    } else if (trimed.startsWith('-') || trimed.split('-').length > 5) {
+        return 'text/plain';
     } else {
         return undefined;
     }
