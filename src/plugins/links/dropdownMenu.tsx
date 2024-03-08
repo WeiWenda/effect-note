@@ -266,10 +266,8 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
     }
     switch (key) {
       case 'load_pdf':
-        props.session.fileInputRef.current.setPath(props.path);
-        $('#file-uploader').trigger('click');
-        break;
       case 'load_md':
+      case 'load_opml':
         props.session.fileInputRef.current.setPath(props.path);
         $('#file-uploader').trigger('click');
         break;
