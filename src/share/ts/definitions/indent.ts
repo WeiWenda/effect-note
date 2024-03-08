@@ -45,7 +45,7 @@ keyDefinitions.registerAction(new Action(
   'select-indent',
   'Indent select blocks right',
   async function({ session, repeat }) {
-    if (session.getAnchor() !== null && !session.cursor.path.is(session.anchor.path)) {
+    if (session.selecting && session.getAnchor() !== null && !session.cursor.path.is(session.anchor.path)) {
       const [parent, index1, index2] = await session.getVisualLineSelections();
       const children = await session.document.getChildren(parent);
       await session.indentBlocks(children[index1], index2 - index1 + 1);
