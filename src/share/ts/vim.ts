@@ -164,6 +164,7 @@ export const INSERT_MODE_MAPPINGS: HotkeyMapping = Object.assign({
   'split-line': [['enter']],
   'scroll-down': [['page down']],
   'scroll-up': [['page up']],
+  'start-tag': [['meta+['], ['ctrl+[']],
   'undo': [['ctrl+z'], ['meta+z']],
   'redo': [['ctrl+Z'], ['meta+Z']],
   'select-left': [['shift+left']],

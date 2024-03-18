@@ -2,6 +2,14 @@ import keyDefinitions, {Action, SequenceAction} from '../keyDefinitions';
 import {IndexedDBBackend, Path} from '../index';
 import {notification} from 'antd';
 keyDefinitions.registerAction(new Action(
+  'start-tag',
+  'starting tag',
+  async function({ session }) {
+    await session.emitAsync('startTag', session.cursor.path);
+  }
+));
+
+keyDefinitions.registerAction(new Action(
   'save-cloud',
   'Persist to cloud',
   async function({ session }) {
