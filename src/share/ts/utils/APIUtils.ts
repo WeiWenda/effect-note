@@ -2,6 +2,7 @@ import {DocInfo, SubscriptionInfo} from '../types';
 import {ServerConfig} from '../../../ts/server_config';
 import config from '../vim';
 import COS from 'cos-js-sdk-v5';
+import {themes} from '../themes';
 
 export const API_BASE_URL = 'http://localhost:51223/api';
 export const ACCESS_TOKEN = 'accessToken';
@@ -165,14 +166,16 @@ export function checkUsernameAvailability(username: string) {
     });
 }
 
-export function getServerConfig() {
+export async function getServerConfig(): Promise<ServerConfig> {
     if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
-        return Promise.resolve(JSON.parse(localStorage.getItem('demo_mock_server_config') || '{}'));
+        const serverConfig = JSON.parse(localStorage.getItem('demo_mock_server_config') || '{}');
+        return {themes: themes, ...serverConfig};
     } else {
-        return request({
+        const serverConfig = await request({
            url: API_BASE_URL + '/config',
            method: 'GET'
         });
+        return {themes: themes, ...serverConfig};
     }
 }
 
