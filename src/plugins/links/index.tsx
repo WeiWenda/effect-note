@@ -88,6 +88,9 @@ export class LinksPlugin {
         this.api.registerListener('session', 'setMindmap', async (row: Row, img_src: string, img_json: string) => {
             await this.setPng(row, img_src, img_json);
         });
+        this.api.registerListener('session', 'unsetMindmap', async (row: Row) => {
+            await this.unsetPng(row);
+        });
         this.api.registerListener('session', 'setDrawio',  (row: Row) => {
             onInsertDrawio(row);
         });
@@ -362,98 +365,6 @@ export class LinksPlugin {
                                     zoom={pluginData.links.drawio.zoom}
                                     onClickFunc={onInsertDrawio}/>
                   </SpecialBlock>
-                );
-            }
-            if (pluginData.links?.png != null) {
-                const pngOnClick: MenuProps['onClick'] = ({ key }) => {
-                    switch (key) {
-                        case 'del_png':
-                            Modal.confirm({
-                                title: '确认删除当前思维导图？',
-                                icon: <ExclamationCircleOutlined />,
-                                okText: '确认',
-                                cancelText: '取消',
-                                onOk: () => {
-                                    that.unsetPng(path.row).then(() => {
-                                        that.session.emit('updateAnyway');
-                                    });
-                                }
-                            });
-                            break;
-                        case 'parse_png':
-                            const kityNode = pluginData.links.png.json as KityMinderNode;
-                            const serializedBlock = that.session.fromKityMinderNode(kityNode) as {
-                                text: string,
-                                collapsed?: boolean,
-                                id?: Row,
-                                plugins?: any,
-                                children?: Array<SerializedBlock>
-                            };
-                            that.session.document.setLine(path.row, serializedBlock.text.split(''));
-                            that.session.document.getInfo(path.row).then(rowInfo => {
-                                that.session.delBlocks(path.row, 0, rowInfo.childRows.length).then(() => {
-                                   that.session.addBlocks(path, 0, serializedBlock.children || []).then(() => {
-                                       that.session.emit('updateInner');
-                                   });
-                                });
-                            });
-                            break;
-                        case 'edit_png':
-                            that.session.emit('openModal', 'png');
-                            that.session.pngOnSave = (img_src: any, json: any) => {
-                                that.setPng(path.row, img_src, json).then(() => {
-                                    that.session.emit('updateAnyway');
-                                });
-                            };
-                            setTimeout(() => {
-                                that.getPng(path.row).then(kmnode => {
-                                    that.session.mindMapRef.current.setContent(kmnode);
-                                });
-                            }, 1000);
-                            break;
-                        default:
-                            message.info(`Click on item ${key}`);
-                    }
-                };
-                const pngMenu = <Menu
-                  onClick={pngOnClick}
-                  items={[{
-                        key: 'edit_png',
-                        label: '修改思维导图'
-                      },
-                      {
-                        key: 'parse_png',
-                        label: '更新大纲内容',
-                      },
-                      {
-                        key: 'del_png',
-                        label: '删除思维导图',
-                    }]}
-                  ></Menu>;
-                elements.push(
-                    <Dropdown key='mindmap-icon' overlay={pngMenu} trigger={['contextMenu']} >
-                        <Tag icon={<PictureOutlined />}
-                          onClick={() => pluginData.links.png.visible = true}
-                          style={{
-                              marginLeft: '5px',
-                              ...getStyles(this.session.clientStore, ['theme-bg-secondary', 'theme-trim', 'theme-text-primary'])
-                          }} >
-                         脑图
-                        </Tag>
-                    </Dropdown>,
-                    <Image
-                        key='mindmap-preview'
-                        style={{ display: 'none' }}
-                        src={pluginData.links.png.src}
-                        preview={{
-                            visible: pluginData.links.png.visible,
-                            src: pluginData.links.png.src,
-                            onVisibleChange: value => {
-                                pluginData.links.png.visible = value;
-                                that.session.emit('updateAnyway');
-                            }
-                        }}
-                    />
                 );
             }
             return elements;

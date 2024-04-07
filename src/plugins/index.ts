@@ -17,6 +17,7 @@ import './code';
 import './comment';
 import './dataloom';
 import './cloze';
+import './mindmap';
 
 // for developers: uncomment the following lines
 /*

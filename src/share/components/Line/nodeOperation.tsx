@@ -24,7 +24,7 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
     {label: LableAndShortCut(client, '插入「表格」', '/dataloom'), value: 'insert-dataloom', shortcut: 'dataloom'},
     // {label: LableAndShortCut(client, 'markdown', '/md'), value: 'insert-md', shortcut: 'md'},
     // {label: LableAndShortCut(client, '富文本', '/rtf'), value: 'insert-rtf', shortcut: 'rtf'},
-    // {label: LableAndShortCut(client, '脑图', '/mindmap'), value: 'insert-mindmap', shortcut: 'mindmap'},
+    {label: LableAndShortCut(client, '插入「脑图」', '/mindmap'), value: 'insert-mindmap', shortcut: 'mindmap'},
     // {label: LableAndShortCut(client, '收藏', '/mark'), value: 'mark-mark', shortcut: 'mark'},
     // {label: LableAndShortCut(client, '展开 -> 一级子节点', '/o1'), value: 'unfold-node-1', shortcut: 'o1'},
     // {label: LableAndShortCut(client, '展开 -> 二级子节点', '/o2'), value: 'unfold-node-2', shortcut: 'o2'},
@@ -94,12 +94,7 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         await props.session.emitAsync('setDataLoom', props.path.row, '', '');
         break;
       case 'insert-mindmap':
-        props.session.emit('openModal', 'png');
-        props.session.pngOnSave = (img_src: any, img_json: any) => {
-          props.session.emitAsync('setMindmap', props.path.row, img_src, img_json).then(() => {
-            props.session.emit('updateAnyway');
-          });
-        };
+        props.session.emit('insert-mindmap', props.path.row);
         setTimeout(() => {
           props.session.getKityMinderNode(props.path).then(kmnode => {
             props.session.mindMapRef.current.setContent(kmnode);
@@ -144,6 +139,7 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
           });
         }
       }}
+      listHeight={400}
       filterOption={(input, option) => (option?.shortcut ?? '').startsWith(input)}
       style={{ width: 200 }}
       options={options}

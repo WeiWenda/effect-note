@@ -69,7 +69,6 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
     'md': false,
     'export': false,
     'drawio': false,
-    'png': false,
     'subscriptionInfo': false,
   });
   const [curDocInfo, setCurDocInfo] = useState({});
@@ -325,24 +324,6 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           }}
       >
         <div id='vditor' className='vditor' />
-      </Modal>
-      <Modal width={window.innerWidth - 10}
-             style={{top: 20}}
-             title='编辑思维导图'
-             open={modalVisible.png}
-             cancelText={'取消'}
-             okText={'保存'}
-             onOk={() => {
-               props.session.mindMapRef.current.getContent().then((data: {img_src: any, json: any}) => {
-                 setModalVisible({...modalVisible, png: false});
-                 props.session.startKeyMonitor();
-                 props.session.pngOnSave(data.img_src, data.json);
-               });
-             }} onCancel={() => {
-               setModalVisible({...modalVisible, png: false});
-               props.session.startKeyMonitor();
-             }}>
-          <Mindmap ref={props.session.mindMapRef}/>
       </Modal>
       <Modal width={window.innerWidth - 10}
              style={{top: 20}}

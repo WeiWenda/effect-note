@@ -109,7 +109,6 @@ export default class Session extends EventEmitter {
   private saving: boolean = false;
   public exportModalContent: string = '';
   public exportFileFunc: () => void;
-  public pngOnSave: (img_src: any, json: any) => void;
   public drawioOnSave: (xml: any) => void;
   public wangEditorOnSave: (html: any) => void;
   public mdEditorOnSave: (markdown: any, html: any) => void;
@@ -154,7 +153,6 @@ export default class Session extends EventEmitter {
     this.drawioRef = React.createRef();
     this.sessionRef = React.createRef();
     this.fileInputRef = React.createRef();
-    this.pngOnSave = () => {};
     this.mdEditorOnSave = () => {};
     this.wangEditorOnSave = () => {};
     this.formSubmitAction = () => {};

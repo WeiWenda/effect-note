@@ -355,12 +355,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         };
         break;
       case 'add_png':
-        props.session.emit('openModal', 'png');
-        props.session.pngOnSave = (img_src: any, json: any) => {
-          props.linksPlugin.setPng(props.path.row, img_src, json).then(() => {
-            props.session.emit('updateAnyway');
-          });
-        };
+        props.session.emit('insert-mindmap', props.path.row);
         setTimeout(() => {
           props.session.getKityMinderNode(props.path).then(kmnode => {
             props.session.mindMapRef.current.setContent(kmnode);
