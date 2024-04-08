@@ -16,6 +16,7 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
   tagPlugin?: TagsPlugin}>) {
   const navigate = useNavigate();
   const handlePrint = useReactToPrint({
+    pageStyle: `@page { size: auto;  margin: 10mm; } @media print { body { -webkit-print-color-adjust: exact; }}`,
     content: () => props.session.sessionRef.current,
   });
   const docName = props.session.userDocs.find(doc => doc.id === props.curDocId)?.name;
@@ -89,12 +90,10 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
         });
         break;
       case 'export_pdf':
-        $('.session-content').css('overflow', 'unset');
         const lockHistoryState = props.session.lockEdit;
         props.session.lockEdit = true;
         handlePrint();
         props.session.lockEdit = lockHistoryState;
-        $('.session-content').css('overflow', 'auto');
         break;
       default:
         message.info(`Click on item ${key}`);
