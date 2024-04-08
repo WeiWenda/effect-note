@@ -1,12 +1,12 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {PluginApi, registerPlugin} from '../../ts/plugins';
 import {linksPluginName} from '../links';
-import {ExclamationCircleOutlined, PictureOutlined} from '@ant-design/icons';
+import {RetweetOutlined} from '@ant-design/icons';
 import {Document, KityMinderNode, Row, SerializedBlock, Session} from '../../share';
 import {Logger} from '../../ts/logger';
-import {Dropdown, Image, Menu, MenuProps, message, Modal, Tag} from 'antd';
-import {getStyles} from '../../share/ts/themes';
+import {Dropdown, Image, Menu, MenuProps, message, Modal, Space, Tag, Tooltip} from 'antd';
 import {Mindmap} from '../../components/mindmap';
+import {SpecialBlock} from '../../share/components/Block/SpecialBlock';
 
 export class MindMapPlugin {
   private api: PluginApi;
@@ -56,124 +56,81 @@ export class MindMapPlugin {
     });
     this.api.registerHook('session', 'renderAfterLine', (elements, {path, line, pluginData}) => {
       if (pluginData.links?.png != null) {
-        const pngOnClick: MenuProps['onClick'] = ({ key }) => {
-          switch (key) {
-            case 'del_png':
-              Modal.confirm({
-                title: '确认删除当前思维导图？',
-                icon: <ExclamationCircleOutlined />,
-                okText: '确认',
-                cancelText: '取消',
-                onOk: () => {
-                  this.session.emitAsync('unsetMindmap', path.row).then(() => {
-                    this.session.emit('updateAnyway');
-                  });
-                }
-              });
-              break;
-            case 'parse_png':
-              const kityNode = pluginData.links.png.json as KityMinderNode;
-              const serializedBlock = this.session.fromKityMinderNode(kityNode) as {
-                text: string,
-                collapsed?: boolean,
-                id?: Row,
-                plugins?: any,
-                children?: Array<SerializedBlock>
-              };
-              this.session.document.setLine(path.row, serializedBlock.text.split(''));
-              this.session.document.getInfo(path.row).then(rowInfo => {
-                this.session.delBlocks(path.row, 0, rowInfo.childRows.length).then(() => {
-                  this.session.addBlocks(path, 0, serializedBlock.children || []).then(() => {
-                    this.session.emit('updateInner');
-                  });
-                });
-              });
-              break;
-            case 'edit_png':
-              this.session.stopKeyMonitor('mindmap-edit');
-              Modal.confirm({
-                afterClose: () => {
-                  this.session.startKeyMonitor();
-                },
-                onOk: () => {
-                  this.session.mindMapRef.current.getContent().then((data: {img_src: any, json: any}) => {
-                    this.session.startKeyMonitor();
-                    this.session.emitAsync('setMindmap', path.row, data.img_src, data.json).then(() => {
-                      this.session.emit('updateAnyway');
+        elements.push(
+          <SpecialBlock key={'special-block'}
+                        path={path}
+                        title={line.join('')}
+                        collapse={pluginData.links.collapse || false}
+                        blockType={'Drawio'} session={this.session} tools={
+            <Space>
+              <Tooltip title={'将思维导图的内容更新到子节点中'}>
+                <RetweetOutlined onClick={() => {
+                  const kityNode = pluginData.links.png.json as KityMinderNode;
+                  const serializedBlock = this.session.fromKityMinderNode(kityNode) as {
+                    text: string,
+                    collapsed?: boolean,
+                    id?: Row,
+                    plugins?: any,
+                    children?: Array<SerializedBlock>
+                  };
+                  this.session.document.setLine(path.row, serializedBlock.text.split(''));
+                  this.session.document.getInfo(path.row).then(rowInfo => {
+                    this.session.delBlocks(path.row, 0, rowInfo.childRows.length).then(() => {
+                      this.session.addBlocks(path, 0, serializedBlock.children || []).then(() => {
+                        this.session.showMessage('更新完成！');
+                        this.session.emit('updateInner');
+                      });
                     });
                   });
-                },
-                onCancel: () => {
-                  this.session.startKeyMonitor();
-                },
-                icon: null,
-                width: window.innerWidth - 10,
-                style: {top: 20},
-                maskClosable: true,
-                title: '编辑思维导图',
-                cancelText: '取消',
-                okText: '保存',
-                content: (
-                  <Mindmap ref={this.session.mindMapRef}/>
-                )
-              });
-              setTimeout(() => {
-                if (this.session.mindMapRef.current) {
-                  this.session.mindMapRef.current.setContent(pluginData.links.png.json);
                 }
-              }, 1000);
-              break;
-            default:
-              message.info(`Click on item ${key}`);
-          }
-        };
-        const pngMenu = <Menu
-          onClick={pngOnClick}
-          items={[{
-            key: 'edit_png',
-            label: '修改思维导图'
-          },
-            {
-              key: 'parse_png',
-              label: '更新大纲内容',
-            },
-            {
-              key: 'del_png',
-              label: '删除思维导图',
-            }]}
-        ></Menu>;
-        elements.push(
-          <Dropdown key='mindmap-icon' overlay={pngMenu} trigger={['contextMenu']} >
-            <Tag icon={<PictureOutlined />}
-                 onClick={() => pluginData.links.png.visible = true}
-                 style={{
-                   marginLeft: '5px',
-                   ...getStyles(this.session.clientStore, ['theme-bg-secondary', 'theme-trim', 'theme-text-primary'])
-                 }} >
-              脑图
-            </Tag>
-          </Dropdown>,
-          <Image
-            key='mindmap-preview'
-            style={{ display: 'none' }}
-            src={pluginData.links.png.src}
-            preview={{
-              visible: pluginData.links.png.visible,
-              src: pluginData.links.png.src,
-              onVisibleChange: value => {
-                pluginData.links.png.visible = value;
-                this.session.emit('updateAnyway');
-              }
-            }}
-          />
+                }/>
+              </Tooltip>
+            </Space>
+          }>
+            <Image
+              onClick={() => {
+                Modal.confirm({
+                  afterClose: () => {
+                    this.session.startKeyMonitor();
+                  },
+                  onOk: () => {
+                    this.session.mindMapRef.current.getContent().then((data: {img_src: any, json: any}) => {
+                      this.session.startKeyMonitor();
+                      this.session.emitAsync('setMindmap', path.row, data.img_src, data.json).then(() => {
+                        this.session.emit('updateAnyway');
+                      });
+                    });
+                  },
+                  onCancel: () => {
+                    this.session.startKeyMonitor();
+                  },
+                  icon: null,
+                  width: window.innerWidth - 10,
+                  style: {top: 20},
+                  maskClosable: true,
+                  title: '编辑思维导图',
+                  cancelText: '取消',
+                  okText: '保存',
+                  content: (
+                    <Mindmap ref={this.session.mindMapRef}/>
+                  )
+                });
+                setTimeout(() => {
+                  if (this.session.mindMapRef.current) {
+                    this.session.mindMapRef.current.setContent(pluginData.links.png.json);
+                  }
+                }, 1000);
+              }}
+              src={pluginData.links.png.src}
+              preview={false}
+            />
+          </SpecialBlock>
         );
       }
       return elements;
     });
   }
 }
-
-
 
 registerPlugin(
   {

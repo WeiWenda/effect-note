@@ -5,6 +5,12 @@ export class Mindmap extends Component {
     super(props);
   }
 
+  componentDidMount() {
+    if (this.props.json) {
+      this.setContent(this.props.json);
+    }
+  }
+
   async setContent(content) {
     var _iframe = document.getElementById('leauiMindMapIfr').contentWindow;
     var km = _iframe.km;

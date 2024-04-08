@@ -88,9 +88,6 @@ export class LinksPlugin {
         this.api.registerListener('session', 'setMindmap', async (row: Row, img_src: string, img_json: string) => {
             await this.setPng(row, img_src, img_json);
         });
-        this.api.registerListener('session', 'unsetMindmap', async (row: Row) => {
-            await this.unsetPng(row);
-        });
         this.api.registerListener('session', 'setDrawio',  (row: Row) => {
             onInsertDrawio(row);
         });
@@ -164,7 +161,7 @@ export class LinksPlugin {
             return obj;
         });
         this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
-            if (pluginData.links?.code || pluginData.links?.drawio ||
+            if (pluginData.links?.code || pluginData.links?.drawio || pluginData.links?.png ||
               pluginData.links?.md || pluginData.links?.rtf || pluginData.links?.dataloom) {
                 return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
                   _token: Token, _emit: EmitFn<React.ReactNode>, _wrapped: Tokenizer
@@ -535,13 +532,6 @@ export class LinksPlugin {
         const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
         ids_to_pngs[row] = {src: src, json: json};
         await this.api.setData('ids_to_pngs', ids_to_pngs);
-    }
-
-    public async unsetPng(row: Row) {
-        const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
-        delete ids_to_pngs[row];
-        await this.api.setData('ids_to_pngs', ids_to_pngs);
-        await this.api.updatedDataForRender(row);
     }
 
     public async getCollapse(row: Row): Promise<boolean | null> {

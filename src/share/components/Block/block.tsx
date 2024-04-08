@@ -45,13 +45,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
         if (!props.onClick) {
           throw new Error('onClick disappeared');
         }
-        if (props.cached.pluginData.links?.md || props.cached.pluginData.links?.drawio ||
-          props.cached.pluginData.links?.code || props.cached.pluginData.links?.dataloom ||
-          props.cached.line.join('').startsWith('<div class=\'node-html\'>')) {
-          return;
-        } else {
-          props.onClick(props.path, e.nativeEvent);
-        }
+        props.onClick(props.path, e.nativeEvent);
       };
     }
 

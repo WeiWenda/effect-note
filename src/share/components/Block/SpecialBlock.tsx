@@ -1,7 +1,7 @@
 import {Path, Session} from '../../ts';
 import {getStyles} from '../../ts/themes';
 import * as React from 'react';
-import {Input, Popover, Space} from 'antd';
+import {Input, Popover, Space, Tooltip} from 'antd';
 import {useState} from 'react';
 import {FolderOutlined, FolderOpenOutlined, EnterOutlined, CopyOutlined} from '@ant-design/icons';
 
@@ -41,7 +41,7 @@ export function SpecialBlock(props: React.PropsWithChildren<{
                onChange={(newValue) => {
                  setTitle(newValue.target.value);
                }}
-        /> : title ? title : <span style={{opacity: '0.5'}}>{defaultTitle}</span> }
+        /> : title ? title : (props.session.lockEdit ? <></> : <span style={{opacity: '0.5'}}>{defaultTitle}</span>) }
     </div>
   );
   const content = (
@@ -57,7 +57,8 @@ export function SpecialBlock(props: React.PropsWithChildren<{
       borderColor: props.session.clientStore.getClientSetting('theme-bg-secondary')
     }}>
       {
-        (headerVision || fold || props.forSetting) &&
+        // 折叠状态、鼠标进入状态下展示title组件
+        (headerVision || fold || props.forSetting) && !props.session.lockEdit &&
         <div className={'effect-block-placehoder'}
              onDoubleClick={() => {
                if (fold) {
@@ -80,48 +81,56 @@ export function SpecialBlock(props: React.PropsWithChildren<{
             }
             {
               fold && !props.forSetting &&
-                <FolderOutlined onClick={() => {
-                  setFold(false);
-                  props.session.emit('setBlockCollapse', props.path.row, false);
-                }} />
+                <Tooltip title={'折叠特殊块内容'}>
+                  <FolderOutlined onClick={() => {
+                    setFold(false);
+                    props.session.emit('setBlockCollapse', props.path.row, false);
+                  }} />
+                </Tooltip>
             }
             {
               !fold && !props.forSetting &&
-                <FolderOpenOutlined onClick={() => {
-                  setFold(true);
-                  props.session.emit('setBlockCollapse', props.path.row, true);
-                }} />
+                <Tooltip title={'展开特殊块内容'}>
+                  <FolderOpenOutlined onClick={() => {
+                    setFold(true);
+                    props.session.emit('setBlockCollapse', props.path.row, true);
+                  }} />
+                </Tooltip>
+            }
+            {
+              !props.forSetting &&
+              <Space>
+                <Tooltip title={'在下方插入新节点'}>
+                  <EnterOutlined onClick={() => {
+                    props.session.cursor.setPosition(props.session.hoverRow!, 0).then(() => {
+                      props.session.newLineBelow().then(() => {
+                        props.session.stopAnchor();
+                        props.session.emit('updateInner');
+                      });
+                    });
+                  }} />
+                </Tooltip>
+                <Tooltip title={'复制当前特殊块至粘贴板'}>
+                  <CopyOutlined onClick={() => {
+                    props.session.yankBlocks(props.path, 1).then(() => {
+                      if (props.onCopy) {
+                        props.onCopy();
+                      }
+                      props.session.showMessage('复制成功');
+                    });
+                  }}/>
+                </Tooltip>
+              </Space>
             }
             {
               !props.session.lockEdit &&
               props.tools
             }
-            {
-              !props.forSetting &&
-              <Space>
-                <EnterOutlined onClick={() => {
-                  props.session.cursor.setPosition(props.session.hoverRow!, 0).then(() => {
-                    props.session.newLineBelow().then(() => {
-                      props.session.stopAnchor();
-                      props.session.emit('updateInner');
-                    });
-                  });
-                }} />
-                <CopyOutlined onClick={() => {
-                  props.session.yankBlocks(props.path, 1).then(() => {
-                    if (props.onCopy) {
-                      props.onCopy();
-                    }
-                    props.session.showMessage('复制成功');
-                  });
-                }}/>
-              </Space>
-            }
           </Space>
         </div>
       }
       {
-        !fold && !headerVision && !props.forSetting && titleElement
+        ((!fold && !headerVision && !props.forSetting) || props.session.lockEdit) && titleElement
       }
       {
         !fold &&
