@@ -4,7 +4,7 @@ import {linksPluginName} from '../links';
 import {RetweetOutlined} from '@ant-design/icons';
 import {Document, KityMinderNode, Row, SerializedBlock, Session} from '../../share';
 import {Logger} from '../../ts/logger';
-import {Dropdown, Image, Menu, MenuProps, message, Modal, Space, Tag, Tooltip} from 'antd';
+import {Modal, Space, Tooltip} from 'antd';
 import {Mindmap} from '../../components/mindmap';
 import {SpecialBlock} from '../../share/components/Block/SpecialBlock';
 
@@ -87,7 +87,7 @@ export class MindMapPlugin {
               </Tooltip>
             </Space>
           }>
-            <Image
+            <img
               onClick={() => {
                 Modal.confirm({
                   afterClose: () => {
@@ -121,8 +121,7 @@ export class MindMapPlugin {
                   }
                 }, 1000);
               }}
-              src={pluginData.links.png.src}
-              preview={false}
+              src={pluginData.links.png.src.startsWith('<svg ') ? `data:image/svg+xml;utf8,${encodeURIComponent(pluginData.links.png.src)}` : pluginData.links.png.src}
             />
           </SpecialBlock>
         );

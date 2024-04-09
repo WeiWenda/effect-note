@@ -20,7 +20,7 @@ export class Mindmap extends Component {
   async getContent() {
     var _iframe = document.getElementById('leauiMindMapIfr').contentWindow;
     var km = _iframe.km;
-    const data = await km.exportData('png');
+    const data = await km.exportData('svg');
     const jsonData = await km.exportJson();
     console.log("当前内容" + JSON.stringify(jsonData));
     return {'img_src': data, 'json': jsonData};
