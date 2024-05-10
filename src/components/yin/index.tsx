@@ -295,15 +295,20 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       newPreviewSession.addHook('renderLineTokenHook', htmlHook);
       setPreviewSession(newPreviewSession);
     }
-    props.session.document.onEvents(['lineSaved', ], ({row}) => {
-      reloadRow(row).then(() => {
-        refreshPreviewSession(previewDocument);
+    props.session.document.onEvents(['afterAttach', 'afterDetach'], ({row, parent_row}) => {
+      reloadRow(parent_row).then(() => {
+          refreshPreviewSession(previewDocument);
       });
     });
     props.session.document.on('afterMove', async ({old_parent, new_parent}) => {
       await reloadRow(old_parent);
       await reloadRow(new_parent);
       refreshPreviewSession(previewDocument);
+    });
+    props.session.document.onEvents(['lineSaved'], ({row, parent}) => {
+      reloadRow(row).then(() => {
+        refreshPreviewSession(previewDocument);
+      });
     });
     const refreshMarkSession = () => {
       const markDocument = new Document(docStore, '');
@@ -393,10 +398,9 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     props.session.stopAnchor();
     props.session.search = null;
     props.session.document.removeAllListeners('lineSaved');
-    props.session.document.removeAllListeners('beforeMove');
     props.session.document.removeAllListeners('afterMove');
-    props.session.document.removeAllListeners('beforeAttach');
-    props.session.document.removeAllListeners('beforeDetach');
+    props.session.document.removeAllListeners('afterAttach');
+    props.session.document.removeAllListeners('afterDetach');
     props.session.document.removeAllListeners('markChange');
     props.session.document.removeAllListeners('tagChange');
   };
@@ -421,13 +425,13 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       await props.session.changeViewRoot(Path.root());
       await props.session.emitAsync('clearPluginStatus');
       await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo.filename!)).then(() => {
-        props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'],
+        props.session.document.onEvents(['lineSaved', 'afterMove', 'afterAttach', 'afterDetach'],
           () => markDirty(docID, true));
         return afterLoadDoc();
       });
       setLoading(false);
     } else {
-      props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'],
+      props.session.document.onEvents(['lineSaved', 'afterMove', 'afterAttach', 'afterDetach'],
         () => markDirty(docID, true));
       await afterLoadDoc();
       setLoading(false);
@@ -467,13 +471,13 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       await props.session.changeViewRoot(Path.root());
       await props.session.emitAsync('clearPluginStatus');
       await props.session.reloadContent(docContent, mimetypeLookup(curDocInfo!.filename!)).then(() => {
-        props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'],
+        props.session.document.onEvents(['lineSaved', 'afterMove', 'afterAttach', 'afterDetach'],
           () => markDirty(docID, true));
         return afterLoadDoc();
       });
       setLoading(false);
     } else {
-      props.session.document.onEvents(['lineSaved', 'beforeMove', 'beforeAttach', 'beforeDetach'],
+      props.session.document.onEvents(['lineSaved', 'afterMove', 'afterAttach', 'afterDetach'],
         () => markDirty(docID, true));
       await afterLoadDoc();
       setLoading(false);

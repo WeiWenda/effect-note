@@ -49,6 +49,7 @@ export function SpecialBlock(props: React.PropsWithChildren<{
       setHeaderVision(true);
       setDefaultTitle('请输入标题');
     }} onMouseLeave={() => {
+      // code块切换语言时header需要保证可见
       if (!props.session.selectPopoverOpen) {
         setHeaderVision(false);
       }

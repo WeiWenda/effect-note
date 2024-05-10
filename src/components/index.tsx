@@ -323,10 +323,6 @@ $(document).ready(async () => {
   });
 
   keyHandler.on('handledKey', () => {
-    session.keydown = true;
-    setTimeout(() => {
-      session.keydown = false;
-    }, 1000);
     session.emit('updateAnyway');
   });
 

@@ -60,6 +60,7 @@ export default function BaseContent({
           onClose();
           session.stopKeyMonitor('dataloom-import');
           Modal.confirm({
+            zIndex: 1000,
             afterClose: () => {
               session.startKeyMonitor();
             },

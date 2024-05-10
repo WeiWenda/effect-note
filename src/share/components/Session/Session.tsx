@@ -140,7 +140,7 @@ export default class SessionComponent extends React.Component<Props, State> {
 
     this.onCrumbClick = async (path) => {
       const session = this.props.session;
-
+      session.selecting = false;
       await session.zoomInto(path);
       session.save();
       this.update();

@@ -148,9 +148,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
              if (this.onClick) {this.onClick(e); }
            }}
            onMouseEnter={() => {
-             if (!this.props.session.keydown) {
-               this.props.session.setHoverRow(path, 'mouse');
-             }
+             this.props.session.setHoverRow(path, 'mouse');
              if (this.props.session.dragging) {
                this.setState({showDragHint: true});
              }
