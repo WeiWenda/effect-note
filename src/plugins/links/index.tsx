@@ -1,11 +1,19 @@
 import * as React from 'react'; // tslint:disable-line no-unused-variable
 import {PluginApi, registerPlugin} from '../../ts/plugins';
-import {Document, EmitFn, KityMinderNode, Mutation, PartialUnfolder, Row, SerializedBlock, Session, Token, Tokenizer} from '../../share';
-import {Dropdown, Image, Menu, MenuProps, message, Modal, Popover, Space, Tag } from 'antd';
-import {EditOutlined, ExclamationCircleOutlined, PictureOutlined, ZoomInOutlined,
-    ZoomOutOutlined, CheckSquareOutlined, BorderOutlined, ArrowRightOutlined, ArrowLeftOutlined} from '@ant-design/icons';
+import {Document, EmitFn, Mutation, PartialUnfolder, Row, Session, Token, Tokenizer} from '../../share';
+import {Button, Popover, Space} from 'antd';
+import {
+    ArrowLeftOutlined,
+    ArrowRightOutlined,
+    BorderOutlined,
+    CheckSquareOutlined,
+    EditOutlined,
+    LinkOutlined,
+    RetweetOutlined,
+    ZoomInOutlined,
+    ZoomOutOutlined
+} from '@ant-design/icons';
 import {Logger} from '../../ts/logger';
-import {getStyles} from '../../share/ts/themes';
 import {pluginName as tagsPluginName, TagsPlugin} from '../tags';
 import {DrawioViewer} from '../../components/drawioViewer';
 import {getTaskStatus, HoverIconDropDownComponent} from './dropdownMenu';
@@ -100,6 +108,9 @@ export class LinksPlugin {
         this.api.registerListener('session', 'setRTF', async (row: Row, html: string) => {
             await this.setRTF(row, html);
         });
+        this.api.registerListener('session', 'setSoftLink', async (row: Row, targetRow: Row) => {
+            await this.setSoftLink(row, targetRow);
+        });
         this.api.registerListener('session', 'setMarkdown', async (row: Row, markdown: string) => {
             await this.setMarkdown(row, markdown);
         });
@@ -137,6 +148,40 @@ export class LinksPlugin {
                 await this.unsetIsCheck(row);
             }
         });
+        this.api.registerHook('session', 'renderBullet', function(bullet, {path, rowInfo}) {
+            if (rowInfo.pluginData?.links?.soft_link) {
+                return (
+                  <Popover content={
+                      <Button
+                        icon={<RetweetOutlined />}
+                        onClick={() => {
+                            that.session.delBlocks(path.row, 0, rowInfo.childRows.length, {noSave: true}).then(() => {
+                                that.session.document.getInfo(rowInfo.pluginData.links.soft_link).then(targetRowInfo => {
+                                   that.session.attachBlocks(path, targetRowInfo.info.childRows).then(() => {
+                                        that.session.showMessage('更新子节点成功！');
+                                   });
+                                });
+                            });
+                        }
+                        }
+                      >点击更新子节点</Button>
+                  }>
+                      <LinkOutlined className={'bullet'}
+                                    onClick={(e) => {
+                                        that.session.document.canonicalPath(rowInfo.pluginData.links.soft_link).then((targetPath) => {
+                                            if (targetPath) {
+                                                that.session.zoomInto(targetPath).then(() => {
+                                                    that.session.emit('updateInner');
+                                                });
+                                            }
+                                        });
+                                    }}/>
+                  </Popover>
+                );
+            } else {
+                return bullet;
+            }
+        });
         this.api.registerHook('session', 'renderHoverBullet', function(bullet, {path, rowInfo}) {
               return (
                 <HoverIconDropDownComponent session={that.session} bullet={bullet} path={path} rowInfo={rowInfo}
@@ -148,6 +193,7 @@ export class LinksPlugin {
             const is_callout = await this.getIsCallout(row);
             const is_order = await this.getIsOrder(row);
             const is_check = await this.getIsCheck(row);
+            const soft_link = await this.getSoftLink(row);
             const collapse = await this.getCollapse(row);
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
             const png = ids_to_pngs[row] || null;
@@ -157,12 +203,12 @@ export class LinksPlugin {
             const dataloom = await this.getDataLoom(row);
             const rtf = await this.getRTF(row);
             const width = await this.getWidth(row);
-            obj.links = { is_callout, is_order, is_board, is_check, collapse, png, drawio: xml, md, code, rtf, dataloom, width};
+            obj.links = { is_callout, is_order, is_board, is_check, soft_link, collapse, png, drawio: xml, md, code, rtf, dataloom, width,
+             is_special: code || xml ||  png || md || rtf || dataloom};
             return obj;
         });
         this.api.registerHook('session', 'renderLineTokenHook', (tokenizer, {pluginData}) => {
-            if (pluginData.links?.code || pluginData.links?.drawio || pluginData.links?.png ||
-              pluginData.links?.md || pluginData.links?.rtf || pluginData.links?.dataloom) {
+            if (pluginData.links?.is_special) {
                 return tokenizer.then(new PartialUnfolder<Token, React.ReactNode>((
                   _token: Token, _emit: EmitFn<React.ReactNode>, _wrapped: Tokenizer
                 ) => {
@@ -192,6 +238,10 @@ export class LinksPlugin {
             const isCheck = await this.getIsCheck(info.row);
             if (isCheck !== null) {
                 struct.is_check = isCheck;
+            }
+            const softLink = await this.getSoftLink(info.row);
+            if (softLink !== null) {
+                struct.soft_link = softLink;
             }
             const ids_to_pngs = await this.api.getData('ids_to_pngs', {});
             if (ids_to_pngs[info.row] != null) {
@@ -238,6 +288,9 @@ export class LinksPlugin {
             }
             if (serialized.is_order) {
                 await this._setIsOrder(path.row, true);
+            }
+            if (serialized.soft_link) {
+                await this._setSoftLink(path.row, serialized.soft_link);
             }
             if (serialized.is_check !== undefined) {
                 await this._setIsCheck(path.row, serialized.is_check);
@@ -374,7 +427,7 @@ export class LinksPlugin {
     }
 
     public async clearLinks() {
-        await this.api.setData('ids_to_links', {});
+        await this.api.setData('ids_to_softlink', {});
         await this.api.setData('ids_to_pngs', {});
         await this.api.setData('ids_to_xmls', {});
         await this.api.setData('ids_to_mds', {});
@@ -451,6 +504,11 @@ export class LinksPlugin {
 
     public async setRTF(row: Row, content: string): Promise<void> {
         await this._setRTF(row, content);
+        await this.api.updatedDataForRender(row);
+    }
+
+    public async setSoftLink(row: Row, targetRow: Row): Promise<void> {
+        await this._setSoftLink(row, targetRow);
         await this.api.updatedDataForRender(row);
     }
 
@@ -565,6 +623,10 @@ export class LinksPlugin {
         const ids_to_check = await this.api.getData('ids_to_check', {});
         return ids_to_check[row] !== undefined ? ids_to_check[row] : null;
     }
+    public async getSoftLink(row: Row): Promise<Row | null> {
+        const ids_to_softlink = await this.api.getData('ids_to_softlink', {});
+        return ids_to_softlink[row] !== undefined ? ids_to_softlink[row] : null;
+    }
     public async setIsCheck(row: Row, is_board: boolean) {
         await this._setIsCheck(row, is_board);
         await this.api.updatedDataForRender(row);
@@ -580,6 +642,12 @@ export class LinksPlugin {
         const ids_to_check = await this.api.getData('ids_to_check', {});
         ids_to_check[row] = mark;
         await this.api.setData('ids_to_check', ids_to_check);
+    }
+
+    private async _setSoftLink(row: Row, targetRow: Row) {
+        const ids_to_softlink = await this.api.getData('ids_to_softlink', {});
+        ids_to_softlink[row] = targetRow;
+        await this.api.setData('ids_to_softlink', ids_to_softlink);
     }
 
     public async getIsBoard(row: Row): Promise<boolean | null> {

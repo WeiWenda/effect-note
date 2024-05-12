@@ -1,4 +1,4 @@
-import {CachedRowInfo, InMemorySession, Path, Row, Session} from '../../share';
+import {CachedRowInfo, InMemorySession, Path, Row, RowInfo, Session} from '../../share';
 import { Dropdown, MenuProps, message} from 'antd';
 import * as React from 'react';
 import {useState} from 'react';
@@ -81,7 +81,7 @@ export const getTaskStatus = (tags: string[]) => {
 };
 
 export function HoverIconDropDownComponent(props: {session: Session, bullet: any,
-  path: Path, rowInfo: CachedRowInfo
+  path: Path, rowInfo: RowInfo
   tagsPlugin: TagsPlugin,
   markPlugin: MarksPlugin,
   linksPlugin: LinksPlugin
@@ -145,6 +145,10 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           label: '插入表格（DataLoom）',
           key: 'insert_dataloom',
         },
+        {
+          label: '生成软链',
+          key: 'insert_softlink',
+        }
         // {
         //   label: '插入文本识别',
         //   key: 'ocr',
@@ -243,7 +247,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       await props.session.attachBlocks(newRow[0], childrens);
     }
     await props.session.cursor.setPosition(newRow[0], 0);
-    await props.session.delBlocks(parent.row, index, 1);
+    await props.session.delBlocks(parent.row, index, 1, {noSave: true});
     props.session.emit('updateInner');
   };
   const onClick: MenuProps['onClick'] = ({ key }) => {
@@ -341,6 +345,24 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         break;
       case 'insert_drawio':
         props.session.emit('setDrawio', props.path.row);
+        break;
+      case 'insert_softlink':
+        // 根节点没有dropdownMenu，因此parent不为null
+        const parent = props.path.parent!;
+        props.session.document.indexInParent(props.path).then(indexInParent => {
+          let softLinkTarget = props.path.row;
+          if (props.rowInfo.pluginData.links?.soft_link) {
+            softLinkTarget = props.rowInfo.pluginData.links?.soft_link;
+          }
+          props.session.addBlocks(parent, indexInParent + 1, [{
+            text: props.rowInfo.line.join(''),
+            collapsed: false,
+            plugins: {soft_link: softLinkTarget},
+            children: props.rowInfo.childRows.map(r => {return {clone: r}; })
+          }]).then(() => {
+            props.session.emit('updateInner');
+          });
+        });
         break;
       case 'insert_dataloom':
         props.session.emit('setDataLoom', props.path.row, '', '');

@@ -45,6 +45,9 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
         if (!props.onClick) {
           throw new Error('onClick disappeared');
         }
+        if (props.cached.pluginData.links?.is_special) {
+          return;
+        }
         props.onClick(props.path, e.nativeEvent);
       };
     }
@@ -157,7 +160,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
              this.setState({showDragHint: false});
            }}
         onMouseDown={(e) => {
-          if (e.detail === 1 && !this.props.session.selectPopoverOpen) {
+          if (e.detail === 1 && !this.props.cached.pluginData.links?.is_special && !this.props.session.selectPopoverOpen) {
             // 颜色面板在其他block上层
             console.log('onLineMouseDown');
             session.selecting = false;
@@ -372,7 +375,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
           } else {
             hoverStyle.marginLeft = -50 + 25 / 2;
           }
-          if (!this.props.viewOnly && this.props.session.hoverRow?.row === row) {
+          if (!this.props.viewOnly && this.props.session.hoverRow?.is(path)) {
             hoverIcon = (
               <i key='hover' style={hoverStyle} className='fa fa-bars bullet hover-icon' title='Cloned'/>
             );
@@ -426,6 +429,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
               </a>
             );
           }
+          bullet = session.applyHook('renderBullet', bullet, { path, rowInfo });
           if (!this.props.viewOnly) {
             bullet = (
                 <Draggable
@@ -447,14 +451,13 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                     if (session.dragging) {
                       if (session.hoverRow) {
                         const target = session.hoverRow;
-                        session.yankCopy().then(() => {
-                          session.yankDelete().then(() => {
-                            session.selecting = false;
-                            session.dragging = false;
-                            session.cursor.setPosition(target, 0).then(() => {
-                              session.pasteAfter().then(() => {
-                                session.emit('updateInner');
-                              });
+                        session.selecting = false;
+                        session.stopAnchor();
+                        session.dragging = false;
+                        session.delBlock(path, {}).then(() => {
+                          session.cursor.setPosition(target, 0).then(() => {
+                            session.pasteAfter().then(() => {
+                              session.emit('updateInner');
                             });
                           });
                         });
@@ -466,7 +469,6 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                 </Draggable>
               );
           }
-          bullet = session.applyHook('renderBullet', bullet, { path, rowInfo });
           const childStyle: React.CSSProperties = {};
           if (cached.pluginData.links?.is_board) {
             childStyle.flexShrink = 0;

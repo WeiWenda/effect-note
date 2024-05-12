@@ -75,7 +75,7 @@ export class MindMapPlugin {
                   };
                   this.session.document.setLine(path.row, serializedBlock.text.split(''));
                   this.session.document.getInfo(path.row).then(rowInfo => {
-                    this.session.delBlocks(path.row, 0, rowInfo.childRows.length).then(() => {
+                    this.session.delBlocks(path.row, 0, rowInfo.childRows.length, {noSave: true}).then(() => {
                       this.session.addBlocks(path, 0, serializedBlock.children || []).then(() => {
                         this.session.showMessage('更新完成！');
                         this.session.emit('updateInner');

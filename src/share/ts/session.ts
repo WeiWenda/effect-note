@@ -1237,9 +1237,10 @@ export default class Session extends EventEmitter {
   ) {
     options.setCursor = 'first';
 
-    const [ collapsed, hasChildren ] = await Promise.all([
+    const [ collapsed, hasChildren, softLink ] = await Promise.all([
       this.document.collapsed(this.cursor.row),
       this.document.hasChildren(this.cursor.row),
+      this.document.softLink(this.cursor.row),
     ]);
 
     if (this.cursor.path.is(this.viewRoot)) {
@@ -1399,7 +1400,7 @@ export default class Session extends EventEmitter {
     return false;
   }
 
-  private async delBlock(path: Path, options: DelBlockOptions) {
+  public async delBlock(path: Path, options: DelBlockOptions) {
     if (path.parent == null) {
       throw new Error('Cannot delete root');
     }

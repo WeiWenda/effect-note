@@ -13,7 +13,7 @@ import {
   Row, Col, Char, Line, SerializedLine, SerializedBlock
 } from './types';
 
-type RowInfo = {
+export type RowInfo = {
   readonly line: Line;
   readonly collapsed: boolean;
   // TODO use Immutable.List?
@@ -467,6 +467,10 @@ export default class Document extends EventEmitter {
     return (await this.getInfo(row)).collapsed;
   }
 
+  public async softLink(row: Row) {
+    return (await this.getInfo(row)).pluginData.links?.soft_link;
+  }
+
   public async setCollapsed(row: Row, collapsed: boolean) {
     this.cache.setCollapsed(row, collapsed);
     if (this.useCacheOnly) {
@@ -887,8 +891,8 @@ export default class Document extends EventEmitter {
   ) {
     if (serialized.clone) {
       // NOTE: this assumes we load in the same order we serialize
-      errors.assert(serialized.clone in id_mapping);
-      const row = id_mapping[serialized.clone];
+      // errors.assert(serialized.clone in id_mapping);
+      const row = id_mapping[serialized.clone] || serialized.clone;
       const clone_path = parent_path.child(row);
       await this.attachChild(parent_path, clone_path, index);
       return clone_path;
