@@ -69,7 +69,7 @@ export function NodeOperationComponent(props: {session: Session, line: Line, pat
         };
         break;
       case 'insert-code':
-        props.session.emitAsync('setCode', props.path.row, '', 'plaintext').then(() => {
+        props.session.emitAsync('setCode', props.path.row, '', 'plaintext', false).then(() => {
           props.session.emit('updateInner');
           setTimeout(() => {
             if (props.session.codeRef[props.path.row]) {

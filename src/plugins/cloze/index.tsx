@@ -23,6 +23,10 @@ export class ClozePlugin {
   }
 
   public async enable() {
+
+    this.api.registerListener('session', 'clearPluginStatus', async () => {
+      await this.clearLinks();
+    });
     this.api.registerListener('session', 'addCloze', async (row: Row, startCol: Col, answer: string) => {
       await this.setCloze(row, startCol, answer);
     });
@@ -102,7 +106,9 @@ export class ClozePlugin {
       }
     });
   }
-
+  public async clearLinks() {
+    await this.api.setData('ids_to_clozes', {});
+  }
   public async setCloze(row: Row, startCol: Col, answer: string): Promise<void> {
     await this._setCloze(row, startCol, {answer: answer, show: false});
     await this.api.updatedDataForRender(row);

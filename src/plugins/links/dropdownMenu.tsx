@@ -227,7 +227,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
           label: '生成引用链接',
           key: 'export_url',
         }
-      ].concat(props.session.serverConfig.imgur?.type === 'picgo' ? [
+      ].concat(props.session.serverConfig.imgur?.type === 'picgo' && process.env.REACT_APP_BUILD_PLATFORM !== 'mas' ? [
         {
           label: '生成分享链接',
           key: 'export_picgo',
@@ -334,7 +334,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
         };
         break;
       case 'insert_code':
-        props.session.emitAsync('setCode', props.path.row, '', 'plaintext').then(() => {
+        props.session.emitAsync('setCode', props.path.row, '', 'plaintext', false).then(() => {
           props.session.emit('updateInner');
           setTimeout(() => {
             if (props.session.codeRef[props.path.row]) {

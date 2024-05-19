@@ -26,6 +26,9 @@ export class CommentPlugin {
       await this.setComments(row, startCol, endCol, comment);
       that.session.emit('changeComment');
     });
+    this.api.registerListener('session', 'clearPluginStatus', async () => {
+      await this.clearLinks();
+    });
     this.api.registerListener('session', 'removeComment', async (row: Row, startCol: Col, endCol: Col) => {
       await this.removeComments(row, startCol, endCol);
       that.session.emit('changeComment');
@@ -113,6 +116,10 @@ export class CommentPlugin {
       }));
       return comments;
     });
+  }
+
+  public async clearLinks() {
+    await this.api.setData('ids_to_comments', {});
   }
 
   public async setComments(row: Row, startCol: Col, endCol: Col, comment: string): Promise<void> {
