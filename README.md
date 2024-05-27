@@ -53,7 +53,7 @@ Project Vision：Empower Personal Knowledge Management And Discovery
          -
       </td>
        <td>
-          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Android/effectnote-1.0.4.apk">直接下载</a>
+          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Android/effectnote-1.0.5.apk">直接下载</a>
        </td>
     </tr>
   </table>
