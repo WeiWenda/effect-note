@@ -84,16 +84,21 @@ export function FontStyleToolComponent(
             <Popover open={showLink}
                      trigger={'click'}
                      onOpenChange={e => {
-                       if (e) {
-                         props.session.stopKeyMonitor('add-link');
-                       } else {
-                         props.session.startKeyMonitor();
+                       if (!e) {
+                         // 避免selectPopoverOpen保持为true
+                         props.session.selectPopoverOpen = false;
                        }
                        setShowLink(e);
                      }}
                      content={
               <Input
                 value={link}
+                onFocus={() => {
+                  props.session.stopKeyMonitor('add-link');
+                }}
+                onBlur={() => {
+                  props.session.startKeyMonitor();
+                }}
                 onChange={(v) => {
                   setLink(v.target.value);
                 }}

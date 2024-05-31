@@ -166,7 +166,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
               className: classes.join(' '),
               onClick: onClick,
               onMouseDown: (e) => {
-                if (path && e.detail === 1) {
+                if (path && e.detail === 1 && !session.selectPopoverOpen) {
                   session.selecting = false;
                   session.setAnchor(path, column);
                   e.stopPropagation();
