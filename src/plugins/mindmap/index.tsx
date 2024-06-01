@@ -61,7 +61,7 @@ export class MindMapPlugin {
                         path={path}
                         title={line.join('')}
                         collapse={pluginData.links.collapse || false}
-                        blockType={'Drawio'} session={this.session} tools={
+                        blockType={'MindMap'} session={this.session} tools={
             <Space>
               <Tooltip title={'将思维导图的内容更新到子节点中'}>
                 <RetweetOutlined onClick={() => {
