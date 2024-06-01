@@ -1834,10 +1834,10 @@ export default class Session extends EventEmitter {
   }
 
   public async yankCopy() {
-    console.log('yankCopy');
     const cursor = this.cursor;
     const anchor = this._anchor;
-    if (anchor !== null && !cursor.path.isRoot()) {
+    if (anchor !== null && !cursor.path.isRoot() && this.selecting) {
+      console.log('yankCopy');
       if (!cursor.path.is(anchor.path) || this.selectInlinePath === null) {
         // 多行选中
         const [parent, index1, index2] = await this.getVisualLineSelections();

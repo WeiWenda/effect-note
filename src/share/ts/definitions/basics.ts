@@ -418,7 +418,6 @@ keyDefinitions.registerAction(new Action(
   'Copy select content to clipboard',
   async function({ session }) {
     await session.yankCopy();
-    session.selecting = true;
   },
 ));
 
