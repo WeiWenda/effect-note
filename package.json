@@ -6,6 +6,7 @@
   "author": "weiwenda",
   "description": "My Description",
   "dependencies": {
+    "@excalidraw/excalidraw": "^0.17.6",
     "@node-rs/jieba": "^1.6.1",
     "cors": "^2.8.5",
     "cos-js-sdk-v5": "^1.4.18",

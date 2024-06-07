@@ -40,6 +40,7 @@ type InsertFnType = (url: string, alt: string, href: string) => void;
 export const HeaderItems = [
   { label: 'Notes', key: 'note'},
   { label: 'Discovery', key: 'discovery' }, // 菜单项务必填写 key
+  { label: 'Produce', key: 'produce' }, // 菜单项务必填写 key
   // { label: 'Test', key: 'test' }
 ];
 // @ts-ignore

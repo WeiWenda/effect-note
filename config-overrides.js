@@ -8,5 +8,11 @@ module.exports = function override(config, env) {
           languages: ['c', 'java', 'scala', 'shell', 'python', 'json', 'sql',
               'xml', 'yaml', 'go', 'php', 'typescript', 'javascript']
       }));
+    config.module.rules.push({
+            test: /\.m?js/,
+            resolve: {
+                fullySpecified: false,
+            },
+        });
     return config;
 }

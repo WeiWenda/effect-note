@@ -58,6 +58,8 @@ import LayoutComponent, {noteLoader} from './layout';
 import YinComponent from './yin';
 import {YangComponent} from './yang';
 import localforage from 'localforage';
+import PkbProducer from './pkb-producer';
+import * as ExcalidrawLib from '@excalidraw/excalidraw';
 
 declare const window: any; // because we attach globals for debugging
 
@@ -235,6 +237,14 @@ $(document).ready(async () => {
         {
           path: 'discovery',
           element: <YangComponent session={session} config={config}/>
+        },
+        {
+          path: 'produce',
+          element: <PkbProducer appTitle={'构建PKB文件'}
+                                useCustom={(api: any, args?: any[]) => {}}
+                                excalidrawLib={ExcalidrawLib}>
+                    <ExcalidrawLib.Excalidraw />
+                  </PkbProducer>
         }
         // {
         //   path: 'test',
