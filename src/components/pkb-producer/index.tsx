@@ -32,6 +32,9 @@ import type {
   Theme,
 } from '@excalidraw/excalidraw/types/element/types';
 import './App.scss';
+import {SessionWithToolbarComponent} from '../session';
+import {api_utils, DocInfo, InMemory, Path, Session} from '../../share';
+import {mimetypeLookup} from '../../ts/util';
 
 type Comment = {
   x: number;
@@ -57,6 +60,7 @@ const COMMENT_INPUT_HEIGHT = 50;
 const COMMENT_INPUT_WIDTH = 150;
 
 export interface AppProps {
+  session: Session;
   appTitle: string;
   useCustom: (api: ExcalidrawImperativeAPI | null, customArgs?: any[]) => void;
   customArgs?: any[];
@@ -65,6 +69,7 @@ export interface AppProps {
 }
 
 export default function PkbProducer({
+                              session,
                               appTitle,
                               useCustom,
                               customArgs,
@@ -90,6 +95,7 @@ export default function PkbProducer({
     loadSceneOrLibraryFromBlob,
   } = excalidrawLib;
   const appRef = useRef<any>(null);
+  const [curDocId, setCurDocId] = useState(-1);
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
@@ -189,7 +195,15 @@ export default function PkbProducer({
                  onDock={(newDocked) => setDocked(newDocked)}>
           <Sidebar.Tabs>
             <Sidebar.Header />
-            <Sidebar.Tab tab='one'>Tab one!</Sidebar.Tab>
+            <Sidebar.Tab tab='one'>
+              <SessionWithToolbarComponent session={session}
+                                           loading={false}
+                                           curDocId={-1}
+                                           filterOuter={''}
+                                           showLayoutIcon={false}
+                                           showLockIcon={true}
+              />
+            </Sidebar.Tab>
             <Sidebar.Tab tab='two'>Tab two!</Sidebar.Tab>
             <Sidebar.TabTriggers>
               <Sidebar.TabTrigger tab='one'>One</Sidebar.TabTrigger>
@@ -271,6 +285,25 @@ export default function PkbProducer({
     excalidrawAPI?.updateScene(sceneData);
   };
 
+  const loadDoc = async (res: DocInfo) => {
+    session.document.store.setBackend(new InMemory(), res.id!.toString());
+    session.document.root = Path.root();
+    session.cursor.reset();
+    session.document.cache.clear();
+    session.stopAnchor();
+    session.search = null;
+    session.document.removeAllListeners('lineSaved');
+    session.document.removeAllListeners('afterMove');
+    session.document.removeAllListeners('afterAttach');
+    session.document.removeAllListeners('afterDetach');
+    session.document.removeAllListeners('markChange');
+    session.document.removeAllListeners('tagChange');
+    let content = res.content!;
+    await session.reloadContent(content, mimetypeLookup(res.name!));
+    session.reset_history();
+    session.reset_jump_history();
+  };
+
   const onLinkOpen = useCallback(
     (
       element: NonDeletedExcalidrawElement,
@@ -287,6 +320,19 @@ export default function PkbProducer({
       if (isInternalLink && !isNewTab && !isNewWindow) {
         // signal that we're handling the redirect ourselves
         event.preventDefault();
+        const docID = Number(link.split('/note/').pop()?.split('?').shift());
+        session.clientStore.setDocname(docID);
+        api_utils.getDocContent(docID).then(res => {
+          loadDoc(res).then(() => {
+            const viewRoot = link.split('f=').pop()?.split('&').shift();
+            session.document.canonicalPath(Number(viewRoot)).then(path => {
+              session.changeViewRoot(path || Path.root()).then(() => {
+                console.log('onLinkOpen', docID, viewRoot);
+                setCurDocId(docID);
+              });
+            });
+          });
+        });
         // do a custom redirect, such as passing to react-router
         // ...
       }

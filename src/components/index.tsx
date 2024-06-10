@@ -240,7 +240,9 @@ $(document).ready(async () => {
         },
         {
           path: 'produce',
-          element: <PkbProducer appTitle={'构建PKB文件'}
+          element: <PkbProducer
+                                session={session}
+                                appTitle={'构建PKB文件'}
                                 useCustom={(api: any, args?: any[]) => {}}
                                 excalidrawLib={ExcalidrawLib}>
                     <ExcalidrawLib.Excalidraw />

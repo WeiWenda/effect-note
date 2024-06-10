@@ -8,6 +8,7 @@ const elements: ExcalidrawElementSkeleton[] = [
     y: 10,
     strokeWidth: 2,
     id: '1',
+    link: 'http://localhost:3000/note/3?f=16002',
   },
   {
     type: 'diamond',
@@ -37,12 +38,7 @@ const elements: ExcalidrawElementSkeleton[] = [
     width: 230,
     height: 230,
     fileId: 'rocket' as FileId,
-  },
-  {
-    type: 'frame',
-    children: ['1', '2'],
-    name: 'My frame',
-  },
+  }
 ];
 export default {
   elements,
