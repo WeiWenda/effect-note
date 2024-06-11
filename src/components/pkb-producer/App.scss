@@ -42,6 +42,14 @@
 
 .excalidraw .sidebar.excalidraw-node-content {
   width: 500px;
+  text-align: left;
+  input[type=text] {
+    border: unset;
+    padding: unset;
+  }
+}
+
+.excalidraw .sidebar.excalidraw-node-content:not(.sidebar--docked) {
   margin-top: 80px;
   margin-bottom: 1em;
   margin-right: 1em;

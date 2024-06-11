@@ -204,29 +204,34 @@ export default function PkbProducer({
       },
       <>
         <WelcomeScreen />
-        <Sidebar name='custom' className={'excalidraw-node-content'}
+        <Sidebar name='node-content' className={'excalidraw-node-content'}
                  docked={docked}
                  onDock={(newDocked) => setDocked(newDocked)}>
-          <Sidebar.Tabs>
-            <Sidebar.Header />
-            <Sidebar.Tab tab='one'>
-              <SessionWithToolbarComponent session={session}
-                                           loading={false}
-                                           curDocId={-1}
-                                           filterOuter={''}
-                                           showLayoutIcon={false}
-                                           showLockIcon={true}
-              />
-            </Sidebar.Tab>
-            <Sidebar.Tab tab='two'>Tab two!</Sidebar.Tab>
-            <Sidebar.TabTriggers>
-              <Sidebar.TabTrigger tab='one'>One</Sidebar.TabTrigger>
-              <Sidebar.TabTrigger tab='two'>Two</Sidebar.TabTrigger>
-            </Sidebar.TabTriggers>
-          </Sidebar.Tabs>
+          <Sidebar.Header >
+            <div
+              style={{
+                color: 'var(--color-primary)',
+                fontSize: '1.2em',
+                fontWeight: 'bold',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                paddingRight: '1em',
+              }}
+            >
+              节点详情
+            </div>
+          </Sidebar.Header>
+          <SessionWithToolbarComponent session={session}
+                                       loading={false}
+                                       curDocId={-1}
+                                       filterOuter={''}
+                                       showLayoutIcon={false}
+                                       showLockIcon={true}
+          />
         </Sidebar>
         <Sidebar.Trigger
-          name='custom'
+          name='node-content'
           tab='one'
           style={{
             position: 'absolute',
@@ -351,7 +356,7 @@ export default function PkbProducer({
         // ...
       }
     },
-    [],
+    [excalidrawAPI],
   );
 
   const onCopy = async (type: 'png' | 'svg' | 'json') => {
