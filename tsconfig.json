@@ -5,7 +5,8 @@
     "lib": [
       "dom",
       "es2019",
-      "esnext.asynciterable"
+      "esnext.asynciterable",
+      "ES2021.String"
     ],
     "jsx": "react-jsx",
     "types": ["jest"],

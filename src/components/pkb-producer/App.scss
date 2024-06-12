@@ -4,6 +4,27 @@
   font-family: sans-serif;
   text-align: center;
 
+  .operation-board {
+    position: absolute;
+    text-align: left;
+    z-index: 100;
+    .operation-title {
+      margin-bottom: 10px;
+    }
+    .operation-options{
+      margin-bottom: 10px;
+    }
+    .ant-input-search .ant-btn,
+    .ant-input-affix-wrapper {
+      background: var(--island-bg-color);
+    }
+      input[type=text] {
+      border: unset;
+      padding: unset;
+      background: unset;
+    }
+  }
+
   .comment-avatar {
     background: #faa2c1;
     border-radius: 66px 67px 67px 0px;

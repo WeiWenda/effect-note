@@ -15,7 +15,7 @@ import {
   resolvablePromise,
   distance2d,
   withBatchedUpdates,
-  withBatchedUpdatesThrottled,
+  withBatchedUpdatesThrottled, getTextElementsMatchingQuery, filterWithPredicate,
 } from './utils';
 
 import initialData from './initialData';
@@ -37,9 +37,14 @@ import './App.scss';
 import {SessionWithToolbarComponent} from '../session';
 import {api_utils, DocInfo, InMemory, Path, Session} from '../../share';
 import {mimetypeLookup} from '../../ts/util';
-import {hasBoundTextElement, isBindableElement, isTextElement} from './typeChecks';
-import {newElementWith} from '@excalidraw/excalidraw';
-
+import {hasBoundTextElement, isBindableElement, isBoundToContainer, isLinearElement, isTextElement} from './typeChecks';
+import {newElementWith, useI18n} from '@excalidraw/excalidraw';
+import Draggable from 'react-draggable';
+import {Collapse, Tag, Input, Checkbox, Button, Switch, Flex, Space} from 'antd';
+import {FileSearchOutlined, FilterOutlined, FunnelPlotOutlined, HolderOutlined} from '@ant-design/icons';
+const { Panel } = Collapse;
+const {Search} = Input;
+const CheckboxGroup = Checkbox.Group;
 type Comment = {
   x: number;
   y: number;
@@ -99,7 +104,12 @@ export default function PkbProducer({
     loadSceneOrLibraryFromBlob,
   } = excalidrawLib;
   const appRef = useRef<any>(null);
+  const { t } = useI18n();
   const [curDocId, setCurDocId] = useState(-1);
+  const [boardX, setBoardX] = useState(10);
+  const [boardY, setBoardY] = useState(70);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
@@ -107,6 +117,9 @@ export default function PkbProducer({
   const [theme, setTheme] = useState<Theme>('light');
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
+  const [tagsData, setTagsData] = useState(['Movies', 'Books', 'Music', 'Sports']);
+  const [visibleShapes, setVisibleShapes] = useState(['rectangle', 'diamond', 'ellipse']);
+  const [selectedTags, setSelectedTags] = React.useState<string[]>(['Movies']);
   const initialStatePromiseRef = useRef<{
     promise: ResolvablePromise<ExcalidrawInitialDataState | null>;
   }>({ promise: null! });
@@ -179,8 +192,8 @@ export default function PkbProducer({
         },
         onPointerUpdate: (payload: {
           pointer: { x: number; y: number };
-          button: "down" | "up";
-          pointersMap: Gesture["pointers"];
+          button: 'down' | 'up';
+          pointersMap: Gesture['pointers'];
         }) => {
           // if (payload.button === 'down') {
           //   const selectedElements = excalidrawAPI?.getAppState().selectedElementIds;
@@ -204,6 +217,115 @@ export default function PkbProducer({
       },
       <>
         <WelcomeScreen />
+        {
+          (showSearch || showFilter) &&
+          <Draggable
+            defaultClassName={'operation-board'}
+            position={{x: boardX, y: boardY}}
+            onDrag={(_ , ui) => {
+              setBoardX(ui.x);
+              setBoardY(ui.y);
+            }}
+            >
+            <div style={{width: '250px'}}>
+              {
+                showSearch &&
+                <Search
+                  allowClear
+                  placeholder='节点搜索'
+                  onSearch={(text) => {
+                    if (!text) {
+                      return;
+                    }
+                    const res = text.matchAll(/"(.*?)"/g);
+                    let query: string[] = [];
+                    let parts;
+                    while (!(parts = res.next()).done) {
+                      query.push(parts.value[1]);
+                    }
+                    text = text.replaceAll(/"(.*?)"/g, '');
+                    query = query.concat(text.split(' ').filter((s) => s.length !== 0));
+                    let match = getTextElementsMatchingQuery(
+                      (excalidrawAPI?.getSceneElements() || []).filter((el) => el.type === 'text'),
+                      query
+                    );
+
+                    if (match.length === 0) {
+                      excalidrawAPI?.setToast({message: '未找到匹配项', duration: 1000});
+                      return false;
+                    }
+                    excalidrawAPI?.updateScene({appState: {selectedElementIds: Object.fromEntries(
+                          match.map((e) => [e.id, true]),
+                        )}});
+                    if (match.length === 1) {
+                      excalidrawAPI?.scrollToContent(match[0]);
+                    }
+                  }}
+                />
+              }
+              {
+                showFilter &&
+                <div style={{background: 'var(--island-bg-color)', padding: '0.75rem',
+                          borderBottomLeftRadius: '0.5rem', borderBottomRightRadius: '0.5rem'}}>
+                  {/*<div className={'operation-title'}>节点标签</div>*/}
+                  {/*<Flex className={'operation-options'} gap={5} wrap={'wrap'} >*/}
+                  {/*  {tagsData.map<React.ReactNode>((tag) => (*/}
+                  {/*    <Tag.CheckableTag*/}
+                  {/*      key={tag}*/}
+                  {/*      checked={selectedTags.includes(tag)}*/}
+                  {/*      onChange={(checked) => {*/}
+                  {/*        const nextSelectedTags = checked*/}
+                  {/*          ? [...selectedTags, tag]*/}
+                  {/*          : selectedTags.filter((t) => t !== tag);*/}
+                  {/*        setSelectedTags(nextSelectedTags);*/}
+                  {/*      }}*/}
+                  {/*    >*/}
+                  {/*      {tag}*/}
+                  {/*    </Tag.CheckableTag>*/}
+                  {/*  ))}*/}
+                  {/*</Flex>*/}
+                  <div className={'operation-title'}>节点形状</div>
+                  <Flex className={'operation-options'} gap={5} wrap={'wrap'} >
+                    {['rectangle', 'diamond', 'ellipse'].map<React.ReactNode>((tag) => (
+                      <Tag.CheckableTag
+                        key={tag}
+                        checked={visibleShapes.includes(tag)}
+                        onChange={(checked) => {
+                          const nextSelectedTags = checked
+                            ? [...visibleShapes, tag]
+                            : visibleShapes.filter((s) => s !== tag);
+                          excalidrawAPI?.updateScene({
+                            elements: filterWithPredicate(excalidrawAPI?.getSceneElements()!, e => nextSelectedTags.includes(e.type))
+                          });
+                          setVisibleShapes(nextSelectedTags);
+                        }}
+                      >
+                        {t(`toolBar.${tag}`)}
+                      </Tag.CheckableTag>
+                    ))}
+                  </Flex>
+                  {/*<div className={'operation-title'}>关系标签</div>*/}
+                  {/*<Flex className={'operation-options'} gap={5} wrap={'wrap'} >*/}
+                  {/*  {tagsData.map<React.ReactNode>((tag) => (*/}
+                  {/*    <Tag.CheckableTag*/}
+                  {/*      key={tag}*/}
+                  {/*      checked={selectedTags.includes(tag)}*/}
+                  {/*      onChange={(checked) => {*/}
+                  {/*        const nextSelectedTags = checked*/}
+                  {/*          ? [...selectedTags, tag]*/}
+                  {/*          : selectedTags.filter((t) => t !== tag);*/}
+                  {/*        setSelectedTags(nextSelectedTags);*/}
+                  {/*      }}*/}
+                  {/*    >*/}
+                  {/*      {tag}*/}
+                  {/*    </Tag.CheckableTag>*/}
+                  {/*  ))}*/}
+                  {/*</Flex>*/}
+                </div>
+              }
+            </div>
+          </Draggable>
+        }
         <Sidebar name='node-content' className={'excalidraw-node-content'}
                  docked={docked}
                  onDock={(newDocked) => setDocked(newDocked)}>
@@ -230,19 +352,6 @@ export default function PkbProducer({
                                        showLockIcon={true}
           />
         </Sidebar>
-        <Sidebar.Trigger
-          name='node-content'
-          tab='one'
-          style={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            bottom: '20px',
-            zIndex: 9999999999999999,
-          }}
-        >
-          Toggle Custom Sidebar
-        </Sidebar.Trigger>
         {renderMenu()}
       </>,
     );
@@ -318,7 +427,7 @@ export default function PkbProducer({
     session.document.removeAllListeners('markChange');
     session.document.removeAllListeners('tagChange');
     let content = res.content!;
-    await session.reloadContent(content, mimetypeLookup(res.name!));
+    await session.reloadContent(content, 'application/json');
     session.reset_history();
     session.reset_jump_history();
   };
@@ -346,6 +455,7 @@ export default function PkbProducer({
             const viewRoot = link.split('f=').pop()?.split('&').shift();
             session.document.canonicalPath(Number(viewRoot)).then(path => {
               session.changeViewRoot(path || Path.root()).then(() => {
+                excalidrawAPI?.updateScene({appState: {openSidebar: {name: 'node-content'}}});
                 console.log('onLinkOpen', docID, viewRoot);
                 setCurDocId(docID);
               });
@@ -391,7 +501,7 @@ export default function PkbProducer({
                   return e;
                 }
               }),
-              appState: {openSidebar: { name: 'custom'}}
+              appState: {openSidebar: { name: 'node-content'}}
             });
           });
           console.log(content);
@@ -411,6 +521,12 @@ export default function PkbProducer({
         <MainMenu.DefaultItems.Help />
         <MainMenu.DefaultItems.ClearCanvas />
         <MainMenu.Separator />
+        <MainMenu.Item icon={<FileSearchOutlined />} onSelect={() => setShowSearch(!showSearch)}>
+          节点搜索工具
+        </MainMenu.Item>
+        <MainMenu.Item icon={<FilterOutlined />} onSelect={() => setShowFilter(!showFilter)}>
+          节点过滤工具
+        </MainMenu.Item>
         {/*<MainMenu.DefaultItems.Socials />*/}
         {/*<MainMenu.Separator />*/}
         {/*<MainMenu.DefaultItems.ToggleTheme*/}

@@ -1,5 +1,7 @@
-import { unstable_batchedUpdates } from 'react-dom';
-import { MIME_TYPES } from '@excalidraw/excalidraw';
+import {unstable_batchedUpdates} from 'react-dom';
+import {MIME_TYPES, newElementWith} from '@excalidraw/excalidraw';
+import {isBoundToContainer, isLinearElement} from './typeChecks';
+import type {ExcalidrawElement} from '@excalidraw/excalidraw/types/element/types';
 
 type FILE_EXTENSION = Exclude<keyof typeof MIME_TYPES, 'binary'>;
 
@@ -25,6 +27,57 @@ export const distance2d = (x1: number, y1: number, x2: number, y2: number) => {
   const xd = x2 - x1;
   const yd = y2 - y1;
   return Math.hypot(xd, yd);
+};
+
+export const filterWithPredicate = (elements: readonly ExcalidrawElement[], predicate: (e: ExcalidrawElement) => boolean): ExcalidrawElement[] => {
+  const elementIdsToKeep = new Set();
+  elements.forEach(e => {
+    if (predicate(e)) {
+      elementIdsToKeep.add(e.id);
+    }
+  });
+  elements.forEach(el => {
+    if (isLinearElement(el)) {
+      if (elementIdsToKeep.has(el.startBinding?.elementId) && elementIdsToKeep.has(el.endBinding?.elementId)) {
+        elementIdsToKeep.add(el.id);
+      }
+    }
+  });
+  return elements.map(el => {
+    if (elementIdsToKeep.has(el.id)) {
+      return el;
+    }
+    if (isBoundToContainer(el) && elementIdsToKeep.has(el.containerId)) {
+      return el;
+    }
+    return newElementWith(el, { isDeleted: true });
+  });
+};
+
+export const getTextElementsMatchingQuery = (
+  elements: ExcalidrawElement[],
+  query: string[],
+  exactMatch: boolean = false, // https://github.com/zsviczian/obsidian-excalidraw-plugin/issues/530
+): ExcalidrawElement[] => {
+  if (!elements || elements.length === 0 || !query || query.length === 0) {
+    return [];
+  }
+
+  return elements.filter((el: any) =>
+    el.type === 'text' &&
+    query.some((q) => {
+      if (exactMatch) {
+        const text = el.originalText.toLowerCase().split('\n')[0].trim();
+        const m = text.match(/^#*(# .*)/);
+        if (!m || m.length !== 2) {
+          return false;
+        }
+        return m[1] === q.toLowerCase();
+      }
+      const text = el.originalText.toLowerCase().replaceAll('\n', ' ').trim();
+      // to distinguish between '# frame' and '# frame 1' https://github.com/zsviczian/obsidian-excalidraw-plugin/issues/530
+      return text.match(q.toLowerCase());
+    }));
 };
 
 export const debounce = <T extends any[]>(
