@@ -17,7 +17,7 @@ const elements: ExcalidrawElementSkeleton[] = [
     backgroundColor: '#fff3bf',
     strokeWidth: 2,
     label: {
-      text: 'HELLO EXCALIDRAW',
+      text: '{"text": "HELLO EXCALIDRAW"}',
       strokeColor: '#099268',
       fontSize: 30,
     },

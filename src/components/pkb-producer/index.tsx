@@ -25,9 +25,11 @@ import type {
   BinaryFileData,
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
+  Gesture,
   PointerDownState as ExcalidrawPointerDownState,
 } from '@excalidraw/excalidraw/types/types';
 import type {
+  ExcalidrawTextElement,
   NonDeletedExcalidrawElement,
   Theme,
 } from '@excalidraw/excalidraw/types/element/types';
@@ -35,6 +37,8 @@ import './App.scss';
 import {SessionWithToolbarComponent} from '../session';
 import {api_utils, DocInfo, InMemory, Path, Session} from '../../share';
 import {mimetypeLookup} from '../../ts/util';
+import {hasBoundTextElement, isBindableElement, isTextElement} from './typeChecks';
+import {newElementWith} from '@excalidraw/excalidraw';
 
 type Comment = {
   x: number;
@@ -171,7 +175,17 @@ export default function PkbProducer({
           elements: NonDeletedExcalidrawElement[],
           state: AppState,
         ) => {
-          console.info('Elements :', elements, 'State : ', state);
+          // console.info('Elements :', elements, 'State : ', state);
+        },
+        onPointerUpdate: (payload: {
+          pointer: { x: number; y: number };
+          button: "down" | "up";
+          pointersMap: Gesture["pointers"];
+        }) => {
+          // if (payload.button === 'down') {
+          //   const selectedElements = excalidrawAPI?.getAppState().selectedElementIds;
+          //   console.log(selectedElements);
+          // }
         },
         // viewModeEnabled,
         // zenModeEnabled,
@@ -357,8 +371,29 @@ export default function PkbProducer({
     activeTool: AppState['activeTool'],
     pointerDownState: ExcalidrawPointerDownState,
   ) => {
-    if (activeTool.type === 'custom' && activeTool.customType === 'comment') {
-
+    if (activeTool.type === 'selection' && pointerDownState.hit.element) {
+      if (hasBoundTextElement(pointerDownState.hit.element)) {
+        const textElementId = pointerDownState.hit.element.boundElements?.find(({ type }) => type === 'text');
+        const textElement = excalidrawAPI?.getSceneElements().find(e => e.id === textElementId?.id) as ExcalidrawTextElement;
+        try {
+          const content = JSON.parse(textElement.originalText);
+          setTimeout(() => {
+            excalidrawAPI?.updateScene({
+              elements: excalidrawAPI?.getSceneElements().map(e => {
+                if (e.id === textElementId?.id) {
+                  return newElementWith(e as ExcalidrawTextElement, {text: content.text});
+                } else {
+                  return e;
+                }
+              }),
+              appState: {openSidebar: { name: 'custom'}}
+            });
+          });
+          console.log(content);
+        } catch (e) {
+          // do nothing
+        }
+      }
     }
   };
   const renderMenu = () => {
