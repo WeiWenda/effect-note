@@ -6,6 +6,7 @@
   "author": "weiwenda",
   "description": "My Description",
   "dependencies": {
+    "@dagrejs/dagre": "^1.1.2",
     "@excalidraw/excalidraw": "^0.17.6",
     "@node-rs/jieba": "^1.6.1",
     "cors": "^2.8.5",

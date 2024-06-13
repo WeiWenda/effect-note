@@ -15,7 +15,7 @@ import {
   resolvablePromise,
   distance2d,
   withBatchedUpdates,
-  withBatchedUpdatesThrottled, getTextElementsMatchingQuery, filterWithPredicate,
+  withBatchedUpdatesThrottled, getTextElementsMatchingQuery, filterWithPredicate, filterWithSelectElementId,
 } from './utils';
 
 import initialData from './initialData';
@@ -40,8 +40,17 @@ import {mimetypeLookup} from '../../ts/util';
 import {hasBoundTextElement, isBindableElement, isBoundToContainer, isLinearElement, isTextElement} from './typeChecks';
 import {newElementWith, useI18n} from '@excalidraw/excalidraw';
 import Draggable from 'react-draggable';
-import {Collapse, Tag, Input, Checkbox, Button, Switch, Flex, Space} from 'antd';
-import {FileSearchOutlined, FilterOutlined, FunnelPlotOutlined, HolderOutlined} from '@ant-design/icons';
+import {Collapse, Tag, Input, Checkbox, Button, Switch, Flex, Space, Tooltip} from 'antd';
+import {
+  ApartmentOutlined,
+  BackwardFilled,
+  BackwardOutlined, BranchesOutlined,
+  FileSearchOutlined,
+  FilterOutlined,
+  ForwardFilled, ForwardOutlined,
+  FunnelPlotOutlined,
+  HolderOutlined, MergeOutlined, NodeIndexOutlined
+} from '@ant-design/icons';
 const { Panel } = Collapse;
 const {Search} = Input;
 const CheckboxGroup = Checkbox.Group;
@@ -105,18 +114,15 @@ export default function PkbProducer({
   } = excalidrawLib;
   const appRef = useRef<any>(null);
   const { t } = useI18n();
-  const [curDocId, setCurDocId] = useState(-1);
+  const [selectId, setSelectId] = useState<string>('');
+  const [editingTextId, setEditingTextId] = useState<string>('');
   const [boardX, setBoardX] = useState(10);
   const [boardY, setBoardY] = useState(70);
   const [showFilter, setShowFilter] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [viewModeEnabled, setViewModeEnabled] = useState(false);
-  const [zenModeEnabled, setZenModeEnabled] = useState(false);
-  const [gridModeEnabled, setGridModeEnabled] = useState(false);
   const [docked, setDocked] = useState(false);
   const [theme, setTheme] = useState<Theme>('light');
   const [disableImageTool, setDisableImageTool] = useState(false);
-  const [isCollaborating, setIsCollaborating] = useState(false);
   const [tagsData, setTagsData] = useState(['Movies', 'Books', 'Music', 'Sports']);
   const [visibleShapes, setVisibleShapes] = useState(['rectangle', 'diamond', 'ellipse']);
   const [selectedTags, setSelectedTags] = React.useState<string[]>(['Movies']);
@@ -159,7 +165,7 @@ export default function PkbProducer({
         //@ts-ignore
         initialStatePromiseRef.current.promise.resolve({
           ...initialData,
-          elements: convertToExcalidrawElements(initialData.elements),
+          elements: initialData.elements,
         });
         excalidrawAPI.addFiles(imagesArray);
       };
@@ -188,7 +194,21 @@ export default function PkbProducer({
           elements: NonDeletedExcalidrawElement[],
           state: AppState,
         ) => {
-          // console.info('Elements :', elements, 'State : ', state);
+          if (!state.openSidebar && editingTextId) {
+            console.log('保存节点内容');
+            session.getCurrentContent(Path.root(), 'application/json').then((content) => {
+               excalidrawAPI?.updateScene({
+                 elements: excalidrawAPI?.getSceneElements().map(e => {
+                   if (e.id === editingTextId) {
+                     return newElementWith(e as ExcalidrawTextElement, {originalText: content});
+                   } else {
+                     return e;
+                   }
+                 })
+               });
+               setEditingTextId('');
+            });
+          }
         },
         onPointerUpdate: (payload: {
           pointer: { x: number; y: number };
@@ -343,10 +363,33 @@ export default function PkbProducer({
             >
               节点详情
             </div>
+            <Space>
+              <Tooltip title={'进入途经点子图'}>
+                <NodeIndexOutlined onClick={() => {
+                  excalidrawAPI?.updateScene({
+                    elements: filterWithSelectElementId('up_down', excalidrawAPI?.getSceneElements()!, selectId)
+                  });
+                }}/>
+              </Tooltip>
+              <Tooltip title={'进入终点子图'} >
+                <BranchesOutlined onClick={() => {
+                  excalidrawAPI?.updateScene({
+                    elements: filterWithSelectElementId('up', excalidrawAPI?.getSceneElements()!, selectId)
+                  });
+                }} />
+              </Tooltip>
+              <Tooltip title={'进入起点子图'}>
+                <MergeOutlined onClick={() => {
+                  excalidrawAPI?.updateScene({
+                    elements: filterWithSelectElementId('down', excalidrawAPI?.getSceneElements()!, selectId)
+                  });
+                }}/>
+              </Tooltip>
+            </Space>
           </Sidebar.Header>
           <SessionWithToolbarComponent session={session}
                                        loading={false}
-                                       curDocId={-1}
+                                       curDocId={-3}
                                        filterOuter={''}
                                        showLayoutIcon={false}
                                        showLockIcon={true}
@@ -455,9 +498,10 @@ export default function PkbProducer({
             const viewRoot = link.split('f=').pop()?.split('&').shift();
             session.document.canonicalPath(Number(viewRoot)).then(path => {
               session.changeViewRoot(path || Path.root()).then(() => {
+                setEditingTextId('');
+                setSelectId(element.id);
                 excalidrawAPI?.updateScene({appState: {openSidebar: {name: 'node-content'}}});
                 console.log('onLinkOpen', docID, viewRoot);
-                setCurDocId(docID);
               });
             });
           });
@@ -487,27 +531,24 @@ export default function PkbProducer({
     pointerDownState: ExcalidrawPointerDownState,
   ) => {
     if (activeTool.type === 'selection' && pointerDownState.hit.element) {
-      if (hasBoundTextElement(pointerDownState.hit.element)) {
+      if (hasBoundTextElement(pointerDownState.hit.element) && !isLinearElement(pointerDownState.hit.element)) {
         const textElementId = pointerDownState.hit.element.boundElements?.find(({ type }) => type === 'text');
         const textElement = excalidrawAPI?.getSceneElements().find(e => e.id === textElementId?.id) as ExcalidrawTextElement;
+        let content = '';
         try {
-          const content = JSON.parse(textElement.originalText);
-          setTimeout(() => {
-            excalidrawAPI?.updateScene({
-              elements: excalidrawAPI?.getSceneElements().map(e => {
-                if (e.id === textElementId?.id) {
-                  return newElementWith(e as ExcalidrawTextElement, {text: content.text});
-                } else {
-                  return e;
-                }
-              }),
-              appState: {openSidebar: { name: 'node-content'}}
-            });
-          });
-          console.log(content);
+           JSON.parse(textElement.originalText);
+           content = textElement.originalText;
         } catch (e) {
           // do nothing
+          content = '{"text": ""}';
         }
+        loadDoc({id: -1, content}).then(() => {
+          setTimeout(() => {
+            setEditingTextId(textElementId!.id);
+            setSelectId(pointerDownState.hit.element!.id);
+            excalidrawAPI?.updateScene({appState: {openSidebar: { name: 'node-content'}}});
+          });
+        });
       }
     }
   };

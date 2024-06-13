@@ -1,7 +1,8 @@
 import {unstable_batchedUpdates} from 'react-dom';
 import {MIME_TYPES, newElementWith} from '@excalidraw/excalidraw';
-import {isBoundToContainer, isLinearElement} from './typeChecks';
-import type {ExcalidrawElement} from '@excalidraw/excalidraw/types/element/types';
+import {isArrowElement, isBoundToContainer, isLinearElement, isTextBindableContainer} from './typeChecks';
+import * as dagre from '@dagrejs/dagre';
+import type {ExcalidrawArrowElement, ExcalidrawElement} from '@excalidraw/excalidraw/types/element/types';
 
 type FILE_EXTENSION = Exclude<keyof typeof MIME_TYPES, 'binary'>;
 
@@ -27,6 +28,63 @@ export const distance2d = (x1: number, y1: number, x2: number, y2: number) => {
   const xd = x2 - x1;
   const yd = y2 - y1;
   return Math.hypot(xd, yd);
+};
+
+export function constructGraph(elements: readonly ExcalidrawElement[], revert: boolean = false, ranker: string = 'network-simplex') {
+  const g = new dagre.graphlib.Graph();
+  g.setGraph({rankdir: 'LR', align: 'UL', ranker: ranker});
+  g.setDefaultEdgeLabel(function() { return {}; });
+  const nodes = elements.filter(e => isTextBindableContainer(e) && !isArrowElement(e));
+  const edges = elements.filter(e => isArrowElement(e)).map(e => e as ExcalidrawArrowElement);
+  nodes.forEach(node => {
+    g.setNode(node.id, {width: node.width, height: node.height});
+  });
+  edges.forEach(edge => {
+    if (edge.startBinding && edge.endBinding) {
+      if (revert) {
+        g.setEdge(edge.endBinding.elementId, edge.startBinding.elementId);
+      } else {
+        g.setEdge(edge.startBinding.elementId, edge.endBinding.elementId);
+      }
+    }
+  });
+  return g;
+}
+
+export const filterWithSelectElementId = (
+  direction: string,
+  elements: readonly ExcalidrawElement[],
+  selectedElementId: string,
+) => {
+  const elementIdsToKeep = new Set();
+  const graph = constructGraph(elements);
+  if (direction.includes('down')) {
+    dagre.graphlib.alg.postorder(graph, selectedElementId).forEach(nodeId => {
+      elementIdsToKeep.add(nodeId);
+    });
+  }
+  if (direction.includes('up')) {
+    const revertGraph = constructGraph(elements, true);
+    dagre.graphlib.alg.postorder(revertGraph, selectedElementId).forEach(nodeId => {
+      elementIdsToKeep.add(nodeId);
+    });
+  }
+  elements.forEach(el => {
+    if (isLinearElement(el)) {
+      if (elementIdsToKeep.has(el.startBinding?.elementId) && elementIdsToKeep.has(el.endBinding?.elementId)) {
+        elementIdsToKeep.add(el.id);
+      }
+    }
+  });
+  return elements.map((el) => {
+    if (elementIdsToKeep.has(el.id)) {
+      return el;
+    }
+    if (isBoundToContainer(el) && elementIdsToKeep.has(el.containerId)) {
+      return el;
+    }
+    return newElementWith(el, { isDeleted: true });
+  });
 };
 
 export const filterWithPredicate = (elements: readonly ExcalidrawElement[], predicate: (e: ExcalidrawElement) => boolean): ExcalidrawElement[] => {
