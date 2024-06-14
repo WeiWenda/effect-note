@@ -158,6 +158,7 @@ registerMode({
   key_transforms: [
     async function(key, context) {
       key = transform_insert_key(key);
+      // console.log('INSERT-key_transforms' + key);
       if (key.length === 1) {
         if ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 \n'.includes(key) && !context.session.cursor.path.isRoot()) {
           // simply insert the key

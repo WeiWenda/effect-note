@@ -327,7 +327,14 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
       }
       {
         !props.loading && compareVersion === '' &&
-          <div className={`session-area ${comments.length ? 'session-area-with-comment' : ''}`}>
+          <div
+              onKeyDown={(event) => {
+                if (!props.session.keyEmitter?.onKeyDown(event.nativeEvent)) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              }}
+              className={`session-area ${comments.length ? 'session-area-with-comment' : ''}`}>
             <SessionComponent ref={props.session.sessionRef} session={props.session} />
             {
               comments.length > 0 &&

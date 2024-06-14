@@ -25,6 +25,7 @@ import {SERVER_CONFIG} from '../../ts/constants';
 import {deserializeState} from '../../components/obsidian-dataloom/data/serialize-state';
 import {exportToMarkdown} from '../../components/obsidian-dataloom/shared/export/export-to-markdown';
 import KeyHandler from './keyHandler';
+import KeyEmitter from './keyEmitter';
 
 type SessionOptions = {
   initialMode?: ModeId,
@@ -88,6 +89,7 @@ export default class Session extends EventEmitter {
   public codeRef: {[key: Row]: MutableRefObject<undefined | monaco.editor.IStandaloneCodeEditor>} = {};
   private historyIndex: number = 0;
   public keyHandler: KeyHandler | null = null;
+  public keyEmitter: KeyEmitter | null = null;
   public jumpHistory: Array<JumpLogEntry> = [];
   public jumpIndex: number = 0;
   public currentUser: UserInfo | null = null;
@@ -183,7 +185,7 @@ export default class Session extends EventEmitter {
 
   public startKeyMonitor() {
     console.log('startKeyMonitor');
-    this.stopMonitor = this.clientStore.getClientSetting('curView') !== 'note';
+    this.stopMonitor = this.clientStore.getClientSetting('curView') === 'discovery';
   }
 
   public stopKeyMonitor(caller: string) {

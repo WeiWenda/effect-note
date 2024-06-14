@@ -108,57 +108,59 @@ export default class KeyEmitter extends EventEmitter {
   //   super();
   // }
 
-  public listen() {
-
-    return document.addEventListener('keydown', (e) => {
-      // IME input keycode is 229
-      if (e.keyCode === 229) {
-        return false;
-      }
-      if (e.keyCode in ignoreMap) {
-        return true;
-      }
-      let key;
-      if (e.keyCode in keyCodeMap) {
-        key = keyCodeMap[e.keyCode];
-        if (e.getModifierState('CapsLock')) {
-          key = key.toUpperCase();
-        }
-      } else {
-        // this is necessary for typing stuff..
-        key = String.fromCharCode(e.keyCode);
-      }
-
-      if (e.shiftKey) {
-        if (key in shiftMap) {
-          key = shiftMap[key];
-        } else {
-          key = `shift+${key}`;
-        }
-      }
-
-      if (e.altKey) {
-        key = `alt+${key}`;
-      }
-
-      if (e.ctrlKey) {
-        key = `ctrl+${key}`;
-      }
-
-      if (e.metaKey) {
-        key = `meta+${key}`;
-      }
-
-      logger.debug('keycode', e.keyCode, 'key', key);
-      const results = this.emit('keydown', key);
-      // return false to stop propagation, if any handler handled the key
-      if (_.some(results)) {
-        e.stopPropagation();
-        e.preventDefault();
-        return false;
-        // return browser_utils.cancel(e);
-      }
+  public onKeyDown = (e: KeyboardEvent) => {
+    // IME input keycode is 229
+    if (e.keyCode === 229) {
+      return false;
+    }
+    if (e.keyCode in ignoreMap) {
       return true;
-    });
+    }
+    let key;
+    if (e.keyCode in keyCodeMap) {
+      key = keyCodeMap[e.keyCode];
+      if (e.getModifierState('CapsLock')) {
+        key = key.toUpperCase();
+      }
+    } else {
+      // this is necessary for typing stuff..
+      key = String.fromCharCode(e.keyCode);
+    }
+
+    if (e.shiftKey) {
+      if (key in shiftMap) {
+        key = shiftMap[key];
+      } else {
+        key = `shift+${key}`;
+      }
+    }
+
+    if (e.altKey) {
+      key = `alt+${key}`;
+    }
+
+    if (e.ctrlKey) {
+      key = `ctrl+${key}`;
+    }
+
+    if (e.metaKey) {
+      key = `meta+${key}`;
+    }
+
+    // logger.info('keycode', e.keyCode, 'key', key);
+    const results = this.emit('keydown', key);
+    // return false to stop propagation, if any handler handled the key
+    if (_.some(results)) {
+      logger.info('Handling key:', key);
+      e.stopPropagation();
+      e.preventDefault();
+      return false;
+      // return browser_utils.cancel(e);
+    }
+    return true;
+  }
+
+  public listen() {
+    return document.addEventListener('keydown', this.onKeyDown);
   }
 }

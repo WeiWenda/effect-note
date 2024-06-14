@@ -194,20 +194,8 @@ export default function PkbProducer({
           elements: NonDeletedExcalidrawElement[],
           state: AppState,
         ) => {
-          if (!state.openSidebar && editingTextId) {
-            console.log('保存节点内容');
-            session.getCurrentContent(Path.root(), 'application/json').then((content) => {
-               excalidrawAPI?.updateScene({
-                 elements: excalidrawAPI?.getSceneElements().map(e => {
-                   if (e.id === editingTextId) {
-                     return newElementWith(e as ExcalidrawTextElement, {originalText: content});
-                   } else {
-                     return e;
-                   }
-                 })
-               });
-               setEditingTextId('');
-            });
+          if (!state.openSidebar) {
+            saveDocIfNeed();
           }
         },
         onPointerUpdate: (payload: {
@@ -387,13 +375,20 @@ export default function PkbProducer({
               </Tooltip>
             </Space>
           </Sidebar.Header>
-          <SessionWithToolbarComponent session={session}
-                                       loading={false}
-                                       curDocId={-3}
-                                       filterOuter={''}
-                                       showLayoutIcon={false}
-                                       showLockIcon={true}
-          />
+          <div onMouseEnter={() => {
+            session.startKeyMonitor();
+          }} onMouseLeave={() => {
+            session.stopKeyMonitor('sidebar-enter');
+          }}
+          >
+            <SessionWithToolbarComponent session={session}
+                                         loading={false}
+                                         curDocId={-3}
+                                         filterOuter={''}
+                                         showLayoutIcon={false}
+                                         showLockIcon={true} />
+
+          </div>
         </Sidebar>
         {renderMenu()}
       </>,
@@ -455,8 +450,26 @@ export default function PkbProducer({
     };
     excalidrawAPI?.updateScene(sceneData);
   };
+  const saveDocIfNeed = async () => {
+    if (editingTextId) {
+      console.log(`正在保存内容到节点 ${editingTextId}`);
+      session.getCurrentContent(Path.root(), 'application/json').then((content) => {
+        excalidrawAPI?.updateScene({
+          elements: excalidrawAPI?.getSceneElements().map(e => {
+            if (e.id === editingTextId) {
+              return newElementWith(e as ExcalidrawTextElement, {originalText: content});
+            } else {
+              return e;
+            }
+          })
+        });
+        setEditingTextId('');
+      });
+    }
+  };
 
   const loadDoc = async (res: DocInfo) => {
+    await saveDocIfNeed();
     session.document.store.setBackend(new InMemory(), res.id!.toString());
     session.document.root = Path.root();
     session.cursor.reset();

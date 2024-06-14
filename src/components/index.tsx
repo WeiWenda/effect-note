@@ -215,7 +215,7 @@ $(document).ready(async () => {
   const keyHandler = new KeyHandler(session, keyBindings);
   session.keyHandler = keyHandler;
   const keyEmitter = new KeyEmitter();
-
+  session.keyEmitter = keyEmitter;
   // expose globals, for debugging
   window.Modes = Modes;
   window.session = session;
