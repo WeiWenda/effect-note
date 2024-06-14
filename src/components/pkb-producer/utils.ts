@@ -2,11 +2,27 @@ import {unstable_batchedUpdates} from 'react-dom';
 import {MIME_TYPES, newElementWith} from '@excalidraw/excalidraw';
 import {isArrowElement, isBoundToContainer, isLinearElement, isTextBindableContainer} from './typeChecks';
 import * as dagre from '@dagrejs/dagre';
-import type {ExcalidrawArrowElement, ExcalidrawElement} from '@excalidraw/excalidraw/types/element/types';
+import type {ExcalidrawArrowElement, ExcalidrawElement, NonDeletedExcalidrawElement} from '@excalidraw/excalidraw/types/element/types';
+import {UIAppState} from '@excalidraw/excalidraw/types/types';
 
 type FILE_EXTENSION = Exclude<keyof typeof MIME_TYPES, 'binary'>;
 
 const INPUT_CHANGE_INTERVAL_MS = 500;
+
+
+export const showSelectedShapeActionsFinal = (
+  appState: UIAppState,
+) =>
+  Boolean(
+    !appState.viewModeEnabled &&
+    ((appState.activeTool.type !== 'custom' &&
+        (appState.editingElement ||
+          (appState.activeTool.type !== 'selection' &&
+            appState.activeTool.type !== 'eraser' &&
+            appState.activeTool.type !== 'hand' &&
+            appState.activeTool.type !== 'laser'))) ||
+      Object.keys(appState.selectedElementIds).length),
+  );
 
 export type ResolvablePromise<T> = Promise<T> & {
   resolve: [T] extends [undefined] ? (value?: T) => void : (value: T) => void;

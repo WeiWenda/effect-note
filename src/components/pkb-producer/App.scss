@@ -62,7 +62,7 @@
 }
 
 .excalidraw .sidebar.excalidraw-node-content {
-  width: 500px;
+  width: 400px;
   text-align: left;
   input[type=text] {
     border: unset;
@@ -71,7 +71,7 @@
 }
 
 .excalidraw .sidebar.excalidraw-node-content:not(.sidebar--docked) {
-  margin-top: 80px;
+  margin-top: 75px;
   margin-bottom: 1em;
   margin-right: 1em;
   border-radius: 0.5rem

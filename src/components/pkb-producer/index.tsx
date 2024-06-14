@@ -9,13 +9,18 @@ import React, {
 import type * as TExcalidraw from '@excalidraw/excalidraw';
 
 import { nanoid } from 'nanoid';
+import $ from 'jquery';
 
 import type { ResolvablePromise } from './utils';
 import {
   resolvablePromise,
   distance2d,
   withBatchedUpdates,
-  withBatchedUpdatesThrottled, getTextElementsMatchingQuery, filterWithPredicate, filterWithSelectElementId,
+  withBatchedUpdatesThrottled,
+  getTextElementsMatchingQuery,
+  filterWithPredicate,
+  filterWithSelectElementId,
+  showSelectedShapeActionsFinal,
 } from './utils';
 
 import initialData from './initialData';
@@ -44,7 +49,7 @@ import {Collapse, Tag, Input, Checkbox, Button, Switch, Flex, Space, Tooltip} fr
 import {
   ApartmentOutlined,
   BackwardFilled,
-  BackwardOutlined, BranchesOutlined,
+  BackwardOutlined, BranchesOutlined, EditOutlined,
   FileSearchOutlined,
   FilterOutlined,
   ForwardFilled, ForwardOutlined,
@@ -119,9 +124,11 @@ export default function PkbProducer({
   const [boardX, setBoardX] = useState(10);
   const [boardY, setBoardY] = useState(70);
   const [showFilter, setShowFilter] = useState(false);
+  const [showSelectedShapeActions, setShowSelectedShapeActions] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [docked, setDocked] = useState(false);
   const [theme, setTheme] = useState<Theme>('light');
+  const [viewMode, setViewMode] = useState(false);
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [tagsData, setTagsData] = useState(['Movies', 'Books', 'Music', 'Sports']);
   const [visibleShapes, setVisibleShapes] = useState(['rectangle', 'diamond', 'ellipse']);
@@ -194,19 +201,20 @@ export default function PkbProducer({
           elements: NonDeletedExcalidrawElement[],
           state: AppState,
         ) => {
+          // 更新样式编辑工具的位置
+          if (showSelectedShapeActions && showSelectedShapeActionsFinal(excalidrawAPI?.getAppState()!)) {
+              $('.App-menu__left').removeClass('visually-hidden');
+              var actionPannel = $( ".selected-shape-actions .App-menu__left").detach();
+              $('#selected-shape-actions-wrapper').append(actionPannel);
+          } else {
+            $('.App-menu__left').addClass('visually-hidden');
+            var actionPannel = $( "#selected-shape-actions-wrapper .App-menu__left").detach();
+            $('.selected-shape-actions').append(actionPannel);
+          }
+          // 避免内容丢失
           if (!state.openSidebar) {
             saveDocIfNeed();
           }
-        },
-        onPointerUpdate: (payload: {
-          pointer: { x: number; y: number };
-          button: 'down' | 'up';
-          pointersMap: Gesture['pointers'];
-        }) => {
-          // if (payload.button === 'down') {
-          //   const selectedElements = excalidrawAPI?.getAppState().selectedElementIds;
-          //   console.log(selectedElements);
-          // }
         },
         // viewModeEnabled,
         // zenModeEnabled,
@@ -226,7 +234,7 @@ export default function PkbProducer({
       <>
         <WelcomeScreen />
         {
-          (showSearch || showFilter) &&
+          (showSearch || showFilter || showSelectedShapeActions) &&
           <Draggable
             defaultClassName={'operation-board'}
             position={{x: boardX, y: boardY}}
@@ -235,7 +243,7 @@ export default function PkbProducer({
               setBoardY(ui.y);
             }}
             >
-            <div style={{width: '250px'}}>
+            <div style={{width: '202px'}}>
               {
                 showSearch &&
                 <Search
@@ -330,6 +338,10 @@ export default function PkbProducer({
                   {/*  ))}*/}
                   {/*</Flex>*/}
                 </div>
+              }
+              {
+                showSelectedShapeActions &&
+                <div id = 'selected-shape-actions-wrapper'/>
               }
             </div>
           </Draggable>
@@ -453,18 +465,17 @@ export default function PkbProducer({
   const saveDocIfNeed = async () => {
     if (editingTextId) {
       console.log(`正在保存内容到节点 ${editingTextId}`);
-      session.getCurrentContent(Path.root(), 'application/json').then((content) => {
-        excalidrawAPI?.updateScene({
-          elements: excalidrawAPI?.getSceneElements().map(e => {
-            if (e.id === editingTextId) {
-              return newElementWith(e as ExcalidrawTextElement, {originalText: content});
-            } else {
-              return e;
-            }
-          })
-        });
-        setEditingTextId('');
+      const content = await session.getCurrentContent(Path.root(), 'application/json');
+      excalidrawAPI?.updateScene({
+        elements: excalidrawAPI?.getSceneElements().map(e => {
+          if (e.id === editingTextId) {
+            return newElementWith(e as ExcalidrawTextElement, {originalText: content});
+          } else {
+            return e;
+          }
+        })
       });
+      setEditingTextId('');
     }
   };
 
@@ -563,6 +574,8 @@ export default function PkbProducer({
           });
         });
       }
+    } else {
+      console.log(activeTool, pointerDownState);
     }
   };
   const renderMenu = () => {
@@ -580,6 +593,9 @@ export default function PkbProducer({
         </MainMenu.Item>
         <MainMenu.Item icon={<FilterOutlined />} onSelect={() => setShowFilter(!showFilter)}>
           节点过滤工具
+        </MainMenu.Item>
+        <MainMenu.Item icon={<EditOutlined />} onSelect={() => setShowSelectedShapeActions(!showSelectedShapeActions)}>
+          样式编辑工具
         </MainMenu.Item>
         {/*<MainMenu.DefaultItems.Socials />*/}
         {/*<MainMenu.Separator />*/}
