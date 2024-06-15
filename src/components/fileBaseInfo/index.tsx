@@ -6,7 +6,12 @@ import {getStyles} from '../../share/ts/themes';
 
 const { Option } = Select;
 
-function FileBaseInfoComponent(props: {session: Session, tags: string[], docInfo: DocInfo, onFinish: (docId: number) => void}) {
+function FileBaseInfoComponent(props: {
+  session: Session,
+  tags: string[],
+  docInfo: DocInfo,
+  onFinish: (docId: number) => void,
+  fileType?: string}) {
   const [form] = Form.useForm();
   const children: React.ReactNode[] = props.tags.filter( onlyUnique ).map(tag => {
     return <Option key={tag}>{tag}</Option>;
@@ -38,6 +43,11 @@ function FileBaseInfoComponent(props: {session: Session, tags: string[], docInfo
             name: values.name
           }).then((doc_id) => {
             props.session.showMessage('修改成功');
+            props.onFinish(doc_id);
+          });
+        } else if (props.fileType && props.fileType === 'pkb') {
+          props.session.newPKB(values.name || defaultName, values.tags || []).then((doc_id) => {
+            props.session.showMessage('创建成功');
             props.onFinish(doc_id);
           });
         } else {

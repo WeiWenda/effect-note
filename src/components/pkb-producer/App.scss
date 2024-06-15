@@ -60,10 +60,14 @@
 .excalidraw .App-menu_top .buttonList {
   display: flex;
 }
+:root {
+  --excalidraw-node-content-width: 400px;
+}
 
 .excalidraw .sidebar.excalidraw-node-content {
-  width: 400px;
+  width: var(--excalidraw-node-content-width);
   text-align: left;
+  border: 1px solid var(--sidebar-border-color);
   input[type=text] {
     border: unset;
     padding: unset;
@@ -71,7 +75,7 @@
 }
 
 .excalidraw .sidebar.excalidraw-node-content:not(.sidebar--docked) {
-  margin-top: 75px;
+  margin-top: 1em;
   margin-bottom: 1em;
   margin-right: 1em;
   border-radius: 0.5rem

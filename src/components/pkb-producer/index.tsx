@@ -1,25 +1,15 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-  Children,
-  cloneElement,
-} from 'react';
+import React, {Children, cloneElement, useCallback, useEffect, useRef, useState,} from 'react';
 import type * as TExcalidraw from '@excalidraw/excalidraw';
+import {newElementWith, useI18n} from '@excalidraw/excalidraw';
 
-import { nanoid } from 'nanoid';
 import $ from 'jquery';
 
-import type { ResolvablePromise } from './utils';
+import type {ResolvablePromise} from './utils';
 import {
-  resolvablePromise,
-  distance2d,
-  withBatchedUpdates,
-  withBatchedUpdatesThrottled,
-  getTextElementsMatchingQuery,
   filterWithPredicate,
   filterWithSelectElementId,
+  getTextElementsMatchingQuery,
+  resolvablePromise,
   showSelectedShapeActionsFinal,
 } from './utils';
 
@@ -30,10 +20,10 @@ import type {
   BinaryFileData,
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
-  Gesture,
   PointerDownState as ExcalidrawPointerDownState,
 } from '@excalidraw/excalidraw/types/types';
 import type {
+  ExcalidrawElement,
   ExcalidrawTextElement,
   NonDeletedExcalidrawElement,
   Theme,
@@ -41,46 +31,22 @@ import type {
 import './App.scss';
 import {SessionWithToolbarComponent} from '../session';
 import {api_utils, DocInfo, InMemory, Path, Session} from '../../share';
-import {mimetypeLookup} from '../../ts/util';
-import {hasBoundTextElement, isBindableElement, isBoundToContainer, isLinearElement, isTextElement} from './typeChecks';
-import {newElementWith, useI18n} from '@excalidraw/excalidraw';
-import Draggable from 'react-draggable';
-import {Collapse, Tag, Input, Checkbox, Button, Switch, Flex, Space, Tooltip} from 'antd';
+import {hasBoundTextElement, isLinearElement} from './typeChecks';
+import Draggable, {DraggableCore, DraggableData, DraggableEvent} from 'react-draggable';
+import {Flex, Input, Space, Tag, Tooltip} from 'antd';
 import {
-  ApartmentOutlined,
-  BackwardFilled,
-  BackwardOutlined, BranchesOutlined, EditOutlined,
+  AppstoreAddOutlined,
+  BranchesOutlined, CloudUploadOutlined,
+  EditOutlined,
   FileSearchOutlined,
   FilterOutlined,
-  ForwardFilled, ForwardOutlined,
-  FunnelPlotOutlined,
-  HolderOutlined, MergeOutlined, NodeIndexOutlined
+  MergeOutlined,
+  NodeIndexOutlined,
+  ReadOutlined
 } from '@ant-design/icons';
-const { Panel } = Collapse;
+import {useLoaderData, useParams} from 'react-router-dom';
+
 const {Search} = Input;
-const CheckboxGroup = Checkbox.Group;
-type Comment = {
-  x: number;
-  y: number;
-  value: string;
-  id?: string;
-};
-
-type PointerDownState = {
-  x: number;
-  y: number;
-  hitElement: Comment;
-  onMove: any;
-  onUp: any;
-  hitElementOffsets: {
-    x: number;
-    y: number;
-  };
-};
-
-const COMMENT_ICON_DIMENSION = 32;
-const COMMENT_INPUT_HEIGHT = 50;
-const COMMENT_INPUT_WIDTH = 150;
 
 export interface AppProps {
   session: Session;
@@ -106,26 +72,26 @@ export default function PkbProducer({
     exportToClipboard,
     useHandleLibrary,
     MIME_TYPES,
-    sceneCoordsToViewportCoords,
-    viewportCoordsToSceneCoords,
-    restoreElements,
     Sidebar,
-    Footer,
     WelcomeScreen,
     MainMenu,
-    LiveCollaborationTrigger,
     convertToExcalidrawElements,
-    loadSceneOrLibraryFromBlob,
   } = excalidrawLib;
+  // @ts-ignore
+  const { curDocId } = useParams();
+  // @ts-ignore
+  const {userDocs} = useLoaderData();
   const appRef = useRef<any>(null);
   const { t } = useI18n();
   const [selectId, setSelectId] = useState<string>('');
   const [editingTextId, setEditingTextId] = useState<string>('');
-  const [boardX, setBoardX] = useState(10);
-  const [boardY, setBoardY] = useState(70);
+  const [boardX, setBoardX] = useState(70);
+  const [boardY, setBoardY] = useState(17);
   const [showFilter, setShowFilter] = useState(false);
+  const [showShapes, setShowShapes] = useState(true);
   const [showSelectedShapeActions, setShowSelectedShapeActions] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
+  const [showSearch, setShowSearch] = useState(true);
+  const [showLibrary, setShowLibrary] = useState(false);
   const [docked, setDocked] = useState(false);
   const [theme, setTheme] = useState<Theme>('light');
   const [viewMode, setViewMode] = useState(false);
@@ -140,7 +106,24 @@ export default function PkbProducer({
     initialStatePromiseRef.current.promise =
       resolvablePromise<ExcalidrawInitialDataState | null>();
   }
-
+  useEffect(() => {
+    session.userDocs = userDocs;
+  }, [userDocs]);
+  useEffect(() => {
+    if (curDocId && Number(curDocId) > 0) {
+      api_utils.getDocContent(Number(curDocId)).then((res) => {
+        const elements = JSON.parse(res.content).elements as readonly ExcalidrawElement[];
+        // @ts-ignore
+        initialStatePromiseRef.current.promise.resolve({
+          ...initialData,
+          elements: elements
+        });
+      });
+    } else {
+      // @ts-ignore
+      initialStatePromiseRef.current.promise.resolve(initialData);
+    }
+  }, [curDocId]);
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
 
@@ -152,33 +135,17 @@ export default function PkbProducer({
     if (!excalidrawAPI) {
       return;
     }
-    const fetchData = async () => {
-      const res = await fetch('/images/rocket.jpeg');
-      const imageData = await res.blob();
-      const reader = new FileReader();
-      reader.readAsDataURL(imageData);
-
-      reader.onload = function () {
-        const imagesArray: BinaryFileData[] = [
-          {
-            id: 'rocket' as BinaryFileData['id'],
-            dataURL: reader.result as BinaryFileData['dataURL'],
-            mimeType: MIME_TYPES.jpg,
-            created: 1644915140367,
-            lastRetrieved: 1644915140367,
-          },
-        ];
-
-        //@ts-ignore
-        initialStatePromiseRef.current.promise.resolve({
-          ...initialData,
-          elements: initialData.elements,
-        });
-        excalidrawAPI.addFiles(imagesArray);
-      };
-    };
-    fetchData();
-  }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES]);
+    if (showShapes) {
+      $('.shapes-section').removeClass('visually-hidden');
+    } else {
+      $('.shapes-section').addClass('visually-hidden');
+    }
+    if (showLibrary) {
+      $('.sidebar-trigger').removeClass('visually-hidden');
+    } else {
+      $('.sidebar-trigger').addClass('visually-hidden');
+    }
+  }, [excalidrawAPI]);
 
   const renderExcalidraw = (children: React.ReactNode) => {
     const Excalidraw: any = Children.toArray(children).find(
@@ -201,15 +168,19 @@ export default function PkbProducer({
           elements: NonDeletedExcalidrawElement[],
           state: AppState,
         ) => {
+          // const shapePanel = $('.shapes-section').detach();
+          // $('.ant-layout-header').append(shapePanel);
           // 更新样式编辑工具的位置
-          if (showSelectedShapeActions && showSelectedShapeActionsFinal(excalidrawAPI?.getAppState()!)) {
-              $('.App-menu__left').removeClass('visually-hidden');
-              var actionPannel = $( ".selected-shape-actions .App-menu__left").detach();
-              $('#selected-shape-actions-wrapper').append(actionPannel);
+          if (showSelectedShapeActionsFinal(excalidrawAPI?.getAppState()!)) {
+            var actionPannel = $( '.selected-shape-actions .App-menu__left').detach();
+            $('#selected-shape-actions-wrapper').append(actionPannel);
           } else {
-            $('.App-menu__left').addClass('visually-hidden');
-            var actionPannel = $( "#selected-shape-actions-wrapper .App-menu__left").detach();
+            var actionPannel = $( '#selected-shape-actions-wrapper .App-menu__left').detach();
             $('.selected-shape-actions').append(actionPannel);
+          }
+          if (state.viewModeEnabled) {
+            excalidrawAPI?.setCursor('pointer');
+            setViewMode(true);
           }
           // 避免内容丢失
           if (!state.openSidebar) {
@@ -349,6 +320,15 @@ export default function PkbProducer({
         <Sidebar name='node-content' className={'excalidraw-node-content'}
                  docked={docked}
                  onDock={(newDocked) => setDocked(newDocked)}>
+          <DraggableCore key='drawer_drag'
+                         scale={1.2}
+                         onDrag={(e: DraggableEvent, ui: DraggableData) => {
+                           const currentWidth = $('.excalidraw-node-content').width()!;
+                           document.documentElement.style.setProperty(
+                             '--excalidraw-node-content-width', `${currentWidth + 2 - ui.deltaX}px`);
+                         }}>
+            <div className='horizontal-drag' style={{zIndex: '3', height: '100%', position: 'absolute'}}></div>
+          </DraggableCore>
           <Sidebar.Header >
             <div
               style={{
@@ -420,48 +400,6 @@ export default function PkbProducer({
   //     });
   //   }
   // };
-
-  const updateScene = () => {
-    const sceneData = {
-      elements: restoreElements(
-        convertToExcalidrawElements([
-          {
-            type: 'rectangle',
-            id: 'rect-1',
-            fillStyle: 'hachure',
-            strokeWidth: 1,
-            strokeStyle: 'solid',
-            roughness: 1,
-            angle: 0,
-            x: 100.50390625,
-            y: 93.67578125,
-            strokeColor: '#c92a2a',
-            width: 186.47265625,
-            height: 141.9765625,
-            seed: 1968410350,
-          },
-          {
-            type: 'arrow',
-            x: 300,
-            y: 150,
-            start: { id: 'rect-1' },
-            end: { type: 'ellipse' },
-          },
-          {
-            type: 'text',
-            x: 300,
-            y: 100,
-            text: 'HELLO WORLD!',
-          },
-        ]),
-        null,
-      ),
-      appState: {
-        viewBackgroundColor: '#edf2ff',
-      },
-    };
-    excalidrawAPI?.updateScene(sceneData);
-  };
   const saveDocIfNeed = async () => {
     if (editingTextId) {
       console.log(`正在保存内容到节点 ${editingTextId}`);
@@ -537,19 +475,6 @@ export default function PkbProducer({
     [excalidrawAPI],
   );
 
-  const onCopy = async (type: 'png' | 'svg' | 'json') => {
-    if (!excalidrawAPI) {
-      return false;
-    }
-    await exportToClipboard({
-      elements: excalidrawAPI.getSceneElements(),
-      appState: excalidrawAPI.getAppState(),
-      files: excalidrawAPI.getFiles(),
-      type,
-    });
-    window.alert(`Copied to clipboard as ${type} successfully`);
-  };
-
   const onPointerDown = (
     activeTool: AppState['activeTool'],
     pointerDownState: ExcalidrawPointerDownState,
@@ -558,13 +483,13 @@ export default function PkbProducer({
       if (hasBoundTextElement(pointerDownState.hit.element) && !isLinearElement(pointerDownState.hit.element)) {
         const textElementId = pointerDownState.hit.element.boundElements?.find(({ type }) => type === 'text');
         const textElement = excalidrawAPI?.getSceneElements().find(e => e.id === textElementId?.id) as ExcalidrawTextElement;
-        let content = '';
+        let content = '{"text": ""}';
         try {
-           JSON.parse(textElement.originalText);
-           content = textElement.originalText;
+           if (typeof JSON.parse(textElement.originalText) === 'object') {
+             content = textElement.originalText;
+           }
         } catch (e) {
           // do nothing
-          content = '{"text": ""}';
         }
         loadDoc({id: -1, content}).then(() => {
           setTimeout(() => {
@@ -582,19 +507,68 @@ export default function PkbProducer({
     return (
       <MainMenu>
         <MainMenu.DefaultItems.LoadScene />
+        <MainMenu.Item icon={<CloudUploadOutlined />} onSelect={() => {
+          console.log('保存至EffectNote');
+          if (!excalidrawAPI) {
+            return false;
+          }
+          exportToClipboard({
+            elements: excalidrawAPI.getSceneElements(),
+            appState: excalidrawAPI.getAppState(),
+            files: excalidrawAPI.getFiles(),
+            type: 'json',
+          }).then(() => {
+            navigator.clipboard.readText().then(content => {
+              const docInfo = { ...userDocs.find((doc: any) => doc.id === Number(curDocId))!,
+                content: JSON.stringify(JSON.parse(content), undefined, 2)};
+              api_utils.updateDoc(Number(curDocId), docInfo).then(() => {
+                excalidrawAPI.setToast({message: '保存成功', duration: 1000});
+              });
+            });
+          });
+        }}>
+          保存至EffectNote
+        </MainMenu.Item>
         <MainMenu.DefaultItems.SaveToActiveFile />
         <MainMenu.DefaultItems.Export />
         <MainMenu.DefaultItems.SaveAsImage />
         <MainMenu.DefaultItems.Help />
         <MainMenu.DefaultItems.ClearCanvas />
         <MainMenu.Separator />
+        <MainMenu.Item icon={<AppstoreAddOutlined />} onSelect={() => {
+          if (showShapes) {
+            $('.shapes-section').addClass('visually-hidden');
+          } else {
+            $('.shapes-section').removeClass('visually-hidden');
+          }
+          setShowShapes(!showShapes);
+        }}>
+          形状工具
+        </MainMenu.Item>
+        <MainMenu.Item icon={<ReadOutlined />} onSelect={() => {
+          if (showLibrary) {
+            $('.sidebar-trigger').addClass('visually-hidden');
+          } else {
+            $('.sidebar-trigger').removeClass('visually-hidden');
+          }
+          setShowLibrary(!showLibrary);
+        }}>
+          素材库
+        </MainMenu.Item>
         <MainMenu.Item icon={<FileSearchOutlined />} onSelect={() => setShowSearch(!showSearch)}>
           节点搜索工具
         </MainMenu.Item>
         <MainMenu.Item icon={<FilterOutlined />} onSelect={() => setShowFilter(!showFilter)}>
           节点过滤工具
         </MainMenu.Item>
-        <MainMenu.Item icon={<EditOutlined />} onSelect={() => setShowSelectedShapeActions(!showSelectedShapeActions)}>
+        <MainMenu.Item icon={<EditOutlined />} onSelect={() => {
+          if (showSelectedShapeActions) {
+            $('.App-menu__left').addClass('visually-hidden');
+          } else {
+            $('.App-menu__left').removeClass('visually-hidden');
+          }
+          setShowSelectedShapeActions(!showSelectedShapeActions);
+        }}>
           样式编辑工具
         </MainMenu.Item>
         {/*<MainMenu.DefaultItems.Socials />*/}

@@ -514,15 +514,20 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       setCurMenu(e.key);
       props.session.clientStore.setClientSetting('openFile', e.key);
       const remoteDocId = menuItem2DocId[Number(e.key)];
-      const recentDocId = props.session.clientStore.getClientSetting('recentDocId');
-      if (recentDocId.indexOf(remoteDocId) === -1) {
-        recentDocId.push(remoteDocId);
-        if (recentDocId.length > 5) {
-          recentDocId.shift();
+      const docInfo = props.session.userDocs.find(info => info.id === remoteDocId);
+      if (docInfo && docInfo.filename?.endsWith('.excalidraw')) {
+        navigate(`/produce/${remoteDocId}`);
+      } else {
+        const recentDocId = props.session.clientStore.getClientSetting('recentDocId');
+        if (recentDocId.indexOf(remoteDocId) === -1) {
+          recentDocId.push(remoteDocId);
+          if (recentDocId.length > 5) {
+            recentDocId.shift();
+          }
         }
+        props.session.clientStore.setClientSetting('recentDocId', recentDocId);
+        navigate(`/note/${remoteDocId}`);
       }
-      props.session.clientStore.setClientSetting('recentDocId', recentDocId);
-      navigate(`/note/${remoteDocId}`);
     } else {
       props.session.showMessage('正在加载，请勿离开');
     }

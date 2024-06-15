@@ -239,14 +239,15 @@ $(document).ready(async () => {
           element: <YangComponent session={session} config={config}/>
         },
         {
-          path: 'produce',
+          path: 'produce/:curDocId',
           element: <PkbProducer
                                 session={session}
                                 appTitle={'构建PKB文件'}
                                 useCustom={(api: any, args?: any[]) => {}}
                                 excalidrawLib={ExcalidrawLib}>
                     <ExcalidrawLib.Excalidraw />
-                  </PkbProducer>
+                  </PkbProducer>,
+          loader: noteLoader,
         }
         // {
         //   path: 'test',

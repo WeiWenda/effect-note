@@ -275,6 +275,14 @@ export function updateDoc(docId: number, docInfo: DocInfo) {
     });
 }
 
+export function uploadPKB(docInfo: DocInfo) {
+    return request({
+        url: API_BASE_URL + '/pkb/',
+        method: 'POST',
+        body: JSON.stringify(docInfo)
+    });
+}
+
 export function uploadDoc(docInfo: DocInfo) {
     // if (!localStorage.getItem(ACCESS_TOKEN) && process.env.REACT_APP_BUILD_PROFILE === 'cloud') {
     //     return Promise.reject('No access token set.');

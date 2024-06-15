@@ -16,7 +16,7 @@ import { XMLParser, XMLBuilder, XMLValidator } from 'fast-xml-parser';
 import * as Modes from './modes';
 
 import {ModeId, CursorOptions, Row, Col, Chars, SerializedBlock, UserInfo, KityMinderNode, DocInfo} from './types';
-import { updateDoc, uploadDoc} from './utils/APIUtils';
+import {updateDoc, uploadDoc, uploadPKB} from './utils/APIUtils';
 import React, {MutableRefObject, Ref} from 'react';
 import Search from './search';
 import {monaco} from 'react-monaco-editor';
@@ -619,6 +619,28 @@ export default class Session extends EventEmitter {
           this.showMessage(e, {warning: true});
         });
       return docDetail.id;
+  }
+
+  public async newPKB(name: string, tags: string[]) {
+    this.showMessage('正在创建...');
+    const docId = Math.max(...this.userDocs.map(d => d.id!)) + 1;
+    const docDetail = await uploadPKB({
+      id: docId,
+      name: name, tag: JSON.stringify(tags), content: JSON.stringify({
+        'type': 'excalidraw',
+        'version': 2,
+        'source': 'http://localhost:3000',
+        'elements': [],
+        'appState': {
+          'gridSize': null,
+          'viewBackgroundColor': '#ffffff'
+        },
+        'files': {}
+      })})
+      .catch(e => {
+        this.showMessage(e, {warning: true});
+      });
+    return docDetail.id;
   }
 
   public async renameFile(share_id: number, docInfo: DocInfo) {

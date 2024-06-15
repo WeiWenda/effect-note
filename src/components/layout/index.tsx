@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Layout, Menu, Spin, Drawer, Button, Tabs, Modal, notification} from 'antd';
-import { SettingOutlined } from '@ant-design/icons';
+import {DownloadOutlined, SettingOutlined} from '@ant-design/icons';
 
 import '@wangeditor/editor/dist/css/style.css';
 import 'vditor/dist/index.css';
@@ -34,6 +34,9 @@ import LoomApp from '../obsidian-dataloom/loom-app';
 import {store} from '../obsidian-dataloom/redux/store';
 import {defaultTagConfig} from '../../ts/server_config';
 import {LoomState} from '../obsidian-dataloom/shared/loom-state/types';
+import AppMountProvider from '../obsidian-dataloom/loom-app/app-mount-provider';
+import {Provider} from 'react-redux';
+import {ExportApp} from '../obsidian-dataloom/export-app';
 const { Header, Footer, Sider, Content } = Layout;
 type InsertFnType = (url: string, alt: string, href: string) => void;
 
@@ -413,6 +416,37 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
               <Button onClick={() => {
                 setModalVisible({...modalVisible, subscriptionInfo: true});
               }}>添加订阅</Button>
+          }
+          {
+            curPage === 'produce' &&
+            <Button onClick={() => {
+              setCurDocInfo({});
+              Modal.confirm({
+                width: '520px',
+                icon: null,
+                className: 'form_modal',
+                afterClose: () => {
+                  props.session.startKeyMonitor();
+                },
+                maskClosable: true,
+                title: '新建图谱',
+                footer: null,
+                content: (
+                  <FileBaseInfoComponent
+                    fileType={'pkb'}
+                    docInfo={curDocInfo}
+                    session={props.session}
+                    tags={props.session.userDocs.flatMap(doc => JSON.parse(doc.tag || '[]') as Array<string>)}
+                    onFinish={(docId) => {
+                      props.session.startKeyMonitor();
+                      navigate(`/produce/${docId}`);
+                    }}
+                  />
+                )
+              });
+            }}>
+                新建图谱
+            </Button>
           }
           <SettingOutlined className='header-setting' onClick={() => {
             setSettingOpen(true);

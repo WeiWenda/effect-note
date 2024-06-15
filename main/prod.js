@@ -59,6 +59,7 @@ async function startExpress(args) {
     origin: 'http://localhost:3000'
   }));
   app.use('/api/docs', require('./expressDocCurd').router);
+  app.use('/api/pkb', require('./expressPkbCurd').router);
   app.use('/api/subscription', require('./expressSubscribeCurd'));
   app.post('/api/upload_image/:docId', multer().array('wangeditor-uploaded-image'), async function (req, res) {
     const {gitHome} = getGitConfig();

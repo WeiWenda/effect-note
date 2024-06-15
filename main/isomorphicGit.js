@@ -23,7 +23,7 @@ const listFiles = async () => {
     const gitConfig = getGitConfig()
     if (gitConfig.gitHome !== '未配置') {
         const files = await git.listFiles({fs, dir: gitConfig.gitHome})
-        const effectFiles = files.filter(file => file.endsWith('.effect.json'))
+        const effectFiles = files.filter(file => file.endsWith('.effect.json') || file.endsWith('.excalidraw'))
         return effectFiles;
     } else {
         return [];

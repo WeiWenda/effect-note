@@ -76,7 +76,7 @@ function constructDocInfo(content, filepath) {
     const name = nameSplits.shift();
     const tag = paths.join('/');
     const otherTags = nameSplits.filter(split => {
-        return split && split !== 'json' && split !== 'effect'
+        return split && split !== 'json' && split !== 'effect' && split !== 'excalidraw'
     })
     return {name,
         filename: filepath.split('/').pop(),
@@ -215,9 +215,10 @@ router.put('/:docId', async (req, res) => {
         const oldFilename = oldFilepath.pop();
         const oldDir = oldFilepath.join('/');
         const filename = req.body.name;
+        const suffix = oldFilename.split('.', 2)[1]
         const tags = JSON.parse(req.body.tag);
         const dir = tags.shift() || '';
-        const actualFilename = `${docId}#${filename}${tags.map(tag => '[' + tag.replace('/', ':') + ']').join('')}.effect.json`
+        const actualFilename = `${docId}#${filename}${tags.map(tag => '[' + tag.replace('/', ':') + ']').join('')}.${suffix}`
         const content = req.body.content;
         if (actualFilename === oldFilename && dir === oldDir) {
             console.log('仅修改内容')
@@ -247,4 +248,4 @@ router.put('/:docId', async (req, res) => {
 });
 
 // this is required
-module.exports = {refreshIndex, router, punctuationSplit, searchSplitFunction, IMAGES_FOLDER, SHARES_FOLDER};
+module.exports = {docId2path, refreshIndex, router, punctuationSplit, searchSplitFunction, IMAGES_FOLDER, SHARES_FOLDER};
