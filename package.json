@@ -1,13 +1,11 @@
 {
   "name": "EffectNote",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "private": true,
   "homepage": "/",
   "author": "weiwenda",
   "description": "My Description",
   "dependencies": {
-    "@dagrejs/dagre": "^1.1.2",
-    "@excalidraw/excalidraw": "^0.17.6",
     "@node-rs/jieba": "^1.6.1",
     "cors": "^2.8.5",
     "cos-js-sdk-v5": "^1.4.18",
@@ -68,6 +66,8 @@
     ]
   },
   "devDependencies": {
+    "@dagrejs/dagre": "^1.1.2",
+    "@excalidraw/excalidraw": "^0.17.6",
     "@ant-design/icons": "^5.2.4",
     "@electron-forge/cli": "^6.4.2",
     "@electron-forge/maker-dmg": "^6.4.2",
