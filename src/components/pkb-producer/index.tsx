@@ -83,8 +83,9 @@ export default function PkbProducer({
   const {userDocs} = useLoaderData();
   const appRef = useRef<any>(null);
   const { t } = useI18n();
-  const [selectId, setSelectId] = useState<string>('');
+  const [selectNodeId, setSelectNodeId] = useState<string>('');
   const [editingTextId, setEditingTextId] = useState<string>('');
+  const [editingDocId, setEditingDocId] = useState<number>(-1);
   const [boardX, setBoardX] = useState(70);
   const [boardY, setBoardY] = useState(17);
   const [showFilter, setShowFilter] = useState(false);
@@ -111,6 +112,7 @@ export default function PkbProducer({
   }, [userDocs]);
   useEffect(() => {
     if (curDocId && Number(curDocId) > 0) {
+      session.clientStore.setClientSetting('curPkbId', Number(curDocId));
       api_utils.getDocContent(Number(curDocId)).then((res) => {
         const elements = JSON.parse(res.content).elements as readonly ExcalidrawElement[];
         // @ts-ignore
@@ -347,27 +349,29 @@ export default function PkbProducer({
               <Tooltip title={'进入途经点子图'}>
                 <NodeIndexOutlined onClick={() => {
                   excalidrawAPI?.updateScene({
-                    elements: filterWithSelectElementId('up_down', excalidrawAPI?.getSceneElements()!, selectId)
+                    elements: filterWithSelectElementId('up_down', excalidrawAPI?.getSceneElements()!, selectNodeId)
                   });
                 }}/>
               </Tooltip>
               <Tooltip title={'进入终点子图'} >
                 <BranchesOutlined onClick={() => {
                   excalidrawAPI?.updateScene({
-                    elements: filterWithSelectElementId('up', excalidrawAPI?.getSceneElements()!, selectId)
+                    elements: filterWithSelectElementId('up', excalidrawAPI?.getSceneElements()!, selectNodeId)
                   });
                 }} />
               </Tooltip>
               <Tooltip title={'进入起点子图'}>
                 <MergeOutlined onClick={() => {
                   excalidrawAPI?.updateScene({
-                    elements: filterWithSelectElementId('down', excalidrawAPI?.getSceneElements()!, selectId)
+                    elements: filterWithSelectElementId('down', excalidrawAPI?.getSceneElements()!, selectNodeId)
                   });
                 }}/>
               </Tooltip>
             </Space>
           </Sidebar.Header>
-          <div onMouseEnter={() => {
+          <div
+            style={{height: '100%'}}
+            onMouseEnter={() => {
             session.startKeyMonitor();
           }} onMouseLeave={() => {
             session.stopKeyMonitor('sidebar-enter');
@@ -414,6 +418,12 @@ export default function PkbProducer({
         })
       });
       setEditingTextId('');
+    } else if (editingDocId > 0) {
+      console.log(`正在保存内容到文档 ${editingDocId}`);
+      session.reUploadFile(Path.root(), editingDocId).then(() => {
+        setEditingDocId(-1);
+        excalidrawAPI?.setToast({message: '节点保存成功', duration: 1000});
+      });
     }
   };
 
@@ -460,8 +470,9 @@ export default function PkbProducer({
             const viewRoot = link.split('f=').pop()?.split('&').shift();
             session.document.canonicalPath(Number(viewRoot)).then(path => {
               session.changeViewRoot(path || Path.root()).then(() => {
+                setEditingDocId(docID);
                 setEditingTextId('');
-                setSelectId(element.id);
+                setSelectNodeId(element.id);
                 excalidrawAPI?.updateScene({appState: {openSidebar: {name: 'node-content'}}});
                 console.log('onLinkOpen', docID, viewRoot);
               });
@@ -494,7 +505,7 @@ export default function PkbProducer({
         loadDoc({id: -1, content}).then(() => {
           setTimeout(() => {
             setEditingTextId(textElementId!.id);
-            setSelectId(pointerDownState.hit.element!.id);
+            setSelectNodeId(pointerDownState.hit.element!.id);
             excalidrawAPI?.updateScene({appState: {openSidebar: { name: 'node-content'}}});
           });
         });
@@ -507,28 +518,31 @@ export default function PkbProducer({
     return (
       <MainMenu>
         <MainMenu.DefaultItems.LoadScene />
-        <MainMenu.Item icon={<CloudUploadOutlined />} onSelect={() => {
-          console.log('保存至EffectNote');
-          if (!excalidrawAPI) {
-            return false;
-          }
-          exportToClipboard({
-            elements: excalidrawAPI.getSceneElements(),
-            appState: excalidrawAPI.getAppState(),
-            files: excalidrawAPI.getFiles(),
-            type: 'json',
-          }).then(() => {
-            navigator.clipboard.readText().then(content => {
-              const docInfo = { ...userDocs.find((doc: any) => doc.id === Number(curDocId))!,
-                content: JSON.stringify(JSON.parse(content), undefined, 2)};
-              api_utils.updateDoc(Number(curDocId), docInfo).then(() => {
-                excalidrawAPI.setToast({message: '保存成功', duration: 1000});
+        {
+          Number(curDocId) > 0 &&
+          <MainMenu.Item icon={<CloudUploadOutlined />} onSelect={() => {
+            console.log('保存至EffectNote');
+            if (!excalidrawAPI) {
+              return false;
+            }
+            exportToClipboard({
+              elements: excalidrawAPI.getSceneElements(),
+              appState: excalidrawAPI.getAppState(),
+              files: excalidrawAPI.getFiles(),
+              type: 'json',
+            }).then(() => {
+              navigator.clipboard.readText().then(content => {
+                const docInfo = { ...userDocs.find((doc: any) => doc.id === Number(curDocId))!,
+                  content: JSON.stringify(JSON.parse(content), undefined, 2)};
+                api_utils.updateDoc(Number(curDocId), docInfo).then(() => {
+                  excalidrawAPI.setToast({message: '画板保存成功', duration: 1000});
+                });
               });
             });
-          });
-        }}>
-          保存至EffectNote
-        </MainMenu.Item>
+          }}>
+            保存至EffectNote
+          </MainMenu.Item>
+        }
         <MainMenu.DefaultItems.SaveToActiveFile />
         <MainMenu.DefaultItems.Export />
         <MainMenu.DefaultItems.SaveAsImage />

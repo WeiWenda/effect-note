@@ -215,7 +215,7 @@ router.put('/:docId', async (req, res) => {
         const oldFilename = oldFilepath.pop();
         const oldDir = oldFilepath.join('/');
         const filename = req.body.name;
-        const suffix = oldFilename.split('.', 2)[1]
+        const suffix = oldFilename.split('.').slice(1).join('.')
         const tags = JSON.parse(req.body.tag);
         const dir = tags.shift() || '';
         const actualFilename = `${docId}#${filename}${tags.map(tag => '[' + tag.replace('/', ':') + ']').join('')}.${suffix}`

@@ -31,6 +31,7 @@ export type ClientSettings = Theme & {
   openFile: string;
   curView: string;
   curDocId: number;
+  curPkbId: number;
   curTheme: string;
   curSearch: string;
   curSearchResult: string;
@@ -52,6 +53,7 @@ const default_client_settings: ClientSettings =
     openFile: '0',
     curView: 'note',
     curDocId: -1,
+    curPkbId: -2,
     curSearch: '',
     curSearchResult: '',
     recentDocId: [-1],

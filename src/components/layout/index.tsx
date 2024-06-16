@@ -59,7 +59,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const forceUpdate = useForceUpdate();
   const navigate = useNavigate();
   const location = useLocation();
-  const [curPage, setCurPage] = useState<string>(location.pathname.split('/').shift() || 'note');
+  const [curPage, setCurPage] = useState<string>(location.pathname.split('/')[1] || 'note');
   const [settingOpen, setSettingOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [drawerWidth, setDrawerWidth] = useState(window.innerWidth / 2);
@@ -374,8 +374,9 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     props.session.startKeyMonitor();
                     const docId = props.session.clientStore.getClientSetting('curDocId');
                     navigate(`/${e.key}/${docId}`);
-                  } else if (e.key === 'test') {
-                    navigate(`/${e.key}`);
+                  } else if (e.key === 'produce') {
+                    const pkbId = props.session.clientStore.getClientSetting('curPkbId');
+                    navigate(`/${e.key}/${pkbId}`);
                   } else {
                     // props.session.stopKeyMonitor('header');
                     const lastSearch = props.session.clientStore.getClientSetting('curSearch');
