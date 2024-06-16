@@ -97,6 +97,12 @@ function SubscriptionSettingsComponent(props: { session: Session}) {
   );
   return (
     <div>
+      {
+        process.env.REACT_APP_BUILD_PROFILE === 'demo' &&
+          <div className={'node-html'}>
+              <span className='red-color'>Demo部署环境下，该功能不可用</span>
+          </div>
+      }
       <DndProvider backend={HTML5Backend}>
         <Table
           columns={columns}

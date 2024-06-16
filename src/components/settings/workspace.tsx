@@ -41,6 +41,12 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
   };
   return (
     <div>
+      {
+         process.env.REACT_APP_BUILD_PROFILE === 'demo' &&
+        <div className={'node-html'}>
+          <span className='red-color'>Demo部署环境下，该功能不可用</span>
+        </div>
+      }
       <div style={{paddingBottom: '1em'}}>当前工作空间：</div>
       <Row style={{alignItems: 'center'}}>
         <Col>

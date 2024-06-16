@@ -276,6 +276,14 @@ export function updateDoc(docId: number, docInfo: DocInfo) {
 }
 
 export function uploadPKB(docInfo: DocInfo) {
+    if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
+        const docs = JSON.parse(localStorage.getItem('demo_mock_doc_list') || '[]');
+        const docId = docs.length;
+        docs.push({id: docId, filename: docInfo.name + '.excalidraw', ...docInfo});
+        localStorage.setItem(`demo_mock_doc_content_${docId}`, docInfo.content || JSON.stringify({text: ''}));
+        localStorage.setItem('demo_mock_doc_list', JSON.stringify(docs));
+        return Promise.resolve({message: 'save success', id: docId});
+    }
     return request({
         url: API_BASE_URL + '/pkb/',
         method: 'POST',
@@ -294,13 +302,12 @@ export function uploadDoc(docInfo: DocInfo) {
         localStorage.setItem(`demo_mock_doc_content_${docId}`, docInfo.content || JSON.stringify({text: ''}));
         localStorage.setItem('demo_mock_doc_list', JSON.stringify(docs));
         return Promise.resolve({message: 'save success', id: docId});
-    } else {
-        return request({
-            url: API_BASE_URL + '/docs/',
-            method: 'POST',
-            body: JSON.stringify(docInfo)
-        });
     }
+    return request({
+        url: API_BASE_URL + '/docs/',
+        method: 'POST',
+        body: JSON.stringify(docInfo)
+    });
 }
 
 function makeid(length: number) {

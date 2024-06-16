@@ -660,7 +660,7 @@ export default class Session extends EventEmitter {
         const docInfo = { ...this.userDocs.find(doc => doc.id === share_id)!};
         docInfo.content = content;
         const docDetail = await updateDoc(share_id, docInfo).catch(e => this.showMessage(e, {warning: true}));
-        if (docDetail.id) {
+        if (docDetail.hasOwnProperty('id')) {
           return Number(docDetail.id) || share_id;
         } else {
           return Promise.reject(docDetail.message);

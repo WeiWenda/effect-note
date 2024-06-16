@@ -1,5 +1,4 @@
 export default {
-  appState: { currentItemFontFamily: 1 },
   scrollToContent: true,
   libraryItems: [
     [

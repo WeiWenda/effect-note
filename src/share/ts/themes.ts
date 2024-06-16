@@ -200,6 +200,7 @@ export function appendStyleScript(clientStore: ClientStore) {
                   `);
   $('.span-selection-background').remove();
   $('#app').append(`<style class='span-selection-background'>
+                    .excalidraw .sidebar.excalidraw-node-content{background-color: ${theme['theme-bg-primary']};color: ${theme['theme-text-primary']}}
                     .horizontal-drag-board:hover{background-color: ${theme['theme-bg-secondary']}}
                     .ant-modal .ant-modal-content{background-color: ${theme['theme-bg-secondary']}}
                     .ant-modal .ant-modal-header{background-color: ${theme['theme-bg-secondary']}}

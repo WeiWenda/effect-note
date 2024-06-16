@@ -421,6 +421,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           {
             curPage === 'produce' &&
             <Button onClick={() => {
+              props.session.stopKeyMonitor('new-pkb-modal');
               setCurDocInfo({});
               Modal.confirm({
                 width: '520px',

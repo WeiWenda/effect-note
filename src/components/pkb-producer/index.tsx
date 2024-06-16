@@ -118,6 +118,10 @@ export default function PkbProducer({
         // @ts-ignore
         initialStatePromiseRef.current.promise.resolve({
           ...initialData,
+          appState: {
+            currentItemFontFamily: 1,
+            viewBackgroundColor: session.clientStore.getClientSetting('theme-bg-primary')
+          },
           elements: elements
         });
       });

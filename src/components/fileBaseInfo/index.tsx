@@ -44,16 +44,22 @@ function FileBaseInfoComponent(props: {
           }).then((doc_id) => {
             props.session.showMessage('修改成功');
             props.onFinish(doc_id);
+          }).catch(e => {
+            props.session.showMessage(e, {warning: true} );
           });
         } else if (props.fileType && props.fileType === 'pkb') {
           props.session.newPKB(values.name || defaultName, values.tags || []).then((doc_id) => {
             props.session.showMessage('创建成功');
             props.onFinish(doc_id);
+          }).catch(e => {
+            props.session.showMessage(e, {warning: true} );
           });
         } else {
           props.session.newFile(values.name || defaultName, values.tags || []).then((doc_id) => {
             props.session.showMessage('创建成功');
             props.onFinish(doc_id);
+          }).catch(e => {
+            props.session.showMessage(e, {warning: true} );
           });
         }
       }}

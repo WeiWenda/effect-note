@@ -3,6 +3,7 @@ import {Session} from '../../share';
 import {ServerConfig} from '../../ts/server_config';
 import {Button, Form, Input, Radio } from 'antd';
 import {setServerConfig as saveServerConfig} from '../../share/ts/utils/APIUtils';
+import * as React from 'react';
 
 export function ImgurComponent(props: { session: Session, serverConfig: ServerConfig}) {
   const [imgurType, setImgurType] = useState(props.serverConfig.imgur?.type || 'local');
@@ -12,6 +13,12 @@ export function ImgurComponent(props: { session: Session, serverConfig: ServerCo
   }, [props.serverConfig]);
   return (
     <>
+      {
+        process.env.REACT_APP_BUILD_PROFILE === 'demo' &&
+          <div className={'node-html'}>
+              <span className='red-color'>Demo部署环境下，该功能不可用</span>
+          </div>
+      }
       <Form
         labelAlign={'left'}
         form={form}
