@@ -463,7 +463,7 @@ export default function PkbProducer({
       const isNewTab = nativeEvent.ctrlKey || nativeEvent.metaKey;
       const isNewWindow = nativeEvent.shiftKey;
       const isInternalLink =
-        link.startsWith('/') || link.includes(window.location.origin);
+        link.startsWith('/') || link.includes(window.location.origin) || link.startsWith('http://localhost:51223/note');
       if (isInternalLink && !isNewTab && !isNewWindow) {
         // signal that we're handling the redirect ourselves
         event.preventDefault();
@@ -507,10 +507,12 @@ export default function PkbProducer({
           // do nothing
         }
         loadDoc({id: -1, content}).then(() => {
-          setTimeout(() => {
-            setEditingTextId(textElementId!.id);
-            setSelectNodeId(pointerDownState.hit.element!.id);
-            excalidrawAPI?.updateScene({appState: {openSidebar: { name: 'node-content'}}});
+          session.changeViewRoot(Path.root()).then(() => {
+            setTimeout(() => {
+              setEditingTextId(textElementId!.id);
+              setSelectNodeId(pointerDownState.hit.element!.id);
+              excalidrawAPI?.updateScene({appState: {openSidebar: { name: 'node-content'}}});
+            });
           });
         });
       }
