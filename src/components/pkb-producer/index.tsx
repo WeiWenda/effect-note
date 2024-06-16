@@ -141,6 +141,7 @@ export default function PkbProducer({
     if (!excalidrawAPI) {
       return;
     }
+    session.stopKeyMonitor('pkb-init');
     if (showShapes) {
       $('.shapes-section').removeClass('visually-hidden');
     } else {

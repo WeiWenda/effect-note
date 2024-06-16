@@ -375,10 +375,11 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     const docId = props.session.clientStore.getClientSetting('curDocId');
                     navigate(`/${e.key}/${docId}`);
                   } else if (e.key === 'produce') {
+                    props.session.stopKeyMonitor('pkb-nav');
                     const pkbId = props.session.clientStore.getClientSetting('curPkbId');
                     navigate(`/${e.key}/${pkbId}`);
                   } else {
-                    // props.session.stopKeyMonitor('header');
+                    props.session.stopKeyMonitor('discovery-nav');
                     const lastSearch = props.session.clientStore.getClientSetting('curSearch');
                     const lastSearchResult = props.session.clientStore.getClientSetting('curSearchResult');
                     if (lastSearch) {
