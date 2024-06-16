@@ -31,7 +31,7 @@ import type {
 import './App.scss';
 import {SessionWithToolbarComponent} from '../session';
 import {api_utils, DocInfo, InMemory, Path, Session} from '../../share';
-import {hasBoundTextElement, isLinearElement} from './typeChecks';
+import {hasBoundTextElement, isBindableElement, isLinearElement} from './typeChecks';
 import Draggable, {DraggableCore, DraggableData, DraggableEvent} from 'react-draggable';
 import {Flex, Input, Space, Tag, Tooltip} from 'antd';
 import {
@@ -84,7 +84,6 @@ export default function PkbProducer({
   const appRef = useRef<any>(null);
   const { t } = useI18n();
   const [selectNodeId, setSelectNodeId] = useState<string>('');
-  const [editingTextId, setEditingTextId] = useState<string>('');
   const [editingDocId, setEditingDocId] = useState<number>(-1);
   const [boardX, setBoardX] = useState(70);
   const [boardY, setBoardY] = useState(17);
@@ -95,7 +94,6 @@ export default function PkbProducer({
   const [showLibrary, setShowLibrary] = useState(false);
   const [docked, setDocked] = useState(false);
   const [theme, setTheme] = useState<Theme>('light');
-  const [viewMode, setViewMode] = useState(false);
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [tagsData, setTagsData] = useState(['Movies', 'Books', 'Music', 'Sports']);
   const [visibleShapes, setVisibleShapes] = useState(['rectangle', 'diamond', 'ellipse']);
@@ -184,10 +182,6 @@ export default function PkbProducer({
           } else {
             var actionPannel = $( '#selected-shape-actions-wrapper .App-menu__left').detach();
             $('.selected-shape-actions').append(actionPannel);
-          }
-          if (state.viewModeEnabled) {
-            excalidrawAPI?.setCursor('pointer');
-            setViewMode(true);
           }
           // 避免内容丢失
           if (!state.openSidebar) {
@@ -410,24 +404,28 @@ export default function PkbProducer({
   //   }
   // };
   const saveDocIfNeed = async () => {
-    if (editingTextId) {
-      console.log(`正在保存内容到节点 ${editingTextId}`);
+    if (!selectNodeId) {
+      return;
+    }
+    if (editingDocId > 0) {
+      console.log(`正在保存内容到文档 ${editingDocId}`);
+      await session.reUploadFile(Path.root(), editingDocId).then(() => {
+        setEditingDocId(-1);
+        setSelectNodeId('');
+        excalidrawAPI?.setToast({message: '节点保存成功', duration: 1000});
+      });
+    } else {
+      console.log(`正在保存内容到节点 ${selectNodeId}`);
       const content = await session.getCurrentContent(Path.root(), 'application/json');
+      setSelectNodeId('');
       excalidrawAPI?.updateScene({
         elements: excalidrawAPI?.getSceneElements().map(e => {
-          if (e.id === editingTextId) {
-            return newElementWith(e as ExcalidrawTextElement, {originalText: content});
+          if (e.id === selectNodeId) {
+            return newElementWith(e as ExcalidrawTextElement, {link: '点击查看节点详情', customData: {'detail': content}});
           } else {
             return e;
           }
         })
-      });
-      setEditingTextId('');
-    } else if (editingDocId > 0) {
-      console.log(`正在保存内容到文档 ${editingDocId}`);
-      await session.reUploadFile(Path.root(), editingDocId).then(() => {
-        setEditingDocId(-1);
-        excalidrawAPI?.setToast({message: '节点保存成功', duration: 1000});
       });
     }
   };
@@ -464,8 +462,19 @@ export default function PkbProducer({
       const isNewTab = nativeEvent.ctrlKey || nativeEvent.metaKey;
       const isNewWindow = nativeEvent.shiftKey;
       const isInternalLink =
-        link.startsWith('/') || link.includes(window.location.origin) || link.startsWith('http://localhost:51223/note');
-      if (isInternalLink && !isNewTab && !isNewWindow) {
+        link.startsWith('/') || link.includes(window.location.origin) ||
+        link.startsWith('http://localhost:51223/note');
+      if (link === '点击查看节点详情' && element.customData && element.customData.detail) {
+        event.preventDefault();
+        loadDoc({id: -1, content: element.customData.detail}).then(() => {
+          session.changeViewRoot(Path.root()).then(() => {
+            setTimeout(() => {
+              setSelectNodeId(element.id);
+              excalidrawAPI?.updateScene({appState: {openSidebar: { name: 'node-content'}}});
+            });
+          });
+        });
+      } else if (isInternalLink && !isNewTab && !isNewWindow) {
         // signal that we're handling the redirect ourselves
         event.preventDefault();
         const docID = Number(link.split('/note/').pop()?.split('?').shift());
@@ -476,7 +485,6 @@ export default function PkbProducer({
             session.document.canonicalPath(Number(viewRoot)).then(path => {
               session.changeViewRoot(path || Path.root()).then(() => {
                 setEditingDocId(docID);
-                setEditingTextId('');
                 setSelectNodeId(element.id);
                 excalidrawAPI?.updateScene({appState: {openSidebar: {name: 'node-content'}}});
                 console.log('onLinkOpen', docID, viewRoot);
@@ -496,22 +504,17 @@ export default function PkbProducer({
     pointerDownState: ExcalidrawPointerDownState,
   ) => {
     if (activeTool.type === 'selection' && pointerDownState.hit.element) {
-      if (hasBoundTextElement(pointerDownState.hit.element) && !isLinearElement(pointerDownState.hit.element)) {
-        const textElementId = pointerDownState.hit.element.boundElements?.find(({ type }) => type === 'text');
-        const textElement = excalidrawAPI?.getSceneElements().find(e => e.id === textElementId?.id) as ExcalidrawTextElement;
+      if (isBindableElement(pointerDownState.hit.element)) {
+        const editingElement = pointerDownState.hit.element;
         let content = '{"text": ""}';
-        try {
-           if (typeof JSON.parse(textElement.originalText) === 'object') {
-             content = textElement.originalText;
-           }
-        } catch (e) {
-          // do nothing
+        if (editingElement.link && editingElement.link === '点击查看节点详情'
+             && editingElement.customData && editingElement.customData.detail) {
+          content = editingElement.customData.detail;
         }
         loadDoc({id: -1, content}).then(() => {
           session.changeViewRoot(Path.root()).then(() => {
             setTimeout(() => {
-              setEditingTextId(textElementId!.id);
-              setSelectNodeId(pointerDownState.hit.element!.id);
+              setSelectNodeId(editingElement.id);
               excalidrawAPI?.updateScene({appState: {openSidebar: { name: 'node-content'}}});
             });
           });
