@@ -529,6 +529,10 @@ export default function PkbProducer({
             if (!excalidrawAPI) {
               return false;
             }
+            if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
+              session.showMessage('Demo部署环境下，该功能不可用', {warning: true});
+              return false;
+            }
             exportToClipboard({
               elements: excalidrawAPI.getSceneElements(),
               appState: excalidrawAPI.getAppState(),
