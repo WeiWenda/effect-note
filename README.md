@@ -20,7 +20,7 @@ Project Vision：Empower Personal Knowledge Management And Discovery
          <a target="_blank" href="https://apps.apple.com/cn/app/effectnote/id6458540943?mt=12"><image width='150px' src="./public/images/mas_en.svg"/> </a>
       </td>
        <td>
-          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Mac/EffectNote-0.5.2-x64.dmg">直接下载</a>
+          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Mac/EffectNote-0.6.0-x64.dmg">直接下载</a>
        </td>
     </tr>
     <tr>
@@ -31,7 +31,7 @@ Project Vision：Empower Personal Knowledge Management And Discovery
          -
       </td>
        <td>
-          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Windows/EffectNote-0.5.2%20Setup.exe">直接下载</a>
+          <a target="_blank" href="https://fileserver-1314328063.cos.ap-beijing.myqcloud.com/Windows/EffectNote-0.6.0%20Setup.exe">直接下载</a>
        </td>
      </tr>
     <tr>
@@ -68,17 +68,20 @@ Project Vision：Empower Personal Knowledge Management And Discovery
 
 
 ## Thanks To
-- [vimflowy](https://github.com/WuTheFWasThat/vimflowy)
 - [react](https://github.com/facebook/react)
 - [electron](https://github.com/electron/electron)
 - [ant-design](https://github.com/ant-design/ant-design)
 - [isomorphic-git](https://github.com/isomorphic-git/isomorphic-git)
+- [vimflowy](https://github.com/WuTheFWasThat/vimflowy)
+- [excalidraw](https://github.com/excalidraw/excalidraw)
+- [drawio](https://github.com/jgraph/drawio)
+- [kittyminder-editor](https://github.com/fex-team/kityminder-editor)
 - [lunr.js](https://github.com/olivernn/lunr.js)
 - [pdf-to-markdown](https://github.com/jzillmann/pdf-to-markdown)
 - [node-git-server](https://github.com/gabrielcsapo/node-git-server)
 - [obsidian-dataloom](https://github.com/trey-wallis/obsidian-dataloom)
 - [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor)
-- [kittyminder-editor](https://github.com/fex-team/kityminder-editor)
 - [wangEditor](https://github.com/wangeditor-team/wangEditor)
 - [vditor](https://github.com/Vanessa219/vditor)
-- [drawio](https://github.com/jgraph/drawio)
+
+
