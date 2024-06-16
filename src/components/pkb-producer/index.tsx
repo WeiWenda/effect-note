@@ -424,7 +424,7 @@ export default function PkbProducer({
       setEditingTextId('');
     } else if (editingDocId > 0) {
       console.log(`正在保存内容到文档 ${editingDocId}`);
-      session.reUploadFile(Path.root(), editingDocId).then(() => {
+      await session.reUploadFile(Path.root(), editingDocId).then(() => {
         setEditingDocId(-1);
         excalidrawAPI?.setToast({message: '节点保存成功', duration: 1000});
       });

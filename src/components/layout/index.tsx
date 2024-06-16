@@ -440,6 +440,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     session={props.session}
                     tags={props.session.userDocs.flatMap(doc => JSON.parse(doc.tag || '[]') as Array<string>)}
                     onFinish={(docId) => {
+                      Modal.destroyAll();
                       props.session.startKeyMonitor();
                       navigate(`/produce/${docId}`);
                     }}
