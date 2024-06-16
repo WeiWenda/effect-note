@@ -1110,6 +1110,7 @@
         },
         {
           "text": "v0.5.1",
+          "collapsed": true,
           "plugins": {
             "is_board": true
           },
@@ -1157,6 +1158,25 @@
                 {
                   "text": "支持插入节点软链",
                   "id": 28495
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "v0.6.0",
+          "plugins": {
+            "is_board": true
+          },
+          "id": 28711,
+          "children": [
+            {
+              "text": "Improvement",
+              "id": 28712,
+              "children": [
+                {
+                  "text": "支持图谱笔记",
+                  "id": 28713
                 }
               ]
             }
