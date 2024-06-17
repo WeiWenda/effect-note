@@ -1,6 +1,8 @@
 // TODO: enum for export mimetypes/extensions
 
 // keyboard key
+import {CachedRowInfo} from './document';
+
 export type Key = string;
 
 export type Macro = Array<Key>;
@@ -33,6 +35,15 @@ export type SerializedBlock = {
   plugins?: any,
   children?: Array<SerializedBlock>
 } | { clone: Row } | string;
+
+export const EMPTY_BLOCK: SerializedBlock = {
+  'text': '',
+  'children': [
+    {
+      'text': ''
+    }
+  ]
+};
 
 export type KityMinderNode = {
     data: {

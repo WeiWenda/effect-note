@@ -15,7 +15,7 @@ import { XMLParser, XMLBuilder, XMLValidator } from 'fast-xml-parser';
 
 import * as Modes from './modes';
 
-import {ModeId, CursorOptions, Row, Col, Chars, SerializedBlock, UserInfo, KityMinderNode, DocInfo} from './types';
+import {ModeId, CursorOptions, Row, Col, Chars, SerializedBlock, UserInfo, KityMinderNode, DocInfo, EMPTY_BLOCK} from './types';
 import {updateDoc, uploadDoc, uploadPKB} from './utils/APIUtils';
 import React, {MutableRefObject, Ref} from 'react';
 import Search from './search';
@@ -614,7 +614,7 @@ export default class Session extends EventEmitter {
       const docId = Math.max(...this.userDocs.map(d => d.id!)) + 1;
       const docDetail = await uploadDoc({
         id: docId,
-        name: name, tag: JSON.stringify(tags), content: JSON.stringify({text: ''})})
+        name: name, tag: JSON.stringify(tags), content: JSON.stringify(EMPTY_BLOCK)})
         .catch(e => {
           this.showMessage(e, {warning: true});
         });

@@ -168,6 +168,19 @@ export const hasBoundTextElement = (
   );
 };
 
+export const getBoundTextOrDefault = (
+  element: ExcalidrawElement,
+  elements: readonly ExcalidrawElement[] | undefined,
+  defaultText: string
+) => {
+  if (hasBoundTextElement(element)) {
+    const boundText = element.boundElements!.find(({ type }) => type === 'text');
+    return elements ? (elements.find(e => e.id === boundText?.id) as ExcalidrawTextElement).text : defaultText;
+  } else {
+    return defaultText;
+  }
+};
+
 export const isBoundToContainer = (
   element: ExcalidrawElement | null,
 ): element is ExcalidrawTextElementWithContainer => {

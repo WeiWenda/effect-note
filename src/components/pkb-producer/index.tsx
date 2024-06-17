@@ -30,8 +30,8 @@ import type {
 } from '@excalidraw/excalidraw/types/element/types';
 import './App.scss';
 import {SessionWithToolbarComponent} from '../session';
-import {api_utils, DocInfo, InMemory, Path, Session} from '../../share';
-import {hasBoundTextElement, isBindableElement, isLinearElement} from './typeChecks';
+import {api_utils, DocInfo, EMPTY_BLOCK, InMemory, Path, Session} from '../../share';
+import {getBoundTextOrDefault, hasBoundTextElement, isBindableElement, isLinearElement} from './typeChecks';
 import Draggable, {DraggableCore, DraggableData, DraggableEvent} from 'react-draggable';
 import {Flex, Input, Space, Tag, Tooltip} from 'antd';
 import {
@@ -85,6 +85,7 @@ export default function PkbProducer({
   const { t } = useI18n();
   const [selectNodeId, setSelectNodeId] = useState<string>('');
   const [editingDocId, setEditingDocId] = useState<number>(-1);
+  const [editingElementText, setEditingElementText] = useState<string>('节点详情');
   const [boardX, setBoardX] = useState(70);
   const [boardY, setBoardY] = useState(17);
   const [showFilter, setShowFilter] = useState(false);
@@ -342,7 +343,7 @@ export default function PkbProducer({
                 paddingRight: '1em',
               }}
             >
-              节点详情
+              {editingElementText}
             </div>
             <Space>
               <Tooltip title={'进入途经点子图'}>
@@ -415,9 +416,12 @@ export default function PkbProducer({
         excalidrawAPI?.setToast({message: '节点保存成功', duration: 1000});
       });
     } else {
-      console.log(`正在保存内容到节点 ${selectNodeId}`);
       const content = await session.getCurrentContent(Path.root(), 'application/json');
       setSelectNodeId('');
+      if (content === JSON.stringify(EMPTY_BLOCK, undefined, 2)) {
+        return;
+      }
+      console.log(`正在保存内容到节点 ${selectNodeId}`);
       excalidrawAPI?.updateScene({
         elements: excalidrawAPI?.getSceneElements().map(e => {
           if (e.id === selectNodeId) {
@@ -450,33 +454,25 @@ export default function PkbProducer({
     session.reset_jump_history();
   };
 
-  const onLinkOpen = useCallback(
-    (
-      element: NonDeletedExcalidrawElement,
-      event: CustomEvent<{
-        nativeEvent: MouseEvent | React.PointerEvent<HTMLCanvasElement>;
-      }>,
-    ) => {
-      const link = element.link!;
-      const { nativeEvent } = event.detail;
-      const isNewTab = nativeEvent.ctrlKey || nativeEvent.metaKey;
-      const isNewWindow = nativeEvent.shiftKey;
+  const handleLinkOpen = useCallback((element: NonDeletedExcalidrawElement) => {
+    if (element.link) {
+      const link = element.link;
       const isInternalLink =
         link.startsWith('/') || link.includes(window.location.origin) ||
         link.startsWith('http://localhost:51223/note');
       if (link === '点击查看节点详情' && element.customData && element.customData.detail) {
-        event.preventDefault();
         loadDoc({id: -1, content: element.customData.detail}).then(() => {
           session.changeViewRoot(Path.root()).then(() => {
             setTimeout(() => {
               setSelectNodeId(element.id);
+              setEditingElementText(getBoundTextOrDefault(element,  excalidrawAPI?.getSceneElements(), '节点详情'));
               excalidrawAPI?.updateScene({appState: {openSidebar: { name: 'node-content'}}});
             });
           });
         });
-      } else if (isInternalLink && !isNewTab && !isNewWindow) {
+        return true;
+      } else if (isInternalLink) {
         // signal that we're handling the redirect ourselves
-        event.preventDefault();
         const docID = Number(link.split('/note/').pop()?.split('?').shift());
         session.clientStore.setDocname(docID);
         api_utils.getDocContent(docID).then(res => {
@@ -486,39 +482,59 @@ export default function PkbProducer({
               session.changeViewRoot(path || Path.root()).then(() => {
                 setEditingDocId(docID);
                 setSelectNodeId(element.id);
+                setEditingElementText(getBoundTextOrDefault(element,  excalidrawAPI?.getSceneElements(), '节点详情'));
                 excalidrawAPI?.updateScene({appState: {openSidebar: {name: 'node-content'}}});
                 console.log('onLinkOpen', docID, viewRoot);
               });
             });
           });
         });
+        return true;
         // do a custom redirect, such as passing to react-router
         // ...
       }
-    },
-    [excalidrawAPI],
-  );
+    } else {
+      return false;
+    }
+  }, [excalidrawAPI]);
+
+  const onLinkOpen = (
+      element: NonDeletedExcalidrawElement,
+      event: CustomEvent<{
+        nativeEvent: MouseEvent | React.PointerEvent<HTMLCanvasElement>;
+      }>
+  ) => {
+    const { nativeEvent } = event.detail;
+    const isNewTab = nativeEvent.ctrlKey || nativeEvent.metaKey;
+    const isNewWindow = nativeEvent.shiftKey;
+    if (isNewTab || isNewWindow) {
+      return;
+    }
+    if (handleLinkOpen(element)) {
+      event.preventDefault();
+    }
+  };
 
   const onPointerDown = (
     activeTool: AppState['activeTool'],
     pointerDownState: ExcalidrawPointerDownState,
   ) => {
     if (activeTool.type === 'selection' && pointerDownState.hit.element) {
-      if (isBindableElement(pointerDownState.hit.element)) {
-        const editingElement = pointerDownState.hit.element;
-        let content = '{"text": ""}';
-        if (editingElement.link && editingElement.link === '点击查看节点详情'
-             && editingElement.customData && editingElement.customData.detail) {
-          content = editingElement.customData.detail;
-        }
-        loadDoc({id: -1, content}).then(() => {
-          session.changeViewRoot(Path.root()).then(() => {
-            setTimeout(() => {
-              setSelectNodeId(editingElement.id);
-              excalidrawAPI?.updateScene({appState: {openSidebar: { name: 'node-content'}}});
+      if (pointerDownState.hit.element.link) {
+        handleLinkOpen(pointerDownState.hit.element);
+      } else {
+        if (isBindableElement(pointerDownState.hit.element)) {
+          const editingElement = pointerDownState.hit.element;
+          loadDoc({id: -1, content: JSON.stringify(EMPTY_BLOCK)}).then(() => {
+            session.changeViewRoot(Path.root()).then(() => {
+              setTimeout(() => {
+                setSelectNodeId(editingElement.id);
+                setEditingElementText(getBoundTextOrDefault(editingElement,  excalidrawAPI?.getSceneElements(), '节点详情'));
+                excalidrawAPI?.updateScene({appState: {openSidebar: { name: 'node-content'}}});
+              });
             });
           });
-        });
+        }
       }
     } else {
       console.log(activeTool, pointerDownState);

@@ -1,4 +1,4 @@
-import {DocInfo, SubscriptionInfo} from '../types';
+import {DocInfo, EMPTY_BLOCK, SubscriptionInfo} from '../types';
 import {ServerConfig} from '../../../ts/server_config';
 import config from '../vim';
 import COS from 'cos-js-sdk-v5';
@@ -261,7 +261,7 @@ export function updateDoc(docId: number, docInfo: DocInfo) {
     if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
         const docs = JSON.parse(localStorage.getItem('demo_mock_doc_list') || '[]') as any[];
         localStorage.setItem('demo_mock_doc_list', JSON.stringify([{
-            content: JSON.stringify({text: ''}),
+            content: JSON.stringify(EMPTY_BLOCK),
             ...docInfo}].concat(
               docs.filter(d => d.id !== docId)
         )));
@@ -280,7 +280,7 @@ export function uploadPKB(docInfo: DocInfo) {
         const docs = JSON.parse(localStorage.getItem('demo_mock_doc_list') || '[]');
         const docId = docs.length;
         docs.push({id: docId, filename: docInfo.name + '.excalidraw', ...docInfo});
-        localStorage.setItem(`demo_mock_doc_content_${docId}`, docInfo.content || JSON.stringify({text: ''}));
+        localStorage.setItem(`demo_mock_doc_content_${docId}`, docInfo.content || JSON.stringify(EMPTY_BLOCK));
         localStorage.setItem('demo_mock_doc_list', JSON.stringify(docs));
         return Promise.resolve({message: 'save success', id: docId});
     }
@@ -299,7 +299,7 @@ export function uploadDoc(docInfo: DocInfo) {
         const docs = JSON.parse(localStorage.getItem('demo_mock_doc_list') || '[]');
         const docId = docs.length;
         docs.push({id: docId, filename: docInfo.name + '.effect.json', ...docInfo});
-        localStorage.setItem(`demo_mock_doc_content_${docId}`, docInfo.content || JSON.stringify({text: ''}));
+        localStorage.setItem(`demo_mock_doc_content_${docId}`, docInfo.content || JSON.stringify(EMPTY_BLOCK));
         localStorage.setItem('demo_mock_doc_list', JSON.stringify(docs));
         return Promise.resolve({message: 'save success', id: docId});
     }
@@ -396,7 +396,7 @@ export function deleteDocContent(docId: number) {
     if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
         const docs = JSON.parse(localStorage.getItem('demo_mock_doc_list') || '[]') as DocInfo[];
         localStorage.setItem('demo_mock_doc_list', JSON.stringify(docs.filter(d => d.id !== docId)));
-        localStorage.setItem(`demo_mock_doc_content_${docId}`, JSON.stringify({text: ''}));
+        localStorage.setItem(`demo_mock_doc_content_${docId}`, JSON.stringify(EMPTY_BLOCK));
         return Promise.resolve();
     }
     return request({
