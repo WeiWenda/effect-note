@@ -81,6 +81,9 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const [xml, setXml] = useState<string | undefined>();
   const [vd, setVd] = React.useState<Vditor>();
   useEffect(() => {
+    setCurPage(location.pathname.split('/')[1] || 'note');
+  }, [location]);
+  useEffect(() => {
     getServerConfig().then(res => {
       setServerConfig(res);
       props.session.serverConfig = res;
@@ -376,7 +379,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     navigate(`/${e.key}/${docId}`);
                   } else if (e.key === 'produce') {
                     props.session.stopKeyMonitor('pkb-nav');
-                    const pkbId = props.session.clientStore.getClientSetting('curPkbId');
+                    const pkbId = curPage === 'produce' ? '-2' : props.session.clientStore.getClientSetting('curPkbId');
                     navigate(`/${e.key}/${pkbId}`);
                   } else {
                     props.session.stopKeyMonitor('discovery-nav');

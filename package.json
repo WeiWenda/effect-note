@@ -66,13 +66,14 @@
     ]
   },
   "devDependencies": {
-    "@dagrejs/dagre": "^1.1.2",
-    "@excalidraw/excalidraw": "^0.17.6",
     "@ant-design/icons": "^5.2.4",
+    "@dagrejs/dagre": "^1.1.2",
     "@electron-forge/cli": "^6.4.2",
     "@electron-forge/maker-dmg": "^6.4.2",
     "@electron-forge/maker-pkg": "^6.4.2",
     "@electron-forge/maker-squirrel": "^6.4.2",
+    "@excalidraw/excalidraw": "^0.17.6",
+    "@excalidraw/mermaid-to-excalidraw": "^1.0.0",
     "@reduxjs/toolkit": "^2.0.1",
     "@rollup/plugin-babel": "^6.0.0",
     "@rollup/plugin-commonjs": "^22.0.2",

@@ -1,6 +1,7 @@
 import React, {Children, cloneElement, useCallback, useEffect, useRef, useState,} from 'react';
 import type * as TExcalidraw from '@excalidraw/excalidraw';
 import {newElementWith, useI18n} from '@excalidraw/excalidraw';
+import { parseMermaidToExcalidraw } from '@excalidraw/mermaid-to-excalidraw';
 
 import $ from 'jquery';
 
@@ -31,7 +32,7 @@ import type {
 import './App.scss';
 import {SessionWithToolbarComponent} from '../session';
 import {api_utils, DocInfo, EMPTY_BLOCK, InMemory, Path, Session} from '../../share';
-import {getBoundTextOrDefault, hasBoundTextElement, isBindableElement, isLinearElement} from './typeChecks';
+import {getBoundTextOrDefault, hasBoundTextElement, isArrowElement, isBindableElement, isLinearElement} from './typeChecks';
 import Draggable, {DraggableCore, DraggableData, DraggableEvent} from 'react-draggable';
 import {Flex, Input, Space, Tag, Tooltip} from 'antd';
 import {
@@ -44,7 +45,7 @@ import {
   NodeIndexOutlined,
   ReadOutlined
 } from '@ant-design/icons';
-import {useLoaderData, useParams} from 'react-router-dom';
+import {useLoaderData, useNavigate, useParams} from 'react-router-dom';
 
 const {Search} = Input;
 
@@ -75,7 +76,7 @@ export default function PkbProducer({
     Sidebar,
     WelcomeScreen,
     MainMenu,
-    convertToExcalidrawElements,
+    convertToExcalidrawElements
   } = excalidrawLib;
   // @ts-ignore
   const { curDocId } = useParams();
@@ -83,6 +84,7 @@ export default function PkbProducer({
   const {userDocs} = useLoaderData();
   const appRef = useRef<any>(null);
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [selectNodeId, setSelectNodeId] = useState<string>('');
   const [editingDocId, setEditingDocId] = useState<number>(-1);
   const [editingElementText, setEditingElementText] = useState<string>('节点详情');
@@ -99,6 +101,7 @@ export default function PkbProducer({
   const [tagsData, setTagsData] = useState(['Movies', 'Books', 'Music', 'Sports']);
   const [visibleShapes, setVisibleShapes] = useState(['rectangle', 'diamond', 'ellipse']);
   const [selectedTags, setSelectedTags] = React.useState<string[]>(['Movies']);
+  const [initialized, setInitialized] = React.useState(false);
   const initialStatePromiseRef = useRef<{
     promise: ResolvablePromise<ExcalidrawInitialDataState | null>;
   }>({ promise: null! });
@@ -114,21 +117,98 @@ export default function PkbProducer({
       session.clientStore.setClientSetting('curPkbId', Number(curDocId));
       api_utils.getDocContent(Number(curDocId)).then((res) => {
         const elements = JSON.parse(res.content).elements as readonly ExcalidrawElement[];
-        // @ts-ignore
-        initialStatePromiseRef.current.promise.resolve({
-          ...initialData,
-          appState: {
-            currentItemFontFamily: 1,
-            viewBackgroundColor: session.clientStore.getClientSetting('theme-bg-primary')
-          },
-          elements: elements
-        });
+        if (!initialized) {
+          // @ts-ignore
+          initialStatePromiseRef.current.promise.resolve({
+            ...initialData,
+            appState: {
+              currentItemFontFamily: 1,
+              viewBackgroundColor: session.clientStore.getClientSetting('theme-bg-primary')
+            },
+            elements: elements
+          });
+          setInitialized(true);
+        } else {
+          excalidrawAPI?.updateScene({elements});
+        }
       });
     } else {
-      // @ts-ignore
-      initialStatePromiseRef.current.promise.resolve(initialData);
+      const tagName2Id: Map<string, number> = new Map<string, number>();
+      const docId2Type: Map<number, string> = new Map<number, string>();
+      const mermaidDefinition = ['flowchart TB'];
+      const mermaidSubGraph: Map<string, string[]> = new Map<string, string[]>();
+      const getOrCompute = (tagName: string) => {
+        if (!tagName2Id.get(tagName)) {
+          const nextId = tagName2Id.size + 1;
+          tagName2Id.set(tagName, nextId);
+          mermaidDefinition.push(`${nextId}[${tagName}]`);
+        }
+        return tagName2Id.get(tagName);
+      };
+      for (const docInfo of userDocs as DocInfo[]) {
+        const tagArray = JSON.parse(docInfo.tag || '[]');
+        const tags = Array.isArray(tagArray) ? tagArray : [];
+        mermaidDefinition.push(`doc${docInfo.id}("${docInfo.id}#${docInfo.name}")`);
+        docId2Type.set(docInfo.id!, docInfo.filename!.split('.').pop() === 'json' ? 'note' : 'produce');
+        for (const tag of tags) {
+          const tagNames = tag.split('/') as string[];
+          if (!tagNames.length) {
+            continue;
+          }
+          if (!mermaidSubGraph.get(tagNames[0])) {
+            mermaidSubGraph.set(tagNames[0], []);
+          }
+          const subGraphDefinition = mermaidSubGraph.get(tagNames[0])!;
+          for (let i = 0; i < tagNames.length - 1; i++) {
+            if (tagName2Id.get(tagNames[i]) && tagName2Id.get(tagNames[i + 1])) {
+              continue;
+            }
+            const srcId = getOrCompute(tagNames[i]);
+            const dstId = getOrCompute(tagNames[i + 1]);
+            subGraphDefinition.push(`${srcId} --> ${dstId}`);
+          }
+          if (tagNames.length > 0) {
+            const finalDir = getOrCompute(tagNames[tagNames.length - 1]);
+            subGraphDefinition.push(`${finalDir} --> doc${docInfo.id}`);
+          }
+        }
+      }
+      [...mermaidSubGraph.entries()].sort((a, b) => a[1].length - b[1].length).forEach((value) => {
+        mermaidDefinition.push(`subgraph ${value[0]}\ndirection LR`);
+        mermaidDefinition.push(...value[1]);
+        mermaidDefinition.push(`end`);
+      });
+      parseMermaidToExcalidraw(mermaidDefinition.join('\n'), {
+        fontSize: 20,
+      }).then(({elements}) => {
+        const convertedElements = convertToExcalidrawElements(elements);
+        const finalElements = convertedElements.map(el => {
+          if (el.roundness && !isArrowElement(el)) {
+            const docId = getBoundTextOrDefault(el, convertedElements, '').split('#')[0];
+            return newElementWith(el, {link: `http://localhost:51223/${docId2Type.get(Number(docId))}/${docId}`});
+          } else {
+            return el;
+          }
+        });
+        if (!initialized) {
+          // @ts-ignore
+          initialStatePromiseRef.current.promise.resolve({
+            ...initialData,
+            appState: {
+              currentItemFontFamily: 1,
+              viewBackgroundColor: session.clientStore.getClientSetting('theme-bg-primary')
+            },
+            elements: finalElements
+          });
+          setInitialized(true);
+        } else {
+          excalidrawAPI?.updateScene({
+            elements: finalElements
+          });
+        }
+      });
     }
-  }, [curDocId]);
+  }, [curDocId, userDocs]);
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
 
@@ -189,7 +269,7 @@ export default function PkbProducer({
             saveDocIfNeed();
           }
         },
-        // viewModeEnabled,
+        viewModeEnabled: curDocId && Number(curDocId) > 0 ? undefined : true,
         // zenModeEnabled,
         // gridModeEnabled,
         theme,
@@ -457,9 +537,10 @@ export default function PkbProducer({
   const handleLinkOpen = useCallback((element: NonDeletedExcalidrawElement) => {
     if (element.link) {
       const link = element.link;
-      const isInternalLink =
-        link.startsWith('/') || link.includes(window.location.origin) ||
-        link.startsWith('http://localhost:51223/note');
+      const isNoteLink =
+        link.startsWith(window.location.origin + '/note') || link.startsWith('http://localhost:51223/note');
+      const isProduceLink =
+        link.startsWith(window.location.origin + '/produce') || link.startsWith('http://localhost:51223/produce');
       if (link === '点击查看节点详情' && element.customData && element.customData.detail) {
         loadDoc({id: -1, content: element.customData.detail}).then(() => {
           session.changeViewRoot(Path.root()).then(() => {
@@ -471,7 +552,7 @@ export default function PkbProducer({
           });
         });
         return true;
-      } else if (isInternalLink) {
+      } else if (isNoteLink) {
         // signal that we're handling the redirect ourselves
         const docID = Number(link.split('/note/').pop()?.split('?').shift());
         session.clientStore.setDocname(docID);
@@ -492,6 +573,11 @@ export default function PkbProducer({
         return true;
         // do a custom redirect, such as passing to react-router
         // ...
+      } else if (isProduceLink) {
+        navigate('/produce/' + link.split('/').pop()!.split('?')[0]);
+        return true;
+      } else {
+        return false;
       }
     } else {
       return false;
