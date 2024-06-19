@@ -459,7 +459,7 @@ export default function PkbProducer({
           >
             <SessionWithToolbarComponent session={session}
                                          loading={false}
-                                         curDocId={-3}
+                                         curDocId={-1}
                                          filterOuter={''}
                                          showLayoutIcon={false}
                                          showLockIcon={true} />
@@ -582,7 +582,7 @@ export default function PkbProducer({
     } else {
       return false;
     }
-  }, [excalidrawAPI]);
+  }, [excalidrawAPI, selectNodeId, editingDocId]);
 
   const onLinkOpen = (
       element: NonDeletedExcalidrawElement,
