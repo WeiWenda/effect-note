@@ -48,7 +48,7 @@ registerPlugin(
               hljs: {
                 lineNumber: true
               },
-              cdn: 'http://localhost:51223/vditor',
+              cdn: `${window.location.origin}/vditor`,
               transform: (html: string) => {
                 return html.replace('<a ', '<a target="_blank" ');
               },
