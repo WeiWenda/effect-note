@@ -116,14 +116,24 @@ export default function PkbProducer({
     if (curDocId && Number(curDocId) > 0) {
       session.clientStore.setClientSetting('curPkbId', Number(curDocId));
       api_utils.getDocContent(Number(curDocId)).then((res) => {
-        const elements = JSON.parse(res.content).elements as readonly ExcalidrawElement[];
+        const savedContent = JSON.parse(res.content);
+        const elements = savedContent.elements as readonly ExcalidrawElement[];
+        setShowLibrary(savedContent.tools?.showLibrary ?? showLibrary);
+        setShowShapes(savedContent.tools?.showShapes ?? showShapes);
+        setShowFilter(savedContent.tools?.showFilter ?? showFilter);
+        setShowSearch(savedContent.tools?.showSearch ?? showSearch);
+        setShowSelectedShapeActions(savedContent.tools?.showSelectedShapeActions ?? showSelectedShapeActions);
         if (!initialized) {
           // @ts-ignore
           initialStatePromiseRef.current.promise.resolve({
             ...initialData,
+            scrollToContent: false,
             appState: {
-              currentItemFontFamily: 1,
-              viewBackgroundColor: session.clientStore.getClientSetting('theme-bg-primary')
+              currentItemFontFamily: savedContent.appState.currentItemFontFamily,
+              viewBackgroundColor: savedContent.appState.viewBackgroundColor,
+              zoom: savedContent.appState.zoom,
+              scrollX: savedContent.appState.scrollX,
+              scrollY: savedContent.appState.scrollY,
             },
             elements: elements
           });
@@ -221,6 +231,8 @@ export default function PkbProducer({
       return;
     }
     session.stopKeyMonitor('pkb-init');
+  }, [excalidrawAPI]);
+  useEffect(() => {
     if (showShapes) {
       $('.shapes-section').removeClass('visually-hidden');
     } else {
@@ -231,7 +243,12 @@ export default function PkbProducer({
     } else {
       $('.sidebar-trigger').addClass('visually-hidden');
     }
-  }, [excalidrawAPI]);
+    if (showSelectedShapeActions) {
+      $('.App-menu__left').removeClass('visually-hidden');
+    } else {
+      $('.App-menu__left').addClass('visually-hidden');
+    }
+  }, [showShapes, showLibrary, showSelectedShapeActions]);
 
   const renderExcalidraw = (children: React.ReactNode) => {
     const Excalidraw: any = Children.toArray(children).find(
@@ -649,7 +666,17 @@ export default function PkbProducer({
             }).then(() => {
               navigator.clipboard.readText().then(content => {
                 const docInfo = { ...userDocs.find((doc: any) => doc.id === Number(curDocId))!,
-                  content: JSON.stringify(JSON.parse(content), undefined, 2)};
+                  content: JSON.stringify({
+                    ...JSON.parse(content),
+                    appState: excalidrawAPI.getAppState(),
+                    tools: {
+                      showLibrary,
+                      showShapes,
+                      showSearch,
+                      showFilter,
+                      showSelectedShapeActions
+                    }
+                  }, undefined, 2)};
                 api_utils.updateDoc(Number(curDocId), docInfo).then(() => {
                   excalidrawAPI.setToast({message: '画板保存成功', duration: 1000});
                 });
@@ -665,24 +692,10 @@ export default function PkbProducer({
         <MainMenu.DefaultItems.Help />
         <MainMenu.DefaultItems.ClearCanvas />
         <MainMenu.Separator />
-        <MainMenu.Item icon={<AppstoreAddOutlined />} onSelect={() => {
-          if (showShapes) {
-            $('.shapes-section').addClass('visually-hidden');
-          } else {
-            $('.shapes-section').removeClass('visually-hidden');
-          }
-          setShowShapes(!showShapes);
-        }}>
+        <MainMenu.Item icon={<AppstoreAddOutlined />} onSelect={() => setShowShapes(!showShapes)}>
           形状工具
         </MainMenu.Item>
-        <MainMenu.Item icon={<ReadOutlined />} onSelect={() => {
-          if (showLibrary) {
-            $('.sidebar-trigger').addClass('visually-hidden');
-          } else {
-            $('.sidebar-trigger').removeClass('visually-hidden');
-          }
-          setShowLibrary(!showLibrary);
-        }}>
+        <MainMenu.Item icon={<ReadOutlined />} onSelect={() => setShowLibrary(!showLibrary)}>
           素材库
         </MainMenu.Item>
         <MainMenu.Item icon={<FileSearchOutlined />} onSelect={() => setShowSearch(!showSearch)}>
@@ -691,14 +704,7 @@ export default function PkbProducer({
         <MainMenu.Item icon={<FilterOutlined />} onSelect={() => setShowFilter(!showFilter)}>
           节点过滤工具
         </MainMenu.Item>
-        <MainMenu.Item icon={<EditOutlined />} onSelect={() => {
-          if (showSelectedShapeActions) {
-            $('.App-menu__left').addClass('visually-hidden');
-          } else {
-            $('.App-menu__left').removeClass('visually-hidden');
-          }
-          setShowSelectedShapeActions(!showSelectedShapeActions);
-        }}>
+        <MainMenu.Item icon={<EditOutlined />} onSelect={() => setShowSelectedShapeActions(!showSelectedShapeActions)}>
           样式编辑工具
         </MainMenu.Item>
         {/*<MainMenu.DefaultItems.Socials />*/}
