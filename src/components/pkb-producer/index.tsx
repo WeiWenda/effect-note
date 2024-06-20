@@ -8,7 +8,7 @@ import $ from 'jquery';
 import type {ResolvablePromise} from './utils';
 import {
   filterWithPredicate,
-  filterWithSelectElementId,
+  filterWithSelectElementId, getNormalizedZoom,
   getTextElementsMatchingQuery,
   resolvablePromise,
   showSelectedShapeActionsFinal,
@@ -90,11 +90,11 @@ export default function PkbProducer({
   const [editingElementText, setEditingElementText] = useState<string>('节点详情');
   const [boardX, setBoardX] = useState(70);
   const [boardY, setBoardY] = useState(17);
-  const [showFilter, setShowFilter] = useState(false);
-  const [showShapes, setShowShapes] = useState(true);
-  const [showSelectedShapeActions, setShowSelectedShapeActions] = useState(false);
-  const [showSearch, setShowSearch] = useState(true);
-  const [showLibrary, setShowLibrary] = useState(false);
+  const [showFilter, setShowFilter] = useState(session.clientStore.getClientSetting('curPkbShowFilter'));
+  const [showShapes, setShowShapes] = useState(session.clientStore.getClientSetting('curPkbShowShapes'));
+  const [showSelectedShapeActions, setShowSelectedShapeActions] = useState(session.clientStore.getClientSetting('curPkbShowSelectedShapeActions'));
+  const [showSearch, setShowSearch] = useState(session.clientStore.getClientSetting('curPkbShowSearch'));
+  const [showLibrary, setShowLibrary] = useState(session.clientStore.getClientSetting('curPkbShowLibrary'));
   const [docked, setDocked] = useState(false);
   const [theme, setTheme] = useState<Theme>('light');
   const [disableImageTool, setDisableImageTool] = useState(false);
@@ -143,7 +143,14 @@ export default function PkbProducer({
           });
           setInitialized(true);
         } else {
-          excalidrawAPI?.updateScene({elements});
+          // @ts-ignore
+          excalidrawAPI?.updateScene({elements, appState: {
+              currentItemFontFamily: savedContent.appState.currentItemFontFamily,
+              viewBackgroundColor: savedContent.appState.viewBackgroundColor,
+              zoom: savedContent.appState.zoom,
+              scrollX: savedContent.appState.scrollX,
+              scrollY: savedContent.appState.scrollY}
+          });
         }
       });
     } else {
@@ -195,6 +202,11 @@ export default function PkbProducer({
       parseMermaidToExcalidraw(mermaidDefinition.join('\n'), {
         fontSize: 20,
       }).then(({elements}) => {
+        setShowLibrary(session.clientStore.getClientSetting('curPkbShowLibrary'));
+        setShowShapes(session.clientStore.getClientSetting('curPkbShowShapes'));
+        setShowFilter(session.clientStore.getClientSetting('curPkbShowFilter'));
+        setShowSearch(session.clientStore.getClientSetting('curPkbShowSearch'));
+        setShowSelectedShapeActions(session.clientStore.getClientSetting('curPkbShowSelectedShapeActions'));
         const convertedElements = convertToExcalidrawElements(elements);
         const finalElements = convertedElements.map(el => {
           if (el.roundness && !isArrowElement(el)) {
@@ -208,16 +220,28 @@ export default function PkbProducer({
           // @ts-ignore
           initialStatePromiseRef.current.promise.resolve({
             ...initialData,
+            scrollToContent: false,
             appState: {
-              currentItemFontFamily: 1,
-              viewBackgroundColor: session.clientStore.getClientSetting('theme-bg-primary')
+              currentItemFontFamily: 2,
+              viewBackgroundColor: session.clientStore.getClientSetting('theme-bg-primary'),
+              zoom: {value: getNormalizedZoom(session.clientStore.getClientSetting('curPkbZoom'))},
+              scrollX: session.clientStore.getClientSetting('curPkbScrollX'),
+              scrollY: session.clientStore.getClientSetting('curPkbScrollY'),
             },
             elements: finalElements
           });
           setInitialized(true);
         } else {
+          // @ts-ignore
           excalidrawAPI?.updateScene({
-            elements: finalElements
+            elements: finalElements,
+            appState: {
+              currentItemFontFamily: 2,
+              viewBackgroundColor: session.clientStore.getClientSetting('theme-bg-primary'),
+              zoom: {value: getNormalizedZoom(session.clientStore.getClientSetting('curPkbZoom'))},
+              scrollX: session.clientStore.getClientSetting('curPkbScrollX'),
+              scrollY: session.clientStore.getClientSetting('curPkbScrollY'),
+            }
           });
         }
       });
@@ -269,6 +293,16 @@ export default function PkbProducer({
           elements: NonDeletedExcalidrawElement[],
           state: AppState,
         ) => {
+          if (Number(curDocId) === -2) {
+            session.clientStore.setClientSetting('curPkbZoom', state.zoom.value);
+            session.clientStore.setClientSetting('curPkbScrollX', state.scrollX);
+            session.clientStore.setClientSetting('curPkbScrollY', state.scrollY);
+            session.clientStore.setClientSetting('curPkbShowLibrary', showLibrary);
+            session.clientStore.setClientSetting('curPkbShowFilter', showFilter);
+            session.clientStore.setClientSetting('curPkbShowSearch', showSearch);
+            session.clientStore.setClientSetting('curPkbShowShapes', showShapes);
+            session.clientStore.setClientSetting('curPkbShowSelectedShapeActions', showSelectedShapeActions);
+          }
           // const shapePanel = $('.shapes-section').detach();
           // $('.ant-layout-header').append(shapePanel);
           // 更新样式编辑工具的位置

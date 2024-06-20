@@ -32,6 +32,14 @@ export type ClientSettings = Theme & {
   curView: string;
   curDocId: number;
   curPkbId: number;
+  curPkbZoom: number,
+  curPkbShowLibrary: boolean,
+  curPkbShowSearch: boolean,
+  curPkbShowFilter: boolean,
+  curPkbShowShapes: boolean,
+  curPkbShowSelectedShapeActions: boolean,
+  curPkbScrollX: number,
+  curPkbScrollY: number,
   curTheme: string;
   curSearch: string;
   curSearchResult: string;
@@ -54,6 +62,14 @@ const default_client_settings: ClientSettings =
     curView: 'note',
     curDocId: -1,
     curPkbId: -2,
+    curPkbZoom: 1,
+    curPkbShowLibrary: false,
+    curPkbShowSearch: true,
+    curPkbShowFilter: false,
+    curPkbShowShapes: true,
+    curPkbShowSelectedShapeActions: false,
+    curPkbScrollX: 0,
+    curPkbScrollY: 0,
     curSearch: '',
     curSearchResult: '',
     recentDocId: [-1],
