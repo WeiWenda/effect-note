@@ -113,6 +113,10 @@ export default function PkbProducer({
     session.userDocs = userDocs;
   }, [userDocs]);
   useEffect(() => {
+    session.clientStore.setClientSetting('curDocId', editingDocId);
+  }, [editingDocId]);
+  useEffect(() => {
+    session.stopKeyMonitor('pkb-init');
     if (curDocId && Number(curDocId) > 0) {
       session.clientStore.setClientSetting('curPkbId', Number(curDocId));
       api_utils.getDocContent(Number(curDocId)).then((res) => {
@@ -226,12 +230,6 @@ export default function PkbProducer({
 
   useHandleLibrary({ excalidrawAPI });
 
-  useEffect(() => {
-    if (!excalidrawAPI) {
-      return;
-    }
-    session.stopKeyMonitor('pkb-init');
-  }, [excalidrawAPI]);
   useEffect(() => {
     if (showShapes) {
       $('.shapes-section').removeClass('visually-hidden');

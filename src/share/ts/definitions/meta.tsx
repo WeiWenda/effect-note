@@ -13,6 +13,10 @@ keyDefinitions.registerAction(new Action(
   'save-cloud',
   'Persist to cloud',
   async function({ session }) {
+    if (session.clientStore.getClientSetting('curDocId') < 0) {
+      console.log('docID不合法，保存失败');
+      return;
+    }
     session.reUploadFile(Path.root(), session.clientStore.getClientSetting('curDocId')).then(docId => {
       if (docId !== undefined) {
         session.emitAsync('save-cloud', {docId: docId}).then(() => {
