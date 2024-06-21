@@ -133,11 +133,11 @@ export default function PkbProducer({
             ...initialData,
             scrollToContent: false,
             appState: {
-              currentItemFontFamily: savedContent.appState.currentItemFontFamily,
-              viewBackgroundColor: savedContent.appState.viewBackgroundColor,
-              zoom: savedContent.appState.zoom,
-              scrollX: savedContent.appState.scrollX,
-              scrollY: savedContent.appState.scrollY,
+              currentItemFontFamily: savedContent.appState?.currentItemFontFamily ?? 2,
+              viewBackgroundColor: savedContent.appState?.viewBackgroundColor ?? session.clientStore.getClientSetting('theme-bg-primary'),
+              zoom: savedContent.appState?.zoom ?? {value: getNormalizedZoom(session.clientStore.getClientSetting('curPkbZoom'))},
+              scrollX: savedContent.appState?.scrollX ?? session.clientStore.getClientSetting('curPkbScrollX'),
+              scrollY: savedContent.appState?.scrollY ?? session.clientStore.getClientSetting('curPkbScrollY'),
             },
             elements: elements
           });
@@ -145,11 +145,11 @@ export default function PkbProducer({
         } else {
           // @ts-ignore
           excalidrawAPI?.updateScene({elements, appState: {
-              currentItemFontFamily: savedContent.appState.currentItemFontFamily,
-              viewBackgroundColor: savedContent.appState.viewBackgroundColor,
-              zoom: savedContent.appState.zoom,
-              scrollX: savedContent.appState.scrollX,
-              scrollY: savedContent.appState.scrollY}
+              currentItemFontFamily: savedContent.appState?.currentItemFontFamily ?? 2,
+              viewBackgroundColor: savedContent.appState?.viewBackgroundColor ?? session.clientStore.getClientSetting('theme-bg-primary'),
+              zoom: savedContent.appState?.zoom ?? {value: getNormalizedZoom(session.clientStore.getClientSetting('curPkbZoom'))},
+              scrollX: savedContent.appState?.scrollX ?? session.clientStore.getClientSetting('curPkbScrollX'),
+              scrollY: savedContent.appState?.scrollY ?? session.clientStore.getClientSetting('curPkbScrollY'),
           });
         }
       });
