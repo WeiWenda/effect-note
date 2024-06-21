@@ -144,12 +144,14 @@ export default function PkbProducer({
           setInitialized(true);
         } else {
           // @ts-ignore
-          excalidrawAPI?.updateScene({elements, appState: {
+          excalidrawAPI?.updateScene({
+            elements, appState: {
               currentItemFontFamily: savedContent.appState?.currentItemFontFamily ?? 2,
               viewBackgroundColor: savedContent.appState?.viewBackgroundColor ?? session.clientStore.getClientSetting('theme-bg-primary'),
               zoom: savedContent.appState?.zoom ?? {value: getNormalizedZoom(session.clientStore.getClientSetting('curPkbZoom'))},
               scrollX: savedContent.appState?.scrollX ?? session.clientStore.getClientSetting('curPkbScrollX'),
-              scrollY: savedContent.appState?.scrollY ?? session.clientStore.getClientSetting('curPkbScrollY'),
+              scrollY: savedContent.appState?.scrollY ?? session.clientStore.getClientSetting('curPkbScrollY')
+            }
           });
         }
       });

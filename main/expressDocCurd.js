@@ -219,7 +219,7 @@ router.put('/:docId', async (req, res) => {
         const tags = JSON.parse(req.body.tag);
         const dir = tags.shift() || '';
         const actualFilename = `${docId}#${filename}${tags.map(tag => '[' + tag.replace('/', ':') + ']').join('')}.${suffix}`
-        const content = req.body.content;
+        let content = req.body.content;
         if (actualFilename === oldFilename && dir === oldDir) {
             console.log('仅修改内容')
             // 仅修改内容
@@ -232,6 +232,16 @@ router.put('/:docId', async (req, res) => {
             });
         } else {
             console.log('重命名或移动目录')
+            if (suffix === 'excalidraw') {
+                const commitOid = await git.resolveRef({ fs, dir: gitHome, ref: 'HEAD' });
+                const { blob } = await git.readBlob({
+                    fs,
+                    dir: gitHome,
+                    oid: commitOid,
+                    filepath: docId2path[docId]
+                });
+                content = Buffer.from(blob).toString('utf8');
+            }
             // 重命名或移动目录
             deleteFile(path.join(gitHome, docId2path[docId])).then(() => {
                 writeFile(dir, actualFilename, content).then(() => {
