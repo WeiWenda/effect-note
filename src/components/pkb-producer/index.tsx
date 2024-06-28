@@ -10,7 +10,7 @@ import {
   filterWithPredicate,
   filterWithSelectElementId, getNormalizedZoom,
   getTextElementsMatchingQuery,
-  resolvablePromise,
+  resolvablePromise, selectWithSelectElementId,
   showSelectedShapeActionsFinal,
 } from './utils';
 
@@ -374,6 +374,7 @@ export default function PkbProducer({
                       excalidrawAPI?.setToast({message: '未找到匹配项', duration: 1000});
                       return false;
                     }
+                    // @ts-ignore
                     excalidrawAPI?.updateScene({appState: {selectedElementIds: Object.fromEntries(
                           match.map((e) => [e.id, true]),
                         )}});
@@ -477,26 +478,53 @@ export default function PkbProducer({
               {editingElementText}
             </div>
             <Space>
-              <Tooltip title={'进入途经点子图'}>
-                <NodeIndexOutlined onClick={() => {
-                  excalidrawAPI?.updateScene({
-                    elements: filterWithSelectElementId('up_down', excalidrawAPI?.getSceneElements()!, selectNodeId)
-                  });
-                }}/>
+              <Tooltip title={'单击选中，双击进入途经点子图'}>
+                <NodeIndexOutlined
+                  onDoubleClick={() => {
+                    excalidrawAPI?.updateScene({
+                      elements: filterWithSelectElementId('up_down', excalidrawAPI?.getSceneElements()!, selectNodeId)
+                    });
+                  }}
+                  onClick={() => {
+                    // @ts-ignore
+                    excalidrawAPI?.updateScene({
+                      appState: {
+                        selectedElementIds: selectWithSelectElementId('up_down', excalidrawAPI?.getSceneElements()!, selectNodeId)
+                      }
+                    });
+                  }}/>
               </Tooltip>
-              <Tooltip title={'进入终点子图'} >
-                <BranchesOutlined onClick={() => {
-                  excalidrawAPI?.updateScene({
-                    elements: filterWithSelectElementId('up', excalidrawAPI?.getSceneElements()!, selectNodeId)
-                  });
-                }} />
+              <Tooltip title={'单击选中，双击进入终点子图'} >
+                <BranchesOutlined
+                  onDoubleClick={() => {
+                    excalidrawAPI?.updateScene({
+                      elements: filterWithSelectElementId('up', excalidrawAPI?.getSceneElements()!, selectNodeId)
+                    });
+                  }}
+                  onClick={() => {
+                    // @ts-ignore
+                    excalidrawAPI?.updateScene({
+                      appState: {
+                        selectedElementIds: selectWithSelectElementId('up', excalidrawAPI?.getSceneElements()!, selectNodeId)
+                      }
+                    });
+                  }}/>
               </Tooltip>
-              <Tooltip title={'进入起点子图'}>
-                <MergeOutlined onClick={() => {
-                  excalidrawAPI?.updateScene({
-                    elements: filterWithSelectElementId('down', excalidrawAPI?.getSceneElements()!, selectNodeId)
-                  });
-                }}/>
+              <Tooltip title={'单击选中，双击进入起点子图'}>
+                <MergeOutlined
+                  onDoubleClick={() => {
+                    excalidrawAPI?.updateScene({
+                      elements: filterWithSelectElementId('down', excalidrawAPI?.getSceneElements()!, selectNodeId)
+                    });
+                  }}
+                  onClick={() => {
+                    // @ts-ignore
+                    excalidrawAPI?.updateScene({
+                      appState: {
+                        selectedElementIds: selectWithSelectElementId('down', excalidrawAPI?.getSceneElements()!, selectNodeId)
+                      }
+                    });
+                  }}/>
               </Tooltip>
             </Space>
           </Sidebar.Header>

@@ -71,6 +71,36 @@ export function constructGraph(elements: readonly ExcalidrawElement[], revert: b
   return g;
 }
 
+export const selectWithSelectElementId = (
+  direction: string,
+  elements: readonly ExcalidrawElement[],
+  selectedElementId: string,
+) => {
+  const elementIdsToKeep = new Set();
+  const graph = constructGraph(elements);
+  if (direction.includes('down')) {
+    dagre.graphlib.alg.postorder(graph, selectedElementId).forEach(nodeId => {
+      elementIdsToKeep.add(nodeId);
+    });
+  }
+  if (direction.includes('up')) {
+    const revertGraph = constructGraph(elements, true);
+    dagre.graphlib.alg.postorder(revertGraph, selectedElementId).forEach(nodeId => {
+      elementIdsToKeep.add(nodeId);
+    });
+  }
+  elements.forEach(el => {
+    if (isLinearElement(el)) {
+      if (elementIdsToKeep.has(el.startBinding?.elementId) && elementIdsToKeep.has(el.endBinding?.elementId)) {
+        elementIdsToKeep.add(el.id);
+      }
+    }
+  });
+  return Object.fromEntries(
+    Array.from(elementIdsToKeep.values()).map((e) => [e, true]),
+  ) as { [id: string]: true; };
+};
+
 export const filterWithSelectElementId = (
   direction: string,
   elements: readonly ExcalidrawElement[],
