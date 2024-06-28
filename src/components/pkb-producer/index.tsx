@@ -583,6 +583,7 @@ export default function PkbProducer({
     await session.reloadContent(content, 'application/json');
     session.reset_history();
     session.reset_jump_history();
+    await session.emitAsync('clearPluginStatus');
   };
 
   const handleLinkOpen = useCallback((element: NonDeletedExcalidrawElement) => {

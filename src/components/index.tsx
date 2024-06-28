@@ -329,7 +329,7 @@ $(document).ready(async () => {
       // NOTE: this is just a best guess... e.g. the mode could be wrong
       // problem is that we process asynchronously, but need to return synchronously
       return keyBindings.bindings[session.mode].getKey(key) != null ||
-        (session.mode === 'INSERT' && (key === 'space' || 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.includes(key)));
+        (session.mode === 'INSERT' && (key === 'space' || 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+ \n'.includes(key)));
     } else {
       return false;
     }
