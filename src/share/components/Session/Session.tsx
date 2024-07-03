@@ -58,16 +58,15 @@ export default class SessionComponent extends React.Component<Props, State> {
       switch (e.detail) {
         case 1:
           if (path) {
-            console.log('onCharClick');
             if (e.shiftKey) {
-              session.selecting = true;
+              session.markSelecting(true, 'onCharClick');
               session.setAnchor(session.cursor.path, session.cursor.col).then(() => {
                 session.cursor.setPosition(path, column).then(() => {
                   this.update();
                 });
               });
             } else {
-              session.selecting = false;
+              session.markSelecting(false, 'onCharClick');
               session.stopAnchor();
               session.cursor.setPosition(path, column).then(() => {
                 this.update();
@@ -79,7 +78,7 @@ export default class SessionComponent extends React.Component<Props, State> {
         case 2: {
           console.log('onCharDoubleClick');
           if (session.mode === 'INSERT') {
-            session.selecting = true;
+            session.markSelecting(true, 'onCharDoubleClick');
             if (session.selectInlinePath === null || !session.selectInlinePath.is(session.cursor.path)) {
               console.log(`selectWord selectInlinePath ${session.selectInlinePath} currentPath ${session.cursor.path}`);
               session.cursor.beginningWord().then(() => {
@@ -113,16 +112,16 @@ export default class SessionComponent extends React.Component<Props, State> {
 
     this.onLineClick = async (path, e ) => {
       const session = this.props.session;
-      console.log('onLineClick');
       // 防止select不上
       if (!session.selecting) {
         // if clicking outside of text, but on the row,
         // move cursor to the end of the row
         let col = this.cursorBetween() ? -1 : -2;
         if (e.shiftKey) {
-          session.selecting = true;
+          session.markSelecting(true, 'onLineClick');
           await session.setAnchor(session.cursor.path, session.cursor.col);
         } else {
+          session.markSelecting(false, 'onLineClick');
           session.stopAnchor();
         }
         await session.cursor.setPosition(path, col);
@@ -141,7 +140,7 @@ export default class SessionComponent extends React.Component<Props, State> {
 
     this.onCrumbClick = async (path) => {
       const session = this.props.session;
-      session.selecting = false;
+      session.markSelecting(false, 'onCrumbClick');
       await session.zoomInto(path);
       session.save();
       this.update();

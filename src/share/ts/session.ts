@@ -188,6 +188,11 @@ export default class Session extends EventEmitter {
     this.stopMonitor = this.clientStore.getClientSetting('curView') === 'discovery';
   }
 
+  public markSelecting(selecting: boolean, callsite: string) {
+    console.log('markSelecting', selecting, callsite);
+    this.selecting = selecting;
+  }
+
   public stopKeyMonitor(caller: string) {
     console.log('stopKeyMonitor from:', caller);
     this.stopMonitor = true;
@@ -1892,7 +1897,7 @@ export default class Session extends EventEmitter {
         await this.delBlocks(parent.row, index1, (index2 - index1) + 1, {addNew: false, noSave: true});
       }
       this.stopAnchor();
-      this.selecting = false;
+      this.markSelecting(false, 'yankDelete');
       this.emit('updateInner');
     } else {
       const lineInfo = await this.document.getInfo(this.cursor.row);

@@ -162,15 +162,14 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
         onMouseDown={(e) => {
           if (e.detail === 1 && !this.props.cached.pluginData.links?.is_special && !this.props.session.selectPopoverOpen) {
             // 颜色面板在其他block上层
-            console.log('onLineMouseDown');
-            session.selecting = false;
+            session.markSelecting(false, 'onLineMouseDown');
             session.setAnchor(path, -1);
           }
         }}
         onMouseMove={(e) => {
           if (path && !session.dragging && e.buttons === 1 && session.getAnchor()) {
             console.log(`onLineMouseMove set selectInlinePath ${path}`);
-            session.selecting = true;
+            session.markSelecting(true, 'onLineMouseMove');
             session.selectMousePressing = true;
             session.selectInlinePath = path;
             session.cursor.setPosition(path, -1).then(() => {
@@ -437,7 +436,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                   positionOffset={session.dragging && session.cursor.path.is(path) ? {x: 0, y: 20} : {x: 0, y: 0}}
                   onDrag={(_ , ui) => {
                     if (Math.abs(ui.deltaX) + Math.abs(ui.deltaY) > 0 && !session.dragging) {
-                      session.selecting = true;
+                      session.markSelecting(true, 'onDrag');
                       session.selectInlinePath = null;
                       session.dragging = true;
                       session.cursor.setPosition(path, 0).then(() => {
@@ -451,7 +450,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                     if (session.dragging) {
                       if (session.hoverRow) {
                         const target = session.hoverRow;
-                        session.selecting = false;
+                        session.markSelecting(false, 'onDragStop');
                         session.stopAnchor();
                         session.dragging = false;
                         session.delBlock(path, {}).then(() => {

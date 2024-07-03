@@ -167,7 +167,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
               onClick: onClick,
               onMouseDown: (e) => {
                 if (path && e.detail === 1 && !session.selectPopoverOpen) {
-                  session.selecting = false;
+                  session.markSelecting(false, 'onCharMouseDown');
                   session.setAnchor(path, column);
                   e.stopPropagation();
                 }
@@ -175,7 +175,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
               onMouseMove: (e) => {
                 if (path && !session.dragging && e.buttons === 1 && session.getAnchor()) {
                   console.log(`onColMouseMove set selectInlinePath ${path.row}`);
-                  session.selecting = true;
+                  session.markSelecting(true, 'onColMouseMove');
                   session.selectMousePressing = true;
                   session.selectInlinePath = path;
                   session.cursor.setPosition(path, column).then(() => {

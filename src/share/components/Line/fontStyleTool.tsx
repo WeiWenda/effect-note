@@ -40,7 +40,7 @@ export function FontStyleToolComponent(
       }).then(() => {
         props.session.stopAnchor();
         props.session.selectPopoverOpen = false;
-        props.session.selecting = false;
+        props.session.markSelecting(false, 'switchClass');
         props.session.emit('updateInner');
       });
     };
@@ -147,7 +147,7 @@ export function FontStyleToolComponent(
               <MessageOutlined onClick={() => {
                 props.session.emitAsync('addComment', props.path.row, props.startCol, props.endCol, '').then(() => {
                   props.session.stopAnchor();
-                  props.session.selecting = false;
+                  props.session.markSelecting(false, 'addComment');
                   props.session.emit('updateInner');
                 });
               }}/>

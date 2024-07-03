@@ -32,7 +32,7 @@ keyDefinitions.registerAction(new Action(
       throw new Error('Motion command was not passed a motion');
     }
     session.stopAnchor();
-    session.selecting = false;
+    session.markSelecting(false, 'move-cursor-insert');
     await motion(session.cursor, {pastEnd: true});
   },
   { acceptsMotion: true },
@@ -448,12 +448,12 @@ keyDefinitions.registerAction(new Action(
       && session.anchor_direction === 'right'
       && session.anchor.col + 1 === session.cursor.col) {
       session.stopAnchor();
-      session.selecting = false;
+      session.markSelecting(false, 'select-left');
       session.selectInlinePath = null;
     } else if (session.getAnchor() === null) {
       session.startAnchor('left');
       session.selectInlinePath = session.cursor.path;
-      session.selecting = true;
+      session.markSelecting(true, 'select-left');
     }
     await session.cursor.left();
   },
@@ -466,7 +466,7 @@ keyDefinitions.registerAction(new Action(
     if (session.getAnchor() === null) {
       session.startAnchor('left');
       session.selectInlinePath = session.cursor.path;
-      session.selecting = true;
+      session.markSelecting(true, 'select-home');
     }
     await session.cursor.home();
   },
@@ -480,12 +480,12 @@ keyDefinitions.registerAction(new Action(
       && session.anchor_direction === 'left'
       && session.anchor.col === session.cursor.col + 1) {
       session.stopAnchor();
-      session.selecting = false;
+      session.markSelecting(false, 'select-right');
       session.selectInlinePath = null;
     } else if (session.getAnchor() === null) {
       session.startAnchor('right');
       session.selectInlinePath = session.cursor.path;
-      session.selecting = true;
+      session.markSelecting(true, 'select-right');
     }
     await session.cursor.right({pastEnd: true});
   },
@@ -498,7 +498,7 @@ keyDefinitions.registerAction(new Action(
     if (session.getAnchor() === null) {
       session.startAnchor('left');
       session.selectInlinePath = session.cursor.path;
-      session.selecting = true;
+      session.markSelecting(true, 'select-end');
     }
     await session.cursor.end({pastEnd: true});
   },
@@ -511,13 +511,13 @@ keyDefinitions.registerAction(new Action(
     if (session.getAnchor() === null) {
       session.startAnchor('down');
       session.selectInlinePath = session.cursor.path;
-      session.selecting = true;
+      session.markSelecting(true, 'select-down');
     }
     await session.cursor.down();
     if (session.anchor_direction === 'up'
       && session.anchor.row === session.cursor.row) {
       session.stopAnchor();
-      session.selecting = false;
+      session.markSelecting(false, 'select-down');
       session.selectInlinePath = null;
     }
   },
@@ -530,13 +530,13 @@ keyDefinitions.registerAction(new Action(
     if (session.getAnchor() === null) {
       session.startAnchor('up');
       session.selectInlinePath = session.cursor.path;
-      session.selecting = true;
+      session.markSelecting(true, 'select-up');
     }
     await session.cursor.up();
     if (session.anchor_direction === 'down'
       && session.anchor.row === session.cursor.row) {
       session.stopAnchor();
-      session.selecting = false;
+      session.markSelecting(false, 'select-up');
       session.selectInlinePath = null;
     }
   },
@@ -685,7 +685,7 @@ keyDefinitions.registerAction(new Action(
   'split-line',
   'Split line at cursor',
   async function({ session }) {
-    session.selecting = false;
+    session.markSelecting(false, 'split-line');
     await session.newLineAtCursor();
   },
 ));

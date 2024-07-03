@@ -343,7 +343,7 @@ $(document).ready(async () => {
     // 从其他应用复制链接的情况
     if (!session.selectPopoverOpen) {
       session.cursor.reset();
-      session.selecting = false;
+      session.markSelecting(false, 'window-blur');
     }
     session.register.saveNone();
     session.emit('updateInner');
