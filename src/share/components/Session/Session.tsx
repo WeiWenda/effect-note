@@ -59,8 +59,8 @@ export default class SessionComponent extends React.Component<Props, State> {
         case 1:
           if (path) {
             if (e.shiftKey) {
-              session.markSelecting(true, 'onCharClick');
-              session.setAnchor(session.cursor.path, session.cursor.col).then(() => {
+              session.markSelecting(true, 'onCharClickWithShift');
+              session.setAnchor(session.cursor.path, session.cursor.col, 'onCharClickWithShift').then(() => {
                 session.cursor.setPosition(path, column).then(() => {
                   this.update();
                 });
@@ -82,7 +82,7 @@ export default class SessionComponent extends React.Component<Props, State> {
             if (session.selectInlinePath === null || !session.selectInlinePath.is(session.cursor.path)) {
               console.log(`selectWord selectInlinePath ${session.selectInlinePath} currentPath ${session.cursor.path}`);
               session.cursor.beginningWord().then(() => {
-                session.setAnchor(session.cursor.path, session.cursor.col).then(() => {
+                session.setAnchor(session.cursor.path, session.cursor.col, 'onCharDoubleClickSelectWord').then(() => {
                   session.cursor.endWord({cursor: {pastEndWord: true}}).then(() => {
                     session.selectInlinePath = session.cursor.path;
                     this.update();
@@ -92,7 +92,7 @@ export default class SessionComponent extends React.Component<Props, State> {
             } else {
               console.log(`selectLine selectInlinePath ${session.selectInlinePath}`);
               session.cursor.home().then(() => {
-                session.setAnchor(session.cursor.path, session.cursor.col).then(() => {
+                session.setAnchor(session.cursor.path, session.cursor.col, 'onCharDoubleClickSelectLine').then(() => {
                   session.cursor.end({pastEnd: true}).then(() => {
                     session.selectPopoverOpen = false;
                     session.selectInlinePath = null;
@@ -118,8 +118,8 @@ export default class SessionComponent extends React.Component<Props, State> {
         // move cursor to the end of the row
         let col = this.cursorBetween() ? -1 : -2;
         if (e.shiftKey) {
-          session.markSelecting(true, 'onLineClick');
-          await session.setAnchor(session.cursor.path, session.cursor.col);
+          session.markSelecting(true, 'onLineClickWithShift');
+          await session.setAnchor(session.cursor.path, session.cursor.col, 'onLineClickWithShift');
         } else {
           session.markSelecting(false, 'onLineClick');
           session.stopAnchor();

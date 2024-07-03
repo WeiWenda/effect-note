@@ -163,7 +163,7 @@ class RowComponent extends React.Component<RowProps, {showDragHint: boolean}> {
           if (e.detail === 1 && !this.props.cached.pluginData.links?.is_special && !this.props.session.selectPopoverOpen) {
             // 颜色面板在其他block上层
             session.markSelecting(false, 'onLineMouseDown');
-            session.setAnchor(path, -1);
+            session.setAnchor(path, -1, 'onLineMouseDown');
           }
         }}
         onMouseMove={(e) => {
@@ -440,7 +440,7 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                       session.selectInlinePath = null;
                       session.dragging = true;
                       session.cursor.setPosition(path, 0).then(() => {
-                        session.setAnchor(path, 0).then(() => {
+                        session.setAnchor(path, 0, 'onDrag').then(() => {
                           session.emit('updateInner');
                         });
                       });

@@ -1738,8 +1738,8 @@ export default class Session extends EventEmitter {
     this._anchor = null;
   }
 
-  public async setAnchor(path: Path, col: number) {
-    // console.log(`anchor : ${col}`);
+  public async setAnchor(path: Path, col: number, callsite: string) {
+    console.log(`setAnchor`, path, col, this.cursor, callsite);
     this._anchor = new Cursor(this, path);
     await this._anchor.setCol(col);
   }
