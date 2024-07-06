@@ -159,7 +159,7 @@ export const INSERT_MODE_MAPPINGS: HotkeyMapping = Object.assign({
   // NOTE: paste-after doesn't make much sense for insert mode
   'paste-before': [['ctrl+v'], ['meta+v']],
   'yank-copy': [['ctrl+c'], ['meta+c']],
-  'yank-delete': [['backspace']],
+  'yank-delete': [['backspace'], ['shift+backspace']],
   'yank-cut': [['meta+x']],
   'split-line': [['enter']],
   'scroll-down': [['page down']],
