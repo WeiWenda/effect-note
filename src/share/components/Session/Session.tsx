@@ -267,7 +267,10 @@ export default class SessionComponent extends React.Component<Props, State> {
 
   public render() {
     const session = this.props.session;
-    if (!this.state.loaded) { return <Spinner/>; }
+    if (!this.state.loaded) {
+      console.log('spin because this.state.loaded');
+      return <Spinner/>;
+    }
 
     const cursorsTree = this.state.cursorsTree;
     if (cursorsTree == null) {
@@ -278,6 +281,7 @@ export default class SessionComponent extends React.Component<Props, State> {
     const viewRoot = session.viewRoot;
     const cachedRow = session.document.cache.get(viewRoot.row);
     if (cachedRow === null) {
+      console.log('spin because cachedRow is null');
       this.fetchAndRerender();
       return <Spinner/>;
     }
