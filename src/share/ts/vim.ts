@@ -152,7 +152,7 @@ export const INSERT_MODE_MAPPINGS: HotkeyMapping = Object.assign({
   'fold-open': [['meta+down']],
   'fold-close': [['meta+up']],
   'delete-blocks': [['meta+shift+delete']],
-  'delete-char-after': [['delete']],
+  'delete-char-after': [['delete'], ['shift+delete']],
   'delete-to-line-beginning': [['ctrl+u']],
   'delete-to-line-end': [['ctrl+k']],
   'delete-to-word-beginning': [['ctrl+w'], ['ctrl+backspace']],
