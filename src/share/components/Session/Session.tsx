@@ -269,6 +269,7 @@ export default class SessionComponent extends React.Component<Props, State> {
     const session = this.props.session;
     if (!this.state.loaded) {
       console.log('spin because this.state.loaded');
+      this.update();
       return <Spinner/>;
     }
 
