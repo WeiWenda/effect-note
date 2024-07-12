@@ -177,7 +177,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
     props.session.document.store.events.on('unsaved', forceUpdate);
   }, []);
   const toolbarConfig: Partial<IToolbarConfig> = {
-    excludeKeys: ['group-video', 'divider', 'fullScreen', 'emotion', 'group-justify', 'group-indent']
+    excludeKeys: ['group-video', 'divider', 'fullScreen', 'emotion', 'group-indent']
   };
   const editorConfig: Partial<IEditorConfig> = {
     placeholder: '请输入内容...',
