@@ -363,7 +363,7 @@ export function getCurrentUser() {
     });
 }
 
-export function getShareDocContent(filename: string) {
+export function getShareDocContent(filename: string): Promise<string> {
     return new Promise(function (resolve, reject) {
         fetch(filename, {}).then(response =>
           response.text().then(json => {

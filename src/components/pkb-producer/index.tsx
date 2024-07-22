@@ -43,9 +43,12 @@ import {
   FilterOutlined,
   MergeOutlined,
   NodeIndexOutlined,
-  ReadOutlined
+  ReadOutlined,
+  ShareAltOutlined
 } from '@ant-design/icons';
-import {useLoaderData, useNavigate, useParams} from 'react-router-dom';
+import {useLoaderData, useNavigate, useParams, useSearchParams} from 'react-router-dom';
+import {uploadJson} from '../../share/ts/utils/APIUtils';
+import {copyToClipboard} from '../index';
 
 const {Search} = Input;
 
@@ -80,6 +83,7 @@ export default function PkbProducer({
   } = excalidrawLib;
   // @ts-ignore
   const { curDocId } = useParams();
+  let [searchParams, setSearchParams] = useSearchParams();
   // @ts-ignore
   const {userDocs} = useLoaderData();
   const appRef = useRef<any>(null);
@@ -117,9 +121,12 @@ export default function PkbProducer({
   }, [editingDocId]);
   useEffect(() => {
     session.stopKeyMonitor('pkb-init');
+    const shareUrl = searchParams.get('s');
     if (curDocId && Number(curDocId) > 0) {
       session.clientStore.setClientSetting('curPkbId', Number(curDocId));
-      api_utils.getDocContent(Number(curDocId)).then((res) => {
+      const contentPromise = shareUrl ? api_utils.getShareDocContent(shareUrl).then(res =>
+        JSON.parse(res) as {content: string}) : api_utils.getDocContent(Number(curDocId));
+      contentPromise.then((res) => {
         const savedContent = JSON.parse(res.content);
         const elements = savedContent.elements as readonly ExcalidrawElement[];
         setShowLibrary(savedContent.tools?.showLibrary ?? showLibrary);
@@ -248,7 +255,7 @@ export default function PkbProducer({
         }
       });
     }
-  }, [curDocId, userDocs]);
+  }, [curDocId, searchParams, userDocs]);
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
 
@@ -747,6 +754,53 @@ export default function PkbProducer({
             });
           }}>
             保存至EffectNote
+          </MainMenu.Item>
+        }
+        {
+          session.serverConfig.imgur?.type === 'picgo' && process.env.REACT_APP_BUILD_PLATFORM !== 'mas' &&
+          <MainMenu.Item icon={<ShareAltOutlined />} onSelect={() => {
+            console.log('生成分享链接');
+            if (!excalidrawAPI) {
+              return false;
+            }
+            if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
+              session.showMessage('Demo部署环境下，该功能不可用', {warning: true});
+              return false;
+            }
+            exportToClipboard({
+              elements: excalidrawAPI.getSceneElements(),
+              appState: excalidrawAPI.getAppState(),
+              files: excalidrawAPI.getFiles(),
+              type: 'json',
+            }).then(() => {
+              navigator.clipboard.readText().then(content => {
+                const docInfo = { ...userDocs.find((doc: any) => doc.id === Number(curDocId))!,
+                  content: JSON.stringify({
+                    ...JSON.parse(content),
+                    appState: excalidrawAPI.getAppState(),
+                    tools: {
+                      showLibrary,
+                      showShapes,
+                      showSearch,
+                      showFilter,
+                      showSelectedShapeActions
+                    }
+                  }, undefined, 2)};
+                uploadJson(
+                  JSON.stringify(docInfo),
+                  session.clientStore.getClientSetting('curDocId'),
+                  session.serverConfig.imgur!).then(shareUrl => {
+                  const url = `http://demo.effectnote.com/produce/1?s=${shareUrl}`;
+                  copyToClipboard(url);
+                  excalidrawAPI.setToast({message: '已复制到粘贴板', duration: 1000});
+                }).catch(e => {
+                  console.error(e);
+                  session.showMessage(`分享失败，报错信息: ${e.message}`);
+                });
+              });
+            });
+          }}>
+            生成分享链接
           </MainMenu.Item>
         }
         <MainMenu.DefaultItems.SaveToActiveFile />
