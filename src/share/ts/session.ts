@@ -148,7 +148,6 @@ export default class Session extends EventEmitter {
     this.showMessage = options.showMessage || ((message) => {
       logger.info(`Showing message: ${message}`);
     });
-    this.stopMonitor = clientStore.getClientSetting('curView') !== 'note';
     this.toggleBindingsDiv = options.toggleBindingsDiv || (() => null);
     this.getLinesPerPage = options.getLinesPerPage || (() => 10);
     this.mindMapRef = React.createRef();
