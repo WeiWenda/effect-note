@@ -1,6 +1,6 @@
 import React, {Children, cloneElement, useCallback, useEffect, useRef, useState,} from 'react';
 import type * as TExcalidraw from '@excalidraw/excalidraw';
-import {newElementWith, useI18n} from '@excalidraw/excalidraw';
+import {newElementWith, serializeLibraryAsJSON, useI18n} from '@excalidraw/excalidraw';
 import { parseMermaidToExcalidraw } from '@excalidraw/mermaid-to-excalidraw';
 
 import $ from 'jquery';
@@ -18,9 +18,9 @@ import initialData from './initialData';
 
 import type {
   AppState,
-  BinaryFileData,
+  LibraryItem,
   ExcalidrawImperativeAPI,
-  ExcalidrawInitialDataState,
+  ExcalidrawInitialDataState, LibraryItems,
   PointerDownState as ExcalidrawPointerDownState,
 } from '@excalidraw/excalidraw/types/types';
 import type {
@@ -49,6 +49,7 @@ import {
 import {useLoaderData, useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {uploadJson} from '../../share/ts/utils/APIUtils';
 import {copyToClipboard} from '../index';
+import {loadLibraryFromBlob} from '@excalidraw/excalidraw/types/data/blob';
 
 const {Search} = Input;
 
@@ -73,6 +74,7 @@ export default function PkbProducer({
     exportToCanvas,
     exportToSvg,
     exportToBlob,
+    loadLibraryFromBlob,
     exportToClipboard,
     useHandleLibrary,
     MIME_TYPES,
@@ -89,6 +91,7 @@ export default function PkbProducer({
   const appRef = useRef<any>(null);
   const { t } = useI18n();
   const navigate = useNavigate();
+  const [libraryItems, setLibraryItems] = useState<readonly LibraryItem[]>([]);
   const [selectNodeId, setSelectNodeId] = useState<string>('');
   const [editingDocId, setEditingDocId] = useState<number>(-1);
   const [editingElementText, setEditingElementText] = useState<string>('节点详情');
@@ -134,22 +137,30 @@ export default function PkbProducer({
         setShowFilter(savedContent.tools?.showFilter ?? showFilter);
         setShowSearch(savedContent.tools?.showSearch ?? showSearch);
         setShowSelectedShapeActions(savedContent.tools?.showSelectedShapeActions ?? showSelectedShapeActions);
+        // @ts-ignore
+        const blob = new Blob([savedContent.libraryItems || serializeLibraryAsJSON(initialData.libraryItems)],
+          {type: `text/plain;charset=utf-8`});
         if (!initialized) {
-          // @ts-ignore
-          initialStatePromiseRef.current.promise.resolve({
-            ...initialData,
-            scrollToContent: false,
-            appState: {
-              currentItemFontFamily: savedContent.appState?.currentItemFontFamily ?? 2,
-              viewBackgroundColor: savedContent.appState?.viewBackgroundColor ?? session.clientStore.getClientSetting('theme-bg-primary'),
-              zoom: savedContent.appState?.zoom ?? {value: getNormalizedZoom(session.clientStore.getClientSetting('curPkbZoom'))},
-              scrollX: savedContent.appState?.scrollX ?? session.clientStore.getClientSetting('curPkbScrollX'),
-              scrollY: savedContent.appState?.scrollY ?? session.clientStore.getClientSetting('curPkbScrollY'),
-            },
-            elements: elements
+          loadLibraryFromBlob(blob).then((savedLibraryItems: LibraryItem[]) => {
+            // @ts-ignore
+            initialStatePromiseRef.current.promise.resolve({
+              libraryItems: savedLibraryItems,
+              scrollToContent: false,
+              appState: {
+                currentItemFontFamily: savedContent.appState?.currentItemFontFamily ?? 2,
+                viewBackgroundColor: savedContent.appState?.viewBackgroundColor ?? session.clientStore.getClientSetting('theme-bg-primary'),
+                zoom: savedContent.appState?.zoom ?? {value: getNormalizedZoom(session.clientStore.getClientSetting('curPkbZoom'))},
+                scrollX: savedContent.appState?.scrollX ?? session.clientStore.getClientSetting('curPkbScrollX'),
+                scrollY: savedContent.appState?.scrollY ?? session.clientStore.getClientSetting('curPkbScrollY'),
+              },
+              elements: elements
+            });
+            setInitialized(true);
           });
-          setInitialized(true);
         } else {
+          loadLibraryFromBlob(blob).then((savedLibraryItems: LibraryItem[]) => {
+            excalidrawAPI?.updateLibrary({libraryItems: savedLibraryItems});
+          });
           // @ts-ignore
           excalidrawAPI?.updateScene({
             elements, appState: {
@@ -286,7 +297,7 @@ export default function PkbProducer({
       (child) =>
         React.isValidElement(child) &&
         typeof child.type !== 'string' &&
-        //@ts-ignore
+        // @ts-ignore
         child.type.displayName === 'Excalidraw',
     );
     if (!Excalidraw) {
@@ -298,6 +309,9 @@ export default function PkbProducer({
         langCode: 'zh-CN',
         excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
         initialData: initialStatePromiseRef.current.promise,
+        onLibraryChange: (libraryItems: LibraryItems) => {
+          setLibraryItems(libraryItems);
+        },
         onChange: (
           elements: NonDeletedExcalidrawElement[],
           state: AppState,
@@ -739,6 +753,7 @@ export default function PkbProducer({
                   content: JSON.stringify({
                     ...JSON.parse(content),
                     appState: excalidrawAPI.getAppState(),
+                    libraryItems: serializeLibraryAsJSON(libraryItems),
                     tools: {
                       showLibrary,
                       showShapes,
@@ -778,6 +793,7 @@ export default function PkbProducer({
                   content: JSON.stringify({
                     ...JSON.parse(content),
                     appState: excalidrawAPI.getAppState(),
+                    libraryItems: serializeLibraryAsJSON(libraryItems),
                     tools: {
                       showLibrary,
                       showShapes,

@@ -218,6 +218,7 @@ $(document).ready(async () => {
   session.keyEmitter = keyEmitter;
   // expose globals, for debugging
   window.Modes = Modes;
+  window.ExcalidrawLib = ExcalidrawLib;
   window.session = session;
   window.logger = logger;
   window.keyHandler = keyHandler;
