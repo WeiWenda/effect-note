@@ -25,6 +25,7 @@ import {TagsPlugin} from '../../plugins/tags';
 import { useForceUpdate } from '../layout';
 import $ from 'jquery';
 import {MonacoDiffEditor} from 'react-monaco-editor';
+import {shiftMap} from '../../share/ts/keyEmitter';
 
 const {Search} = Input;
 
@@ -332,6 +333,12 @@ export function SessionWithToolbarComponent(props: {session: Session, loading: b
                 if (!props.session.keyEmitter?.onKeyDown(event.nativeEvent)) {
                   event.preventDefault();
                   event.stopPropagation();
+                } else if (!event.repeat && Object.values(shiftMap).includes(props.session.keyEmitter?.getKeyName(event.nativeEvent))) {
+                  event.stopPropagation();
+                  const newEvent = new KeyboardEvent('keydown',
+                    {key: event.nativeEvent.key, code: event.nativeEvent.code, shiftKey: true, repeat: true});
+                  console.log('dispatch to document', newEvent, event);
+                  document.dispatchEvent(newEvent);
                 }
               }}
               className={`session-area ${comments.length ? 'session-area-with-comment' : ''}`}>

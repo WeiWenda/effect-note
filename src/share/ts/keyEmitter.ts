@@ -16,7 +16,7 @@ For more info, see its consumer, keyHandler.ts, as well as keyBindings.ts
 Note that one-character keys are treated specially, in that they are insertable in insert mode.
 */
 
-const shiftMap: {[key: string]: Key} = {
+export const shiftMap: {[key: string]: Key} = {
   '`': '~',
   '1': '!',
   '2': '@',
@@ -107,15 +107,7 @@ export default class KeyEmitter extends EventEmitter {
   // constructor() {
   //   super();
   // }
-
-  public onKeyDown = (e: KeyboardEvent) => {
-    // IME input keycode is 229
-    if (e.keyCode === 229) {
-      return false;
-    }
-    if (e.keyCode in ignoreMap) {
-      return true;
-    }
+  public getKeyName = (e: KeyboardEvent) => {
     let key;
     if (e.keyCode in keyCodeMap) {
       key = keyCodeMap[e.keyCode];
@@ -146,7 +138,18 @@ export default class KeyEmitter extends EventEmitter {
     if (e.metaKey) {
       key = `meta+${key}`;
     }
+    return key;
+  }
 
+  public onKeyDown = (e: KeyboardEvent) => {
+    // IME input keycode is 229
+    if (e.keyCode === 229) {
+      return false;
+    }
+    if (e.keyCode in ignoreMap) {
+      return true;
+    }
+    const key = this.getKeyName(e);
     // logger.info('keycode', e.keyCode, 'key', key);
     const results = this.emit('keydown', key);
     // return false to stop propagation, if any handler handled the key
