@@ -14,6 +14,7 @@ import {Session} from '../../share';
 import {EMPTY_WORKSPACE_INFO, ServerConfig, WorkSpaceInfo} from '../../ts/server_config';
 import {QRCodeCanvas} from 'qrcode.react';
 import {reindexWorkSpace, setServerConfig as saveServerConfig, workspaceRebuild} from '../../share/ts/utils/APIUtils';
+import localforage from 'localforage';
 
 function WorkspaceSettingsComponent(props: { session: Session, serverConfig: ServerConfig}) {
   const [form] = Form.useForm();
@@ -26,6 +27,9 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
     form.setFieldsValue(curWorkSpace);
   }, [curWorkSpace]);
   const onSelect = (value: String) => {
+    if (curWorkSpace && curWorkSpace.gitLocalDir === value) {
+      return;
+    }
     const updatedWorkSpaces = props.serverConfig.workspaces!.map(i => {
       if (i.gitLocalDir === value) {
         return {...i, active: true} as WorkSpaceInfo;
@@ -36,7 +40,10 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
     updatedWorkSpaces.filter(i => i.active).forEach(i => setCurWorkSpace(i));
     const newServerConfig = {...props.serverConfig, workspaces: updatedWorkSpaces};
     saveServerConfig(newServerConfig).then(() => {
-      window.location.reload();
+      localStorage.clear();
+      localforage.clear().then(() => {
+        window.location.reload();
+      });
     });
   };
   return (
@@ -108,8 +115,11 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
                   onOk: () => {
                     props.session.emit('openModal', 'loading');
                     workspaceRebuild().then(() => {
-                      props.session.emit('closeModal', 'loading');
-                      props.session.showMessage('重建成功');
+                      localStorage.clear();
+                      localforage.clear().then(() => {
+                        props.session.emit('closeModal', 'loading');
+                        props.session.showMessage('重建成功');
+                      });
                     });
                   }
                 });
