@@ -252,7 +252,7 @@ export function YangComponent(props: {session: Session, config: Config}) {
       }
       {
         selectedResult &&
-        <SessionWithToolbarComponent curDocId={-1} loading={loading} session={props.session} filterOuter={filterOuter}
+        <SessionWithToolbarComponent curDocId={-2} loading={loading} session={props.session} filterOuter={filterOuter}
                                      showLayoutIcon={false} showLockIcon={true}/>
       }
     </div>

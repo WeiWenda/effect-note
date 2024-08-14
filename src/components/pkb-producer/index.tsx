@@ -93,7 +93,7 @@ export default function PkbProducer({
   const navigate = useNavigate();
   const [libraryItems, setLibraryItems] = useState<readonly LibraryItem[]>([]);
   const [selectNodeId, setSelectNodeId] = useState<string>('');
-  const [editingDocId, setEditingDocId] = useState<number>(-1);
+  const [editingDocId, setEditingDocId] = useState<number>(-3);
   const [editingElementText, setEditingElementText] = useState<string>('节点详情');
   const [boardX, setBoardX] = useState(70);
   const [boardY, setBoardY] = useState(17);
@@ -559,7 +559,7 @@ export default function PkbProducer({
           >
             <SessionWithToolbarComponent session={session}
                                          loading={false}
-                                         curDocId={-1}
+                                         curDocId={-3}
                                          filterOuter={''}
                                          showLayoutIcon={false}
                                          showLockIcon={true} />
@@ -591,7 +591,7 @@ export default function PkbProducer({
     if (editingDocId > 0) {
       console.log(`正在保存内容到文档 ${editingDocId}`);
       await session.reUploadFile(Path.root(), editingDocId).then(() => {
-        setEditingDocId(-1);
+        setEditingDocId(-3);
         setSelectNodeId('');
         excalidrawAPI?.setToast({message: '节点保存成功', duration: 1000});
       });
@@ -643,7 +643,7 @@ export default function PkbProducer({
       const isProduceLink =
         link.startsWith(window.location.origin + '/produce') || link.startsWith('http://localhost:51223/produce');
       if (link === '点击查看节点详情' && element.customData && element.customData.detail) {
-        loadDoc({id: -1, content: element.customData.detail}).then(() => {
+        loadDoc({id: -3, content: element.customData.detail}).then(() => {
           session.changeViewRoot(Path.root()).then(() => {
             setTimeout(() => {
               setSelectNodeId(element.id);
@@ -712,7 +712,7 @@ export default function PkbProducer({
       } else {
         if (isBindableElement(pointerDownState.hit.element)) {
           const editingElement = pointerDownState.hit.element;
-          loadDoc({id: -1, content: JSON.stringify(EMPTY_BLOCK)}).then(() => {
+          loadDoc({id: -3, content: JSON.stringify(EMPTY_BLOCK)}).then(() => {
             session.changeViewRoot(Path.root()).then(() => {
               setTimeout(() => {
                 setSelectNodeId(editingElement.id);
