@@ -414,6 +414,8 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     const docID = -2;
     const newDocName = docID.toString();
     props.session.clientStore.setClientSetting('curDocId', docID);
+    // 用于produce/discovery返回
+    props.session.clientStore.setClientSetting('lastDocId', docID);
     props.session.clientStore.setDocname(docID);
     await props.session.changeViewRoot(Path.loadFromAncestry(await props.session.clientStore.getLastViewRoot()));
     document.title = curDocInfo.name!;

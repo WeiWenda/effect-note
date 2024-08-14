@@ -375,7 +375,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                   props.session.clientStore.setClientSetting('curView', e.key);
                   if (e.key === 'note') {
                     props.session.startKeyMonitor();
-                    const docId = props.session.clientStore.getClientSetting('curDocId');
+                    const docId = props.session.clientStore.getClientSetting('lastDocId');
                     navigate(`/${e.key}/${docId}`);
                   } else if (e.key === 'produce') {
                     props.session.stopKeyMonitor('pkb-nav');

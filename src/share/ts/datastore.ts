@@ -29,6 +29,7 @@ export type ClientSettings = Theme & {
   defaultLayout: string;
   openMenus: string;
   openFile: string;
+  lastDocId: number;
   curView: string;
   curDocId: number;
   curPkbId: number;
@@ -60,6 +61,7 @@ const default_client_settings: ClientSettings =
     openMenus: '[\"0\"]',
     openFile: '0',
     curView: 'note',
+    lastDocId: -1,
     curDocId: -1,
     curPkbId: -2,
     curPkbZoom: 1,
