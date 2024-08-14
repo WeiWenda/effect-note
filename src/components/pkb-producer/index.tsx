@@ -707,6 +707,9 @@ export default function PkbProducer({
     pointerDownState: ExcalidrawPointerDownState,
   ) => {
     if (activeTool.type === 'selection' && pointerDownState.hit.element) {
+      if (pointerDownState.hit.element.id === selectNodeId) {
+        return;
+      }
       if (pointerDownState.hit.element.link) {
         handleLinkOpen(pointerDownState.hit.element);
       } else {
@@ -742,28 +745,30 @@ export default function PkbProducer({
               session.showMessage('Demo部署环境下，该功能不可用', {warning: true});
               return false;
             }
-            exportToClipboard({
-              elements: excalidrawAPI.getSceneElements(),
-              appState: excalidrawAPI.getAppState(),
-              files: excalidrawAPI.getFiles(),
-              type: 'json',
-            }).then(() => {
-              navigator.clipboard.readText().then(content => {
-                const docInfo = { ...userDocs.find((doc: any) => doc.id === Number(curDocId))!,
-                  content: JSON.stringify({
-                    ...JSON.parse(content),
-                    appState: excalidrawAPI.getAppState(),
-                    libraryItems: serializeLibraryAsJSON(libraryItems),
-                    tools: {
-                      showLibrary,
-                      showShapes,
-                      showSearch,
-                      showFilter,
-                      showSelectedShapeActions
-                    }
-                  }, undefined, 2)};
-                api_utils.updateDoc(Number(curDocId), docInfo).then(() => {
-                  excalidrawAPI.setToast({message: '画板保存成功', duration: 1000});
+            saveDocIfNeed().then(() => {
+              exportToClipboard({
+                elements: excalidrawAPI.getSceneElements(),
+                appState: excalidrawAPI.getAppState(),
+                files: excalidrawAPI.getFiles(),
+                type: 'json',
+              }).then(() => {
+                navigator.clipboard.readText().then(content => {
+                  const docInfo = { ...userDocs.find((doc: any) => doc.id === Number(curDocId))!,
+                    content: JSON.stringify({
+                      ...JSON.parse(content),
+                      appState: excalidrawAPI.getAppState(),
+                      libraryItems: serializeLibraryAsJSON(libraryItems),
+                      tools: {
+                        showLibrary,
+                        showShapes,
+                        showSearch,
+                        showFilter,
+                        showSelectedShapeActions
+                      }
+                    }, undefined, 2)};
+                  api_utils.updateDoc(Number(curDocId), docInfo).then(() => {
+                    excalidrawAPI.setToast({message: '画板保存成功', duration: 1000});
+                  });
                 });
               });
             });
@@ -782,36 +787,38 @@ export default function PkbProducer({
               session.showMessage('Demo部署环境下，该功能不可用', {warning: true});
               return false;
             }
-            exportToClipboard({
-              elements: excalidrawAPI.getSceneElements(),
-              appState: excalidrawAPI.getAppState(),
-              files: excalidrawAPI.getFiles(),
-              type: 'json',
-            }).then(() => {
-              navigator.clipboard.readText().then(content => {
-                const docInfo = { ...userDocs.find((doc: any) => doc.id === Number(curDocId))!,
-                  content: JSON.stringify({
-                    ...JSON.parse(content),
-                    appState: excalidrawAPI.getAppState(),
-                    libraryItems: serializeLibraryAsJSON(libraryItems),
-                    tools: {
-                      showLibrary,
-                      showShapes,
-                      showSearch,
-                      showFilter,
-                      showSelectedShapeActions
-                    }
-                  }, undefined, 2)};
-                uploadJson(
-                  JSON.stringify(docInfo),
-                  session.clientStore.getClientSetting('curDocId'),
-                  session.serverConfig.imgur!).then(shareUrl => {
-                  const url = `http://demo.effectnote.com/produce/1?s=${shareUrl}`;
-                  copyToClipboard(url);
-                  excalidrawAPI.setToast({message: '已复制到粘贴板', duration: 1000});
-                }).catch(e => {
-                  console.error(e);
-                  session.showMessage(`分享失败，报错信息: ${e.message}`);
+            saveDocIfNeed().then(() => {
+              exportToClipboard({
+                elements: excalidrawAPI.getSceneElements(),
+                appState: excalidrawAPI.getAppState(),
+                files: excalidrawAPI.getFiles(),
+                type: 'json',
+              }).then(() => {
+                navigator.clipboard.readText().then(content => {
+                  const docInfo = { ...userDocs.find((doc: any) => doc.id === Number(curDocId))!,
+                    content: JSON.stringify({
+                      ...JSON.parse(content),
+                      appState: excalidrawAPI.getAppState(),
+                      libraryItems: serializeLibraryAsJSON(libraryItems),
+                      tools: {
+                        showLibrary,
+                        showShapes,
+                        showSearch,
+                        showFilter,
+                        showSelectedShapeActions
+                      }
+                    }, undefined, 2)};
+                  uploadJson(
+                    JSON.stringify(docInfo),
+                    session.clientStore.getClientSetting('curDocId'),
+                    session.serverConfig.imgur!).then(shareUrl => {
+                    const url = `http://demo.effectnote.com/produce/1?s=${shareUrl}`;
+                    copyToClipboard(url);
+                    excalidrawAPI.setToast({message: '已复制到粘贴板', duration: 1000});
+                  }).catch(e => {
+                    console.error(e);
+                    session.showMessage(`分享失败，报错信息: ${e.message}`);
+                  });
                 });
               });
             });
