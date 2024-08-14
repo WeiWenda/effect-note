@@ -35,6 +35,7 @@ export type ClientSettings = Theme & {
   curPkbId: number;
   curPkbZoom: number,
   curPkbShowLibrary: boolean,
+  curPkbShowDetail: boolean,
   curPkbShowSearch: boolean,
   curPkbShowFilter: boolean,
   curPkbShowShapes: boolean,
@@ -66,6 +67,7 @@ const default_client_settings: ClientSettings =
     curPkbId: -2,
     curPkbZoom: 1,
     curPkbShowLibrary: false,
+    curPkbShowDetail: true,
     curPkbShowSearch: true,
     curPkbShowFilter: false,
     curPkbShowShapes: true,

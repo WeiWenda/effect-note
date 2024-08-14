@@ -44,7 +44,8 @@ import {
   MergeOutlined,
   NodeIndexOutlined,
   ReadOutlined,
-  ShareAltOutlined
+  ShareAltOutlined,
+  ProfileOutlined
 } from '@ant-design/icons';
 import {useLoaderData, useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {uploadJson} from '../../share/ts/utils/APIUtils';
@@ -98,6 +99,7 @@ export default function PkbProducer({
   const [boardX, setBoardX] = useState(70);
   const [boardY, setBoardY] = useState(17);
   const [showFilter, setShowFilter] = useState(session.clientStore.getClientSetting('curPkbShowFilter'));
+  const [showDetail, setShowDetail] = useState(session.clientStore.getClientSetting('curPkbShowDetail'));
   const [showShapes, setShowShapes] = useState(session.clientStore.getClientSetting('curPkbShowShapes'));
   const [showSelectedShapeActions, setShowSelectedShapeActions] = useState(session.clientStore.getClientSetting('curPkbShowSelectedShapeActions'));
   const [showSearch, setShowSearch] = useState(session.clientStore.getClientSetting('curPkbShowSearch'));
@@ -134,6 +136,7 @@ export default function PkbProducer({
         const elements = savedContent.elements as readonly ExcalidrawElement[];
         setShowLibrary(savedContent.tools?.showLibrary ?? showLibrary);
         setShowShapes(savedContent.tools?.showShapes ?? showShapes);
+        setShowDetail(savedContent.tools?.showDetail ?? showDetail);
         setShowFilter(savedContent.tools?.showFilter ?? showFilter);
         setShowSearch(savedContent.tools?.showSearch ?? showSearch);
         setShowSelectedShapeActions(savedContent.tools?.showSelectedShapeActions ?? showSelectedShapeActions);
@@ -225,6 +228,7 @@ export default function PkbProducer({
         setShowLibrary(session.clientStore.getClientSetting('curPkbShowLibrary'));
         setShowShapes(session.clientStore.getClientSetting('curPkbShowShapes'));
         setShowFilter(session.clientStore.getClientSetting('curPkbShowFilter'));
+        setShowDetail(session.clientStore.getClientSetting('curPkbShowDetail'));
         setShowSearch(session.clientStore.getClientSetting('curPkbShowSearch'));
         setShowSelectedShapeActions(session.clientStore.getClientSetting('curPkbShowSelectedShapeActions'));
         const convertedElements = convertToExcalidrawElements(elements);
@@ -322,6 +326,7 @@ export default function PkbProducer({
             session.clientStore.setClientSetting('curPkbScrollY', state.scrollY);
             session.clientStore.setClientSetting('curPkbShowLibrary', showLibrary);
             session.clientStore.setClientSetting('curPkbShowFilter', showFilter);
+            session.clientStore.setClientSetting('curPkbShowDetail', showDetail);
             session.clientStore.setClientSetting('curPkbShowSearch', showSearch);
             session.clientStore.setClientSetting('curPkbShowShapes', showShapes);
             session.clientStore.setClientSetting('curPkbShowSelectedShapeActions', showSelectedShapeActions);
@@ -697,7 +702,7 @@ export default function PkbProducer({
     if (isNewTab || isNewWindow) {
       return;
     }
-    if (handleLinkOpen(element)) {
+    if (handleLinkOpen(element) && showDetail) {
       event.preventDefault();
     }
   };
@@ -708,6 +713,9 @@ export default function PkbProducer({
   ) => {
     if (activeTool.type === 'selection' && pointerDownState.hit.element) {
       if (pointerDownState.hit.element.id === selectNodeId) {
+        return;
+      }
+      if (!showDetail) {
         return;
       }
       if (pointerDownState.hit.element.link) {
@@ -759,6 +767,7 @@ export default function PkbProducer({
                       appState: excalidrawAPI.getAppState(),
                       libraryItems: serializeLibraryAsJSON(libraryItems),
                       tools: {
+                        showDetail,
                         showLibrary,
                         showShapes,
                         showSearch,
@@ -802,6 +811,7 @@ export default function PkbProducer({
                       libraryItems: serializeLibraryAsJSON(libraryItems),
                       tools: {
                         showLibrary,
+                        showDetail,
                         showShapes,
                         showSearch,
                         showFilter,
@@ -832,19 +842,34 @@ export default function PkbProducer({
         <MainMenu.DefaultItems.Help />
         <MainMenu.DefaultItems.ClearCanvas />
         <MainMenu.Separator />
-        <MainMenu.Item icon={<AppstoreAddOutlined />} onSelect={() => setShowShapes(!showShapes)}>
+        <MainMenu.Item icon={<AppstoreAddOutlined />}
+                       shortcut={showShapes ? 'ON' : 'OFF'}
+                       onSelect={() => setShowShapes(!showShapes)}>
           形状工具
         </MainMenu.Item>
-        <MainMenu.Item icon={<ReadOutlined />} onSelect={() => setShowLibrary(!showLibrary)}>
+        <MainMenu.Item icon={<ReadOutlined />}
+                       shortcut={showLibrary ? 'ON' : 'OFF'}
+                       onSelect={() => setShowLibrary(!showLibrary)}>
           素材库
         </MainMenu.Item>
-        <MainMenu.Item icon={<FileSearchOutlined />} onSelect={() => setShowSearch(!showSearch)}>
+        <MainMenu.Item icon={<FileSearchOutlined />}
+                       shortcut={showSearch ? 'ON' : 'OFF'}
+                       onSelect={() => setShowSearch(!showSearch)}>
           节点搜索工具
         </MainMenu.Item>
-        <MainMenu.Item icon={<FilterOutlined />} onSelect={() => setShowFilter(!showFilter)}>
+        <MainMenu.Item icon={<FilterOutlined />}
+                       shortcut={showFilter ? 'ON' : 'OFF'}
+                       onSelect={() => setShowFilter(!showFilter)}>
           节点过滤工具
         </MainMenu.Item>
-        <MainMenu.Item icon={<EditOutlined />} onSelect={() => setShowSelectedShapeActions(!showSelectedShapeActions)}>
+        <MainMenu.Item icon={<ProfileOutlined />}
+                       shortcut={showDetail ? 'ON' : 'OFF'}
+                       onSelect={() => setShowDetail(!showDetail)}>
+          节点内容工具
+        </MainMenu.Item>
+        <MainMenu.Item icon={<EditOutlined />}
+                       shortcut={showSelectedShapeActions ? 'ON' : 'OFF'}
+                       onSelect={() => setShowSelectedShapeActions(!showSelectedShapeActions)}>
           样式编辑工具
         </MainMenu.Item>
         {/*<MainMenu.DefaultItems.Socials />*/}
