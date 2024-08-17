@@ -1,6 +1,6 @@
 {
   "name": "EffectNote",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "homepage": "/",
   "author": "weiwenda",
@@ -38,7 +38,7 @@
     "build-win32": "set \"REACT_APP_BUILD_PROFIL=local\" && set \"REACT_APP_BUILD_PLATFORM=win32\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build",
     "build-mas": "export REACT_APP_BUILD_PROFILE=local && export REACT_APP_BUILD_PLATFORM=mas && npm run build",
     "rmcache": "rm -rf ./node_modules/.cache",
-    "make": "npm run build-drawin && npm run rmcache && PLATFORM=darwin electron-forge make --platform darwin --targets @electron-forge/maker-dmg",
+    "make": "  PLATFORM=darwin electron-forge make --platform darwin --targets @electron-forge/maker-dmg",
     "makewin": "npm run build-win32 && npm run rmcache && electron-forge make --platform win32",
     "makemas": "npm run build-mas && npm run rmcache && PLATFORM=mas electron-forge make --platform mas --targets @electron-forge/maker-pkg --arch x64"
   },

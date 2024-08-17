@@ -1138,6 +1138,7 @@
         },
         {
           "text": "v0.5.2",
+          "collapsed": true,
           "plugins": {
             "is_board": true
           },
@@ -1171,12 +1172,61 @@
           "id": 28711,
           "children": [
             {
-              "text": "Improvement",
+              "text": "New Features",
               "id": 28712,
               "children": [
                 {
                   "text": "支持图谱笔记",
                   "id": 28713
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "v0.6.1",
+          "plugins": {
+            "is_board": true
+          },
+          "id": 29122,
+          "children": [
+            {
+              "text": "New Features",
+              "plugins": {
+                "width": 0.17184401850627892
+              },
+              "id": 29125,
+              "children": [
+                {
+                  "text": "图谱笔记支持通过demo网站分享",
+                  "id": 29126
+                },
+                {
+                  "text": "图谱笔记支持素材库持久化",
+                  "id": 29130
+                }
+              ]
+            },
+            {
+              "text": "Improvement",
+              "plugins": {
+                "width": 0.13598810310641116
+              },
+              "id": 29123,
+              "children": [
+                {
+                  "text": "优化图谱笔记的编辑体验",
+                  "id": 29124
+                }
+              ]
+            },
+            {
+              "text": "Fix",
+              "id": 29128,
+              "children": [
+                {
+                  "text": "修复切换工作空间后内容冲突的问题",
+                  "id": 29129
                 }
               ]
             }
