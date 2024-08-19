@@ -133,8 +133,8 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
       if (modalName === 'md') {
         setTimeout(() => {
           const vditor = new Vditor('vditor', {
-            mode: 'sv',
             upload: {
+              linkToImgUrl: API_BASE_URL + '/download_image',
               handler: (files: File[]) => new Promise<null>(resolve => {
                 uploadImage(files[0],
                   props.session.clientStore.getClientSetting('curDocId'),
@@ -156,7 +156,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
             height: window.innerHeight - 360,
             toolbar: ['quote', '|', 'headings', 'bold', 'italic', 'strike', 'inline-code', '|',
               'list', 'ordered-list', 'check' , '|', 'link', 'upload', 'table', 'code', '|',
-              'insert-before', 'insert-after', 'undo', 'redo'],
+              'insert-before', 'insert-after', 'undo', 'redo', '|', 'edit-mode'],
             after: () => {
               vditor.setValue(data.md || '');
               setVd(vditor);

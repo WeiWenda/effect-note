@@ -79,9 +79,9 @@ async function startExpress(args) {
     const filename = picUrl.split('/').pop().replace(/[^\w]/g, '')
     const distinctFileName = genRandomFileName(filename)
     downloadImage(picUrl, path.join(gitHome, IMAGES_FOLDER, distinctFileName)).then(() => {
-      res.send({data: {originalURL: picUrl, url: `http://localhost:${port}/api/${IMAGES_FOLDER}/${distinctFileName}`}})
+      res.send({msg: '', code: 0, data: {originalURL: picUrl, url: `http://localhost:${port}/api/${IMAGES_FOLDER}/${distinctFileName}`}})
     }).catch(() => {
-      res.send({data: {originalURL: picUrl, url: picUrl}})
+      res.send({msg: '', code: 0, data: {originalURL: picUrl, url: picUrl}})
     })
   })
   // app.post('/api/ocr_image', multer().single('file'), async function(req, res) {
