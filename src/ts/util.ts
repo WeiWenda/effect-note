@@ -19,13 +19,13 @@ export const htmlTypes: Array<string> = [
 
 const htmlRegexParts: Array<string> = [];
 htmlRegexParts.push(
-  `<span class='([^']*?)'>([^<]*?)</span>`
+  `(<span class='([^']*?)'>)([^<]*?)</span>`
 );
 htmlRegexParts.push(
   `<span(.|\\n)*/>`
 );
 htmlRegexParts.push(
-  `<a(.|\\n)*?href="(.*?)">([^<]*?)</a>`
+  `(<a(.|\\n)*?href="(.*?)">)([^<]*?)</a>`
 );
 htmlTypes.forEach((htmltype) => {
     htmlRegexParts.push(

@@ -18,7 +18,7 @@ export function FontStyleToolComponent(
   const [link, setLink] = useState<string | undefined>(props.link);
   // const [comment, setComment] = useState<string>('');
   const [open, setOpen] = useState(false);
-  const [showLink, setShowLink] = useState(false);
+  const [showLink, setShowLink] = useState(props.link ? true : false);
   // const [showComment, setShowComment] = useState(false);
   const switchClass = (newClass: string) => {
     return () => {

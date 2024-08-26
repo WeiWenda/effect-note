@@ -112,21 +112,24 @@ export default class SessionComponent extends React.Component<Props, State> {
 
     this.onLineClick = async (path, e ) => {
       const session = this.props.session;
-      // 防止select不上
-      if (!session.selecting) {
-        // if clicking outside of text, but on the row,
-        // move cursor to the end of the row
-        let col = this.cursorBetween() ? -1 : -2;
-        if (e.shiftKey) {
-          session.markSelecting(true, 'onLineClickWithShift');
-          await session.setAnchor(session.cursor.path, session.cursor.col, 'onLineClickWithShift');
-        } else {
-          session.markSelecting(false, 'onLineClick');
-          session.stopAnchor();
-        }
-        await session.cursor.setPosition(path, col);
-        this.update();
+      if (session.selectPopoverOpen) {
+        return;
       }
+      if (session.selecting) {
+        return;
+      }
+      // if clicking outside of text, but on the row,
+      // move cursor to the end of the row
+      let col = this.cursorBetween() ? -1 : -2;
+      if (e.shiftKey) {
+        session.markSelecting(true, 'onLineClickWithShift');
+        await session.setAnchor(session.cursor.path, session.cursor.col, 'onLineClickWithShift');
+      } else {
+        session.markSelecting(false, 'onLineClick');
+        session.stopAnchor();
+      }
+      await session.cursor.setPosition(path, col);
+      this.update();
     };
 
     this.onBulletClick = async (path) => {
