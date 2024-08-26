@@ -75,10 +75,13 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
                 setCurWorkSpace(EMPTY_WORKSPACE_INFO);
               }} />
             </Tooltip>
-            <Tooltip title='重建查找索引'>
+            <Tooltip title='刷新内容索引和页面缓存'>
               <ReloadOutlined onClick={() => {
                 reindexWorkSpace().then(res => {
-                  props.session.showMessage(res.message);
+                  localStorage.clear();
+                  localforage.clear().then(() => {
+                    props.session.showMessage(res.message);
+                  });
                 });
               }} />
             </Tooltip>
@@ -105,26 +108,29 @@ function WorkspaceSettingsComponent(props: { session: Session, serverConfig: Ser
                 }}/>
               </Tooltip>
             }
-            <Tooltip title='重建当前工作空间（rm -rf && git clone）'>
-              <CloudSyncOutlined onClick={() => {
-                Modal.confirm({
-                  title: `${curWorkSpace?.gitLocalDir} 将被重建，请确认！`,
-                  icon: <ExclamationCircleOutlined />,
-                  okText: '确认',
-                  cancelText: '取消',
-                  onOk: () => {
-                    props.session.emit('openModal', 'loading');
-                    workspaceRebuild().then(() => {
-                      localStorage.clear();
-                      localforage.clear().then(() => {
-                        props.session.emit('closeModal', 'loading');
-                        props.session.showMessage('重建成功');
+            {
+              sycType !== 'never' &&
+              <Tooltip title='重建当前工作空间（rm -rf && git clone）'>
+                <CloudSyncOutlined onClick={() => {
+                  Modal.confirm({
+                    title: `${curWorkSpace?.gitLocalDir} 将被重建，请确认！`,
+                    icon: <ExclamationCircleOutlined />,
+                    okText: '确认',
+                    cancelText: '取消',
+                    onOk: () => {
+                      props.session.emit('openModal', 'loading');
+                      workspaceRebuild().then(() => {
+                        localStorage.clear();
+                        localforage.clear().then(() => {
+                          props.session.emit('closeModal', 'loading');
+                          props.session.showMessage('重建成功');
+                        });
                       });
-                    });
-                  }
-                });
-              }}/>
-            </Tooltip>
+                    }
+                  });
+                }}/>
+              </Tooltip>
+            }
             <Tooltip title='在文件浏览器打开'>
               <FolderViewOutlined onClick={() => {
                 if (curWorkSpace?.gitLocalDir) {

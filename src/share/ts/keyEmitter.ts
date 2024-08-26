@@ -111,7 +111,7 @@ export default class KeyEmitter extends EventEmitter {
     let key;
     if (e.keyCode in keyCodeMap) {
       key = keyCodeMap[e.keyCode];
-      if (e.getModifierState('CapsLock')) {
+      if (e.getModifierState('CapsLock') && 'abcdefghijklmnopqrstuvwxyz'.includes(key)) {
         key = key.toUpperCase();
       }
     } else {
