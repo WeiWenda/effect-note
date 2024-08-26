@@ -199,6 +199,9 @@ export function FontStyleToolComponent(
                 props.session.changeChars(props.path!.row, props.startCol, props.endCol - props.startCol, () => {
                   return props.textContent.split('');
                 }).then(() => {
+                  props.session.stopAnchor();
+                  props.session.selectPopoverOpen = false;
+                  props.session.markSelecting(false, 'deleteClass');
                   props.session.emit('updateInner');
                 });
               }}/>
