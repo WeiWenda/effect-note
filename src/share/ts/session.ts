@@ -130,7 +130,7 @@ export default class Session extends EventEmitter {
   public selectMousePressing: boolean = false;
   public selectPopoverOpen: boolean = false;
   public dragging: boolean = false;
-  public keydown: boolean = false;
+  public debugMode: boolean = false;
   public serverConfig: ServerConfig = SERVER_CONFIG;
 
   private static swapCase(chars: Chars) {

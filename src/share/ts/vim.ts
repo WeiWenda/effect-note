@@ -148,6 +148,7 @@ export const VISUAL_LINE_MODE_MAPPINGS: HotkeyMapping = Object.assign({
 export const INSERT_MODE_MAPPINGS: HotkeyMapping = Object.assign({
   'move-cursor-insert': [[motionKey]],
   'toggle-help': [['ctrl+?']],
+  'toggle-debug': [['meta+8']],
   'fold-toggle': [['ctrl+space']],
   'fold-open': [['meta+down']],
   'fold-close': [['meta+up']],

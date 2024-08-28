@@ -75,7 +75,14 @@ keyDefinitions.registerAction(new Action(
   },
   { acceptsMotion: true },
 ));
-
+keyDefinitions.registerAction(new Action(
+  'toggle-debug',
+  'Show/hide key bindings (edit in settings)',
+  async function({ session }) {
+    session.debugMode = !session.debugMode;
+  },
+  { sequence: SequenceAction.DROP },
+));
 keyDefinitions.registerAction(new Action(
   'toggle-help',
   'Show/hide key bindings (edit in settings)',

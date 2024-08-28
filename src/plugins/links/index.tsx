@@ -387,6 +387,9 @@ export class LinksPlugin {
             return lineContents;
         });
         this.api.registerHook('session', 'renderAfterLine', (elements, {path, line, pluginData}) => {
+            if (that.session.debugMode) {
+                elements.push(<span>（{path.row}）</span>);
+            }
             if (pluginData.links?.drawio != null) {
                 elements.push(
                   <SpecialBlock key={'special-block'}
