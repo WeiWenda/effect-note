@@ -80,7 +80,7 @@ export default class SessionComponent extends React.Component<Props, State> {
           if (session.mode === 'INSERT') {
             session.markSelecting(true, 'onCharDoubleClick');
             if (session.selectInlinePath === null || !session.selectInlinePath.is(session.cursor.path)) {
-              console.log(`selectWord selectInlinePath ${session.selectInlinePath} currentPath ${session.cursor.path}`);
+              // console.log(`selectWord selectInlinePath ${session.selectInlinePath} currentPath ${session.cursor.path}`);
               session.cursor.beginningWord().then(() => {
                 session.setAnchor(session.cursor.path, session.cursor.col, 'onCharDoubleClickSelectWord').then(() => {
                   session.cursor.endWord({cursor: {pastEndWord: true}}).then(() => {
@@ -90,7 +90,7 @@ export default class SessionComponent extends React.Component<Props, State> {
                 });
               });
             } else {
-              console.log(`selectLine selectInlinePath ${session.selectInlinePath}`);
+              // console.log(`selectLine selectInlinePath ${session.selectInlinePath}`);
               session.cursor.home().then(() => {
                 session.setAnchor(session.cursor.path, session.cursor.col, 'onCharDoubleClickSelectLine').then(() => {
                   session.cursor.end({pastEnd: true}).then(() => {
@@ -190,7 +190,7 @@ export default class SessionComponent extends React.Component<Props, State> {
               await virtualCursor.setCol(-1);
               anchorCol = virtualCursor.col;
             }
-            console.log(`anchor : ${anchorCol} cursor ${cursor.col}`);
+            // console.log(`anchor : ${anchorCol} cursor ${cursor.col}`);
             let start = Math.min(cursor.col, anchorCol);
             const end = Math.max(cursor.col, anchorCol);
             let cols: Array<Col> = [];

@@ -78,8 +78,13 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const [curDocInfo, setCurDocInfo] = useState({});
   const [editor, setEditor] = useState<IDomEditor | null>(null);
   const [html, setHtml] = useState('<p>');
+  const [debugSelecting, setDebugSelecting] = useState(props.session.selecting);
   const [xml, setXml] = useState<string | undefined>();
   const [vd, setVd] = React.useState<Vditor>();
+  useEffect(() => {
+    console.log('found session change');
+    setDebugSelecting(props.session.selecting);
+  }, [props.session.selecting, props.session.hoverRow]);
   useEffect(() => {
     setCurPage(location.pathname.split('/')[1] || 'note');
   }, [location]);
@@ -398,6 +403,24 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     }
                   }
                 }}/>
+          {
+            props.session.debugMode &&
+            <div style={{display: 'flex'}}>
+                {/*<div>*/}
+                {/*  <span>hover: {props.session.hoverRow?.row}</span>*/}
+                {/*  <span>anchor: {props.session.getAnchor()?.row}</span>*/}
+                {/*  <span>cursor: {props.session.cursor.row}</span>*/}
+                {/*  <span>selectInlinePath: {props.session.selectInlinePath?.row}</span>*/}
+                {/*</div>*/}
+                <div>
+                  <span>selecting: {debugSelecting ? 'true' : 'false'}</span>
+                  <span>dragging: {props.session.dragging}</span>
+                  <span>selectPopoverOpen: {props.session.selectPopoverOpen}</span>
+                  <span>selectMousePressing: {props.session.selectMousePressing}</span>
+                  <span>stopMonitor: {props.session.stopMonitor}</span>
+                </div>
+            </div>
+          }
           {
             curPage === 'note' &&
             <Button onClick={() => {

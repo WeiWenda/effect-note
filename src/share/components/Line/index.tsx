@@ -174,7 +174,7 @@ export default class LineComponent extends React.Component<LineProps, {input: st
               },
               onMouseMove: (e) => {
                 if (path && !session.dragging && e.buttons === 1 && session.getAnchor()) {
-                  console.log(`onColMouseMove set selectInlinePath ${path.row}`);
+                  // console.log(`onColMouseMove set selectInlinePath ${path.row}`);
                   session.markSelecting(true, 'onColMouseMove');
                   session.selectMousePressing = true;
                   session.selectInlinePath = path;

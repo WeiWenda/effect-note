@@ -183,17 +183,17 @@ export default class Session extends EventEmitter {
   }
 
   public startKeyMonitor() {
-    console.log('startKeyMonitor');
+    // console.log('startKeyMonitor');
     this.stopMonitor = this.clientStore.getClientSetting('curView') === 'discovery';
   }
 
   public markSelecting(selecting: boolean, callsite: string) {
-    console.log('markSelecting', selecting, callsite);
+    // console.log('markSelecting', selecting, callsite);
     this.selecting = selecting;
   }
 
   public stopKeyMonitor(caller: string) {
-    console.log('stopKeyMonitor from:', caller);
+    // console.log('stopKeyMonitor from:', caller);
     this.stopMonitor = true;
   }
 
@@ -1738,7 +1738,7 @@ export default class Session extends EventEmitter {
   }
 
   public async setAnchor(path: Path, col: number, callsite: string) {
-    console.log(`setAnchor`, path, col, this.cursor, callsite);
+    // console.log(`setAnchor`, path, col, this.cursor, callsite);
     this._anchor = new Cursor(this, path);
     await this._anchor.setCol(col);
   }
@@ -1756,7 +1756,7 @@ export default class Session extends EventEmitter {
       await this.document.getCommonAncestor(cursor.path, anchor.path);
     if (ancestors1.length === 0) {
       if (common.parent == null) {
-        console.log(cursor, anchor);
+        // console.log(cursor, anchor);
         throw new Error('Invalid state: cursor was at root?');
       }
       // anchor is underneath cursor
