@@ -75,15 +75,15 @@ export function MonacoEditorWrapper(props: {
                       bordered={false}
                       onFocus={() => {
                         props.session.stopAnchor();
-                        props.session.selectPopoverOpen = true;
+                        props.session.setSelectPopoverOpen('code-block');
                       }}
                       onBlur={() => {
-                        props.session.selectPopoverOpen = false;
+                        props.session.setSelectPopoverOpen('');
                       }}
                       value={ language.charAt(0).toUpperCase() + language.slice(1) }
                       onChange={(newLanguage: string) => {
                         setLanguage(newLanguage);
-                        props.session.selectPopoverOpen = false;
+                        props.session.setSelectPopoverOpen('');
                       }}
                       options={languages.map(l => {
                         return {value: l, label: l};

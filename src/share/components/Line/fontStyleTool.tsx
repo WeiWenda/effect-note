@@ -39,7 +39,7 @@ export function FontStyleToolComponent(
         }
       }).then(() => {
         props.session.stopAnchor();
-        props.session.selectPopoverOpen = false;
+        props.session.setSelectPopoverOpen('');
         props.session.markSelecting(false, 'switchClass');
         props.session.emit('updateInner');
       });
@@ -51,11 +51,11 @@ export function FontStyleToolComponent(
                className={`node-html`}
                onOpenChange={(e) => {
                  if (e) {
-                   props.session.selectPopoverOpen = true;
+                   props.session.setSelectPopoverOpen('style-tool');
                    setOpen(true);
                  } else {
                    if (!showLink) {
-                     props.session.selectPopoverOpen = false;
+                     props.session.setSelectPopoverOpen('');
                      setOpen(false);
                    }
                  }
@@ -72,7 +72,7 @@ export function FontStyleToolComponent(
             {/*           props.session.emitAsync('addCloze', props.path!.row, props.startCol, props.textContent).then(() => {*/}
             {/*             props.session.stopAnchor();*/}
             {/*             setTimeout(() => {*/}
-            {/*               props.session.selectPopoverOpen = false;*/}
+            {/*               props.session.setSelectPopoverOpen('');*/}
             {/*             }, 200);*/}
             {/*             props.session.selecting = false;*/}
             {/*             props.session.emit('updateInner');*/}
@@ -86,7 +86,7 @@ export function FontStyleToolComponent(
                      onOpenChange={e => {
                        if (!e) {
                          // 避免selectPopoverOpen保持为true
-                         props.session.selectPopoverOpen = false;
+                         props.session.setSelectPopoverOpen('');
                        }
                        setShowLink(e);
                      }}
@@ -105,7 +105,7 @@ export function FontStyleToolComponent(
                 addonBefore='链接到:' addonAfter={
                 <CheckOutlined onClick={() => {
                   props.session.startKeyMonitor();
-                  props.session.selectPopoverOpen = false;
+                  props.session.setSelectPopoverOpen('');
                   switchClass('')();
                   setShowLink(false);
                 }}/>
@@ -134,7 +134,7 @@ export function FontStyleToolComponent(
             {/*             addonBefore='备注内容:' addonAfter={*/}
             {/*             <CheckOutlined onClick={() => {*/}
             {/*               props.session.startKeyMonitor();*/}
-            {/*               props.session.selectPopoverOpen = false;*/}
+            {/*               props.session.setSelectPopoverOpen('');*/}
             {/*               props.session.emitAsync('addComment', props.path.row, props.startCol, props.endCol, comment).then(() => {*/}
             {/*                 props.session.emit('updateInner');*/}
             {/*               });*/}
@@ -200,7 +200,7 @@ export function FontStyleToolComponent(
                   return props.textContent.split('');
                 }).then(() => {
                   props.session.stopAnchor();
-                  props.session.selectPopoverOpen = false;
+                  props.session.setSelectPopoverOpen('');
                   props.session.markSelecting(false, 'deleteClass');
                   props.session.emit('updateInner');
                 });

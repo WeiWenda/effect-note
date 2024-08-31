@@ -95,7 +95,6 @@ export default class SessionComponent extends React.Component<Props, State> {
               session.cursor.home().then(() => {
                 session.setAnchor(session.cursor.path, session.cursor.col, 'onCharDoubleClickSelectLine').then(() => {
                   session.cursor.end({pastEnd: true}).then(() => {
-                    session.selectPopoverOpen = false;
                     session.selectInlinePath = null;
                     this.update();
                   });

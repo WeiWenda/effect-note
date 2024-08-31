@@ -63,7 +63,7 @@ export function SpecialBlock(props: React.PropsWithChildren<{
         <div className={'effect-block-placehoder'}
              onDoubleClick={() => {
                if (fold) {
-                 props.session.selectPopoverOpen = false;
+                 props.session.setSelectPopoverOpen('');
                  setFold(false);
                  props.session.emit('setBlockCollapse', props.path.row, false);
                }
@@ -147,10 +147,10 @@ export function SpecialBlock(props: React.PropsWithChildren<{
                open={popOverOpen}
                onOpenChange={(e) => {
                  if (e) {
-                   props.session.selectPopoverOpen = true;
+                   props.session.setSelectPopoverOpen('special-block-fold-hover');
                    setPopOverOpen(true);
                  } else {
-                   props.session.selectPopoverOpen = false;
+                   props.session.setSelectPopoverOpen('');
                    setPopOverOpen(false);
                  }
                }}

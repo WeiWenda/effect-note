@@ -16,8 +16,14 @@ export class SessionDebugger extends React.Component<DebuggerProps, {}> {
         {
           this.props.session.stopMonitor &&
           <div>
-              Stopping keydown monitor
+              Stopping keydown monitor by {this.props.session.stopMonitor}
           </div>
+        }
+        {
+          this.props.session.selectPopoverOpen &&
+            <div>
+                Popover Open by {this.props.session.selectPopoverOpen}
+            </div>
         }
         {
           this.props.session.hoverRow &&
@@ -35,12 +41,6 @@ export class SessionDebugger extends React.Component<DebuggerProps, {}> {
               this.props.session.selectInlinePath &&
               <div>
                   Inline startCol {this.props.session.getAnchor()?.col} endCol {this.props.session.cursor.col}
-              </div>
-            }
-            {
-              this.props.session.selectPopoverOpen &&
-              <div>
-                  Popover Open
               </div>
             }
           </div>

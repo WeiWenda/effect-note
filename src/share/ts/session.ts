@@ -120,7 +120,7 @@ export default class Session extends EventEmitter {
   // 3. onCharDoubleClick
   public selectInlinePath: Path | null = null;
   public formSubmitAction: (value: any) => void;
-  public stopMonitor: boolean = false;
+  public stopMonitor: string = '';
   // 为true时渲染高亮，鼠标按下时被重置为false，有选中内容被设置为true
   // 1. onCharMouseDown、onLineMouseDown，重置为false
   // 2. onCharMouseUp、onLineMouseUp、onCharDoubleClick，设置为true
@@ -128,7 +128,7 @@ export default class Session extends EventEmitter {
   //       onCharClick在true的情况下不会触发，down和up不是同一个char
   public selecting: boolean = false;
   public selectMousePressing: boolean = false;
-  public selectPopoverOpen: boolean = false;
+  public selectPopoverOpen: string = '';
   public dragging: boolean = false;
   public debugMode: boolean = false;
   public serverConfig: ServerConfig = SERVER_CONFIG;
@@ -182,9 +182,17 @@ export default class Session extends EventEmitter {
     await this.emitAsync('exit');
   }
 
+  public setSelectPopoverOpen(caller: string) {
+    this.selectPopoverOpen = caller;
+  }
+
   public startKeyMonitor() {
     // console.log('startKeyMonitor');
-    this.stopMonitor = this.clientStore.getClientSetting('curView') === 'discovery';
+    if (this.clientStore.getClientSetting('curView') === 'discovery') {
+      this.stopMonitor = 'discovery-default';
+    } else {
+      this.stopMonitor = '';
+    }
     if (this.debugMode) {
       this.emit('updateInner')
     }
@@ -197,7 +205,7 @@ export default class Session extends EventEmitter {
 
   public stopKeyMonitor(caller: string) {
     // console.log('stopKeyMonitor from:', caller);
-    this.stopMonitor = true;
+    this.stopMonitor = caller;
     if (this.debugMode) {
       this.emit('updateInner')
     }
@@ -1892,7 +1900,6 @@ export default class Session extends EventEmitter {
       if (cursor.path.is(anchor.path) && this.selectInlinePath !== null) {
         console.log('yankDelete words in line');
         // 单行选中
-        this.selectPopoverOpen = false;
         const options = {includeEnd: false, yank: false};
         await this.deleteBetween(cursor, anchor, options);
       } else {

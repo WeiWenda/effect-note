@@ -252,7 +252,7 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
   };
   const onClick: MenuProps['onClick'] = ({ key }) => {
     setDropDownOpen(false);
-    props.session.selectPopoverOpen = false;
+    props.session.setSelectPopoverOpen('');
     props.session.setMode('INSERT');
     if (key.startsWith('fold')) {
       const foldLevel = Number(key.split('_').pop());
@@ -448,9 +448,9 @@ export function HoverIconDropDownComponent(props: {session: Session, bullet: any
       onOpenChange={(open) => {
         setDropDownOpen(open);
         if (open) {
-          props.session.selectPopoverOpen = true;
+          props.session.setSelectPopoverOpen('dropdown-menu');
         } else {
-          props.session.selectPopoverOpen = false;
+          props.session.setSelectPopoverOpen('');
         }
       }}
       menu={menusProps} trigger={['click']} >
