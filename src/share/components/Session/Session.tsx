@@ -11,6 +11,7 @@ import { Col } from '../../ts/types';
 import Path from '../../ts/path';
 import $ from 'jquery';
 import { CursorsInfoTree } from '../../ts/cursor';
+import {SessionDebugger} from '../../../components/session/debugger';
 
 // TODO: move mode-specific logic into mode render functions
 
@@ -316,6 +317,10 @@ export default class SessionComponent extends React.Component<Props, State> {
              this.props.session.setHoverRow(null, 'mouse leave');
            }}
       >
+        {
+          this.props.session.debugMode &&
+            <SessionDebugger session={this.props.session}/>
+        }
         <BlockComponent
           iconNoTopLevel='fa-circle'
           iconDirFold='fa-circle'

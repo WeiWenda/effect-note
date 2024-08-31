@@ -185,6 +185,9 @@ export default class Session extends EventEmitter {
   public startKeyMonitor() {
     // console.log('startKeyMonitor');
     this.stopMonitor = this.clientStore.getClientSetting('curView') === 'discovery';
+    if (this.debugMode) {
+      this.emit('updateInner')
+    }
   }
 
   public markSelecting(selecting: boolean, callsite: string) {
@@ -195,6 +198,9 @@ export default class Session extends EventEmitter {
   public stopKeyMonitor(caller: string) {
     // console.log('stopKeyMonitor from:', caller);
     this.stopMonitor = true;
+    if (this.debugMode) {
+      this.emit('updateInner')
+    }
   }
 
   public applySearch(filterContent: string) {

@@ -260,6 +260,9 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
     if (nextProps.filteredRows !== this.props.filteredRows) {
       return true;
     }
+    if (this.props.session.debugMode) {
+      return true;
+    }
     if (nextProps.session.lastHoverRow?.getAncestry().includes(nextProps.path.row) ||
       nextProps.session.hoverRow?.getAncestry().includes(nextProps.path.row)) {
       return true;
