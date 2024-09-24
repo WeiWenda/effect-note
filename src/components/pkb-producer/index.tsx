@@ -1,6 +1,6 @@
-import React, {Children, cloneElement, useCallback, useEffect, useRef, useState,} from 'react';
-import type * as TExcalidraw from '@excalidraw/excalidraw';
-import {newElementWith, serializeLibraryAsJSON, useI18n} from '@excalidraw/excalidraw';
+import React, {Children, cloneElement, useCallback, useEffect, useRef, useState} from 'react';
+import type * as TExcalidraw from '@weiwenda/excalidraw';
+import {newElementWith, serializeLibraryAsJSON, useI18n} from '@weiwenda/excalidraw';
 import { parseMermaidToExcalidraw } from '@excalidraw/mermaid-to-excalidraw';
 
 import $ from 'jquery';
@@ -22,19 +22,20 @@ import type {
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState, LibraryItems,
   PointerDownState as ExcalidrawPointerDownState,
-} from '@excalidraw/excalidraw/types/types';
+} from '@weiwenda/excalidraw/dist/excalidraw/types';
 import type {
   ExcalidrawElement,
   ExcalidrawTextElement,
   NonDeletedExcalidrawElement,
   Theme,
-} from '@excalidraw/excalidraw/types/element/types';
+} from '@weiwenda/excalidraw/dist/excalidraw/element/types';
+import './index.css';
 import './App.scss';
 import {SessionWithToolbarComponent} from '../session';
 import {api_utils, DocInfo, EMPTY_BLOCK, InMemory, Path, Session} from '../../share';
 import {getBoundTextOrDefault, hasBoundTextElement, isArrowElement, isBindableElement, isLinearElement} from './typeChecks';
 import Draggable, {DraggableCore, DraggableData, DraggableEvent} from 'react-draggable';
-import {Flex, Input, Space, Tag, Tooltip} from 'antd';
+import {Button, Flex, Input, Space, Tag, Tooltip} from 'antd';
 import {
   AppstoreAddOutlined,
   BranchesOutlined, CloudUploadOutlined,
@@ -50,7 +51,7 @@ import {
 import {useLoaderData, useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {uploadJson} from '../../share/ts/utils/APIUtils';
 import {copyToClipboard} from '../index';
-import {loadLibraryFromBlob} from '@excalidraw/excalidraw/types/data/blob';
+import {doAutoLayout} from './layoutUtils';
 
 const {Search} = Input;
 
@@ -108,7 +109,7 @@ export default function PkbProducer({
   const [theme, setTheme] = useState<Theme>('light');
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [tagsData, setTagsData] = useState(['Movies', 'Books', 'Music', 'Sports']);
-  const [visibleShapes, setVisibleShapes] = useState(['rectangle', 'diamond', 'ellipse']);
+  const [visibleShapes, setVisibleShapes] = useState(['rectangle', 'diamond', 'ellipse', 'text']);
   const [selectedTags, setSelectedTags] = React.useState<string[]>(['Movies']);
   const [initialized, setInitialized] = React.useState(false);
   const initialStatePromiseRef = useRef<{
@@ -223,7 +224,9 @@ export default function PkbProducer({
         mermaidDefinition.push(`end`);
       });
       parseMermaidToExcalidraw(mermaidDefinition.join('\n'), {
-        fontSize: 20,
+        themeVariables: {
+          fontSize: '20'
+        }
       }).then(({elements}) => {
         setShowLibrary(session.clientStore.getClientSetting('curPkbShowLibrary'));
         setShowShapes(session.clientStore.getClientSetting('curPkbShowShapes'));
@@ -431,9 +434,23 @@ export default function PkbProducer({
                   {/*    </Tag.CheckableTag>*/}
                   {/*  ))}*/}
                   {/*</Flex>*/}
+                  <div className={'operation-title'}>自动布局</div>
+                  <Flex className={'operation-options'} gap={5} wrap={'wrap'}>
+                      <Button type='primary' onClick={() => {
+                        doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX', 'RIGHT', excalidrawAPI?.getSceneElements()!);
+                      }}>Layer LTR</Button>
+                      <Button type='primary' onClick={() => {
+                        doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX', 'LEFT', excalidrawAPI?.getSceneElements()!);
+                      }}>Layer RTL</Button>
+                      <Button type='primary' onClick={() => {
+                        doAutoLayout('org.eclipse.elk.mrtree', '', '', excalidrawAPI?.getSceneElements()!);
+                      }}>Tree</Button>
+                      <Button type='primary'>紧凑SPOrE</Button>
+                      <Button type='primary'>紧凑Stress</Button>
+                  </Flex>
                   <div className={'operation-title'}>节点形状</div>
                   <Flex className={'operation-options'} gap={5} wrap={'wrap'} >
-                    {['rectangle', 'diamond', 'ellipse'].map<React.ReactNode>((tag) => (
+                    {['rectangle', 'diamond', 'ellipse', 'text'].map<React.ReactNode>((tag) => (
                       <Tag.CheckableTag
                         key={tag}
                         checked={visibleShapes.includes(tag)}
@@ -447,7 +464,7 @@ export default function PkbProducer({
                           setVisibleShapes(nextSelectedTags);
                         }}
                       >
-                        {t(`toolBar.${tag}`)}
+                        {t(`toolBar.rectangle`)}
                       </Tag.CheckableTag>
                     ))}
                   </Flex>
@@ -860,7 +877,7 @@ export default function PkbProducer({
         <MainMenu.Item icon={<FilterOutlined />}
                        shortcut={showFilter ? 'ON' : 'OFF'}
                        onSelect={() => setShowFilter(!showFilter)}>
-          节点过滤工具
+          节点选择工具
         </MainMenu.Item>
         <MainMenu.Item icon={<ProfileOutlined />}
                        shortcut={showDetail ? 'ON' : 'OFF'}

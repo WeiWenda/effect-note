@@ -1,14 +1,18 @@
 import {unstable_batchedUpdates} from 'react-dom';
-import {MIME_TYPES, newElementWith} from '@excalidraw/excalidraw';
+import {MIME_TYPES, newElementWith} from '@weiwenda/excalidraw';
 import {isArrowElement, isBoundToContainer, isLinearElement, isTextBindableContainer} from './typeChecks';
 import * as dagre from '@dagrejs/dagre';
-import type {ExcalidrawArrowElement, ExcalidrawElement, NonDeletedExcalidrawElement} from '@excalidraw/excalidraw/types/element/types';
-import {NormalizedZoomValue, UIAppState} from '@excalidraw/excalidraw/types/types';
+import type {
+  ExcalidrawArrowElement,
+  ExcalidrawElement,
+  ExcalidrawTextElementWithContainer,
+  NonDeletedExcalidrawElement
+} from '@weiwenda/excalidraw/dist/excalidraw/element/types';
+import {NormalizedZoomValue, UIAppState} from '@weiwenda/excalidraw/dist/excalidraw/types';
 
 type FILE_EXTENSION = Exclude<keyof typeof MIME_TYPES, 'binary'>;
 
 const INPUT_CHANGE_INTERVAL_MS = 500;
-
 
 export const showSelectedShapeActionsFinal = (
   appState: UIAppState,
@@ -16,11 +20,10 @@ export const showSelectedShapeActionsFinal = (
   Boolean(
     !appState.viewModeEnabled &&
     ((appState.activeTool.type !== 'custom' &&
-        (appState.editingElement ||
-          (appState.activeTool.type !== 'selection' &&
-            appState.activeTool.type !== 'eraser' &&
-            appState.activeTool.type !== 'hand' &&
-            appState.activeTool.type !== 'laser'))) ||
+        (appState.activeTool.type !== 'selection' &&
+          appState.activeTool.type !== 'eraser' &&
+          appState.activeTool.type !== 'hand' &&
+          appState.activeTool.type !== 'laser')) ||
       Object.keys(appState.selectedElementIds).length),
   );
 
@@ -165,7 +168,7 @@ export const filterWithPredicate = (elements: readonly ExcalidrawElement[], pred
 export const getTextElementsMatchingQuery = (
   elements: ExcalidrawElement[],
   query: string[],
-  exactMatch: boolean = false, // https://github.com/zsviczian/obsidian-excalidraw-plugin/issues/530
+  exactMatch: boolean = false, // https://github.com/excalidraw/obsidian-excalidraw-plugin/issues/530
 ): ExcalidrawElement[] => {
   if (!elements || elements.length === 0 || !query || query.length === 0) {
     return [];
@@ -183,7 +186,7 @@ export const getTextElementsMatchingQuery = (
         return m[1] === q.toLowerCase();
       }
       const text = el.originalText.toLowerCase().replaceAll('\n', ' ').trim();
-      // to distinguish between '# frame' and '# frame 1' https://github.com/zsviczian/obsidian-excalidraw-plugin/issues/530
+      // to distinguish between '# frame' and '# frame 1' https://github.com/excalidraw/obsidian-excalidraw-plugin/issues/530
       return text.match(q.toLowerCase());
     }));
 };

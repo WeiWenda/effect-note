@@ -10,9 +10,9 @@ import type {
   ExcalidrawTextElement,
   ExcalidrawTextElementWithContainer,
   InitializedExcalidrawImageElement,
-} from '@excalidraw/excalidraw/types/element/types';
-import {ToolType} from '@excalidraw/excalidraw/types/types';
-import {MarkNonNullable} from '@excalidraw/excalidraw/types/utility-types';
+} from '@weiwenda/excalidraw/dist/excalidraw/element/types';
+import {ToolType} from '@weiwenda/excalidraw/dist/excalidraw/types';
+import {MarkNonNullable} from '@weiwenda/excalidraw/dist/excalidraw/utility-types';
 
 export const assertNever = (
   value: never,
@@ -129,34 +129,6 @@ export const isTextBindableContainer = (
       element.type === 'ellipse' ||
       isArrowElement(element))
   );
-};
-
-export const isExcalidrawElement = (
-  element: any,
-): element is ExcalidrawElement => {
-  const type: ExcalidrawElementType | undefined = element?.type;
-  if (!type) {
-    return false;
-  }
-  switch (type) {
-    case 'text':
-    case 'diamond':
-    case 'rectangle':
-    case 'embeddable':
-    case 'ellipse':
-    case 'arrow':
-    case 'freedraw':
-    case 'line':
-    case 'frame':
-    case 'image':
-    case 'selection': {
-      return true;
-    }
-    default: {
-      assertNever(type, null);
-      return false;
-    }
-  }
 };
 
 export const hasBoundTextElement = (

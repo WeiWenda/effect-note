@@ -59,7 +59,7 @@ import YinComponent from './yin';
 import {YangComponent} from './yang';
 import localforage from 'localforage';
 import PkbProducer from './pkb-producer';
-import * as ExcalidrawLib from '@excalidraw/excalidraw';
+import * as ExcalidrawLib from '@weiwenda/excalidraw';
 
 declare const window: any; // because we attach globals for debugging
 
@@ -224,6 +224,7 @@ $(document).ready(async () => {
   window.keyHandler = keyHandler;
   window.keyEmitter = keyEmitter;
   window.keyBindings = keyBindings;
+  window.EXCALIDRAW_ASSET_PATH = '/excalidraw-assets';
 
   const router = createBrowserRouter([
     {
@@ -246,7 +247,7 @@ $(document).ready(async () => {
                                 appTitle={'构建PKB文件'}
                                 useCustom={(api: any, args?: any[]) => {}}
                                 excalidrawLib={ExcalidrawLib}>
-                    <ExcalidrawLib.Excalidraw />
+                    <ExcalidrawLib.Excalidraw/>
                   </PkbProducer>,
           loader: noteLoader,
         }
