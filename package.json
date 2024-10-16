@@ -1,6 +1,6 @@
 {
   "name": "EffectNote",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": true,
   "homepage": "/",
   "author": "weiwenda",
@@ -98,7 +98,7 @@
     "@types/ws": "0.0.41",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-react": "^1.0.6",
-    "@weiwenda/excalidraw": "0.17.1-effectnote-3",
+    "@weiwenda/excalidraw": "^0.17.1-effecnote-4",
     "antd": "^5.10.2",
     "electron": "26.0.0",
     "electron-builder": "^22.14.13",

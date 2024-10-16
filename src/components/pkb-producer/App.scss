@@ -115,6 +115,10 @@
   --color-primary-darkest: #e64980;
   --color-primary-light: #fcc2d7;
 
+  .footer-layout {
+    background: var(--color-surface-low)
+  }
+
   button.custom-element {
     width: 2rem;
     height: 2rem;

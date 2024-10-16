@@ -1,6 +1,6 @@
 import React, {Children, cloneElement, useCallback, useEffect, useRef, useState} from 'react';
 import type * as TExcalidraw from '@weiwenda/excalidraw';
-import {newElementWith, serializeLibraryAsJSON, useI18n} from '@weiwenda/excalidraw';
+import {Footer, newElementWith, serializeLibraryAsJSON, useI18n} from '@weiwenda/excalidraw';
 import { parseMermaidToExcalidraw } from '@excalidraw/mermaid-to-excalidraw';
 
 import $ from 'jquery';
@@ -40,7 +40,7 @@ import {
   AppstoreAddOutlined,
   BranchesOutlined, CloudUploadOutlined,
   EditOutlined,
-  FileSearchOutlined,
+  ApartmentOutlined,
   FilterOutlined,
   MergeOutlined,
   NodeIndexOutlined,
@@ -102,6 +102,7 @@ export default function PkbProducer({
   const [boardX, setBoardX] = useState(70);
   const [boardY, setBoardY] = useState(17);
   const [showFilter, setShowFilter] = useState(session.clientStore.getClientSetting('curPkbShowFilter'));
+  const [showLayout, setShowLayout] = useState(session.clientStore.getClientSetting('curPkbShowLayout'));
   const [showDetail, setShowDetail] = useState(session.clientStore.getClientSetting('curPkbShowDetail'));
   const [showShapes, setShowShapes] = useState(session.clientStore.getClientSetting('curPkbShowShapes'));
   const [showSelectedShapeActions, setShowSelectedShapeActions] = useState(session.clientStore.getClientSetting('curPkbShowSelectedShapeActions'));
@@ -140,6 +141,7 @@ export default function PkbProducer({
         setShowShapes(savedContent.tools?.showShapes ?? showShapes);
         setShowDetail(savedContent.tools?.showDetail ?? showDetail);
         setShowFilter(savedContent.tools?.showFilter ?? showFilter);
+        setShowLayout(savedContent.tools?.showLayout ?? showLayout);
         setShowSelectedShapeActions(savedContent.tools?.showSelectedShapeActions ?? showSelectedShapeActions);
         // @ts-ignore
         const blob = new Blob([savedContent.libraryItems || serializeLibraryAsJSON(initialData.libraryItems)],
@@ -231,6 +233,7 @@ export default function PkbProducer({
         setShowLibrary(session.clientStore.getClientSetting('curPkbShowLibrary'));
         setShowShapes(session.clientStore.getClientSetting('curPkbShowShapes'));
         setShowFilter(session.clientStore.getClientSetting('curPkbShowFilter'));
+        setShowLayout(session.clientStore.getClientSetting('curPkbShowLayout'));
         setShowDetail(session.clientStore.getClientSetting('curPkbShowDetail'));
         setShowSelectedShapeActions(session.clientStore.getClientSetting('curPkbShowSelectedShapeActions'));
         const convertedElements = convertToExcalidrawElements(elements);
@@ -327,6 +330,7 @@ export default function PkbProducer({
             session.clientStore.setClientSetting('curPkbScrollY', state.scrollY);
             session.clientStore.setClientSetting('curPkbShowLibrary', showLibrary);
             session.clientStore.setClientSetting('curPkbShowFilter', showFilter);
+            session.clientStore.setClientSetting('curPkbShowLayout', showLayout);
             session.clientStore.setClientSetting('curPkbShowDetail', showDetail);
             session.clientStore.setClientSetting('curPkbShowShapes', showShapes);
             session.clientStore.setClientSetting('curPkbShowSelectedShapeActions', showSelectedShapeActions);
@@ -362,6 +366,48 @@ export default function PkbProducer({
         validateEmbeddable: true,
       },
       <>
+        {excalidrawAPI && showLayout && (
+          <Footer>
+            <Flex style={{paddingLeft: '5px'}} gap={5} wrap={'wrap'} align={'center'}>
+              <Button className={'footer-layout'} onClick={() => {
+                doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX'
+                  , 'RIGHT', excalidrawAPI?.getSceneElements()!).then(elements => {
+                  excalidrawAPI?.updateScene({
+                    elements: elements
+                  });
+                });
+              }}>
+                <img style={{position: 'relative', top: '2px'}}
+                      onClick={e => e.preventDefault()}
+                      src={`${process.env.PUBLIC_URL}/images/layout_ltr.png`} height={18} />
+              </Button>
+              <Button className={'footer-layout'} onClick={() => {
+                doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX'
+                  , 'LEFT', excalidrawAPI?.getSceneElements()!).then(elements => {
+                  excalidrawAPI?.updateScene({
+                    elements: elements
+                  });
+                });
+              }}>
+                <img style={{position: 'relative', top: '2px'}}
+                     onClick={e => e.preventDefault()}
+                     src={`${process.env.PUBLIC_URL}/images/layout_rtl.png`} height={18} />
+              </Button>
+              <Button className={'footer-layout'} onClick={() => {
+                doAutoLayout('org.eclipse.elk.mrtree', ''
+                  , '', excalidrawAPI?.getSceneElements()!).then(elements => {
+                  excalidrawAPI?.updateScene({
+                    elements: elements
+                  });
+                });
+              }}>
+                <img style={{position: 'relative', top: '2px'}}
+                     onClick={e => e.preventDefault()}
+                     src={`${process.env.PUBLIC_URL}/images/layout_tree.png`} height={18} />
+              </Button>
+            </Flex>
+          </Footer>
+        )}
         <WelcomeScreen />
         {
           (showFilter || showSelectedShapeActions) &&
@@ -395,34 +441,6 @@ export default function PkbProducer({
                   {/*    </Tag.CheckableTag>*/}
                   {/*  ))}*/}
                   {/*</Flex>*/}
-                  <div className={'operation-title'}>自动布局</div>
-                  <Flex className={'operation-options'} gap={5} wrap={'wrap'}>
-                      <Button type='primary' onClick={() => {
-                        // setLanguage({ code: 'zh-CN', label: '简体中文' });
-                        // doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX'
-                        //   , 'RIGHT', excalidrawAPI?.getSceneElements()!).then(elements => {
-                        //   excalidrawAPI?.updateScene({
-                        //     elements: elements
-                        //   });
-                        // });
-                      }}>Layer LTR</Button>
-                      <Button type='primary' onClick={() => {
-                        doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX'
-                          , 'LEFT', excalidrawAPI?.getSceneElements()!).then(elements => {
-                          excalidrawAPI?.updateScene({
-                            elements: elements
-                          });
-                        });
-                      }}>Layer RTL</Button>
-                      <Button type='primary' onClick={() => {
-                        doAutoLayout('org.eclipse.elk.mrtree', ''
-                          , '', excalidrawAPI?.getSceneElements()!).then(elements => {
-                          excalidrawAPI?.updateScene({
-                            elements: elements
-                          });
-                        });
-                      }}>Tree</Button>
-                  </Flex>
                   <div className={'operation-title'}>节点形状</div>
                   <Flex className={'operation-options'} gap={5} wrap={'wrap'} >
                     {['rectangle', 'diamond', 'ellipse', 'text'].map<React.ReactNode>((tag) => (
@@ -763,6 +781,7 @@ export default function PkbProducer({
                         showLibrary,
                         showShapes,
                         showFilter,
+                        showLayout,
                         showSelectedShapeActions
                       }
                     }, undefined, 2)};
@@ -805,6 +824,7 @@ export default function PkbProducer({
                         showDetail,
                         showShapes,
                         showFilter,
+                        showLayout,
                         showSelectedShapeActions
                       }
                     }, undefined, 2)};
@@ -842,21 +862,27 @@ export default function PkbProducer({
                        onSelect={() => setShowLibrary(!showLibrary)}>
           素材库
         </MainMenu.Item>
-        <MainMenu.Item icon={<FilterOutlined />}
-                       shortcut={showFilter ? 'ON' : 'OFF'}
-                       onSelect={() => setShowFilter(!showFilter)}>
-          节点选择工具
-        </MainMenu.Item>
-        <MainMenu.Item icon={<ProfileOutlined />}
-                       shortcut={showDetail ? 'ON' : 'OFF'}
-                       onSelect={() => setShowDetail(!showDetail)}>
-          节点内容工具
+        <MainMenu.Item icon={<ApartmentOutlined />}
+                       shortcut={showLayout ? 'ON' : 'OFF'}
+                       onSelect={() => setShowLayout(!showLayout)}>
+          自动布局工具
         </MainMenu.Item>
         <MainMenu.Item icon={<EditOutlined />}
                        shortcut={showSelectedShapeActions ? 'ON' : 'OFF'}
                        onSelect={() => setShowSelectedShapeActions(!showSelectedShapeActions)}>
           样式编辑工具
         </MainMenu.Item>
+        <MainMenu.Item icon={<ProfileOutlined />}
+                       shortcut={showDetail ? 'ON' : 'OFF'}
+                       onSelect={() => setShowDetail(!showDetail)}>
+          节点内容工具
+        </MainMenu.Item>
+        <MainMenu.Item icon={<FilterOutlined />}
+                       shortcut={showFilter ? 'ON' : 'OFF'}
+                       onSelect={() => setShowFilter(!showFilter)}>
+          节点选择工具
+        </MainMenu.Item>
+
         {/*<MainMenu.DefaultItems.Socials />*/}
         {/*<MainMenu.Separator />*/}
         {/*<MainMenu.DefaultItems.ToggleTheme*/}
