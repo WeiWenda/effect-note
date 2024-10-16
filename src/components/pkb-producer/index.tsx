@@ -8,8 +8,8 @@ import $ from 'jquery';
 import type {ResolvablePromise} from './utils';
 import {
   filterWithPredicate,
-  filterWithSelectElementId, getNormalizedZoom,
-  getTextElementsMatchingQuery,
+  filterWithSelectElementId, getBoundTextOrDefault, getNormalizedZoom,
+  isArrowElement, isBindableElement,
   resolvablePromise, selectWithSelectElementId,
   showSelectedShapeActionsFinal,
 } from './utils';
@@ -30,11 +30,10 @@ import type {
   Theme,
 } from '@weiwenda/excalidraw/dist/excalidraw/element/types';
 import fallbackLangData from '@weiwenda/excalidraw/dist/excalidraw/locales/en.json';
-import './index.css';
+import '@weiwenda/excalidraw/index.css';
 import './App.scss';
 import {SessionWithToolbarComponent} from '../session';
 import {api_utils, DocInfo, EMPTY_BLOCK, InMemory, Path, Session} from '../../share';
-import {getBoundTextOrDefault, hasBoundTextElement, isArrowElement, isBindableElement, isLinearElement} from './typeChecks';
 import Draggable, {DraggableCore, DraggableData, DraggableEvent} from 'react-draggable';
 import {Button, Flex, Input, Space, Tag, Tooltip} from 'antd';
 import {
@@ -54,6 +53,7 @@ import {uploadJson} from '../../share/ts/utils/APIUtils';
 import {copyToClipboard} from '../index';
 import {doAutoLayout} from './layoutUtils';
 import {NestedKeyOf} from '@weiwenda/excalidraw/dist/excalidraw/utility-types';
+// import {setLanguage} from '@weiwenda/excalidraw/dist/excalidraw/i18n';
 
 const {Search} = Input;
 
@@ -398,16 +398,30 @@ export default function PkbProducer({
                   <div className={'operation-title'}>自动布局</div>
                   <Flex className={'operation-options'} gap={5} wrap={'wrap'}>
                       <Button type='primary' onClick={() => {
-                        doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX', 'RIGHT', excalidrawAPI?.getSceneElements()!);
+                        // setLanguage({ code: 'zh-CN', label: '简体中文' });
+                        // doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX'
+                        //   , 'RIGHT', excalidrawAPI?.getSceneElements()!).then(elements => {
+                        //   excalidrawAPI?.updateScene({
+                        //     elements: elements
+                        //   });
+                        // });
                       }}>Layer LTR</Button>
                       <Button type='primary' onClick={() => {
-                        doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX', 'LEFT', excalidrawAPI?.getSceneElements()!);
+                        doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX'
+                          , 'LEFT', excalidrawAPI?.getSceneElements()!).then(elements => {
+                          excalidrawAPI?.updateScene({
+                            elements: elements
+                          });
+                        });
                       }}>Layer RTL</Button>
                       <Button type='primary' onClick={() => {
-                        doAutoLayout('org.eclipse.elk.mrtree', '', '', excalidrawAPI?.getSceneElements()!);
+                        doAutoLayout('org.eclipse.elk.mrtree', ''
+                          , '', excalidrawAPI?.getSceneElements()!).then(elements => {
+                          excalidrawAPI?.updateScene({
+                            elements: elements
+                          });
+                        });
                       }}>Tree</Button>
-                      <Button type='primary'>紧凑SPOrE</Button>
-                      <Button type='primary'>紧凑Stress</Button>
                   </Flex>
                   <div className={'operation-title'}>节点形状</div>
                   <Flex className={'operation-options'} gap={5} wrap={'wrap'} >

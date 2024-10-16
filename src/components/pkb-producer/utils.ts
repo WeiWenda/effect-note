@@ -1,18 +1,90 @@
-import {unstable_batchedUpdates} from 'react-dom';
-import {MIME_TYPES, newElementWith} from '@weiwenda/excalidraw';
-import {isArrowElement, isBoundToContainer, isLinearElement, isTextBindableContainer} from './typeChecks';
+import {isLinearElement, newElementWith} from '@weiwenda/excalidraw';
 import * as dagre from '@dagrejs/dagre';
 import type {
   ExcalidrawArrowElement,
-  ExcalidrawElement,
-  ExcalidrawTextElementWithContainer,
-  NonDeletedExcalidrawElement
+  ExcalidrawBindableElement,
+  ExcalidrawElement, ExcalidrawTextContainer,
+  ExcalidrawTextElement, ExcalidrawTextElementWithContainer
 } from '@weiwenda/excalidraw/dist/excalidraw/element/types';
 import {NormalizedZoomValue, UIAppState} from '@weiwenda/excalidraw/dist/excalidraw/types';
+import {MarkNonNullable} from '@weiwenda/excalidraw/dist/excalidraw/utility-types';
 
-type FILE_EXTENSION = Exclude<keyof typeof MIME_TYPES, 'binary'>;
+export const isBindableElement = (
+  element: ExcalidrawElement | null,
+  includeLocked = true,
+): element is ExcalidrawBindableElement => {
+  return (
+    element != null &&
+    (!element.locked || includeLocked === true) &&
+    (element.type === 'rectangle' ||
+      element.type === 'diamond' ||
+      element.type === 'ellipse' ||
+      element.type === 'image' ||
+      element.type === 'iframe' ||
+      element.type === 'embeddable' ||
+      element.type === 'frame' ||
+      element.type === 'magicframe' ||
+      (element.type === 'text' && !element.containerId))
+  );
+};
 
-const INPUT_CHANGE_INTERVAL_MS = 500;
+export const isTextBindableContainer = (
+  element: ExcalidrawElement | null,
+  includeLocked = true,
+): element is ExcalidrawTextContainer => {
+  return (
+    element != null &&
+    (!element.locked || includeLocked === true) &&
+    (element.type === 'rectangle' ||
+      element.type === 'diamond' ||
+      element.type === 'ellipse' ||
+      isArrowElement(element))
+  );
+};
+
+export const isArrowElement = (
+  element?: ExcalidrawElement | null,
+): element is ExcalidrawArrowElement => {
+  return element != null && element.type === 'arrow';
+};
+
+export const hasBoundTextElement = (
+  element: ExcalidrawElement | null,
+): element is MarkNonNullable<ExcalidrawBindableElement, 'boundElements'> => {
+  return (
+    isTextBindableContainer(element) &&
+    !!element.boundElements?.some(({ type }) => type === 'text')
+  );
+};
+
+export const isBoundToContainer = (
+  element: ExcalidrawElement | null,
+): element is ExcalidrawTextElementWithContainer => {
+  return (
+    element !== null &&
+    'containerId' in element &&
+    element.containerId !== null &&
+    isTextElement(element)
+  );
+};
+export const isTextElement = (
+  element: ExcalidrawElement | null,
+): element is ExcalidrawTextElement => {
+  return element != null && element.type === 'text';
+};
+
+export const getBoundTextOrDefault = (
+  element: ExcalidrawElement,
+  elements: readonly ExcalidrawElement[] | undefined,
+  defaultText: string
+) => {
+  if (hasBoundTextElement(element)) {
+    const boundText = element.boundElements!.find(({ type }) => type === 'text');
+    return elements ? (elements.find(e => e.id === boundText?.id) as ExcalidrawTextElement).text : defaultText;
+  } else {
+    return defaultText;
+  }
+};
 
 export const showSelectedShapeActionsFinal = (
   appState: UIAppState,
@@ -45,12 +117,6 @@ export const resolvablePromise = <T>() => {
   (promise as any).resolve = resolve;
   (promise as any).reject = reject;
   return promise as ResolvablePromise<T>;
-};
-
-export const distance2d = (x1: number, y1: number, x2: number, y2: number) => {
-  const xd = x2 - x1;
-  const yd = y2 - y1;
-  return Math.hypot(xd, yd);
 };
 
 export function constructGraph(elements: readonly ExcalidrawElement[], revert: boolean = false, ranker: string = 'network-simplex') {
@@ -140,7 +206,8 @@ export const filterWithSelectElementId = (
   });
 };
 
-export const filterWithPredicate = (elements: readonly ExcalidrawElement[], predicate: (e: ExcalidrawElement) => boolean): ExcalidrawElement[] => {
+export const filterWithPredicate = (elements: readonly ExcalidrawElement[],
+                                    predicate: (e: ExcalidrawElement) => boolean): ExcalidrawElement[] => {
   const elementIdsToKeep = new Set();
   elements.forEach(e => {
     if (predicate(e)) {
@@ -218,28 +285,4 @@ export const debounce = <T extends any[]>(
     clearTimeout(handle);
   };
   return ret;
-};
-
-export const withBatchedUpdates = <
-  TFunction extends ((event: any) => void) | (() => void),
->(
-  func: Parameters<TFunction>['length'] extends 0 | 1 ? TFunction : never,
-) =>
-  ((event) => {
-    unstable_batchedUpdates(func as TFunction, event);
-  }) as TFunction;
-
-/**
- * barches React state updates and throttles the calls to a single call per
- * animation frame
- */
-export const withBatchedUpdatesThrottled = <
-  TFunction extends ((event: any) => void) | (() => void),
->(
-  func: Parameters<TFunction>['length'] extends 0 | 1 ? TFunction : never,
-) => {
-  // @ts-ignore
-  return throttleRAF<Parameters<TFunction>>(((event) => {
-    unstable_batchedUpdates(func, event);
-  }) as TFunction);
 };

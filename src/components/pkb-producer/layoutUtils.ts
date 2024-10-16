@@ -1,8 +1,9 @@
 import ELK from 'elkjs/lib/elk.bundled.js';
 import {ExcalidrawArrowElement, ExcalidrawBindableElement, ExcalidrawElement} from '@weiwenda/excalidraw/dist/excalidraw/element/types';
-import {getCommonBoundingBox, getMaximumGroups, intersectElementWithLine, newElementWith} from '@weiwenda/excalidraw';
+import {bumpVersion, getCommonBoundingBox, getMaximumGroups, intersectElementWithLine, newElementWith} from '@weiwenda/excalidraw';
 import {ElkNode, LayoutOptions} from 'elkjs/lib/elk-api';
 import {GlobalPoint, LocalPoint} from '@weiwenda/excalidraw/dist/math';
+import _ from 'lodash';
 const elk = new ELK();
 
 /**
@@ -21,17 +22,17 @@ export const arrayToMap = <T extends { id: string } | string>(
   }, new Map());
 };
 
-export const doAutoLayout = (selectedAlgorithm: string,
+export const doAutoLayout = async (selectedAlgorithm: string,
                              nodePlacementStrategy: string,
                              selectedDirection: string,
-                             elementsBefore: readonly ExcalidrawElement[]) => {
+                             elementsBefore: readonly ExcalidrawElement[]): Promise<ExcalidrawElement[]> => {
   let groupMap = new Map();
   let targetElkMap = new Map();
   let arrowEls = [];
-  const elementsEditable = [...elementsBefore];
+  const elementsEditable = _.cloneDeep(elementsBefore) as ExcalidrawElement[];
   const componentComponentSpacing = '10';
-  const nodeNodeSpacing = '10';
-  const nodeNodeBetweenLayersSpacing = '10';
+  const nodeNodeSpacing = '40';
+  const nodeNodeBetweenLayersSpacing = '100';
   let layoutOptionsJson: LayoutOptions = {
     'elk.algorithm': selectedAlgorithm,
     'org.eclipse.elk.layered.nodePlacement.strategy': nodePlacementStrategy,
@@ -43,7 +44,7 @@ export const doAutoLayout = (selectedAlgorithm: string,
     'org.eclipse.elk.layered.crossingMinimization.semiInteractive': 'true',
     'org.eclipse.elk.layered.considerModelOrder.components': 'FORCE_MODEL_ORDER'
   };
-  const groups = getMaximumGroups(elementsEditable, arrayToMap(elementsBefore))
+  const groups = getMaximumGroups(elementsEditable, arrayToMap(elementsEditable))
     .filter((els) => els.length > 0);
 
   const graph: ElkNode = {
@@ -68,6 +69,7 @@ export const doAutoLayout = (selectedAlgorithm: string,
       }
     } else {
       let elkId = 'g' + i;
+      // 编组的子元素在重新布局时当做一个元素
       elements.reduce((result, el) => {
         result.set(el.id, elkId);
         return result;
@@ -108,7 +110,7 @@ export const doAutoLayout = (selectedAlgorithm: string,
     Math.min(...Array.from(groupMap.values()).map((v) => v.boundingBox.topY)) -
     12;
 
-  elk
+  return elk
     .layout(graph)
     .then((resultGraph) => {
       for (const elkEl of resultGraph.children!) {
@@ -123,15 +125,12 @@ export const doAutoLayout = (selectedAlgorithm: string,
 
           groupEl.x = groupEl.x + groupElDistanceX;
           groupEl.y = groupEl.y + groupElDistanceY;
+          bumpVersion(groupEl);
         }
       }
-
-      // ea.copyViewElementsToEAforEditing(selectedElements);
-      // ea.addElementsToView(false, false);
-
       normalizeSelectedArrows(elementsEditable);
-    })
-    .catch(console.error);
+      return elementsEditable;
+    });
 };
 
 const getBoundingBox = (elements: ExcalidrawElement[]): {
@@ -210,15 +209,14 @@ function recalculateStartPointOfLine(
   );
 
   if (intersectA && intersectA.length > 0) {
-    const points = [...line.points];
+    const points = line.points as any[];
     points[0] = [0, 0] as LocalPoint;
     for (let i = 1; i < line.points.length; i++) {
       points[i][0] -= intersectA[0][0] - line.x;
       points[i][1] -= intersectA[0][1] - line.y;
     }
-    return newElementWith(line, {points, x: intersectA[0][0], y: intersectA[0][1]});
-  } else {
-    return line;
+    (line as any).x = intersectA[0][0];
+    (line as any).y = intersectA[0][1];
   }
 }
 
@@ -245,13 +243,10 @@ function recalculateEndPointOfLine(line: ExcalidrawArrowElement, el: ExcalidrawB
   );
 
   if (intersectA && intersectA.length > 0) {
-    const points = [...line.points];
+    const points = line.points as any[];
     points[points.length - 1] = [
       intersectA[0][0] - line.x,
       intersectA[0][1] - line.y,
     ] as LocalPoint;
-    return newElementWith(line, {points});
-  } else {
-    return line;
   }
 }

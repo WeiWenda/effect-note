@@ -224,7 +224,7 @@ $(document).ready(async () => {
   window.keyHandler = keyHandler;
   window.keyEmitter = keyEmitter;
   window.keyBindings = keyBindings;
-  window.EXCALIDRAW_ASSET_PATH = '/excalidraw-assets';
+  window.EXCALIDRAW_ASSET_PATH = '/assets';
 
   const router = createBrowserRouter([
     {
