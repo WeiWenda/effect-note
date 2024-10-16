@@ -29,6 +29,7 @@ import type {
   NonDeletedExcalidrawElement,
   Theme,
 } from '@weiwenda/excalidraw/dist/excalidraw/element/types';
+import fallbackLangData from '@weiwenda/excalidraw/dist/excalidraw/locales/en.json';
 import './index.css';
 import './App.scss';
 import {SessionWithToolbarComponent} from '../session';
@@ -52,6 +53,7 @@ import {useLoaderData, useNavigate, useParams, useSearchParams} from 'react-rout
 import {uploadJson} from '../../share/ts/utils/APIUtils';
 import {copyToClipboard} from '../index';
 import {doAutoLayout} from './layoutUtils';
+import {NestedKeyOf} from '@weiwenda/excalidraw/dist/excalidraw/utility-types';
 
 const {Search} = Input;
 
@@ -103,7 +105,6 @@ export default function PkbProducer({
   const [showDetail, setShowDetail] = useState(session.clientStore.getClientSetting('curPkbShowDetail'));
   const [showShapes, setShowShapes] = useState(session.clientStore.getClientSetting('curPkbShowShapes'));
   const [showSelectedShapeActions, setShowSelectedShapeActions] = useState(session.clientStore.getClientSetting('curPkbShowSelectedShapeActions'));
-  const [showSearch, setShowSearch] = useState(session.clientStore.getClientSetting('curPkbShowSearch'));
   const [showLibrary, setShowLibrary] = useState(session.clientStore.getClientSetting('curPkbShowLibrary'));
   const [docked, setDocked] = useState(false);
   const [theme, setTheme] = useState<Theme>('light');
@@ -139,7 +140,6 @@ export default function PkbProducer({
         setShowShapes(savedContent.tools?.showShapes ?? showShapes);
         setShowDetail(savedContent.tools?.showDetail ?? showDetail);
         setShowFilter(savedContent.tools?.showFilter ?? showFilter);
-        setShowSearch(savedContent.tools?.showSearch ?? showSearch);
         setShowSelectedShapeActions(savedContent.tools?.showSelectedShapeActions ?? showSelectedShapeActions);
         // @ts-ignore
         const blob = new Blob([savedContent.libraryItems || serializeLibraryAsJSON(initialData.libraryItems)],
@@ -232,7 +232,6 @@ export default function PkbProducer({
         setShowShapes(session.clientStore.getClientSetting('curPkbShowShapes'));
         setShowFilter(session.clientStore.getClientSetting('curPkbShowFilter'));
         setShowDetail(session.clientStore.getClientSetting('curPkbShowDetail'));
-        setShowSearch(session.clientStore.getClientSetting('curPkbShowSearch'));
         setShowSelectedShapeActions(session.clientStore.getClientSetting('curPkbShowSelectedShapeActions'));
         const convertedElements = convertToExcalidrawElements(elements);
         const finalElements = convertedElements.map(el => {
@@ -313,7 +312,6 @@ export default function PkbProducer({
     const newElement = cloneElement(
       Excalidraw,
       {
-        langCode: 'zh-CN',
         excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
         initialData: initialStatePromiseRef.current.promise,
         onLibraryChange: (libraryItems: LibraryItems) => {
@@ -330,7 +328,6 @@ export default function PkbProducer({
             session.clientStore.setClientSetting('curPkbShowLibrary', showLibrary);
             session.clientStore.setClientSetting('curPkbShowFilter', showFilter);
             session.clientStore.setClientSetting('curPkbShowDetail', showDetail);
-            session.clientStore.setClientSetting('curPkbShowSearch', showSearch);
             session.clientStore.setClientSetting('curPkbShowShapes', showShapes);
             session.clientStore.setClientSetting('curPkbShowSelectedShapeActions', showSelectedShapeActions);
           }
@@ -367,7 +364,7 @@ export default function PkbProducer({
       <>
         <WelcomeScreen />
         {
-          (showSearch || showFilter || showSelectedShapeActions) &&
+          (showFilter || showSelectedShapeActions) &&
           <Draggable
             defaultClassName={'operation-board'}
             position={{x: boardX, y: boardY}}
@@ -377,42 +374,6 @@ export default function PkbProducer({
             }}
             >
             <div style={{width: '202px'}}>
-              {
-                showSearch &&
-                <Search
-                  allowClear
-                  placeholder='节点搜索'
-                  onSearch={(text) => {
-                    if (!text) {
-                      return;
-                    }
-                    const res = text.matchAll(/"(.*?)"/g);
-                    let query: string[] = [];
-                    let parts;
-                    while (!(parts = res.next()).done) {
-                      query.push(parts.value[1]);
-                    }
-                    text = text.replaceAll(/"(.*?)"/g, '');
-                    query = query.concat(text.split(' ').filter((s) => s.length !== 0));
-                    let match = getTextElementsMatchingQuery(
-                      (excalidrawAPI?.getSceneElements() || []).filter((el) => el.type === 'text'),
-                      query
-                    );
-
-                    if (match.length === 0) {
-                      excalidrawAPI?.setToast({message: '未找到匹配项', duration: 1000});
-                      return false;
-                    }
-                    // @ts-ignore
-                    excalidrawAPI?.updateScene({appState: {selectedElementIds: Object.fromEntries(
-                          match.map((e) => [e.id, true]),
-                        )}});
-                    if (match.length === 1) {
-                      excalidrawAPI?.scrollToContent(match[0]);
-                    }
-                  }}
-                />
-              }
               {
                 showFilter &&
                 <div style={{background: 'var(--island-bg-color)', padding: '0.75rem',
@@ -464,7 +425,7 @@ export default function PkbProducer({
                           setVisibleShapes(nextSelectedTags);
                         }}
                       >
-                        {t(`toolBar.rectangle`)}
+                        {t(`toolBar.${tag}` as NestedKeyOf<typeof fallbackLangData>)}
                       </Tag.CheckableTag>
                     ))}
                   </Flex>
@@ -787,7 +748,6 @@ export default function PkbProducer({
                         showDetail,
                         showLibrary,
                         showShapes,
-                        showSearch,
                         showFilter,
                         showSelectedShapeActions
                       }
@@ -830,7 +790,6 @@ export default function PkbProducer({
                         showLibrary,
                         showDetail,
                         showShapes,
-                        showSearch,
                         showFilter,
                         showSelectedShapeActions
                       }
@@ -868,11 +827,6 @@ export default function PkbProducer({
                        shortcut={showLibrary ? 'ON' : 'OFF'}
                        onSelect={() => setShowLibrary(!showLibrary)}>
           素材库
-        </MainMenu.Item>
-        <MainMenu.Item icon={<FileSearchOutlined />}
-                       shortcut={showSearch ? 'ON' : 'OFF'}
-                       onSelect={() => setShowSearch(!showSearch)}>
-          节点搜索工具
         </MainMenu.Item>
         <MainMenu.Item icon={<FilterOutlined />}
                        shortcut={showFilter ? 'ON' : 'OFF'}

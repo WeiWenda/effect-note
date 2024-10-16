@@ -61,8 +61,8 @@ export const doAutoLayout = (selectedAlgorithm: string,
     ) {
       if (
         elements[0].type === 'arrow' &&
-        elements[0].startBinding &&
-        elements[0].endBinding
+        (elements[0] as ExcalidrawArrowElement).startBinding &&
+        (elements[0] as ExcalidrawArrowElement).endBinding
       ) {
         arrowEls.push(elements[0]);
       }
