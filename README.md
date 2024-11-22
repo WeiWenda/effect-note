@@ -67,7 +67,7 @@ Project Vision：Empower Personal Knowledge Management And Discovery
 ![](./public/images/readme_pic2.png)
 
 ## Contributing
-- [Development Guide](https://github.com/WeiWenda/effect-note-mobile/blob/main/Development.md)
+- [Development Guide](https://github.com/WeiWenda/effect-note/blob/main/Development.md)
 
 ## Thanks To
 - [react](https://github.com/facebook/react)
