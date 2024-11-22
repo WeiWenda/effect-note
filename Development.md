@@ -21,6 +21,7 @@ npm run build
 ```
 执行成功后，build目录下将有以下内容
 ![](./docs/build_file_tree.png)
+
 3. 启动electron调试进程
 ```
 npm run start
