@@ -370,8 +370,9 @@ export default function PkbProducer({
           <Footer>
             <Flex style={{paddingLeft: '5px'}} gap={5} wrap={'wrap'} align={'center'}>
               <Button className={'footer-layout'} onClick={() => {
-                doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX'
-                  , 'RIGHT', excalidrawAPI?.getSceneElements()!).then(elements => {
+                doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX', 'RIGHT',
+                    excalidrawAPI?.getSceneElements()!,
+                    excalidrawAPI?.getAppState().selectedElementIds).then(elements => {
                   excalidrawAPI?.updateScene({
                     elements: elements
                   });
@@ -382,8 +383,9 @@ export default function PkbProducer({
                       src={`${process.env.PUBLIC_URL}/images/layout_ltr.png`} height={18} />
               </Button>
               <Button className={'footer-layout'} onClick={() => {
-                doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX'
-                  , 'LEFT', excalidrawAPI?.getSceneElements()!).then(elements => {
+                doAutoLayout('org.eclipse.elk.layered', 'NETWORK_SIMPLEX', 'LEFT',
+                    excalidrawAPI?.getSceneElements()!,
+                    excalidrawAPI?.getAppState().selectedElementIds).then(elements => {
                   excalidrawAPI?.updateScene({
                     elements: elements
                   });
@@ -394,8 +396,9 @@ export default function PkbProducer({
                      src={`${process.env.PUBLIC_URL}/images/layout_rtl.png`} height={18} />
               </Button>
               <Button className={'footer-layout'} onClick={() => {
-                doAutoLayout('org.eclipse.elk.mrtree', ''
-                  , '', excalidrawAPI?.getSceneElements()!).then(elements => {
+                doAutoLayout('org.eclipse.elk.mrtree', '', '',
+                    excalidrawAPI?.getSceneElements()!,
+                    excalidrawAPI?.getAppState().selectedElementIds).then(elements => {
                   excalidrawAPI?.updateScene({
                     elements: elements
                   });

@@ -1,5 +1,10 @@
 import ELK from 'elkjs/lib/elk.bundled.js';
-import {ExcalidrawArrowElement, ExcalidrawBindableElement, ExcalidrawElement} from '@weiwenda/excalidraw/dist/excalidraw/element/types';
+import {
+  ElementsMap,
+  ExcalidrawArrowElement,
+  ExcalidrawBindableElement,
+  ExcalidrawElement
+} from '@weiwenda/excalidraw/dist/excalidraw/element/types';
 import {bumpVersion, getCommonBoundingBox, getMaximumGroups, intersectElementWithLine, newElementWith} from '@weiwenda/excalidraw';
 import {ElkNode, LayoutOptions} from 'elkjs/lib/elk-api';
 import {GlobalPoint, LocalPoint} from '@weiwenda/excalidraw/dist/math';
@@ -25,11 +30,13 @@ export const arrayToMap = <T extends { id: string } | string>(
 export const doAutoLayout = async (selectedAlgorithm: string,
                              nodePlacementStrategy: string,
                              selectedDirection: string,
-                             elementsBefore: readonly ExcalidrawElement[]): Promise<ExcalidrawElement[]> => {
+                             elementsBefore: readonly ExcalidrawElement[],
+                             selectedElementIds: { [p: string]: true }): Promise<ExcalidrawElement[]> => {
   let groupMap = new Map();
   let targetElkMap = new Map();
   let arrowEls = [];
-  const elementsEditable = _.cloneDeep(elementsBefore) as ExcalidrawElement[];
+  let elementsAll = _.cloneDeep(elementsBefore) as ExcalidrawElement[];
+  const elementsEditable = Object.values(selectedElementIds).includes(true) ? elementsAll.filter(e => selectedElementIds[e.id]) : elementsAll;
   const componentComponentSpacing = '10';
   const nodeNodeSpacing = '40';
   const nodeNodeBetweenLayersSpacing = '100';
@@ -110,7 +117,7 @@ export const doAutoLayout = async (selectedAlgorithm: string,
     Math.min(...Array.from(groupMap.values()).map((v) => v.boundingBox.topY)) -
     12;
 
-  return elk
+  const elementsAfterLayout = await elk
     .layout(graph)
     .then((resultGraph) => {
       for (const elkEl of resultGraph.children!) {
@@ -131,6 +138,18 @@ export const doAutoLayout = async (selectedAlgorithm: string,
       normalizeSelectedArrows(elementsEditable);
       return elementsEditable;
     });
+  if (Object.values(selectedElementIds).includes(true)) {
+    const afterLayoutMap: ElementsMap = arrayToMap(elementsAfterLayout);
+    return elementsAll.map(e => {
+      if (selectedElementIds[e.id]) {
+        return afterLayoutMap.get(e.id);
+      } else {
+        return e;
+      }
+    }) as ExcalidrawElement[];
+  } else {
+    return elementsAfterLayout;
+  }
 };
 
 const getBoundingBox = (elements: ExcalidrawElement[]): {
