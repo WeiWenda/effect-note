@@ -29,9 +29,7 @@ npm run start
 ## 生成windows安装包
 1. 依次执行以下命令
 ```
-npm run build-win32
-del -A ./node_modules/.cache
-electron-forge make --platform win32
+npm run makewin
 ```
 
 ## 生成Mac无签名包

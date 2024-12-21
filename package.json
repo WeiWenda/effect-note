@@ -37,7 +37,7 @@
     "build-drawin": "export REACT_APP_BUILD_PROFILE=local && export REACT_APP_BUILD_PLATFORM=darwin && npm run build",
     "build-win32": "set \"REACT_APP_BUILD_PROFIL=local\" && set \"REACT_APP_BUILD_PLATFORM=win32\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build",
     "build-mas": "export REACT_APP_BUILD_PROFILE=local && export REACT_APP_BUILD_PLATFORM=mas && npm run build",
-    "rmcache": "rm -rf ./node_modules/.cache",
+    "rmcache": "rimraf ./node_modules/.cache",
     "make": "npm run build-drawin && npm run rmcache && PLATFORM=darwin electron-forge make --platform darwin --targets @electron-forge/maker-dmg",
     "makewin": "npm run build-win32 && npm run rmcache && electron-forge make --platform win32",
     "makemas": "npm run build-mas && npm run rmcache && PLATFORM=mas electron-forge make --platform mas --targets @electron-forge/maker-pkg --arch x64"
@@ -143,6 +143,7 @@
     "react-scripts": "^5.0.1",
     "react-to-print": "^2.14.10",
     "react-virtuoso": "^4.6.2",
+    "rimraf": "^6.0.1",
     "rollup": "^2.79.1",
     "rollup-plugin-sass": "^1.12.16",
     "runtypes": "^6.7.0",
