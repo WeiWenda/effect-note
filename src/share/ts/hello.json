@@ -1231,6 +1231,38 @@
               ]
             }
           ]
+        },
+        {
+          "text": "v0.6.2",
+          "plugins": {
+            "is_board": true
+          },
+          "id": 29137,
+          "children": [
+            {
+              "text": "New  Features",
+              "plugins": {
+                "width": 0.17172413793103447
+              },
+              "id": 29140,
+              "children": [
+                {
+                  "text": "图谱笔记支持自动布局",
+                  "id": 29141
+                }
+              ]
+            },
+            {
+              "text": "Improvement",
+              "id": 29138,
+              "children": [
+                {
+                  "text": "修复文本选中编辑时状态错乱的问题",
+                  "id": 29139
+                }
+              ]
+            }
+          ]
         }
       ]
     },
