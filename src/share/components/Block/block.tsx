@@ -454,7 +454,6 @@ export default class BlockComponent extends React.Component<BlockProps, {}> {
                       if (session.hoverRow) {
                         const target = session.hoverRow;
                         session.markSelecting(false, 'onDragStop');
-                        session.stopAnchor();
                         session.dragging = false;
                         session.delBlock(path, {}).then(() => {
                           session.cursor.setPosition(target, 0).then(() => {

@@ -194,20 +194,24 @@ export default class Session extends EventEmitter {
       this.stopMonitor = '';
     }
     if (this.debugMode) {
-      this.emit('updateInner')
+      this.emit('updateInner');
     }
   }
 
   public markSelecting(selecting: boolean, callsite: string) {
     // console.log('markSelecting', selecting, callsite);
     this.selecting = selecting;
+    if (!selecting) {
+      this._anchor = null;
+      this.selectPopoverOpen = '';
+    }
   }
 
   public stopKeyMonitor(caller: string) {
     // console.log('stopKeyMonitor from:', caller);
     this.stopMonitor = caller;
     if (this.debugMode) {
-      this.emit('updateInner')
+      this.emit('updateInner');
     }
   }
 
@@ -1184,6 +1188,7 @@ export default class Session extends EventEmitter {
     }
     const mutation = new mutations.ChangeChars(row, col, nchars, change_fn);
     await this.do(mutation);
+    this.markSelecting(false, 'changeChars');
     return mutation.ncharsDeleted;
   }
 
@@ -1908,7 +1913,6 @@ export default class Session extends EventEmitter {
         const [parent, index1, index2] = await this.getVisualLineSelections();
         await this.delBlocks(parent.row, index1, (index2 - index1) + 1, {addNew: false, noSave: true});
       }
-      this.stopAnchor();
       this.markSelecting(false, 'yankDelete');
       this.emit('updateInner');
     } else {

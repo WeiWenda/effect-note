@@ -18,6 +18,7 @@ export function FontStyleToolComponent(
   const [link, setLink] = useState<string | undefined>(props.link);
   // const [comment, setComment] = useState<string>('');
   const [open, setOpen] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
   const [showLink, setShowLink] = useState(props.link ? true : false);
   // const [showComment, setShowComment] = useState(false);
   const switchClass = (newClass: string) => {
@@ -38,9 +39,6 @@ export function FontStyleToolComponent(
           return `<span class='${newClasses.join(' ')}'>${props.textContent}</span>`.split('');
         }
       }).then(() => {
-        props.session.stopAnchor();
-        props.session.setSelectPopoverOpen('');
-        props.session.markSelecting(false, 'switchClass');
         props.session.emit('updateInner');
       });
     };
@@ -54,7 +52,7 @@ export function FontStyleToolComponent(
                    props.session.setSelectPopoverOpen('style-tool');
                    setOpen(true);
                  } else {
-                   if (!showLink) {
+                   if (!showLink && open) {
                      props.session.setSelectPopoverOpen('');
                      setOpen(false);
                    }
@@ -89,6 +87,7 @@ export function FontStyleToolComponent(
                          props.session.setSelectPopoverOpen('');
                        }
                        setShowLink(e);
+                       setTooltipOpen(false);
                      }}
                      content={
               <Input
@@ -105,13 +104,14 @@ export function FontStyleToolComponent(
                 addonBefore='链接到:' addonAfter={
                 <CheckOutlined onClick={() => {
                   props.session.startKeyMonitor();
-                  props.session.setSelectPopoverOpen('');
                   switchClass('')();
                   setShowLink(false);
                 }}/>
               }/>
             }>
-              <Tooltip title='添加超链接'>
+              <Tooltip open={tooltipOpen} onOpenChange={e => {
+                  setTooltipOpen(e && !showLink);
+              }} title='添加超链接'>
                 <LinkOutlined />
               </Tooltip>
             </Popover>
@@ -146,7 +146,6 @@ export function FontStyleToolComponent(
             <Tooltip title='添加批注'>
               <MessageOutlined onClick={() => {
                 props.session.emitAsync('addComment', props.path.row, props.startCol, props.endCol, '').then(() => {
-                  props.session.stopAnchor();
                   props.session.markSelecting(false, 'addComment');
                   props.session.emit('updateInner');
                 });
@@ -199,9 +198,6 @@ export function FontStyleToolComponent(
                 props.session.changeChars(props.path!.row, props.startCol, props.endCol - props.startCol, () => {
                   return props.textContent.split('');
                 }).then(() => {
-                  props.session.stopAnchor();
-                  props.session.setSelectPopoverOpen('');
-                  props.session.markSelecting(false, 'deleteClass');
                   props.session.emit('updateInner');
                 });
               }}/>

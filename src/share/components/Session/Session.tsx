@@ -68,7 +68,6 @@ export default class SessionComponent extends React.Component<Props, State> {
               });
             } else {
               session.markSelecting(false, 'onCharClick');
-              session.stopAnchor();
               session.cursor.setPosition(path, column).then(() => {
                 this.update();
               });
@@ -126,7 +125,6 @@ export default class SessionComponent extends React.Component<Props, State> {
         await session.setAnchor(session.cursor.path, session.cursor.col, 'onLineClickWithShift');
       } else {
         session.markSelecting(false, 'onLineClick');
-        session.stopAnchor();
       }
       await session.cursor.setPosition(path, col);
       this.update();
