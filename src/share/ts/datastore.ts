@@ -478,7 +478,13 @@ export class DocumentStore {
   }
 
   public async getNew() {
-    const id = await this.getId();
+    let used = true;
+    let id = 0;
+    while (used) {
+      id = await this.getId();
+      const collapse = await this.backend.get(this._lineKey_(id));
+      used = collapse != null;
+    }
     await Promise.all([
       this.setLine(id, []),
       this.setChildren(id, []),
