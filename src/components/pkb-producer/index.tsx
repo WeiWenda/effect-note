@@ -21,7 +21,7 @@ import type {
   LibraryItem,
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState, LibraryItems,
-  PointerDownState as ExcalidrawPointerDownState,
+  PointerDownState as ExcalidrawPointerDownState, BinaryFileData,
 } from '@weiwenda/excalidraw/dist/excalidraw/types';
 import type {
   ExcalidrawElement,
@@ -136,6 +136,7 @@ export default function PkbProducer({
         JSON.parse(res) as {content: string}) : api_utils.getDocContent(Number(curDocId));
       contentPromise.then((res) => {
         const savedContent = JSON.parse(res.content);
+        const files = savedContent.files as Record<ExcalidrawElement['id'], BinaryFileData>;
         const elements = savedContent.elements as readonly ExcalidrawElement[];
         setShowLibrary(savedContent.tools?.showLibrary ?? showLibrary);
         setShowShapes(savedContent.tools?.showShapes ?? showShapes);
@@ -159,7 +160,8 @@ export default function PkbProducer({
                 scrollX: savedContent.appState?.scrollX ?? session.clientStore.getClientSetting('curPkbScrollX'),
                 scrollY: savedContent.appState?.scrollY ?? session.clientStore.getClientSetting('curPkbScrollY'),
               },
-              elements: elements
+              elements: elements,
+              files: files,
             });
             setInitialized(true);
           });
@@ -167,6 +169,7 @@ export default function PkbProducer({
           loadLibraryFromBlob(blob).then((savedLibraryItems: LibraryItem[]) => {
             excalidrawAPI?.updateLibrary({libraryItems: savedLibraryItems});
           });
+          excalidrawAPI?.addFiles(Object.values(files));
           // @ts-ignore
           excalidrawAPI?.updateScene({
             elements, appState: {
