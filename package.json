@@ -130,7 +130,7 @@
     "react": "^18.0.21",
     "react-app-rewired": "^2.2.1",
     "react-color": "^2.19.3",
-    "react-contenteditable": "^3.3.6",
+    "react-contenteditable": "^3.3.7",
     "react-cool-portal": "^1.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",

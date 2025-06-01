@@ -12,25 +12,27 @@ export function ContentEditableWrapper(props: {session: Session, cursorStyle: Re
                        key='input-hack'
                        html={input}
                        onChange={(e) => {
-                         const newVal = e.target.value.replace(/&lt;/g, '<')
-                           .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-                         setInput(newVal);
-                         if (! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal.substring(0, 1))) {
-                           props.session.setHoverRow(props.session.cursor.path, 'input-hack');
-                           props.session.addCharsAtCursor(newVal.split('')).then(() => {
-                             if (newVal === '/') {
-                               props.session.setMode('NODE_OPERATION');
-                             }
-                             props.session.emit('updateAnyway');
-                             setInput('');
-                           });
-                         }
+                           const newVal = e.target.value.replace(/&lt;/g, '<')
+                               .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+                           setInput(newVal);
+                           if (window.navigator.platform.startsWith('Mac') &&
+                               ! new RegExp('[\u4E00-\u9FA5a-zA-Z0-9 ]').test(newVal.substring(0, 1))) {
+                               props.session.setHoverRow(props.session.cursor.path, 'input-hack');
+                               props.session.addCharsAtCursor(newVal.split('')).then(() => {
+                                   if (newVal === '/') {
+                                       props.session.setMode('NODE_OPERATION');
+                                   }
+                                   props.session.emit('updateAnyway');
+                                   setInput('');
+                               });
+                           }
                        }}
                        onCompositionEnd={(e) => {
                          const newVal = e.data.replace(/&lt;/g, '<')
                            .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
                          e.preventDefault();
                          e.stopPropagation();
+                         console.log('onCompositionEnd', newVal);
                          props.session.setHoverRow(props.session.cursor.path, 'input-hack');
                          // simply insert the key
                          props.session.addCharsAtCursor(newVal.split('')).then(() => {

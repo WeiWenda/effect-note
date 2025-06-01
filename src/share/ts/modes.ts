@@ -160,13 +160,22 @@ registerMode({
       key = transform_insert_key(key);
       // console.log('INSERT-key_transforms' + key);
       if (key.length === 1) {
-        if ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '.includes(key) && !context.session.cursor.path.isRoot()) {
-          // simply insert the key
-          await context.session.addCharsAtCursor([key]);
-          await context.session.applyHookAsync('charInserted', {}, { key });
+        if (!context.session.cursor.path.isRoot()) {
+          if (window.navigator.platform.startsWith('Mac')) {
+            if ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '.includes(key)) {
+              // simply insert the key
+              await context.session.addCharsAtCursor([key]);
+              await context.session.applyHookAsync('charInserted', {}, { key });
+              return [null, context];
+            }
+          } else if (window.navigator.platform.startsWith('Win')) {
+              // simply insert the key
+              await context.session.addCharsAtCursor([key]);
+              await context.session.applyHookAsync('charInserted', {}, { key });
+              return [null, context];
+            }
+          }
         }
-        return [null, context];
-      }
       return [key, context];
     },
   ],

@@ -283,8 +283,6 @@ export default class SessionComponent extends React.Component<Props, State> {
     const viewRoot = session.viewRoot;
     const cachedRow = session.document.cache.get(viewRoot.row);
     if (cachedRow === null) {
-      console.log('spin because cachedRow is null');
-      this.fetchAndRerender();
       return <Spinner/>;
     }
 

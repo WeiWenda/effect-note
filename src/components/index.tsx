@@ -330,8 +330,13 @@ $(document).ready(async () => {
       keyHandler.queueKey(key);
       // NOTE: this is just a best guess... e.g. the mode could be wrong
       // problem is that we process asynchronously, but need to return synchronously
-      return keyBindings.bindings[session.mode].getKey(key) != null ||
-        (session.mode === 'INSERT' && (key === 'space' || 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.includes(key)));
+      if (window.navigator.platform.startsWith('Mac')) {
+        return keyBindings.bindings[session.mode].getKey(key) != null ||
+          (session.mode === 'INSERT' && (key === 'space' || 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.includes(key)));
+      } else {
+        return keyBindings.bindings[session.mode].getKey(key) != null ||
+            (session.mode === 'INSERT' && (key === 'space' || key.length === 1));
+      }
     } else {
       return false;
     }

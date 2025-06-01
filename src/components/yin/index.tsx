@@ -1,7 +1,7 @@
 import {
   api_utils,
   DocInfo,
-  Document,
+  Document, EMPTY_BLOCK,
   IndexedDBBackend,
   Path,
   Session,
@@ -271,12 +271,12 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
   }, []);
   const afterLoadDoc = async () => {
     props.session.getCurrentContent(Path.root(), 'application/json').then(c => {
-      if (JSON.stringify(JSON.parse(c)) === JSON.stringify(JSON.parse('{ "text": "", "children": [ { "text": "" } ] }'))) {
-         props.session.document.getChildren(Path.root()).then(rows => {
-           props.session.cursor.setPosition(rows.pop()!, 0).then(() => {
-             props.session.emit('updateInner');
-           });
-         });
+      if (JSON.stringify(JSON.parse(c)) === JSON.stringify(EMPTY_BLOCK)) {
+        props.session.document.getChildren(Path.root()).then(rows => {
+          props.session.cursor.setPosition(rows.pop()!, 0).then(() => {
+            props.session.emit('updateInner');
+          });
+        });
       }
     });
     const docStore = props.session.document.store;
