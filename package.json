@@ -35,7 +35,7 @@
     "eject": "react-scripts eject",
     "package": "electron-forge package",
     "build-drawin": "export REACT_APP_BUILD_PROFILE=local && export REACT_APP_BUILD_PLATFORM=darwin && npm run build",
-    "build-win32": "set \"REACT_APP_BUILD_PROFIL=local\" && set \"REACT_APP_BUILD_PLATFORM=win32\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build",
+    "build-win32": "set \"REACT_APP_BUILD_PROFILE=local\" && set \"REACT_APP_BUILD_PLATFORM=win32\" && set \"NODE_TLS_REJECT_UNAUTHORIZED=0\" && npm run build",
     "build-mas": "export REACT_APP_BUILD_PROFILE=local && export REACT_APP_BUILD_PLATFORM=mas && npm run build",
     "rmcache": "rimraf ./node_modules/.cache",
     "make": "npm run build-drawin && npm run rmcache && PLATFORM=darwin electron-forge make --platform darwin --targets @electron-forge/maker-dmg",
