@@ -59,7 +59,6 @@ import YinComponent from './yin';
 import {YangComponent} from './yang';
 import localforage from 'localforage';
 import PkbProducer from './pkb-producer';
-import * as ExcalidrawLib from '@weiwenda/excalidraw';
 
 declare const window: any; // because we attach globals for debugging
 
@@ -218,7 +217,6 @@ $(document).ready(async () => {
   session.keyEmitter = keyEmitter;
   // expose globals, for debugging
   window.Modes = Modes;
-  window.ExcalidrawLib = ExcalidrawLib;
   window.session = session;
   window.logger = logger;
   window.keyHandler = keyHandler;
@@ -245,10 +243,7 @@ $(document).ready(async () => {
           element: <PkbProducer
                                 session={session}
                                 appTitle={'构建PKB文件'}
-                                useCustom={(api: any, args?: any[]) => {}}
-                                excalidrawLib={ExcalidrawLib}>
-                    <ExcalidrawLib.Excalidraw/>
-                  </PkbProducer>,
+                                useCustom={(api: any, args?: any[]) => {}}/>,
           loader: noteLoader,
         }
         // {

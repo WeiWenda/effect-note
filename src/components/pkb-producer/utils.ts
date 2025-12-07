@@ -1,13 +1,23 @@
-import {isLinearElement, newElementWith} from '@weiwenda/excalidraw';
+import {isLinearElement, newElementWith} from '@excalidraw/excalidraw';
 import * as dagre from '@dagrejs/dagre';
 import type {
   ExcalidrawArrowElement,
   ExcalidrawBindableElement,
-  ExcalidrawElement, ExcalidrawTextContainer,
-  ExcalidrawTextElement, ExcalidrawTextElementWithContainer
-} from '@weiwenda/excalidraw/dist/excalidraw/element/types';
-import {NormalizedZoomValue, UIAppState} from '@weiwenda/excalidraw/dist/excalidraw/types';
-import {MarkNonNullable} from '@weiwenda/excalidraw/dist/excalidraw/utility-types';
+  ExcalidrawElement,
+  ExcalidrawTextContainer,
+  ExcalidrawTextElement,
+  ExcalidrawTextElementWithContainer
+} from
+      '@excalidraw/excalidraw/dist/types/excalidraw/element/types';
+import { MarkNonNullable } from '@excalidraw/excalidraw/dist/types/excalidraw/utility-types';
+import {NormalizedZoomValue, UIAppState} from '@excalidraw/excalidraw/dist/types/excalidraw/types';
+import {useCallback, useState} from 'react';
+
+export const useCallbackRefState = <T>() => {
+  const [refValue, setRefValue] = useState<T | null>(null);
+  const refCallback = useCallback((value: T | null) => setRefValue(value), []);
+  return [refValue, refCallback] as const;
+};
 
 export const isBindableElement = (
   element: ExcalidrawElement | null,

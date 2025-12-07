@@ -59,7 +59,7 @@ export function FontStyleToolComponent(
                  }
                }}
                content={
-        <div className={'rtf-toolbox node-html'} style={{display: 'flex', flexDirection: 'column'}}>
+        <div data-prevent-outside-click={true} className={'rtf-toolbox node-html'} style={{display: 'flex', flexDirection: 'column'}}>
           <Space>
             <BoldOutlined onClick={switchClass('bold')}/>
             <ItalicOutlined onClick={switchClass('italic')}/>
@@ -90,24 +90,26 @@ export function FontStyleToolComponent(
                        setTooltipOpen(false);
                      }}
                      content={
-              <Input
-                value={link}
-                onFocus={() => {
-                  props.session.stopKeyMonitor('add-link');
-                }}
-                onBlur={() => {
-                  props.session.startKeyMonitor();
-                }}
-                onChange={(v) => {
-                  setLink(v.target.value);
-                }}
-                addonBefore='链接到:' addonAfter={
-                <CheckOutlined onClick={() => {
-                  props.session.startKeyMonitor();
-                  switchClass('')();
-                  setShowLink(false);
-                }}/>
-              }/>
+                <div data-prevent-outside-click={true} >
+                    <Input
+                        value={link}
+                        onFocus={() => {
+                            props.session.stopKeyMonitor('add-link');
+                        }}
+                        onBlur={() => {
+                            props.session.startKeyMonitor();
+                        }}
+                        onChange={(v) => {
+                            setLink(v.target.value);
+                        }}
+                        addonBefore='链接到:' addonAfter={
+                        <CheckOutlined onClick={() => {
+                            props.session.startKeyMonitor();
+                            switchClass('')();
+                            setShowLink(false);
+                        }}/>
+                    }/>
+                </div>
             }>
               <Tooltip open={tooltipOpen} onOpenChange={e => {
                   setTooltipOpen(e && !showLink);
