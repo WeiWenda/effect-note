@@ -34,7 +34,7 @@ export class DrawioEditor extends Component {
   }
 
   render() {
-    const iframe = '<iframe id="drawioIfr" src="/drawio/index.html?embed=1&proto=json&lang=zh"'
+    const iframe = '<iframe id="drawioIfr" src="' + process.env.PUBLIC_URL + '/drawio/index.html?embed=1&proto=json&lang=zh"'
       + ' frameborder="0"'
       + ' width="' + (window.innerWidth - 70) + '"'
       + ' height="' + (window.innerHeight - 125) + '"></iframe>';

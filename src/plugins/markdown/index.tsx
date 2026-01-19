@@ -48,13 +48,13 @@ registerPlugin(
               hljs: {
                 lineNumber: true
               },
-              cdn: `${window.location.origin}/vditor`,
+              cdn: `${window.location.origin}${process.env.PUBLIC_URL}/vditor`,
               transform: (html: string) => {
                 return html.replace('<a ', '<a target="_blank" ');
               },
               theme : {
                 current: mode,
-                path: 'content-theme'
+                path: `${window.location.origin}${process.env.PUBLIC_URL}/vditor/dist/css/content-theme`
               }});
           }
         }, 100);
