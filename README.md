@@ -4,7 +4,7 @@
 一款免费的大纲笔记软件，纯文件存储，Gitee云端同步
 <br>
   <span>
-    <a target="_blank" href="https://weiwenda.github.io/effect-note/note/-1">在线Demo</a>
+    <a target="_blank" href="https://weiwenda.github.io/effect-note/">在线Demo</a>
   </span>
 <br>
   Inspired By Confluence & Workflowy
