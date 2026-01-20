@@ -226,7 +226,7 @@ $(document).ready(async () => {
 
   const router = createBrowserRouter([
     {
-      path: '/',
+      path: '/' + process.env.PUBLIC_URL,
       element: <LayoutComponent session={session} config={config} pluginManager={pluginManager}/>,
       children: [
         {

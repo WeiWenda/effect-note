@@ -59,7 +59,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const forceUpdate = useForceUpdate();
   const navigate = useNavigate();
   const location = useLocation();
-  const [curPage, setCurPage] = useState<string>(location.pathname.split('/')[1] || 'note');
+  const [curPage, setCurPage] = useState<string>(location.pathname.split(process.env.PUBLIC_URL)[1].split('/')[1] || 'note');
   const [settingOpen, setSettingOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [drawerWidth, setDrawerWidth] = useState(window.innerWidth / 2);
@@ -81,7 +81,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
   const [xml, setXml] = useState<string | undefined>();
   const [vd, setVd] = React.useState<Vditor>();
   useEffect(() => {
-    setCurPage(location.pathname.split('/')[1] || 'note');
+    setCurPage(location.pathname.split(process.env.PUBLIC_URL)[1].split('/')[1] || 'note');
   }, [location]);
   useEffect(() => {
     getServerConfig().then(res => {
@@ -279,7 +279,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
           onFinish={(docId) => {
             setModalVisible({...modalVisible, noteInfo: false});
             props.session.startKeyMonitor();
-            navigate(`/note/${docId}`);
+            navigate(`${process.env.PUBLIC_URL}/note/${docId}`);
           }}
         />
       </Modal>
@@ -365,7 +365,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
         <Header className='layout-header' style={{
           ...getStyles(props.session.clientStore, ['theme-bg-primary', 'theme-text-primary'])
         }}>
-          <img className='logo' src={'/images/icon.png'}></img>
+          <img className='logo' src={process.env.PUBLIC_URL + '/images/icon.png'}></img>
           <div className='header-title'>Effect</div>
           <Menu style={{borderBottom: 'unset'}} className='header-menu' mode='horizontal'
                 items={HeaderItems}
@@ -376,25 +376,25 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                   if (e.key === 'note') {
                     props.session.startKeyMonitor();
                     const docId = props.session.clientStore.getClientSetting('lastDocId');
-                    navigate(`/${e.key}/${docId}`);
+                    navigate(`${process.env.PUBLIC_URL}/${e.key}/${docId}`);
                   } else if (e.key === 'produce') {
                     props.session.stopKeyMonitor('pkb-nav');
                     const pkbId = curPage === 'produce' ? '-2' : props.session.clientStore.getClientSetting('curPkbId');
-                    navigate(`/${e.key}/${pkbId}`);
+                    navigate(`${process.env.PUBLIC_URL}/${e.key}/${pkbId}`);
                   } else {
                     props.session.stopKeyMonitor('discovery-nav');
                     const lastSearch = props.session.clientStore.getClientSetting('curSearch');
                     const lastSearchResult = props.session.clientStore.getClientSetting('curSearchResult');
                     if (lastSearch) {
                       if (lastSearchResult) {
-                        navigate(`/${e.key}?q=${encodeURIComponent(lastSearch)}&v=${encodeURIComponent(lastSearchResult)}`);
+                        navigate(`${process.env.PUBLIC_URL}/${e.key}?q=${encodeURIComponent(lastSearch)}&v=${encodeURIComponent(lastSearchResult)}`);
                       } else {
-                        navigate(`/${e.key}?q=${encodeURIComponent(lastSearch)}`);
+                        navigate(`${process.env.PUBLIC_URL}/${e.key}?q=${encodeURIComponent(lastSearch)}`);
                       }
                     } else if (lastSearchResult) {
-                      navigate(`/${e.key}?v=${encodeURIComponent(lastSearchResult)}`);
+                      navigate(`${process.env.PUBLIC_URL}/${e.key}?v=${encodeURIComponent(lastSearchResult)}`);
                     } else {
-                      navigate(`/${e.key}`);
+                      navigate(`${process.env.PUBLIC_URL}/${e.key}`);
                     }
                   }
                 }}/>
@@ -446,7 +446,7 @@ function LayoutComponent(props: {session: Session, config: Config, pluginManager
                     onFinish={(docId) => {
                       Modal.destroyAll();
                       props.session.startKeyMonitor();
-                      navigate(`/produce/${docId}`);
+                      navigate(`${process.env.PUBLIC_URL}/produce/${docId}`);
                     }}
                   />
                 )

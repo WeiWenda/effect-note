@@ -379,7 +379,7 @@ export default function PkbProducer({
         // do a custom redirect, such as passing to react-router
         // ...
       } else if (isProduceLink) {
-        navigate('/produce/' + link.split('/').pop()!.split('?')[0]);
+        navigate(process.env.PUBLIC_URL + '/produce/' + link.split('/').pop()!.split('?')[0]);
         return true;
       } else {
         return false;
@@ -717,10 +717,6 @@ export default function PkbProducer({
                   <MainMenu.Item icon={<CloudUploadOutlined />} onSelect={() => {
                     console.log('保存至EffectNote');
                     if (!excalidrawAPI) {
-                      return false;
-                    }
-                    if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
-                      session.showMessage('Demo部署环境下，该功能不可用', {warning: true});
                       return false;
                     }
                     saveDocIfNeed().then(() => {

@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkEffectNote=self.webpackChunkEffectNote||[]).push([[6531],{6531:(e,a,s)=>{s.r(a),s.d(a,{WorkerUrl:()=>r});var t=s(229),r=(s(88390),s(43881),new URL("file:///Users/weiwenda/workspace/WSWorkSpace/effect-note/node_modules/@excalidraw/excalidraw/dist/prod/subset-worker.chunk.js"));typeof window>"u"&&typeof self<"u"&&(self.onmessage=async e=>{if(e.data.command===t.a.Subset){let a=await(0,t.c)(e.data.arrayBuffer,e.data.codePoints);self.postMessage(a,{transfer:[a]})}})}}]);
-//# sourceMappingURL=6531.48d1f22a.chunk.js.map

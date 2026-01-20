@@ -51,7 +51,7 @@ function FileToolsComponent(props:  React.PropsWithChildren<{
           onOk: () => {
             api_utils.deleteDocContent(props.curDocId).then(() => {
               props.session.clientStore.setClientSetting('curDocId', -1);
-              navigate(`/note/-1`);
+              navigate(`${process.env.PUBLIC_URL}/note/-1`);
             }).catch(e => {
               props.session.showMessage(e, {warning: true});
             });

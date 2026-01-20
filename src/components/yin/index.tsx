@@ -444,7 +444,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
     setLoading(true);
     const curDocInfo = (userDocs as DocInfo[]).find(doc => doc.id === docID);
     if (curDocInfo === undefined) {
-      navigate(`/note/-1`);
+      navigate(`${process.env.PUBLIC_URL}/note/-1`);
     }
     let initialLoad = false;
     const newDocName = docID.toString();
@@ -520,7 +520,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
       const remoteDocId = menuItem2DocId[Number(e.key)];
       const docInfo = props.session.userDocs.find(info => info.id === remoteDocId);
       if (docInfo && docInfo.filename?.endsWith('.excalidraw')) {
-        navigate(`/produce/${remoteDocId}`);
+        navigate(`${process.env.PUBLIC_URL}/produce/${remoteDocId}`);
       } else {
         const recentDocId = props.session.clientStore.getClientSetting('recentDocId');
         if (recentDocId.indexOf(remoteDocId) === -1) {
@@ -530,7 +530,7 @@ function YinComponent(props: {session: Session, pluginManager: PluginsManager}) 
           }
         }
         props.session.clientStore.setClientSetting('recentDocId', recentDocId);
-        navigate(`/note/${remoteDocId}`);
+        navigate(`${process.env.PUBLIC_URL}/note/${remoteDocId}`);
       }
     } else {
       props.session.showMessage('正在加载，请勿离开');

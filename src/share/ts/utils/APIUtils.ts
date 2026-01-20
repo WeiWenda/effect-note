@@ -278,11 +278,10 @@ export function updateDoc(docId: number, docInfo: DocInfo) {
 export function uploadPKB(docInfo: DocInfo) {
     if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
         const docs = JSON.parse(localStorage.getItem('demo_mock_doc_list') || '[]');
-        const docId = docs.length;
-        docs.push({id: docId, filename: docInfo.name + '.excalidraw', ...docInfo});
-        localStorage.setItem(`demo_mock_doc_content_${docId}`, docInfo.content || JSON.stringify(EMPTY_BLOCK));
+        docs.push({id: docInfo.id, filename: docInfo.name + '.excalidraw', ...docInfo});
+        localStorage.setItem(`demo_mock_doc_content_${docInfo.id}`, docInfo.content || JSON.stringify(EMPTY_BLOCK));
         localStorage.setItem('demo_mock_doc_list', JSON.stringify(docs));
-        return Promise.resolve({message: 'save success', id: docId});
+        return Promise.resolve({message: 'save success', id: docInfo.id});
     }
     return request({
         url: API_BASE_URL + '/pkb/',
@@ -297,11 +296,10 @@ export function uploadDoc(docInfo: DocInfo) {
     // }
     if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
         const docs = JSON.parse(localStorage.getItem('demo_mock_doc_list') || '[]');
-        const docId = docs.length;
-        docs.push({id: docId, filename: docInfo.name + '.effect.json', ...docInfo});
-        localStorage.setItem(`demo_mock_doc_content_${docId}`, docInfo.content || JSON.stringify(EMPTY_BLOCK));
+        docs.push({id: docInfo.id, filename: docInfo.name + '.effect.json', ...docInfo});
+        localStorage.setItem(`demo_mock_doc_content_${docInfo.id}`, docInfo.content || JSON.stringify(EMPTY_BLOCK));
         localStorage.setItem('demo_mock_doc_list', JSON.stringify(docs));
-        return Promise.resolve({message: 'save success', id: docId});
+        return Promise.resolve({message: 'save success', id: docInfo.id});
     }
     return request({
         url: API_BASE_URL + '/docs/',
@@ -381,10 +379,10 @@ export function getDocContent(docId: number, version: string = 'HEAD') {
     //     return Promise.reject('No access token set.');
     // }
     if (docId === -1) {
-        return Promise.resolve({content: config.getDefaultData()});
+        return Promise.resolve({content: config.getDefaultData(), id: docId});
     }
     if (process.env.REACT_APP_BUILD_PROFILE === 'demo') {
-        return Promise.resolve({content: localStorage.getItem(`demo_mock_doc_content_${docId}`)!});
+        return Promise.resolve({content: localStorage.getItem(`demo_mock_doc_content_${docId}`)!, id: docId});
     }
     return request({
         url: `${API_BASE_URL}/docs/${docId}?version=${version}`,

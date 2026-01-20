@@ -633,7 +633,7 @@ export default class Session extends EventEmitter {
 
   public async newFile(name: string, tags: string[]) {
       this.showMessage('正在创建...');
-      const docId = Math.max(...this.userDocs.map(d => d.id!)) + 1;
+      const docId = Math.max(...this.userDocs.map(d => d.id!), 0) + 1;
       const docDetail = await uploadDoc({
         id: docId,
         name: name, tag: JSON.stringify(tags), content: JSON.stringify(EMPTY_BLOCK)})
@@ -645,7 +645,7 @@ export default class Session extends EventEmitter {
 
   public async newPKB(name: string, tags: string[]) {
     this.showMessage('正在创建...');
-    const docId = Math.max(...this.userDocs.map(d => d.id!)) + 1;
+    const docId = Math.max(...this.userDocs.map(d => d.id!), 0) + 1;
     const docDetail = await uploadPKB({
       id: docId,
       name: name, tag: JSON.stringify(tags), content: JSON.stringify({
