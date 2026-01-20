@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkEffectNote=self.webpackChunkEffectNote||[]).push([[8728],{78728:(e,a,f)=>{f.r(a),f.d(a,{default:()=>t.c,en:()=>t.a,kaa:()=>t.b});var t=f(72781);f(43881)}}]);

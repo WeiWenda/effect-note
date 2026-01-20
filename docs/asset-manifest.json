@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/effect-note/static/css/main.b3d27073.css",
-    "main.js": "/effect-note/static/js/main.273207e3.js",
+    "main.js": "/effect-note/static/js/main.1f238363.js",
     "static/js/673.09f552b3.chunk.js": "/effect-note/static/js/673.09f552b3.chunk.js",
     "static/js/1655.9c2a8482.chunk.js": "/effect-note/static/js/1655.9c2a8482.chunk.js",
     "static/js/3827.aa3f1080.chunk.js": "/effect-note/static/js/3827.aa3f1080.chunk.js",
@@ -190,7 +190,7 @@
     "static/media/KaTeX_Size3-Regular.woff2": "/effect-note/static/media/KaTeX_Size3-Regular.5cce6e91e556438f05bc.woff2",
     "index.html": "/effect-note/index.html",
     "main.b3d27073.css.map": "/effect-note/static/css/main.b3d27073.css.map",
-    "main.273207e3.js.map": "/effect-note/static/js/main.273207e3.js.map",
+    "main.1f238363.js.map": "/effect-note/static/js/main.1f238363.js.map",
     "673.09f552b3.chunk.js.map": "/effect-note/static/js/673.09f552b3.chunk.js.map",
     "1655.9c2a8482.chunk.js.map": "/effect-note/static/js/1655.9c2a8482.chunk.js.map",
     "3827.aa3f1080.chunk.js.map": "/effect-note/static/js/3827.aa3f1080.chunk.js.map",
@@ -302,6 +302,6 @@
   },
   "entrypoints": [
     "static/css/main.b3d27073.css",
-    "static/js/main.273207e3.js"
+    "static/js/main.1f238363.js"
   ]
 }
